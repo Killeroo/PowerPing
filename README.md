@@ -5,13 +5,22 @@ Small improved ICMP ping program lovingly inspired by windows and unix, written 
 ![alt text](Screenshots/readme_screenshot.png "PowerPing in action")
 
 # Usage: 
-     PowerPing [--t] [--c count] [--w timeout] [--m message] target_name
+     PowerPing [--?] | [--whoami] | [--location address] | [--t] 
+			   [--c count] [--w timeout] [--m message] [--i TTL]
+			   [--in interval] [--4] target_name
 
 # Options:
+     --?             Displays this help message
      --t             Ping the target until stopped (Control-C to stop)
      --c count       Number of pings to send
      --w timeout     Time to wait for reply (in milliseconds)
      --m message     Ping packet message
+	 --i ttl		 Time To Live
+	 --in interval   Interval between each ping (in milliseconds)
+     --4             Force using IPv4	 
+	 
+     --whoami        Location info for current host
+     --location addr Location info for an address	 
 
 # Example:
      powerping 8.8.8.8                    -     Send ping to google DNS with default values (3000ms timeout, 5 pings)

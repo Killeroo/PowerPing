@@ -18,7 +18,11 @@ class Ping
     public int interval { get; set; } // Time interval between each ping
     public int timeout { get; set; }
     public int count { get; set; }
+    public int ttl { get; set; }
     public bool continous { get; set; }
+    public bool forceV4 = false;
+    public bool forceV6 = false;
+    public bool cancelFlag = false; 
 
     // Local variables setup
     private static Stopwatch timer = new Stopwatch();
@@ -35,19 +39,7 @@ class Ping
                                                         "Network unreachable for ICMP", "Host unreachable for ICMP"};
 
     // Constructor
-    public Ping()
-    {
-        // Attempt to create socket
-        try
-        {
-            sock = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.Icmp);
-        }
-        catch (SocketException)
-        {
-            Console.WriteLine("Socket cannot be created\nPlease run as Administrator and try again");
-            Environment.Exit(0); // Move this to outside ping class?
-        }
-    }
+    public Ping() { }
 
     /// <summary>
     /// Send ping to address
@@ -57,23 +49,64 @@ class Ping
         // Local variable setup
         IPEndPoint iep = null;
         EndPoint ep = null;
+        IPAddress ipAddr = null;
+        AddressFamily af; //address family of socket
         ICMP packet = new ICMP();
         int recv, index = 1;
 
         // Verify address
         try
         {
-            iep = new IPEndPoint(Dns.GetHostAddresses(address)[0], 0);
+            // Query DNS for host address
+            if (forceV4 || forceV6) // If we are forcing a particular address family
+            {
+                foreach (IPAddress a in Dns.GetHostEntry(address).AddressList)
+                {
+                    // Run through addresses until we find one that matches the family we are forcing
+                    if (a.AddressFamily == AddressFamily.InterNetwork && forceV4
+                        || a.AddressFamily == AddressFamily.InterNetworkV6 && forceV6)
+                        ipAddr = a; 
+                }
+            }
+            else
+            {
+                ipAddr = Dns.GetHostAddresses(address)[0];
+            }
+
+            // Get address family of host
+            af = ipAddr.AddressFamily;
+
+            // Setup endpoint
+            iep = new IPEndPoint(ipAddr, 0);
             ep = (EndPoint)iep;
         }
         catch (SocketException)
         {
-            Console.WriteLine("Host address not found");
+            Console.WriteLine("PowerPing could not find the host address [" + address + "]");
+            Console.WriteLine("Check address and try again.");
+            return;
+        }
+        catch (NullReferenceException)
+        {
+            Console.WriteLine("PowerPing could not find the host address [" + address + "]");
+            Console.WriteLine("Check address and try again.");
             return;
         }
 
-        // Set timeout for ping
-        sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, timeout);
+        // Create socket
+        try
+        {
+            sock = new Socket(af, SocketType.Raw, ProtocolType.Icmp);
+        }
+        catch (SocketException)
+        {
+            Console.WriteLine("Socket cannot be created\nPlease run as Administrator and try again");
+            Environment.Exit(0); // Move this to outside ping class?
+        }
+
+        // Set socket options
+        sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, timeout); // Timeout
+        sock.Ttl = (short) ttl; // TTL
 
         // Construct ping packet
         packet.type = 0x08;
@@ -92,6 +125,10 @@ class Ping
             Buffer.BlockCopy(BitConverter.GetBytes(index), 0, packet.message, 2, 2); // Include sequence number in ping message
             UInt16 chksm = packet.getChecksum();
             packet.checksum = chksm;
+
+            // Stop sending if cancel flag recieved
+            if (cancelFlag)
+                return;
 
             // Send ping request
             timer.Start();
@@ -114,7 +151,10 @@ class Ping
             catch (SocketException)
             {
                 Console.BackgroundColor = ConsoleColor.DarkRed;
-                Console.WriteLine("Request timed out.");
+                Console.Write("Request timed out.");
+                // Make double sure we dont get the red line bug
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.WriteLine();
                 lost++;
             }
             finally
@@ -126,6 +166,7 @@ class Ping
             index++;
             Thread.Sleep(interval);
         }
+
     }
 
     public void trace(string addr)
@@ -141,6 +182,7 @@ class Ping
     /// <param name="index">Sequence number</param>
     private void displayReplyPacket(ICMP packet, EndPoint ep, int index)
     {
+        Console.BackgroundColor = ConsoleColor.Black;
         Console.Write("Reply from: {0} ", ep.ToString());
         Console.Write("Seq={0} ", index);
         Console.Write("Type=");
@@ -213,10 +255,20 @@ class Ping
     /// </summary>
     public void displayStatistics()
     {
+        // Reset console colour
+        Console.BackgroundColor = ConsoleColor.Black;
+
+        // Close socket 
+        sock.Close();
+
+        // Display stats
         double percent = Math.Round((double)((lost / sent) * 100), 1);
         Console.WriteLine("\nPing statistics for {0}:", address);
         Console.WriteLine("     Packet: Sent = " + sent + ", Recieved = " + recieved + ", Lost = " + lost + " (" + percent + "% loss})");
         Console.WriteLine();
+
+        // Confirm to exit
+        PowerPing.Macros.pause(true);
     }
     
 }

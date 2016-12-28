@@ -61,6 +61,8 @@ namespace PowerPing
 
             Console.WriteLine(loc);
 
+            Macros.pause();
+
             return loc;
         }
 
@@ -71,6 +73,16 @@ namespace PowerPing
         {
             getAddressLocation("", true);
             // TODO: Add some pc information too
+        }
+
+        /// <summary>
+        /// Pause program and wait for user input
+        /// </summary>
+        /// <param name="exit">switch to use word "exit" instead of "continue"</param>
+        public static void pause(bool exit = false)
+        {
+            Console.Write("Press any key to " + (exit ? "exit" : "continue") + " . . .");
+            Console.ReadLine();
         }
     }
 }
