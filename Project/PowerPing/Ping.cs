@@ -26,17 +26,24 @@ class Ping
 
     // Local variables setup
     private static Stopwatch timer = new Stopwatch();
+    private static Stopwatch overallTimer = new Stopwatch();
     private static Socket sock; // Socket to send and recieve pings on
     private static int sent = 0;
     private static int recieved = 0;
     private static int lost = 0;
+    private static long max = 0;
+    private static long min = -1;
 
     // Destination unreachable code values
-    private static string[] codeValues = new string[] {"Network unreachable", "Host unreachable", "Protocol unreachable",
+    private static string[] destUnreachableCodeValues = new string[] {"Network unreachable", "Host unreachable", "Protocol unreachable",
                                                         "Port unreachable", "Fragmentation needed & DF flag set", "Source route failed",
                                                         "Destination network unkown", "Destination host unknown", "Source host isolated",
                                                         "Communication with destination network prohibited", "Communication with destination network prohibited",
                                                         "Network unreachable for ICMP", "Host unreachable for ICMP"};
+    private static string[] redirectCodeValues = new string[] {"Packet redirected for the network", "Packet redirected for the host",
+                                                 "Packet redirected for the ToS & network", "Packet redirected for the ToS & host"};
+    private static string[] timeExceedCodeValues = new string[] { "TTL expired in transit", "Fragment reassembly time exceeded" };
+    private static string[] badParameterCodeValues = new string[] { "IP header pointer indicates error", "IP header missing an option", "Bad IP header length" };
 
     // Constructor
     public Ping() { }
@@ -117,7 +124,8 @@ class Ping
         packet.messageSize = payload.Length + 4;
         int packetSize = packet.messageSize + 4;
 
-        Console.WriteLine("Pinging {0} [{1}] (Packet message \"{2}\"):", address, ep.ToString(), message);
+        overallTimer.Start();
+        Console.WriteLine("Pinging {0} [{1}] (Packet message \"{2}\") [TTL={3}]:", address, ep.ToString(), message, ttl);
         while (continous ? true : index <= count)
         {
             // Calculate packet checksum
@@ -130,13 +138,13 @@ class Ping
             if (cancelFlag)
                 return;
 
-            // Send ping request
-            timer.Start();
-            sock.SendTo(packet.getBytes(), packetSize, SocketFlags.None, iep);
-            sent++;
-
             try
             {
+                // Send ping request
+                timer.Start();
+                sock.SendTo(packet.getBytes(), packetSize, SocketFlags.None, iep);
+                sent++;
+
                 // Try recieve ping response
                 byte[] buffer = new byte[1024];
                 recv = sock.ReceiveFrom(buffer, ref ep);
@@ -146,6 +154,12 @@ class Ping
                 ICMP response = new ICMP(buffer, recv);
                 displayReplyPacket(response, ep, index);
                 recieved++;
+
+                // Check response time against current max and min
+                if (timer.ElapsedMilliseconds > max)
+                    max = timer.ElapsedMilliseconds;
+                if (timer.ElapsedMilliseconds < min || min == -1)
+                    min = timer.ElapsedMilliseconds;
 
             }
             catch (SocketException)
@@ -166,6 +180,14 @@ class Ping
             index++;
             Thread.Sleep(interval);
         }
+
+    }
+
+    /// <summary>
+    /// Listen for an ICMP packets 
+    /// </summary>
+    public void listen()
+    {
 
     }
 
@@ -198,7 +220,7 @@ class Ping
                 break;
             case 3:
                 Console.BackgroundColor = ConsoleColor.DarkRed;
-                Console.Write(packet.code > 13 ? "DESTINATION UNREACHABLE" : codeValues[packet.code].ToUpper());
+                Console.Write(packet.code > 13 ? "DESTINATION UNREACHABLE" : destUnreachableCodeValues[packet.code].ToUpper());
                 break;
             case 4:
                 Console.BackgroundColor = ConsoleColor.DarkRed;
@@ -206,15 +228,23 @@ class Ping
                 break;
             case 5:
                 Console.BackgroundColor = ConsoleColor.DarkMagenta;
-                Console.Write("PING REDIRECT");
+                Console.Write(packet.code > 3 ? "PING REDIRECT" : redirectCodeValues[packet.code].ToUpper());
+                break;
+            case 9:
+                Console.BackgroundColor = ConsoleColor.DarkYellow;
+                Console.Write("ROUTER ADVERTISEMENT");
+                break;
+            case 10:
+                Console.BackgroundColor = ConsoleColor.DarkYellow;
+                Console.Write("ROUTER SOLICITATION");
                 break;
             case 11:
                 Console.BackgroundColor = ConsoleColor.DarkRed;
-                Console.Write("TIME EXCEEDED");
+                Console.Write(packet.code > 1 ? "TIME EXCEEDED" : timeExceedCodeValues[packet.code].ToUpper());
                 break;
             case 12:
                 Console.BackgroundColor = ConsoleColor.DarkRed;
-                Console.Write("PARAMETER PROBLEM");
+                Console.Write(packet.code > 2 ? "PARAMETER PROBLEM" : badParameterCodeValues[packet.code].ToUpper());
                 break;
             case 13:
                 Console.BackgroundColor = ConsoleColor.DarkBlue;
@@ -258,13 +288,41 @@ class Ping
         // Reset console colour
         Console.BackgroundColor = ConsoleColor.Black;
 
+        // Stop counting total elapsed timer
+        overallTimer.Stop();
+
         // Close socket 
         sock.Close();
 
         // Display stats
-        double percent = Math.Round((double)((lost / sent) * 100), 1);
+        double percent = (double) lost / sent;
+        percent = Math.Round(percent * 100, 1);
         Console.WriteLine("\nPing statistics for {0}:", address);
-        Console.WriteLine("     Packet: Sent = " + sent + ", Recieved = " + recieved + ", Lost = " + lost + " (" + percent + "% loss})");
+
+        Console.Write("     Packet: Sent ");
+        Console.BackgroundColor = ConsoleColor.Yellow;
+        Console.ForegroundColor = ConsoleColor.Black;
+        Console.Write("[" + sent + "]");
+        Console.BackgroundColor = ConsoleColor.Black;
+        Console.ForegroundColor = ConsoleColor.Gray;
+        Console.Write(", Recieved ");
+        Console.BackgroundColor = ConsoleColor.Green;
+        Console.ForegroundColor = ConsoleColor.Black;
+        Console.Write("[" + recieved + "]");
+        Console.BackgroundColor = ConsoleColor.Black;
+        Console.ForegroundColor = ConsoleColor.Gray;
+        Console.Write(", Lost ");
+        Console.BackgroundColor = ConsoleColor.Red;
+        Console.ForegroundColor = ConsoleColor.Black;
+        Console.Write("[" + lost + "]");
+        Console.BackgroundColor = ConsoleColor.Black;
+        Console.ForegroundColor = ConsoleColor.Gray;
+        Console.WriteLine(" (" + percent + "% loss)");
+
+        Console.WriteLine("Response times:");
+        Console.WriteLine("     Minimum [{0}ms], Maximum [{1}ms]", min, max);
+        
+        Console.WriteLine("Total elapsed time (HH:MM:SS.FFF): {0:hh\\:mm\\:ss\\.fff}", overallTimer.Elapsed);
         Console.WriteLine();
 
         // Confirm to exit
