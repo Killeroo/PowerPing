@@ -10,7 +10,9 @@ namespace PowerPing
 {
     class Program
     {
-        private static Ping p;
+        // Global variable setup
+        private static Ping p = new Ping();
+        private static bool listening = false;
 
         static void Main(string[] args)
         {
@@ -110,6 +112,13 @@ namespace PowerPing
                             Macros.getAddressLocation(args[count + 1], true);
                             Environment.Exit(0);
                             break;
+                        case "/listen":
+                        case "-listen":
+                        case "--listen": // Listen for ICMP packets
+                            listening = true;
+                            p.listen();
+                            Environment.Exit(0);
+                            break;
                         default:
                             if ((count == args.Length - 1 || count == 0) && !addrFound)
                             { // Assume first or last argument is address
@@ -143,7 +152,6 @@ namespace PowerPing
             }
 
             // Send ping
-            p = new Ping();
             p.address = address;
             p.count = num;
             p.message = message;
@@ -168,8 +176,8 @@ namespace PowerPing
             Console.WriteLine("\nDescription:");
             Console.WriteLine("     This advanced ping utility provides geoip querying, ICMP packet info");
             Console.WriteLine("     and result colourization.");
-            Console.WriteLine("\nUsage: PowerPing [--?] | [--whoami] | [--location address] | [--t] ");
-            Console.WriteLine("                 [--c count] [--w timeout] [--m message] [--i TTL]");
+            Console.WriteLine("\nUsage: PowerPing [--?] | [--whoami] | [--location address] | [--listen] |");
+            Console.WriteLine("                 [--t] [--c count] [--w timeout] [--m message] [--i TTL]");
             Console.WriteLine("                 [--in interval] [--4] target_name");
             Console.WriteLine("\nOptions:");
             Console.WriteLine("     --?             Displays this help message");
@@ -184,6 +192,8 @@ namespace PowerPing
             Console.WriteLine();
             Console.WriteLine("     --whoami        Location info for current host");
             Console.WriteLine("     --location addr Location info for an address");
+            Console.WriteLine();
+            Console.WriteLine("     --listen        Listen for ICMP packets");
             Console.WriteLine("\nWritten by Matthew Carney [matthewcarney64@gmail.com] =^-^=");
             Console.WriteLine("Find the project here [https://github.com/Killeroo/PowerPing]\n");
             PowerPing.Macros.pause();
@@ -194,8 +204,13 @@ namespace PowerPing
             // Send cancel request
             p.cancelFlag = true;
 
+            // Reset console colour
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.Gray;
+
             // Stop ping process and display stats when control c pressed
-            p.displayStatistics();
+            if (!listening)
+                p.displayStatistics();
         }
     }
 }

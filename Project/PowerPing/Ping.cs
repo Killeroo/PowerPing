@@ -33,8 +33,13 @@ class Ping
     private static int lost = 0;
     private static long max = 0;
     private static long min = -1;
+    private static ConsoleColor[] typeColors = new ConsoleColor[] {ConsoleColor.DarkGreen, ConsoleColor.Black, ConsoleColor.Black,
+                                               ConsoleColor.DarkRed, ConsoleColor.DarkMagenta, ConsoleColor.DarkBlue, ConsoleColor.Black,
+                                               ConsoleColor.Black, ConsoleColor.DarkYellow, ConsoleColor.DarkYellow, ConsoleColor.DarkRed,
+                                               ConsoleColor.DarkRed, ConsoleColor.DarkBlue, ConsoleColor.DarkBlue, ConsoleColor.DarkBlue,
+                                               ConsoleColor.DarkBlue};
 
-    // Destination unreachable code values
+    // Type code values
     private static string[] destUnreachableCodeValues = new string[] {"Network unreachable", "Host unreachable", "Protocol unreachable",
                                                         "Port unreachable", "Fragmentation needed & DF flag set", "Source route failed",
                                                         "Destination network unkown", "Destination host unknown", "Source host isolated",
@@ -59,7 +64,7 @@ class Ping
         IPAddress ipAddr = null;
         AddressFamily af; //address family of socket
         ICMP packet = new ICMP();
-        int recv, index = 1;
+        int bytesRead, index = 1;
 
         // Verify address
         try
@@ -103,7 +108,7 @@ class Ping
         // Create socket
         try
         {
-            sock = new Socket(af, SocketType.Raw, ProtocolType.Icmp);
+            sock = new Socket(af, SocketType.Raw, af == AddressFamily.InterNetwork ? ProtocolType.Icmp : ProtocolType.IcmpV6);
         }
         catch (SocketException)
         {
@@ -147,11 +152,11 @@ class Ping
 
                 // Try recieve ping response
                 byte[] buffer = new byte[1024];
-                recv = sock.ReceiveFrom(buffer, ref ep);
+                bytesRead = sock.ReceiveFrom(buffer, ref ep);
                 timer.Stop();
 
                 // Display reply packet
-                ICMP response = new ICMP(buffer, recv);
+                ICMP response = new ICMP(buffer, bytesRead);
                 displayReplyPacket(response, ep, index);
                 recieved++;
 
@@ -188,7 +193,55 @@ class Ping
     /// </summary>
     public void listen()
     {
+        IPAddress localAddress = null;
 
+        // Find local address
+        foreach (var ip in Dns.GetHostEntry(Dns.GetHostName()).AddressList)
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+                localAddress = ip;
+
+        try
+        {
+            // Create listener socket
+            Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.Icmp);
+            // Bind socket to local address
+            listener.Bind(new IPEndPoint(localAddress, 0));
+            // Set SIO_RCVALL flag to socket IO control
+            listener.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 });
+
+            Console.WriteLine("Listening for ICMP Packets . . .");
+
+            // Listening loop
+            while (true)
+            {
+                byte[] buffer = new byte[4096];
+                // Endpoint for storing source address
+                EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                // Recieve any incoming ICMPv4 packets
+                int bytesRead = listener.ReceiveFrom(buffer, ref remoteEndPoint);
+                // Create ICMP object of response
+                ICMP response = new ICMP(buffer, bytesRead);
+
+                // Display captured packet
+                Console.BackgroundColor = response.type > 15 ? ConsoleColor.Black : typeColors[response.type];
+                Console.ForegroundColor = response.type < 16 ? ConsoleColor.Black : ConsoleColor.Gray;
+                Console.WriteLine("ICMPv4 Packet received {0} bytes read from {1} [type {2}] [code {3}]", bytesRead, remoteEndPoint, response.type, response.code);
+
+                // Reset console colours
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.Gray;
+            }
+        }
+        catch (SocketException)
+        {
+            Console.WriteLine("Socket error - Cannot read from or create socket.");
+            Environment.Exit(0);
+        }
+        catch (NullReferenceException)
+        {
+            Console.WriteLine("Error fetching local address - connect to a network and try again.");
+            Environment.Exit(0);
+        }
     }
 
     public void trace(string addr)
@@ -223,11 +276,11 @@ class Ping
                 Console.Write(packet.code > 13 ? "DESTINATION UNREACHABLE" : destUnreachableCodeValues[packet.code].ToUpper());
                 break;
             case 4:
-                Console.BackgroundColor = ConsoleColor.DarkRed;
+                Console.BackgroundColor = ConsoleColor.DarkMagenta;
                 Console.Write("SOURCE QUENCH");
                 break;
             case 5:
-                Console.BackgroundColor = ConsoleColor.DarkMagenta;
+                Console.BackgroundColor = ConsoleColor.DarkBlue;
                 Console.Write(packet.code > 3 ? "PING REDIRECT" : redirectCodeValues[packet.code].ToUpper());
                 break;
             case 9:
