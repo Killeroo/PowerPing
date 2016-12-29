@@ -5,8 +5,8 @@ Small improved ICMP ping program lovingly inspired by windows and unix, written 
 ![alt text](Screenshots/readme_screenshot.png "PowerPing in action")
 
 # Usage: 
-     PowerPing [--?] | [--whoami] | [--location address] | [--t] 
-			   [--c count] [--w timeout] [--m message] [--i TTL]
+     PowerPing [--?] | [--whoami] | [--location address] | [--listen] |
+			   [--t] [--c count] [--w timeout] [--m message] [--i TTL]
 			   [--in interval] [--4] target_name
 
 # Options:
@@ -20,7 +20,9 @@ Small improved ICMP ping program lovingly inspired by windows and unix, written 
      --4             Force using IPv4	 
 	 
      --whoami        Location info for current host
-     --location addr Location info for an address	 
+     --location addr Location info for an address
+
+	 --listen		 Listen for ICMP packets
 
 # Example:
      powerping 8.8.8.8                    -     Send ping to google DNS with default values (3000ms timeout, 5 pings)
