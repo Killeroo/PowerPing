@@ -46,6 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Display.cs" />
+    <Compile Include="Graph.cs" />
     <Compile Include="ICMP.cs" />
     <Compile Include="Macros.cs" />
     <Compile Include="Ping.cs" />

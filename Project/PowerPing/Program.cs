@@ -201,8 +201,8 @@ namespace PowerPing
 
         protected static void exitHandler(object sender, ConsoleCancelEventArgs args)
         {
-            // Send cancel request
-            p.cancelFlag = true;
+            // Stop ping
+            p.stop();
 
             // Reset console colour
             Console.BackgroundColor = ConsoleColor.Black;

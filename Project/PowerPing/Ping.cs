@@ -22,33 +22,26 @@ class Ping
     public bool continous { get; set; }
     public bool forceV4 = false;
     public bool forceV6 = false;
-    public bool cancelFlag = false; 
+    public bool cancelFlag = false;
+    public bool isRunning = false;
+    public TimeSpan operationTime { get { return overallTimer.Elapsed; } }
+
+    // Result attributes
+    public int sent = 0;
+    public int recieved = 0;
+    public int lost = 0;
+    public long max = 0;
+    public long min = -1;
 
     // Local variables setup
     private static Stopwatch timer = new Stopwatch();
     private static Stopwatch overallTimer = new Stopwatch();
-    private static Socket sock; // Socket to send and recieve pings on
-    private static int sent = 0;
-    private static int recieved = 0;
-    private static int lost = 0;
-    private static long max = 0;
-    private static long min = -1;
+    private static Socket sock = null; // Socket to send and recieve pings on
     private static ConsoleColor[] typeColors = new ConsoleColor[] {ConsoleColor.DarkGreen, ConsoleColor.Black, ConsoleColor.Black,
                                                ConsoleColor.DarkRed, ConsoleColor.DarkMagenta, ConsoleColor.DarkBlue, ConsoleColor.Black,
                                                ConsoleColor.Black, ConsoleColor.DarkYellow, ConsoleColor.DarkYellow, ConsoleColor.DarkRed,
                                                ConsoleColor.DarkRed, ConsoleColor.DarkBlue, ConsoleColor.DarkBlue, ConsoleColor.DarkBlue,
                                                ConsoleColor.DarkBlue};
-
-    // Type code values
-    private static string[] destUnreachableCodeValues = new string[] {"Network unreachable", "Host unreachable", "Protocol unreachable",
-                                                        "Port unreachable", "Fragmentation needed & DF flag set", "Source route failed",
-                                                        "Destination network unkown", "Destination host unknown", "Source host isolated",
-                                                        "Communication with destination network prohibited", "Communication with destination network prohibited",
-                                                        "Network unreachable for ICMP", "Host unreachable for ICMP"};
-    private static string[] redirectCodeValues = new string[] {"Packet redirected for the network", "Packet redirected for the host",
-                                                 "Packet redirected for the ToS & network", "Packet redirected for the ToS & host"};
-    private static string[] timeExceedCodeValues = new string[] { "TTL expired in transit", "Fragment reassembly time exceeded" };
-    private static string[] badParameterCodeValues = new string[] { "IP header pointer indicates error", "IP header missing an option", "Bad IP header length" };
 
     // Constructor
     public Ping() { }
@@ -66,59 +59,20 @@ class Ping
         ICMP packet = new ICMP();
         int bytesRead, index = 1;
 
-        // Verify address
-        try
-        {
-            // Query DNS for host address
-            if (forceV4 || forceV6) // If we are forcing a particular address family
-            {
-                foreach (IPAddress a in Dns.GetHostEntry(address).AddressList)
-                {
-                    // Run through addresses until we find one that matches the family we are forcing
-                    if (a.AddressFamily == AddressFamily.InterNetwork && forceV4
-                        || a.AddressFamily == AddressFamily.InterNetworkV6 && forceV6)
-                        ipAddr = a; 
-                }
-            }
-            else
-            {
-                ipAddr = Dns.GetHostAddresses(address)[0];
-            }
-
-            // Get address family of host
-            af = ipAddr.AddressFamily;
-
-            // Setup endpoint
-            iep = new IPEndPoint(ipAddr, 0);
-            ep = (EndPoint)iep;
-        }
-        catch (SocketException)
-        {
-            Console.WriteLine("PowerPing could not find the host address [" + address + "]");
-            Console.WriteLine("Check address and try again.");
-            return;
-        }
-        catch (NullReferenceException)
-        {
-            Console.WriteLine("PowerPing could not find the host address [" + address + "]");
-            Console.WriteLine("Check address and try again.");
-            return;
-        }
-
-        // Create socket
-        try
-        {
-            sock = new Socket(af, SocketType.Raw, af == AddressFamily.InterNetwork ? ProtocolType.Icmp : ProtocolType.IcmpV6);
-        }
-        catch (SocketException)
-        {
-            Console.WriteLine("Socket cannot be created\nPlease run as Administrator and try again");
-            Environment.Exit(0); // Move this to outside ping class?
-        }
+        // Setup socket 
+        if (sock == null)
+            setupSocket(ipAddr.AddressFamily);
 
         // Set socket options
         sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, timeout); // Timeout
-        sock.Ttl = (short) ttl; // TTL
+        sock.Ttl = (short)ttl; // TTL
+
+        // Verify address
+        ipAddr = verifyAddress(address);
+
+        // Setup ping endpoint
+        iep = new IPEndPoint(ipAddr, 0);
+        ep = (EndPoint)iep;
 
         // Construct ping packet
         packet.type = 0x08;
@@ -139,9 +93,16 @@ class Ping
             UInt16 chksm = packet.getChecksum();
             packet.checksum = chksm;
 
-            // Stop sending if cancel flag recieved
+            // Exit if cancel flag recieved
             if (cancelFlag)
+            {
+                isRunning = false;
                 return;
+            }
+            else
+            {
+                isRunning = true;
+            }
 
             try
             {
@@ -155,9 +116,13 @@ class Ping
                 bytesRead = sock.ReceiveFrom(buffer, ref ep);
                 timer.Stop();
 
-                // Display reply packet
+                // Store reply packet
                 ICMP response = new ICMP(buffer, bytesRead);
-                displayReplyPacket(response, ep, index);
+
+                // Display reply packet
+                PowerPing.Display.displayReply(response, ep.ToString(), index,  timer.ElapsedMilliseconds);
+
+                // Increment number of recieved replys
                 recieved++;
 
                 // Check response time against current max and min
@@ -186,6 +151,32 @@ class Ping
             Thread.Sleep(interval);
         }
 
+        // Stop operation
+        this.stop();
+
+    }
+
+    /// <summary>
+    /// Stop any ping operations running and release resources
+    /// </summary>
+    public void stop()
+    {
+        // If ping is running send cancel flag
+        if (isRunning)
+            cancelFlag = true;
+
+        // wait till ping stops running
+        while (isRunning)
+            Task.Delay(25);
+
+        // Stop counting total elapsed timer
+        overallTimer.Stop();
+
+        // Close socket
+        sock.Close();
+
+        // Reset cancel flag
+        cancelFlag = false;
     }
 
     /// <summary>
@@ -203,11 +194,11 @@ class Ping
         try
         {
             // Create listener socket
-            Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.Icmp);
+            setupSocket(AddressFamily.InterNetwork);
             // Bind socket to local address
-            listener.Bind(new IPEndPoint(localAddress, 0));
+            sock.Bind(new IPEndPoint(localAddress, 0));
             // Set SIO_RCVALL flag to socket IO control
-            listener.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 });
+            sock.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 });
 
             Console.WriteLine("Listening for ICMP Packets . . .");
 
@@ -218,14 +209,14 @@ class Ping
                 // Endpoint for storing source address
                 EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
                 // Recieve any incoming ICMPv4 packets
-                int bytesRead = listener.ReceiveFrom(buffer, ref remoteEndPoint);
+                int bytesRead = sock.ReceiveFrom(buffer, ref remoteEndPoint);
                 // Create ICMP object of response
                 ICMP response = new ICMP(buffer, bytesRead);
 
                 // Display captured packet
                 Console.BackgroundColor = response.type > 15 ? ConsoleColor.Black : typeColors[response.type];
                 Console.ForegroundColor = response.type < 16 ? ConsoleColor.Black : ConsoleColor.Gray;
-                Console.WriteLine("ICMPv4 Packet received {0} bytes read from {1} [type {2}] [code {3}]", bytesRead, remoteEndPoint, response.type, response.code);
+                Console.WriteLine("{0}: ICMPv4: {1} bytes from {2} [type {3}] [code {4}]", DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead, remoteEndPoint, response.type, response.code);
 
                 // Reset console colours
                 Console.BackgroundColor = ConsoleColor.Black;
@@ -249,137 +240,60 @@ class Ping
 
     }
 
-    /// <summary>
-    /// Display information about reply ping packet
-    /// </summary>
-    /// <param name="packet">Repy packet</param>
-    /// <param name="ep">Ping reply endpoint object</param>
-    /// <param name="index">Sequence number</param>
-    private void displayReplyPacket(ICMP packet, EndPoint ep, int index)
+    private void setupSocket(AddressFamily family)
     {
-        Console.BackgroundColor = ConsoleColor.Black;
-        Console.Write("Reply from: {0} ", ep.ToString());
-        Console.Write("Seq={0} ", index);
-        Console.Write("Type=");
-        switch (packet.type)
+        // Create socket
+        try
         {
-            case 0:
-                Console.BackgroundColor = ConsoleColor.DarkGreen;
-                Console.Write("ECHO REPLY");
-                break;
-            case 8:
-                Console.BackgroundColor = ConsoleColor.DarkYellow;
-                Console.Write("ECHO REQUEST");
-                break;
-            case 3:
-                Console.BackgroundColor = ConsoleColor.DarkRed;
-                Console.Write(packet.code > 13 ? "DESTINATION UNREACHABLE" : destUnreachableCodeValues[packet.code].ToUpper());
-                break;
-            case 4:
-                Console.BackgroundColor = ConsoleColor.DarkMagenta;
-                Console.Write("SOURCE QUENCH");
-                break;
-            case 5:
-                Console.BackgroundColor = ConsoleColor.DarkBlue;
-                Console.Write(packet.code > 3 ? "PING REDIRECT" : redirectCodeValues[packet.code].ToUpper());
-                break;
-            case 9:
-                Console.BackgroundColor = ConsoleColor.DarkYellow;
-                Console.Write("ROUTER ADVERTISEMENT");
-                break;
-            case 10:
-                Console.BackgroundColor = ConsoleColor.DarkYellow;
-                Console.Write("ROUTER SOLICITATION");
-                break;
-            case 11:
-                Console.BackgroundColor = ConsoleColor.DarkRed;
-                Console.Write(packet.code > 1 ? "TIME EXCEEDED" : timeExceedCodeValues[packet.code].ToUpper());
-                break;
-            case 12:
-                Console.BackgroundColor = ConsoleColor.DarkRed;
-                Console.Write(packet.code > 2 ? "PARAMETER PROBLEM" : badParameterCodeValues[packet.code].ToUpper());
-                break;
-            case 13:
-                Console.BackgroundColor = ConsoleColor.DarkBlue;
-                Console.Write("TIMESTAMP REQUEST");
-                break;
-            case 14:
-                Console.BackgroundColor = ConsoleColor.DarkBlue;
-                Console.Write("TIMESTAMP REPLY");
-                break;
-            case 15:
-                Console.BackgroundColor = ConsoleColor.DarkBlue;
-                Console.Write("INFORMATION REQUEST");
-                break;
-            case 16:
-                Console.BackgroundColor = ConsoleColor.DarkBlue;
-                Console.Write("INFORMATION REPLY");
-                break;
-            default:
-                Console.BackgroundColor = ConsoleColor.DarkYellow;
-                Console.Write("UNKNOWN TYPE");
-                break;
+            sock = new Socket(family, SocketType.Raw, family == AddressFamily.InterNetwork ? ProtocolType.Icmp : ProtocolType.IcmpV6);
         }
-        Console.BackgroundColor = ConsoleColor.Black;
-        Console.Write(" time=");
-        if (timer.ElapsedMilliseconds <= 100L)
-            Console.ForegroundColor = ConsoleColor.Green;
-        else if (timer.ElapsedMilliseconds <= 500L)
-            Console.ForegroundColor = ConsoleColor.Yellow;
-        else if (timer.ElapsedMilliseconds > 500L)
-            Console.ForegroundColor = ConsoleColor.Red;
-        Console.Write("{0}ms", timer.ElapsedMilliseconds < 1 ? "<1" : timer.ElapsedMilliseconds.ToString());
-        Console.ForegroundColor = ConsoleColor.Gray;
-        Console.WriteLine();
+        catch (SocketException)
+        {
+            Console.WriteLine("Socket cannot be created\nPlease run as Administrator and try again");
+            Environment.Exit(0); // Move this to outside ping class?
+        }
     }
 
-    /// <summary>
-    /// Displays statistics of current ping task
-    /// </summary>
-    public void displayStatistics()
+    private IPAddress verifyAddress(string address)
     {
-        // Reset console colour
-        Console.BackgroundColor = ConsoleColor.Black;
+        IPAddress ipAddr = null;
 
-        // Stop counting total elapsed timer
-        overallTimer.Stop();
+        // Parse the address to IPAddress
+        IPAddress.TryParse(address, out ipAddr);
 
-        // Close socket 
-        sock.Close();
+        // Lookup address
+        try
+        {
+            // Query DNS for host address
+            if (forceV4 || forceV6) // If we are forcing a particular address family
+            {
+                foreach (IPAddress a in Dns.GetHostEntry(address).AddressList)
+                {
+                    // Run through addresses until we find one that matches the family we are forcing
+                    if (a.AddressFamily == AddressFamily.InterNetwork && forceV4
+                        || a.AddressFamily == AddressFamily.InterNetworkV6 && forceV6)
+                        ipAddr = a;
+                }
+            }
+            else
+            {
+                ipAddr = Dns.GetHostAddresses(address)[0];
+            }
 
-        // Display stats
-        double percent = (double) lost / sent;
-        percent = Math.Round(percent * 100, 1);
-        Console.WriteLine("\nPing statistics for {0}:", address);
+        }
+        catch (SocketException)
+        {
+            Console.WriteLine("PowerPing could not find the host address [" + address + "]");
+            Console.WriteLine("Check address and try again.");
+        }
+        catch (NullReferenceException)
+        {
+            Console.WriteLine("PowerPing could not find the host address [" + address + "]");
+            Console.WriteLine("Check address and try again.");
+        }
 
-        Console.Write("     Packet: Sent ");
-        Console.BackgroundColor = ConsoleColor.Yellow;
-        Console.ForegroundColor = ConsoleColor.Black;
-        Console.Write("[" + sent + "]");
-        Console.BackgroundColor = ConsoleColor.Black;
-        Console.ForegroundColor = ConsoleColor.Gray;
-        Console.Write(", Recieved ");
-        Console.BackgroundColor = ConsoleColor.Green;
-        Console.ForegroundColor = ConsoleColor.Black;
-        Console.Write("[" + recieved + "]");
-        Console.BackgroundColor = ConsoleColor.Black;
-        Console.ForegroundColor = ConsoleColor.Gray;
-        Console.Write(", Lost ");
-        Console.BackgroundColor = ConsoleColor.Red;
-        Console.ForegroundColor = ConsoleColor.Black;
-        Console.Write("[" + lost + "]");
-        Console.BackgroundColor = ConsoleColor.Black;
-        Console.ForegroundColor = ConsoleColor.Gray;
-        Console.WriteLine(" (" + percent + "% loss)");
+        return ipAddr;
 
-        Console.WriteLine("Response times:");
-        Console.WriteLine("     Minimum [{0}ms], Maximum [{1}ms]", min, max);
-        
-        Console.WriteLine("Total elapsed time (HH:MM:SS.FFF): {0:hh\\:mm\\:ss\\.fff}", overallTimer.Elapsed);
-        Console.WriteLine();
-
-        // Confirm to exit
-        PowerPing.Macros.pause(true);
     }
     
 }
