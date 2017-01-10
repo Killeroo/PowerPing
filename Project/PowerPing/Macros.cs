@@ -84,5 +84,17 @@ namespace PowerPing
             Console.Write("Press any key to " + (exit ? "exit" : "continue") + " . . .");
             Console.ReadLine();
         }
+
+        /// <summary>
+        /// Check if long value is between a range
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="left">Lower range</param>
+        /// <param name="right">Upper range</param>
+        /// <returns></returns>
+        public static bool isBetween(long value, long left, long right)
+        {
+            return value > left && value < right;
+        }
     }
 }

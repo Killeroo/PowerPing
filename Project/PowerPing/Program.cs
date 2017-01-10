@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Reflection;
-//using System.Globalization;
 
 namespace PowerPing
 {
@@ -30,6 +28,11 @@ namespace PowerPing
             string address = "";
             string message = "R U Alive?";
 
+            Graph g = new Graph();
+            g.start();
+
+            Console.Read();
+
             // Add Control C event
             Console.CancelKeyPress += new ConsoleCancelEventHandler(exitHandler);
             Console.WriteLine();
@@ -37,7 +40,7 @@ namespace PowerPing
             // Check if no arguments
             if (args.Length == 0)
             {
-                displayHelpMsg();
+                PowerPing.Display.displayHelpMsg();
                 return;
             }
 
@@ -97,7 +100,7 @@ namespace PowerPing
                         case "/?":
                         case "-?":
                         case "--?": // Display help message
-                            displayHelpMsg();
+                            PowerPing.Display.displayHelpMsg();
                             Environment.Exit(0);
                             break;
                         case "/whoami":
@@ -134,20 +137,20 @@ namespace PowerPing
             }
             catch (IndexOutOfRangeException)
             {
-                Console.WriteLine("ERROR: Incorrect Argument Usage\n");
-                displayHelpMsg();
+                PowerPing.Display.displayError("Incorrect Argument Usage");
+                PowerPing.Display.displayHelpMsg();
                 return;
             }
             catch (FormatException)
             {
-                Console.WriteLine("ERROR: Incorrect Argument Format\n");
-                displayHelpMsg();
+                PowerPing.Display.displayError("Incorrect Argument Format");
+                PowerPing.Display.displayHelpMsg();
                 return;
             }
             catch (Exception)
             {
-                Console.WriteLine("ERROR: Invalid Argument or General Error Occured\n");
-                displayHelpMsg();
+                PowerPing.Display.displayError("Invalid Argument or General Error Occured");
+                PowerPing.Display.displayHelpMsg();
                 return;
             }
 
@@ -164,39 +167,8 @@ namespace PowerPing
             p.send();
 
             // Only display stats if ping hasn't been cancelled
-            if (!p.cancelFlag)
-                p.displayStatistics();
-        }
-
-        private static void displayHelpMsg()
-        {
-            Version v = Assembly.GetExecutingAssembly().GetName().Version;
-            string version = Assembly.GetExecutingAssembly().GetName().Name + " Version " + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ")";
-            Console.WriteLine(version);
-            Console.WriteLine("\nDescription:");
-            Console.WriteLine("     This advanced ping utility provides geoip querying, ICMP packet info");
-            Console.WriteLine("     and result colourization.");
-            Console.WriteLine("\nUsage: PowerPing [--?] | [--whoami] | [--location address] | [--listen] |");
-            Console.WriteLine("                 [--t] [--c count] [--w timeout] [--m message] [--i TTL]");
-            Console.WriteLine("                 [--in interval] [--4] target_name");
-            Console.WriteLine("\nOptions:");
-            Console.WriteLine("     --?             Displays this help message");
-            Console.WriteLine("     --t             Ping the target until stopped (Control-C to stop)");
-            Console.WriteLine("     --c count       Number of pings to send");
-            Console.WriteLine("     --w timeout     Time to wait for reply (in milliseconds)");
-            Console.WriteLine("     --m message     Ping packet message");
-            Console.WriteLine("     --i ttl         Time To Live");
-            Console.WriteLine("     --in interval   Interval between each ping (in milliseconds)");
-            Console.WriteLine("     --4             Force using IPv4");
-            //Console.WriteLine("     --6             Force using IPv6");
-            Console.WriteLine();
-            Console.WriteLine("     --whoami        Location info for current host");
-            Console.WriteLine("     --location addr Location info for an address");
-            Console.WriteLine();
-            Console.WriteLine("     --listen        Listen for ICMP packets");
-            Console.WriteLine("\nWritten by Matthew Carney [matthewcarney64@gmail.com] =^-^=");
-            Console.WriteLine("Find the project here [https://github.com/Killeroo/PowerPing]\n");
-            PowerPing.Macros.pause();
+            //if (!p.cancelFlag)
+                //p.displayStatistics();
         }
 
         protected static void exitHandler(object sender, ConsoleCancelEventArgs args)
@@ -209,8 +181,8 @@ namespace PowerPing
             Console.ForegroundColor = ConsoleColor.Gray;
 
             // Stop ping process and display stats when control c pressed
-            if (!listening)
-                p.displayStatistics();
+            //if (!listening)
+                //p.displayStatistics();
         }
     }
 }

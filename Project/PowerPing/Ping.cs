@@ -36,12 +36,7 @@ class Ping
     // Local variables setup
     private static Stopwatch timer = new Stopwatch();
     private static Stopwatch overallTimer = new Stopwatch();
-    private static Socket sock = null; // Socket to send and recieve pings on
-    private static ConsoleColor[] typeColors = new ConsoleColor[] {ConsoleColor.DarkGreen, ConsoleColor.Black, ConsoleColor.Black,
-                                               ConsoleColor.DarkRed, ConsoleColor.DarkMagenta, ConsoleColor.DarkBlue, ConsoleColor.Black,
-                                               ConsoleColor.Black, ConsoleColor.DarkYellow, ConsoleColor.DarkYellow, ConsoleColor.DarkRed,
-                                               ConsoleColor.DarkRed, ConsoleColor.DarkBlue, ConsoleColor.DarkBlue, ConsoleColor.DarkBlue,
-                                               ConsoleColor.DarkBlue};
+    private static Socket sock = null;
 
     // Constructor
     public Ping() { }
@@ -55,9 +50,15 @@ class Ping
         IPEndPoint iep = null;
         EndPoint ep = null;
         IPAddress ipAddr = null;
-        AddressFamily af; //address family of socket
         ICMP packet = new ICMP();
         int bytesRead, index = 1;
+
+        // Verify address
+        ipAddr = verifyAddress(address);
+
+        // Setup ping endpoint
+        iep = new IPEndPoint(ipAddr, 0);
+        ep = (EndPoint)iep;
 
         // Setup socket 
         if (sock == null)
@@ -66,13 +67,6 @@ class Ping
         // Set socket options
         sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, timeout); // Timeout
         sock.Ttl = (short)ttl; // TTL
-
-        // Verify address
-        ipAddr = verifyAddress(address);
-
-        // Setup ping endpoint
-        iep = new IPEndPoint(ipAddr, 0);
-        ep = (EndPoint)iep;
 
         // Construct ping packet
         packet.type = 0x08;
@@ -83,8 +77,10 @@ class Ping
         packet.messageSize = payload.Length + 4;
         int packetSize = packet.messageSize + 4;
 
-        overallTimer.Start();
-        Console.WriteLine("Pinging {0} [{1}] (Packet message \"{2}\") [TTL={3}]:", address, ep.ToString(), message, ttl);
+        overallTimer.Start(); // Start timing ping operation
+        PowerPing.Display.displayPingIntroMsg(ep.ToString(), this); // Display intro message
+
+        // Sending loop
         while (continous ? true : index <= count)
         {
             // Calculate packet checksum
@@ -120,7 +116,7 @@ class Ping
                 ICMP response = new ICMP(buffer, bytesRead);
 
                 // Display reply packet
-                PowerPing.Display.displayReply(response, ep.ToString(), index,  timer.ElapsedMilliseconds);
+                PowerPing.Display.displayReplyPacket(response, ep.ToString(), index,  timer.ElapsedMilliseconds);
 
                 // Increment number of recieved replys
                 recieved++;
@@ -134,16 +130,11 @@ class Ping
             }
             catch (SocketException)
             {
-                Console.BackgroundColor = ConsoleColor.DarkRed;
-                Console.Write("Request timed out.");
-                // Make double sure we dont get the red line bug
-                Console.BackgroundColor = ConsoleColor.Black;
-                Console.WriteLine();
+                PowerPing.Display.displayTimeout();
                 lost++;
             }
             finally
             {
-                Console.BackgroundColor = ConsoleColor.Black;
                 timer.Reset();
             }
 
@@ -161,13 +152,15 @@ class Ping
     /// </summary>
     public void stop()
     {
-        // If ping is running send cancel flag
+        // If a ping operation is running send cancel flag
         if (isRunning)
+        {
             cancelFlag = true;
 
-        // wait till ping stops running
-        while (isRunning)
-            Task.Delay(25);
+            // wait till ping stops running
+            while (isRunning)
+                Task.Delay(25);
+        }
 
         // Stop counting total elapsed timer
         overallTimer.Stop();
@@ -200,7 +193,8 @@ class Ping
             // Set SIO_RCVALL flag to socket IO control
             sock.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 });
 
-            Console.WriteLine("Listening for ICMP Packets . . .");
+            // Display initial message
+            PowerPing.Display.displayListeningIntroMsg();
 
             // Listening loop
             while (true)
@@ -214,31 +208,24 @@ class Ping
                 ICMP response = new ICMP(buffer, bytesRead);
 
                 // Display captured packet
-                Console.BackgroundColor = response.type > 15 ? ConsoleColor.Black : typeColors[response.type];
-                Console.ForegroundColor = response.type < 16 ? ConsoleColor.Black : ConsoleColor.Gray;
-                Console.WriteLine("{0}: ICMPv4: {1} bytes from {2} [type {3}] [code {4}]", DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead, remoteEndPoint, response.type, response.code);
-
-                // Reset console colours
-                Console.BackgroundColor = ConsoleColor.Black;
-                Console.ForegroundColor = ConsoleColor.Gray;
+                PowerPing.Display.displayCapturedPacket(response, remoteEndPoint.ToString(), DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead);
             }
         }
         catch (SocketException)
         {
-            Console.WriteLine("Socket error - Cannot read from or create socket.");
-            Environment.Exit(0);
+            PowerPing.Display.displayError("Socket Error - Error occured while reading from socket\nPlease try again.", true);
         }
         catch (NullReferenceException)
         {
-            Console.WriteLine("Error fetching local address - connect to a network and try again.");
-            Environment.Exit(0);
+            PowerPing.Display.displayError("Error fetching local address, connect to a network and try again.", true);
         }
     }
 
-    public void trace(string addr)
-    {
+    public void trace() { }
 
-    }
+    public void scan() { }
+
+    public void flood() { }
 
     private void setupSocket(AddressFamily family)
     {
@@ -249,8 +236,7 @@ class Ping
         }
         catch (SocketException)
         {
-            Console.WriteLine("Socket cannot be created\nPlease run as Administrator and try again");
-            Environment.Exit(0); // Move this to outside ping class?
+            PowerPing.Display.displayError("Socket cannot be created\nPlease run as Administrator and try again.", true);
         }
     }
 
@@ -283,13 +269,11 @@ class Ping
         }
         catch (SocketException)
         {
-            Console.WriteLine("PowerPing could not find the host address [" + address + "]");
-            Console.WriteLine("Check address and try again.");
+            PowerPing.Display.displayError("PowerPing could not find the host address [" + address + "]\nCheck address and try again.");
         }
         catch (NullReferenceException)
         {
-            Console.WriteLine("PowerPing could not find the host address [" + address + "]");
-            Console.WriteLine("Check address and try again.");
+            PowerPing.Display.displayError("PowerPing could not find the host address [" + address + "]\nCheck address and try again.");
         }
 
         return ipAddr;

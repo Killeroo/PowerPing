@@ -3,15 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 
 /* Display Class */
-// Responsible for printing and displaying of ping results and information
+// Responsible for displaying of ping results and information (designed for a console window)
 
 namespace PowerPing
 {
 
     class Display
     {
+        private static ConsoleColor[] typeColors = new ConsoleColor[] {ConsoleColor.DarkGreen, ConsoleColor.Black, ConsoleColor.Black,
+                                               ConsoleColor.DarkRed, ConsoleColor.DarkMagenta, ConsoleColor.DarkBlue, ConsoleColor.Black,
+                                               ConsoleColor.Black, ConsoleColor.DarkYellow, ConsoleColor.DarkYellow, ConsoleColor.DarkRed,
+                                               ConsoleColor.DarkRed, ConsoleColor.DarkBlue, ConsoleColor.DarkBlue, ConsoleColor.DarkBlue,
+                                               ConsoleColor.DarkBlue};
+
         // Type code values
         private static string[] destUnreachableCodeValues = new string[] {"Network unreachable", "Host unreachable", "Protocol unreachable",
                                                         "Port unreachable", "Fragmentation needed & DF flag set", "Source route failed",
@@ -23,6 +30,57 @@ namespace PowerPing
         private static string[] timeExceedCodeValues = new string[] { "TTL expired in transit", "Fragment reassembly time exceeded" };
         private static string[] badParameterCodeValues = new string[] { "IP header pointer indicates error", "IP header missing an option", "Bad IP header length" };
 
+        /// <summary>
+        /// Displays help message
+        /// </summary>
+        public static void displayHelpMsg()
+        {
+            Version v = Assembly.GetExecutingAssembly().GetName().Version;
+            string version = Assembly.GetExecutingAssembly().GetName().Name + " Version " + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ")";
+            Console.WriteLine(version);
+            Console.WriteLine("\nDescription:");
+            Console.WriteLine("     This advanced ping utility provides geoip querying, ICMP packet info");
+            Console.WriteLine("     and result colourization.");
+            Console.WriteLine("\nUsage: PowerPing [--?] | [--whoami] | [--location address] | [--listen] |");
+            Console.WriteLine("                 [--t] [--c count] [--w timeout] [--m message] [--i TTL]");
+            Console.WriteLine("                 [--in interval] [--4] target_name");
+            Console.WriteLine("\nOptions:");
+            Console.WriteLine("     --?             Displays this help message");
+            Console.WriteLine("     --t             Ping the target until stopped (Control-C to stop)");
+            Console.WriteLine("     --c count       Number of pings to send");
+            Console.WriteLine("     --w timeout     Time to wait for reply (in milliseconds)");
+            Console.WriteLine("     --m message     Ping packet message");
+            Console.WriteLine("     --i ttl         Time To Live");
+            Console.WriteLine("     --in interval   Interval between each ping (in milliseconds)");
+            Console.WriteLine("     --4             Force using IPv4");
+            //Console.WriteLine("     --6             Force using IPv6");
+            Console.WriteLine();
+            Console.WriteLine("     --whoami        Location info for current host");
+            Console.WriteLine("     --location addr Location info for an address");
+            Console.WriteLine();
+            Console.WriteLine("     --listen        Listen for ICMP packets");
+            Console.WriteLine("\nWritten by Matthew Carney [matthewcarney64@gmail.com] =^-^=");
+            Console.WriteLine("Find the project here [https://github.com/Killeroo/PowerPing]\n");
+            PowerPing.Macros.pause();
+        }
+
+        /// <summary>
+        /// Display Initial ping message to screen, declaring simple info about the ping
+        /// </summary>
+        /// <param name="host">Resolved host address</param>
+        /// <param name="ping">Ping object</param>
+        public static void displayPingIntroMsg(String host, Ping ping)
+        {
+            Console.WriteLine("Pinging {0} [{1}] (Packet message \"{2}\") [TTL={3}]:", ping.address, host, ping.message, ping.ttl);
+        }
+
+        /// <summary>
+        /// Display initial listening message
+        /// </summary>
+        public static void displayListeningIntroMsg()
+        {
+            Console.WriteLine("Listening for ICMP Packets . . .");
+        }
 
         /// <summary>
         /// Display information about reply ping packet
@@ -31,7 +89,7 @@ namespace PowerPing
         /// <param name="address">Reply address</param>
         /// <param name="index">Sequence number</param>
         /// <param name="replyTime">Time taken before reply recieved in milliseconds</param>
-        public static void displayReply(ICMP packet, String address, int index, long replyTime)
+        public static void displayReplyPacket(ICMP packet, String address, int index, long replyTime)
         {
             Console.BackgroundColor = ConsoleColor.Black;
             Console.Write("Reply from: {0} ", address);
@@ -110,9 +168,25 @@ namespace PowerPing
         }
 
         /// <summary>
+        /// Display information about a captured packet
+        /// </summary>
+        public static void displayCapturedPacket(ICMP packet, String address, String timeRecieved, int bytesRead)
+        {
+            // Display captured packet
+            Console.BackgroundColor = packet.type > 15 ? ConsoleColor.Black : typeColors[packet.type];
+            Console.ForegroundColor = packet.type < 16 ? ConsoleColor.Black : ConsoleColor.Gray;
+            Console.WriteLine("{0}: ICMPv4: {1} bytes from {2} [type {3}] [code {4}]", timeRecieved, bytesRead, address, packet.type, packet.code);
+
+            // Reset console colours
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.Gray;
+        }
+
+        /// <summary>
         /// Displays statistics for a ping object
         /// </summary>
-        public void displayStatistics(Ping ping)
+        /// <param name="ping"> </param>
+        public static void displayStatistics(Ping ping)
         {
             // Reset console colour
             Console.BackgroundColor = ConsoleColor.Black;
@@ -150,6 +224,39 @@ namespace PowerPing
 
             // Confirm to exit
             PowerPing.Macros.pause(true);
+        }
+
+        /// <summary>
+        /// Display error message
+        /// </summary>
+        /// <param name="errorMessage">Error message to display</param>
+        /// <param name="exit">Whether to exit program after displaying error</param>
+        public static void displayError(String errorMessage, bool exit = false)
+        {
+            Console.BackgroundColor = ConsoleColor.DarkYellow;
+            Console.ForegroundColor = ConsoleColor.Black;
+
+            // Write error message
+            Console.WriteLine("ERROR: " + errorMessage);
+
+            // Reset console colours
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            if (exit)
+                Environment.Exit(0);
+        }
+
+        /// <summary>
+        /// Display Timeout message
+        /// </summary>
+        public static void displayTimeout()
+        {
+            Console.BackgroundColor = ConsoleColor.DarkRed;
+            Console.Write("Request timed out.");
+            // Make double sure we dont get the red line bug
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.WriteLine();
         }
     }
 }
