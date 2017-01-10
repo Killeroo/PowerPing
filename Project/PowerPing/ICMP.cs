@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
 
 /* ICMP class (Internet Control Message Protocol) */
 // For creating ICMP (ping) packet objects

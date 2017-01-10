@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace PowerPing
 {
@@ -11,11 +9,12 @@ namespace PowerPing
         const string FULL_BAR_BLOCK_CHAR = "█";
         const string HALF_BAR_BLOCK_CHAR = "▄";
 
-        int xAxisStartPoint;
+        int plotStartX;
+        int plotStartY;
 
-        List<String[]> graphColumns;
+        List<String[]> graphColumns = new List<string[]>();
 
-        bool compactGraph = false;
+        bool compactGraph = true;
         bool isGraphSetup = false;
         int xAxisLength = 40;
 
@@ -27,6 +26,24 @@ namespace PowerPing
             if (!isGraphSetup)
                 setup();
 
+            addColumnToGraph(createBar(100));
+
+            addColumnToGraph(createBar(95));
+
+            addColumnToGraph(createBar(110));
+
+            addColumnToGraph(createBar(20));
+
+            addColumnToGraph(createBar(50));
+
+            addColumnToGraph(createBar(75));
+
+            addColumnToGraph(createBar(22));
+
+            addColumnToGraph(createBar(120));
+
+            addColumnToGraph(createBar(220));
+
             // Start drawing graph
             draw();
             
@@ -37,21 +54,34 @@ namespace PowerPing
             // Drawing loop
 
             // Save start position
-            int graphStartY = Console.CursorTop - 5;
-            int graphStartX = 7;
+            plotStartY = Console.CursorTop - 5;
+            plotStartX = 7;
 
             // Drawing loop
             while (true)
             {
                 // Reset position
-                Console.CursorTop = graphStartY;
-                Console.CursorLeft = graphStartX;
+                Console.CursorTop = plotStartY;
+                Console.CursorLeft = plotStartX;
 
-                // Go through each column of graph X axis
-                for (int x = 0; x <= 40; x++)
-                {
-                    // TODO:
-                }
+
+                //// Go through each column of graph X axis
+                //for (int x = 0; x <= xAxisLength; x++)
+                //{
+                //    // TODO:
+
+                //    Thread.Sleep(1000);
+                //}
+
+                drawGraphColumns();
+
+                Random rand = new Random();
+
+                Console.Read();
+
+                addColumnToGraph(createBar(rand.Next(1,900)));
+
+                //Thread.Sleep(1000);
             }
             
         }
@@ -64,6 +94,21 @@ namespace PowerPing
             drawBackground();
 
             isGraphSetup = true;
+        }
+
+        private void drawGraphColumns()
+        {
+            // Clear columns space before drawing
+            for (int x = 0; x <= xAxisLength; x++)
+            {
+
+            }
+
+            foreach (String[] bar in graphColumns)
+            {
+                drawBar(bar);
+                Console.CursorLeft++;
+            }
         }
 
         /// <summary>
@@ -135,11 +180,28 @@ namespace PowerPing
 
         private void drawBar(String[] bar)
         {
+            // save cursor location
+            int cursorPositionX = Console.CursorLeft;
+            int cursorPositionY = Console.CursorTop;
+
             foreach(String segment in bar)
             {
                 Console.Write(segment);
                 Console.CursorTop--;
                 Console.CursorLeft--;
+            }
+
+            // Reset cursor to starting position
+            Console.SetCursorPosition(cursorPositionX, cursorPositionY);
+        }
+
+        public void clearGraph()
+        {
+            // Save orginal cursor
+
+            for(int x = 0; x <= xAxisLength; x++)
+            {
+
             }
         }
 
@@ -185,18 +247,34 @@ namespace PowerPing
             {
                 if (count + 1 % 2 == 0)
                     bar[count] = FULL_BAR_BLOCK_CHAR;
-                else if (count == 1)
-                    if (replyTime <= 50)
+                else if (replyTime <= 100)
+                    if (replyTime <= 25)
+                        bar[count] = "▀";//HALF_BAR_BLOCK_CHAR;
+                    else if (replyTime <= 50)
                         bar[count] = HALF_BAR_BLOCK_CHAR;
+                    else if (replyTime <= 75)
+                        bar[count] = FULL_BAR_BLOCK_CHAR;
                     else
-                        bar[count] = FULL_BAR_BLOCK_CHAR;//"▀";
+                        bar[count] = HALF_BAR_BLOCK_CHAR;//FULL_BAR_BLOCK_CHAR;//"▀";
                 else
-                    bar[count] = HALF_BAR_BLOCK_CHAR;
+                    bar[count] = FULL_BAR_BLOCK_CHAR;//HALF_BAR_BLOCK_CHAR;
             }
 
             return bar;
 
         }
 
+        /// <summary>
+        /// Add a column to the graph list
+        /// </summary>
+        private void addColumnToGraph(String[] col)
+        {
+            graphColumns.Add(col);
+
+            // If number of columns exceeds x Axis length
+            if (graphColumns.Count >= xAxisLength)
+                // Remove first element
+                graphColumns.RemoveAt(0);
+        }
     }
 }
