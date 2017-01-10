@@ -188,34 +188,34 @@ namespace PowerPing
             Console.BackgroundColor = ConsoleColor.Black;
 
             // Display stats
-            double percent = (double)ping.lost / ping.sent;
+            double percent = (double)ping.getPacketsLost / ping.getPacketsSent;
             percent = Math.Round(percent * 100, 1);
             Console.WriteLine("\nPing statistics for {0}:", ping.address);
 
             Console.Write("     Packet: Sent ");
             Console.BackgroundColor = ConsoleColor.Yellow;
             Console.ForegroundColor = ConsoleColor.Black;
-            Console.Write("[" + ping.sent + "]");
+            Console.Write("[" + ping.getPacketsSent + "]");
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(", Recieved ");
             Console.BackgroundColor = ConsoleColor.Green;
             Console.ForegroundColor = ConsoleColor.Black;
-            Console.Write("[" + ping.recieved + "]");
+            Console.Write("[" + ping.getPacketsRecieved + "]");
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(", Lost ");
             Console.BackgroundColor = ConsoleColor.Red;
             Console.ForegroundColor = ConsoleColor.Black;
-            Console.Write("[" + ping.lost + "]");
+            Console.Write("[" + ping.getPacketsLost + "]");
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.WriteLine(" (" + percent + "% loss)");
 
             Console.WriteLine("Response times:");
-            Console.WriteLine("     Minimum [{0}ms], Maximum [{1}ms]", ping.min, ping.max);
+            Console.WriteLine("     Minimum [{0}ms], Maximum [{1}ms]", ping.getMinReplyTime, ping.getMaxReplyTime);
 
-            Console.WriteLine("Total elapsed time (HH:MM:SS.FFF): {0:hh\\:mm\\:ss\\.fff}", ping.operationTime);
+            Console.WriteLine("Total elapsed time (HH:MM:SS.FFF): {0:hh\\:mm\\:ss\\.fff}", ping.getTotalRunTime);
             Console.WriteLine();
 
             // Confirm to exit

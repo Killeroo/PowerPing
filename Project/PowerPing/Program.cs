@@ -24,7 +24,7 @@ namespace PowerPing
             string address = "";
             string message = "R U Alive?";
 
-            Graph g = new Graph();
+            Graph g = new Graph("8.8.8.8");
             g.start();
 
             Console.Read();

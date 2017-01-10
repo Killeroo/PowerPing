@@ -9,44 +9,47 @@ namespace PowerPing
         const string FULL_BAR_BLOCK_CHAR = "█";
         const string HALF_BAR_BLOCK_CHAR = "▄";
 
-        int plotStartX;
-        int plotStartY;
+        public bool compactGraph = false;
 
-        List<String[]> graphColumns = new List<string[]>();
+        // Local variable declaration
+        private Ping graphPing = new Ping();
+        private List<String[]> graphColumns = new List<string[]>();
+        private bool isGraphSetup = false;
+        private int xAxisLength = 40;
+        private String address;
 
-        bool compactGraph = true;
-        bool isGraphSetup = false;
-        int xAxisLength = 40;
+        // Location of graph plotting space
+        private int plotStartX;
+        private int plotStartY;
+
+        // Label locations
+        private int sentLabelX, sentLabelY;
+        private int recLabelX, recLabelY;
+        private int failLabelX, failLabelY;
+        private int rttLabelX, rttLabelY;
+        
+        public Graph(string address)
+        {
+            // Setup ping
+            graphPing.address = address;
+            graphPing.message = "R U Alive?";
+            graphPing.timeout = 3000;
+            graphPing.continous = true;
+            graphPing.interval = 1000;
+            graphPing.ttl = 255;
+        }
 
         public void start()
         {
+            // Hide cursor
             Console.CursorVisible = false;
 
             // Check graph is setup
             if (!isGraphSetup)
                 setup();
 
-            addColumnToGraph(createBar(100));
-
-            addColumnToGraph(createBar(95));
-
-            addColumnToGraph(createBar(110));
-
-            addColumnToGraph(createBar(20));
-
-            addColumnToGraph(createBar(50));
-
-            addColumnToGraph(createBar(75));
-
-            addColumnToGraph(createBar(22));
-
-            addColumnToGraph(createBar(120));
-
-            addColumnToGraph(createBar(220));
-
             // Start drawing graph
             draw();
-            
         }
 
         private void draw()
@@ -57,6 +60,10 @@ namespace PowerPing
             plotStartY = Console.CursorTop - 5;
             plotStartX = 7;
 
+            // Start sending ping
+            var pinger = new Thread(new ThreadStart(graphPing.send));
+            //graphPing.send();
+
             // Drawing loop
             while (true)
             {
@@ -64,24 +71,17 @@ namespace PowerPing
                 Console.CursorTop = plotStartY;
                 Console.CursorLeft = plotStartX;
 
-
-                //// Go through each column of graph X axis
-                //for (int x = 0; x <= xAxisLength; x++)
-                //{
-                //    // TODO:
-
-                //    Thread.Sleep(1000);
-                //}
-
+                // Draw graph columns
                 drawGraphColumns();
 
-                Random rand = new Random();
+                // Update labels
+                updateLabels(graphPing);
 
-                Console.Read();
+                // Get results from ping and add to graph
+                addColumnToGraph(createColumn(graphPing.getCurrentResponseTime));
 
-                addColumnToGraph(createBar(rand.Next(1,900)));
-
-                //Thread.Sleep(1000);
+                // Wait one second
+                Thread.Sleep(1000);
             }
             
         }
@@ -99,11 +99,9 @@ namespace PowerPing
         private void drawGraphColumns()
         {
             // Clear columns space before drawing
-            for (int x = 0; x <= xAxisLength; x++)
-            {
+            clear();
 
-            }
-
+            // Draw each graph column
             foreach (String[] bar in graphColumns)
             {
                 drawBar(bar);
@@ -158,11 +156,30 @@ namespace PowerPing
             // Draw X axis of graph
             drawXAxis();
 
-            // Draw info
-            Console.WriteLine("       Sent:       Recieved:");
-            Console.WriteLine("                     Failed:");
+            // Draw info (and get location info for each label)
+            Console.Write("       Sent: ");
+            sentLabelX = Console.CursorLeft;
+            sentLabelY = Console.CursorTop;
+
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            Console.Write("       Recieved: ");
+            recLabelX = Console.CursorLeft;
+            recLabelY = Console.CursorTop;
             Console.WriteLine();
-            Console.WriteLine("Current round trip time (RTT): ");
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.Write("                     Failed: ");
+            failLabelX = Console.CursorLeft;
+            failLabelY = Console.CursorTop;
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            Console.WriteLine();
+            Console.Write("Current round trip time (RTT): ");
+            rttLabelX = Console.CursorLeft;
+            rttLabelY = Console.CursorTop;
+            Console.WriteLine();
         }
 
         /// <summary>
@@ -195,21 +212,84 @@ namespace PowerPing
             Console.SetCursorPosition(cursorPositionX, cursorPositionY);
         }
 
-        public void clearGraph()
+        private void updateLabels(Ping ping)
         {
-            // Save orginal cursor
+            // save cursor location
+            int cursorPositionX = Console.CursorLeft;
+            int cursorPositionY = Console.CursorTop;
 
-            for(int x = 0; x <= xAxisLength; x++)
+            String blankLabel = new String(' ', 4);
+
+            // Update sent label
+            Console.SetCursorPosition(sentLabelX, sentLabelY);
+            // Clear label first
+            Console.Write(blankLabel);
+            // Move cursor back
+            Console.CursorLeft = Console.CursorLeft - 4;
+            // Write label value
+            Console.Write(ping.getPacketsSent);
+
+            // Update recieve label
+            Console.SetCursorPosition(recLabelX, recLabelY);
+            Console.Write(blankLabel);
+            Console.CursorLeft = Console.CursorLeft - 4;
+            Console.Write(ping.getPacketsRecieved);
+
+            // Update fail label
+            Console.SetCursorPosition(failLabelX, failLabelY);
+            Console.Write(blankLabel);
+            Console.CursorLeft = Console.CursorLeft - 4;
+            Console.Write(ping.getPacketsLost);
+
+            // Update RTT label
+            Console.SetCursorPosition(rttLabelX, rttLabelY);
+            Console.Write(blankLabel);
+            Console.CursorLeft = Console.CursorLeft - 4;
+            Console.Write(ping.getCurrentResponseTime);
+
+            // Reset cursor to starting position
+            Console.SetCursorPosition(cursorPositionX, cursorPositionY);
+        }
+
+        /// <summary>
+        /// Clear the plotting area of the graph
+        /// </summary>
+        private void clear()
+        {
+            // save cursor location
+            int cursorPositionX = Console.CursorLeft;
+            int cursorPositionY = Console.CursorTop;
+
+            // Set cursor position to start of plot
+            Console.SetCursorPosition(plotStartX, plotStartY);
+
+            String blankRow = new String(' ', xAxisLength);
+            String bottomRow = new String('─', xAxisLength);
+
+            for(int x = 0; x < (compactGraph ? 10 : 20); x++)
             {
+                // Draw black spaces
+                Console.Write(blankRow);
+                Console.CursorLeft = plotStartX;
+                Console.CursorTop--;
 
+                // Draw bottom row
+                if (x == 9 || x == 19)
+                {
+                    Console.CursorTop = plotStartY;
+                    Console.Write(bottomRow);
+                }
             }
+
+            // Reset cursor to starting position
+            Console.SetCursorPosition(cursorPositionX, cursorPositionY);
         }
 
         /// <summary>
         /// Generate bar for graphbased
         /// </summary>
         /// <param name="replyTime">Reply time of packet to plot</param>
-        private String[] createBar(long replyTime)
+        private String[] createColumn(long replyTime)
         {
             String[] bar;
             int count = 0;

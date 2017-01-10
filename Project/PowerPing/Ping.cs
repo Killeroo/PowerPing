@@ -21,21 +21,28 @@ class Ping
     public bool continous { get; set; }
     public bool forceV4 = false;
     public bool forceV6 = false;
-    public bool cancelFlag = false;
-    public bool isRunning = false;
-    public TimeSpan operationTime { get { return overallTimer.Elapsed; } }
+    public bool isRunning = false; // Is Ping currently sending?
+    public bool noSendOutput = false; // Hide out put when sending a ping
+    public TimeSpan getTotalRunTime { get { return overallTimer.Elapsed; } } // Get the total amount of time spent on current ping task
+    public long getCurrentResponseTime { get { return responseTimer.ElapsedMilliseconds; } } // Response time of most recent ping
+    public int getPacketsSent { get { return sent; } }
+    public int getPacketsRecieved { get { return recieved; } }
+    public int getPacketsLost { get { return lost; } }
+    public long getMaxReplyTime { get { return max; } }
+    public long getMinReplyTime { get { return min; } }
 
     // Result attributes
-    public int sent = 0;
-    public int recieved = 0;
-    public int lost = 0;
-    public long max = 0;
-    public long min = -1;
+    private int sent = 0;
+    private int recieved = 0;
+    private int lost = 0;
+    private long max = 0;
+    private long min = -1;
 
     // Local variables setup
-    private static Stopwatch timer = new Stopwatch();
+    private static Stopwatch responseTimer = new Stopwatch();
     private static Stopwatch overallTimer = new Stopwatch();
     private static Socket sock = null;
+    private bool cancelFlag = false;
 
     // Constructor
     public Ping() { }
@@ -102,29 +109,29 @@ class Ping
             try
             {
                 // Send ping request
-                timer.Start();
+                responseTimer.Start();
                 sock.SendTo(packet.getBytes(), packetSize, SocketFlags.None, iep);
                 sent++;
 
                 // Try recieve ping response
                 byte[] buffer = new byte[1024];
                 bytesRead = sock.ReceiveFrom(buffer, ref ep);
-                timer.Stop();
+                responseTimer.Stop();
 
                 // Store reply packet
                 ICMP response = new ICMP(buffer, bytesRead);
 
                 // Display reply packet
-                PowerPing.Display.displayReplyPacket(response, ep.ToString(), index,  timer.ElapsedMilliseconds);
+                PowerPing.Display.displayReplyPacket(response, ep.ToString(), index,  responseTimer.ElapsedMilliseconds);
 
                 // Increment number of recieved replys
                 recieved++;
 
                 // Check response time against current max and min
-                if (timer.ElapsedMilliseconds > max)
-                    max = timer.ElapsedMilliseconds;
-                if (timer.ElapsedMilliseconds < min || min == -1)
-                    min = timer.ElapsedMilliseconds;
+                if (responseTimer.ElapsedMilliseconds > max)
+                    max = responseTimer.ElapsedMilliseconds;
+                if (responseTimer.ElapsedMilliseconds < min || min == -1)
+                    min = responseTimer.ElapsedMilliseconds;
 
             }
             catch (SocketException)
@@ -134,7 +141,7 @@ class Ping
             }
             finally
             {
-                timer.Reset();
+                responseTimer.Reset();
             }
 
             index++;
