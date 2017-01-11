@@ -21,7 +21,7 @@ class Ping
     public bool continous { get; set; }
     public bool forceV4 = false;
     public bool forceV6 = false;
-    public bool isRunning = false; // Is Ping currently sending?
+    public bool isRunning = false; // Is ping currently sending?
     public bool noSendOutput = false; // Hide out put when sending a ping
     public TimeSpan getTotalRunTime { get { return overallTimer.Elapsed; } } // Get the total amount of time spent on current ping task
     public long getCurrentResponseTime { get { return responseTimer.ElapsedMilliseconds; } } // Response time of most recent ping
@@ -45,10 +45,39 @@ class Ping
     private bool cancelFlag = false;
 
     // Constructor
-    public Ping() { }
+    // TODO: Rework constructors, add default values
+    public Ping()
+    {
+        // Assign defaul ping values
+        address = "127.0.0.1";
+        count = 5;
+        timeout = 3000;
+        ttl = 255;
+        interval = 1000;
+        continous = false;
+        forceV4 = false;
+        forceV6 = false;
+        message = "R U Alive?";
+    }
+
+    public Ping(string addr)
+    {
+        // Use provided address
+        address = addr;
+
+        // Assign default ping values
+        count = 5;
+        timeout = 3000;
+        ttl = 255;
+        interval = 1000;
+        continous = false;
+        forceV4 = false;
+        forceV6 = false;
+        message = "R U Alive?";
+    }
 
     /// <summary>
-    /// Send ping to address
+    /// Sends a standard set ping packets to an address and waits for a reply
     /// </summary>
     public void send()
     {
@@ -75,6 +104,7 @@ class Ping
         sock.Ttl = (short)ttl; // TTL
 
         // Construct ping packet
+        // TODO: Move to own method
         packet.type = 0x08;
         packet.code = 0x00;
         Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2);
@@ -149,6 +179,7 @@ class Ping
         }
 
         // Stop operation
+        isRunning = false;
         this.stop();
 
     }
@@ -169,17 +200,19 @@ class Ping
         }
 
         // Stop counting total elapsed timer
-        overallTimer.Stop();
+        if (overallTimer.IsRunning)
+            overallTimer.Stop();
 
         // Close socket
-        sock.Close();
+        if (sock != null || sock.IsBound)
+            sock.Close();
 
         // Reset cancel flag
         cancelFlag = false;
     }
 
     /// <summary>
-    /// Listen for an ICMP packets 
+    /// Listen for an ICMPv4 packets 
     /// </summary>
     public void listen()
     {
@@ -229,7 +262,11 @@ class Ping
 
     public void trace() { }
 
-    public void scan() { }
+    public void scan()
+    {
+        // Setup the socket
+        setupSocket(AddressFamily.InterNetwork);
+    }
 
     public void flood() { }
 

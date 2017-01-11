@@ -195,25 +195,25 @@ namespace PowerPing
             Console.Write("     Packet: Sent ");
             Console.BackgroundColor = ConsoleColor.Yellow;
             Console.ForegroundColor = ConsoleColor.Black;
-            Console.Write("[" + ping.getPacketsSent + "]");
+            Console.Write("[ " + ping.getPacketsSent + " ]");
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(", Recieved ");
             Console.BackgroundColor = ConsoleColor.Green;
             Console.ForegroundColor = ConsoleColor.Black;
-            Console.Write("[" + ping.getPacketsRecieved + "]");
+            Console.Write("[ " + ping.getPacketsRecieved + " ]");
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(", Lost ");
             Console.BackgroundColor = ConsoleColor.Red;
             Console.ForegroundColor = ConsoleColor.Black;
-            Console.Write("[" + ping.getPacketsLost + "]");
+            Console.Write("[ " + ping.getPacketsLost + " ]");
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.WriteLine(" (" + percent + "% loss)");
 
             Console.WriteLine("Response times:");
-            Console.WriteLine("     Minimum [{0}ms], Maximum [{1}ms]", ping.getMinReplyTime, ping.getMaxReplyTime);
+            Console.WriteLine("     Minimum [ {0}ms ], Maximum [ {1}ms ]", ping.getMinReplyTime, ping.getMaxReplyTime);
 
             Console.WriteLine("Total elapsed time (HH:MM:SS.FFF): {0:hh\\:mm\\:ss\\.fff}", ping.getTotalRunTime);
             Console.WriteLine();

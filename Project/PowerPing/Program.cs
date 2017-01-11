@@ -6,30 +6,20 @@ namespace PowerPing
     {
         // Global variable setup
         private static Ping p = new Ping();
-        private static bool listening = false;
+        private static bool sendFlag = false; // Indicates if a normal ping operation is being performed
+        private static bool cancelled = false; // Indicates if cancel event has been called
 
         static void Main(string[] args)
         {
             // Local variables 
             bool addrFound = false;
 
-            // Default ping values
-            int num = 5;
-            int timeout = 3000;
-            int ttl = 255;
-            int interval = 1000;
-            bool infinite = false;
-            bool forceV4 = false;
-            bool forceV6 = false;
-            string address = "";
-            string message = "R U Alive?";
+            //Graph g = new Graph("8.8.8.8");
+            //g.start();
 
-            Graph g = new Graph("8.8.8.8");
-            g.start();
+            //Console.Read();
 
-            Console.Read();
-
-            // Add Control C event
+            // Add Control C event handler
             Console.CancelKeyPress += new ConsoleCancelEventHandler(exitHandler);
             Console.WriteLine();
 
@@ -50,48 +40,48 @@ namespace PowerPing
                         case "/c":
                         case "-c":
                         case "--c": // Ping count
-                            num = Convert.ToInt16(args[count + 1]);
+                            p.count = Convert.ToInt16(args[count + 1]);
                             break;
                         case "/t":
                         case "-t":
                         case "--t": // Infinitely send
-                            infinite = true;
+                            p.continous = true;
                             break;
                         case "/w":
                         case "-w":
                         case "--w": // Timeout
-                            timeout = Convert.ToInt16(args[count + 1]);
+                            p.timeout = Convert.ToInt16(args[count + 1]);
                             break;
                         case "/m":
                         case "-m":
                         case "--m": // Message
-                            message = args[count + 1];
+                            p.message = args[count + 1];
                             break;
                         case "/i":
                         case "-i":
                         case "--i": // Time To Live
-                            ttl = Convert.ToInt16(args[count + 1]);
+                            p.ttl = Convert.ToInt16(args[count + 1]);
                             break;
                         case "/in":
                         case "-in":
                         case "--in":
-                            interval = Convert.ToInt16(args[count + 1]);
+                            p.interval = Convert.ToInt16(args[count + 1]);
                             break;
                         case "/4":
                         case "-4":
                         case "--4": // Force ping with IPv4
-                            if (forceV6)
+                            if (p.forceV6)
                                 // Reset IPv4 force if already set (change force both v4 and v6)
-                                forceV6 = false;
-                            forceV4 = true;
+                                p.forceV6 = false;
+                            p.forceV4 = true;
                             break;
                         case "/6":
                         case "-6":
                         case "--6": // Force ping with IPv6
-                            if (forceV4)
+                            if (p.forceV4)
                                 // Reset IPv4 force if already set
-                                forceV4 = false;
-                            forceV6 = true;
+                                p.forceV4 = false;
+                            p.forceV6 = true;
                             break;
                         case "/?":
                         case "-?":
@@ -114,21 +104,19 @@ namespace PowerPing
                         case "/listen":
                         case "-listen":
                         case "--listen": // Listen for ICMP packets
-                            listening = true;
                             p.listen();
                             Environment.Exit(0);
                             break;
                         default:
                             if ((count == args.Length - 1 || count == 0) && !addrFound)
                             { // Assume first or last argument is address
-                                address = args[count];
+                                p.address = args[count];
                                 addrFound = true;
                             }
                             if (args[count].Contains("--"))
                                 throw new Exception();
                             break;
                     }
-
                 }
             }
             catch (IndexOutOfRangeException)
@@ -151,24 +139,27 @@ namespace PowerPing
             }
 
             // Send ping
-            p.address = address;
-            p.count = num;
-            p.message = message;
-            p.timeout = timeout;
-            p.continous = infinite;
-            p.interval = interval;
-            p.ttl = ttl;
-            p.forceV4 = forceV4;
-            p.forceV6 = forceV6;
+            sendFlag = true;
             p.send();
 
-            // Only display stats if ping hasn't been cancelled
-            //if (!p.cancelFlag)
-                //p.displayStatistics();
+            // Display stats after ping(s) has been sent
+            if (!cancelled)
+                PowerPing.Display.displayStatistics(p);
         }
 
+        /// <summary>
+        /// Event handler for control - c
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         protected static void exitHandler(object sender, ConsoleCancelEventArgs args)
         {
+            // Cancel termination
+            args.Cancel = true;
+
+            // Set cancel flag
+            cancelled = true;
+
             // Stop ping
             p.stop();
 
@@ -176,9 +167,9 @@ namespace PowerPing
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Gray;
 
-            // Stop ping process and display stats when control c pressed
-            //if (!listening)
-                //p.displayStatistics();
+            // Display stats if a normal ping is being sent
+            if (sendFlag)
+                PowerPing.Display.displayStatistics(p);
         }
     }
 }
