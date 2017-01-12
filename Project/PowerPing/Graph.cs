@@ -274,7 +274,7 @@ namespace PowerPing
             String blankRow = new String(' ', xAxisLength);
             String bottomRow = new String('─', xAxisLength);
 
-            for(int x = 0; x < (compactGraph ? 10 : 20); x++)
+            for(int x = 0; x <= (compactGraph ? 10 : 20); x++)
             {
                 // Draw black spaces
                 Console.Write(blankRow);

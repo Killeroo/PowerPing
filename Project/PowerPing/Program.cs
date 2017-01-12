@@ -12,8 +12,6 @@ namespace PowerPing
             // Local variables 
             bool addrFound = false;
 
-            // Add Control C event handler
-            Console.CancelKeyPress += new ConsoleCancelEventHandler(exitHandler);
             Console.WriteLine();
 
             // Check if no arguments
@@ -138,6 +136,10 @@ namespace PowerPing
                 PowerPing.Display.displayHelpMsg();
                 return;
             }
+
+            // only add Control C event handler when sending standard ping
+            // (So statistics can still be displayed when ping interupted)
+            Console.CancelKeyPress += new ConsoleCancelEventHandler(exitHandler);
 
             // Send ping
             p.Send();
