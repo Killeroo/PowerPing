@@ -6,18 +6,11 @@ namespace PowerPing
     {
         // Global variable setup
         private static Ping p = new Ping();
-        private static bool sendFlag = false; // Indicates if a normal ping operation is being performed
-        private static bool cancelled = false; // Indicates if cancel event has been called
 
         static void Main(string[] args)
         {
             // Local variables 
             bool addrFound = false;
-
-            //Graph g = new Graph("8.8.8.8");
-            //g.start();
-
-            //Console.Read();
 
             // Add Control C event handler
             Console.CancelKeyPress += new ConsoleCancelEventHandler(exitHandler);
@@ -55,6 +48,8 @@ namespace PowerPing
                         case "/m":
                         case "-m":
                         case "--m": // Message
+                            if (args[count + 1].Contains("--"))
+                                throw new Exception();
                             p.message = args[count + 1];
                             break;
                         case "/i":
@@ -104,8 +99,14 @@ namespace PowerPing
                         case "/listen":
                         case "-listen":
                         case "--listen": // Listen for ICMP packets
-                            p.listen();
+                            p.Listen();
                             Environment.Exit(0);
+                            break;
+                        case "/graph":
+                        case "-graph":
+                        case "--graph": // Graph view
+                            Graph g = new Graph(args[count + 1]);
+                            g.start();
                             break;
                         default:
                             if ((count == args.Length - 1 || count == 0) && !addrFound)
@@ -139,12 +140,7 @@ namespace PowerPing
             }
 
             // Send ping
-            sendFlag = true;
-            p.send();
-
-            // Display stats after ping(s) has been sent
-            if (!cancelled)
-                PowerPing.Display.displayStatistics(p);
+            p.Send();
         }
 
         /// <summary>
@@ -157,19 +153,13 @@ namespace PowerPing
             // Cancel termination
             args.Cancel = true;
 
-            // Set cancel flag
-            cancelled = true;
-
             // Stop ping
-            p.stop();
+            p.Stop();
 
             // Reset console colour
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Gray;
 
-            // Display stats if a normal ping is being sent
-            if (sendFlag)
-                PowerPing.Display.displayStatistics(p);
         }
     }
 }

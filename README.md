@@ -1,13 +1,13 @@
 # PowerPing - Advanced Windows Ping 
 
 Small improved ICMP ping program lovingly inspired by windows and unix, written in C#.
-
+***
 ![alt text](Screenshots/readme_screenshot.png "PowerPing in action")
 
 # Usage: 
      PowerPing [--?] | [--whoami] | [--location address] | [--listen] |
-			   [--t] [--c count] [--w timeout] [--m message] [--i TTL]
-			   [--in interval] [--4] target_name
+			   [--graph address] | [--t] [--c count] [--w timeout] [--m message] 
+			   [--i TTL] [--in interval] [--4] target_name
 
 # Options:
      --?             Displays this help message
@@ -18,6 +18,8 @@ Small improved ICMP ping program lovingly inspired by windows and unix, written 
 	 --i ttl		 Time To Live
 	 --in interval   Interval between each ping (in milliseconds)
      --4             Force using IPv4	 
+	 
+	 --graph address Ping an address, display results in graph view
 	 
      --whoami        Location info for current host
      --location addr Location info for an address

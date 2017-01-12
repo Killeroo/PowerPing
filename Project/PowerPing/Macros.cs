@@ -78,8 +78,7 @@ namespace PowerPing
         public static void pause(bool exit = false)
         {
             Console.Write("Press any key to " + (exit ? "exit" : "continue") + " . . .");
-            var stuff = Console.ReadLine();
-            Console.WriteLine(stuff);
+            Console.ReadLine();
         }
 
         /// <summary>

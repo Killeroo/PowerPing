@@ -38,8 +38,8 @@ namespace PowerPing
             Console.WriteLine("     This advanced ping utility provides geoip querying, ICMP packet info");
             Console.WriteLine("     and result colourization.");
             Console.WriteLine("\nUsage: PowerPing [--?] | [--whoami] | [--location address] | [--listen] |");
-            Console.WriteLine("                 [--t] [--c count] [--w timeout] [--m message] [--i TTL]");
-            Console.WriteLine("                 [--in interval] [--4] target_name");
+            Console.WriteLine("                 [--graph address] | [--t] [--c count] [--w timeout] ");
+            Console.WriteLine("                 [--m message] [--i TTL] [--in interval] [--4] target_name");
             Console.WriteLine("\nOptions:");
             Console.WriteLine("     --?             Displays this help message");
             Console.WriteLine("     --t             Ping the target until stopped (Control-C to stop)");
@@ -55,6 +55,9 @@ namespace PowerPing
             Console.WriteLine("     --location addr Location info for an address");
             Console.WriteLine();
             Console.WriteLine("     --listen        Listen for ICMP packets");
+            Console.WriteLine();
+            Console.WriteLine("     --graph addrs   Ping an address, display results in graph view");
+            Console.WriteLine();
             Console.WriteLine("\nWritten by Matthew Carney [matthewcarney64@gmail.com] =^-^=");
             Console.WriteLine("Find the project here [https://github.com/Killeroo/PowerPing]\n");
             PowerPing.Macros.pause();

@@ -14,17 +14,17 @@ class Ping
     // Ping attributes
     public string address { get; set; }
     public string message { get; set; }
-    public int interval { get; set; } // Time interval between each ping
+    public int interval { get; set; } // Time interval between sending each ping
     public int timeout { get; set; }
     public int count { get; set; }
     public int ttl { get; set; }
     public bool continous { get; set; }
-    public bool forceV4 = false;
-    public bool forceV6 = false;
-    public bool isRunning = false; // Is ping currently sending?
-    public bool noSendOutput = false; // Hide out put when sending a ping
-    public TimeSpan getTotalRunTime { get { return overallTimer.Elapsed; } } // Get the total amount of time spent on current ping task
-    public long getCurrentResponseTime { get { return responseTimer.ElapsedMilliseconds; } } // Response time of most recent ping
+    public bool forceV4 { get; set; } = false;
+    public bool forceV6 { get; set; } = false;
+    public bool showOutput { get; set; } = true; // Hide output when sending a ping
+    public bool isRunning { get { return running; } }
+    public TimeSpan getTotalRunTime { get { return totalRunTime.Elapsed; } } // Total amount of time pings have been sending
+    public long getLastResponseTime { get { return lastResponseTime; } }
     public int getPacketsSent { get { return sent; } }
     public int getPacketsRecieved { get { return recieved; } }
     public int getPacketsLost { get { return lost; } }
@@ -40,9 +40,11 @@ class Ping
 
     // Local variables setup
     private static Stopwatch responseTimer = new Stopwatch();
-    private static Stopwatch overallTimer = new Stopwatch();
+    private static Stopwatch totalRunTime = new Stopwatch();
     private static Socket sock = null;
     private bool cancelFlag = false;
+    private bool running = false;
+    private long lastResponseTime = 0;
 
     // Constructor
     // TODO: Rework constructors, add default values
@@ -79,7 +81,7 @@ class Ping
     /// <summary>
     /// Sends a standard set ping packets to an address and waits for a reply
     /// </summary>
-    public void send()
+    public void Send()
     {
         // Local variable setup
         IPEndPoint iep = null;
@@ -113,8 +115,9 @@ class Ping
         packet.messageSize = payload.Length + 4;
         int packetSize = packet.messageSize + 4;
 
-        overallTimer.Start(); // Start timing ping operation
-        PowerPing.Display.displayPingIntroMsg(ep.ToString(), this); // Display intro message
+        totalRunTime.Start(); // Start timing ping operation
+        if (showOutput)
+            PowerPing.Display.displayPingIntroMsg(ep.ToString(), this); // Display intro message
 
         // Sending loop
         while (continous ? true : index <= count)
@@ -125,16 +128,11 @@ class Ping
             UInt16 chksm = packet.getChecksum();
             packet.checksum = chksm;
 
-            // Exit if cancel flag recieved
+            // Exit loop if cancel flag recieved
             if (cancelFlag)
-            {
-                isRunning = false;
-                return;
-            }
+                break;
             else
-            {
-                isRunning = true;
-            }
+                running = true;
 
             try
             {
@@ -152,10 +150,14 @@ class Ping
                 ICMP response = new ICMP(buffer, bytesRead);
 
                 // Display reply packet
-                PowerPing.Display.displayReplyPacket(response, ep.ToString(), index,  responseTimer.ElapsedMilliseconds);
+                if (showOutput)
+                    PowerPing.Display.displayReplyPacket(response, ep.ToString(), index,  responseTimer.ElapsedMilliseconds);
 
                 // Increment number of recieved replys
                 recieved++;
+
+                // Store reply time
+                lastResponseTime = responseTimer.ElapsedMilliseconds;
 
                 // Check response time against current max and min
                 if (responseTimer.ElapsedMilliseconds > max)
@@ -166,7 +168,9 @@ class Ping
             }
             catch (SocketException)
             {
-                PowerPing.Display.displayTimeout();
+                if (showOutput)
+                    PowerPing.Display.displayTimeout();
+                lastResponseTime = 0;
                 lost++;
             }
             finally
@@ -179,29 +183,32 @@ class Ping
         }
 
         // Stop operation
-        isRunning = false;
-        this.stop();
+        running = false;
+        this.Stop();
 
+        // Display stats
+        if (showOutput)
+            PowerPing.Display.displayStatistics(this);
     }
 
     /// <summary>
     /// Stop any ping operations running and release resources
     /// </summary>
-    public void stop()
+    public void Stop()
     {
         // If a ping operation is running send cancel flag
-        if (isRunning)
+        if (running)
         {
             cancelFlag = true;
 
             // wait till ping stops running
-            while (isRunning)
+            while (running)
                 Task.Delay(25);
         }
 
         // Stop counting total elapsed timer
-        if (overallTimer.IsRunning)
-            overallTimer.Stop();
+        if (totalRunTime.IsRunning)
+            totalRunTime.Stop();
 
         // Close socket
         if (sock != null || sock.IsBound)
@@ -214,7 +221,7 @@ class Ping
     /// <summary>
     /// Listen for an ICMPv4 packets 
     /// </summary>
-    public void listen()
+    public void Listen()
     {
         IPAddress localAddress = null;
 
@@ -260,15 +267,78 @@ class Ping
         }
     }
 
-    public void trace() { }
+    public void Trace() { }
 
-    public void scan()
+    public void Scan()
     {
-        // Setup the socket
+        // Local variable setup
+        IPEndPoint iep = null;
+        EndPoint ep = null;
+        IPAddress ipAddr = null;
+        ICMP packet = new ICMP();
+        int bytesRead, index = 1;
+
+        // create socket the socket
         setupSocket(AddressFamily.InterNetwork);
+
+        // Set socket timeout
+        sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 500);
+
+        // Construct ping packet
+        packet.type = 0x08;
+        packet.code = 0x00;
+        Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2);
+        byte[] payload = Encoding.ASCII.GetBytes(message);
+        Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
+        packet.messageSize = payload.Length + 4;
+        int packetSize = packet.messageSize + 4;
+
+        // Sending loop
+        while (continous ? true : index <= count)
+        {
+            // Calculate packet checksum
+            packet.checksum = 0;
+            Buffer.BlockCopy(BitConverter.GetBytes(index), 0, packet.message, 2, 2); // Include sequence number in ping message
+            UInt16 chksm = packet.getChecksum();
+            packet.checksum = chksm;
+
+            try
+            {
+                // Send ping request
+                responseTimer.Start();
+                sock.SendTo(packet.getBytes(), packetSize, SocketFlags.None, iep);
+                sent++;
+
+                // Try recieve ping response
+                byte[] buffer = new byte[1024];
+                bytesRead = sock.ReceiveFrom(buffer, ref ep);
+                responseTimer.Stop();
+
+                // Store reply packet
+                ICMP response = new ICMP(buffer, bytesRead);
+
+                // Display reply packet
+                PowerPing.Display.displayReplyPacket(response, ep.ToString(), index, responseTimer.ElapsedMilliseconds);
+
+            }
+            catch (SocketException)
+            {
+                PowerPing.Display.displayTimeout();
+                lost++;
+            }
+            finally
+            {
+                responseTimer.Reset();
+            }
+
+            index++;
+            Thread.Sleep(interval);
+        }
+
+
     }
 
-    public void flood() { }
+    public void Flood() { }
 
     private void setupSocket(AddressFamily family)
     {

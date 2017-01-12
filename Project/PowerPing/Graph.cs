@@ -9,14 +9,13 @@ namespace PowerPing
         const string FULL_BAR_BLOCK_CHAR = "█";
         const string HALF_BAR_BLOCK_CHAR = "▄";
 
-        public bool compactGraph = false;
+        public bool compactGraph = true;
 
         // Local variable declaration
         private Ping graphPing = new Ping();
         private List<String[]> graphColumns = new List<string[]>();
         private bool isGraphSetup = false;
         private int xAxisLength = 40;
-        private String address;
 
         // Location of graph plotting space
         private int plotStartX;
@@ -27,16 +26,14 @@ namespace PowerPing
         private int recLabelX, recLabelY;
         private int failLabelX, failLabelY;
         private int rttLabelX, rttLabelY;
+        private int timeLabelX, timeLabelY;
         
         public Graph(string address)
         {
             // Setup ping
             graphPing.address = address;
-            graphPing.message = "R U Alive?";
-            graphPing.timeout = 3000;
             graphPing.continous = true;
-            graphPing.interval = 1000;
-            graphPing.ttl = 255;
+            graphPing.showOutput = false;
         }
 
         public void start()
@@ -54,14 +51,11 @@ namespace PowerPing
 
         private void draw()
         {
-            // Drawing loop
+            // Start ping in background thread
+            Thread pinger = new Thread(new ThreadStart(graphPing.Send));
+            pinger.IsBackground = true;
+            pinger.Start();
 
-            // Save start position
-            plotStartY = Console.CursorTop - 5;
-            plotStartX = 7;
-
-            // Start sending ping
-            var pinger = new Thread(new ThreadStart(graphPing.send));
             //graphPing.send();
 
             // Drawing loop
@@ -78,7 +72,7 @@ namespace PowerPing
                 updateLabels(graphPing);
 
                 // Get results from ping and add to graph
-                addColumnToGraph(createColumn(graphPing.getCurrentResponseTime));
+                addColumnToGraph(createColumn(graphPing.getLastResponseTime));
 
                 // Wait one second
                 Thread.Sleep(1000);
@@ -101,12 +95,17 @@ namespace PowerPing
             // Clear columns space before drawing
             clear();
 
-            // Draw each graph column
-            foreach (String[] bar in graphColumns)
+            for (int x = 0; x < graphColumns.Count; x++)
             {
-                drawBar(bar);
+                // Change colour for most recent column 
+                if (x == graphColumns.Count - 1)
+                    Console.ForegroundColor = ConsoleColor.Green;
+                drawBar(graphColumns[x]);
                 Console.CursorLeft++;
             }
+
+            // Reset colour after
+            Console.ForegroundColor = ConsoleColor.Gray;
         }
 
         /// <summary>
@@ -114,84 +113,87 @@ namespace PowerPing
         /// </summary>
         private void drawBackground()
         {
+            // Draw title
+            Console.WriteLine("                       (PowerPing - Graph View)");
+            //Console.WriteLine();
+
             // Draw Y axis of graph
             if (compactGraph)
             {
-                Console.WriteLine(">1000 ┐");
-                Console.WriteLine("  900 ┤");
-                Console.WriteLine("  800 ┤");
-                Console.WriteLine("  700 ┤");
-                Console.WriteLine("  600 ┤");
-                Console.WriteLine("  500 ┤");
-                Console.WriteLine("  400 ┤");
-                Console.WriteLine("  300 ┤");
-                Console.WriteLine("  200 ┤");
-                Console.WriteLine("  100 ┤");
+                Console.WriteLine("         >1000 ┐");
+                Console.WriteLine("           900 ┤");
+                Console.WriteLine("           800 ┤");
+                Console.WriteLine("           700 ┤");
+                Console.WriteLine(" Response  600 ┤");
+                Console.WriteLine("   Time    500 ┤");
+                Console.WriteLine("   (ms)    400 ┤");
+                Console.WriteLine("           300 ┤");
+                Console.WriteLine("           200 ┤");
+                Console.WriteLine("           100 ┤");
             }
             else
             {
-                Console.WriteLine(">1000 ┐");
-                Console.WriteLine("      ┤");
-                Console.WriteLine(" 900 ─┤");
-                Console.WriteLine("      ┤");
-                Console.WriteLine(" 800 ─┤");
-                Console.WriteLine("      ┤");
-                Console.WriteLine(" 700 ─┤");
-                Console.WriteLine("      ┤");
-                Console.WriteLine(" 600 ─┤");
-                Console.WriteLine("      ┤");
-                Console.WriteLine(" 500 ─┤");
-                Console.WriteLine("      ┤");
-                Console.WriteLine(" 400 ─┤");
-                Console.WriteLine("      ┤");
-                Console.WriteLine(" 300 ─┤");
-                Console.WriteLine("      ┤");
-                Console.WriteLine(" 200 ─┤");
-                Console.WriteLine("      ┤");
-                Console.WriteLine(" 100 ─┤");
-                Console.WriteLine("      ┤");
+                Console.WriteLine("          >1000 ┐");
+                Console.WriteLine("                ┤");
+                Console.WriteLine("           900 ─┤");
+                Console.WriteLine("                ┤");
+                Console.WriteLine("           800 ─┤");
+                Console.WriteLine("                ┤");
+                Console.WriteLine("           700 ─┤");
+                Console.WriteLine("                ┤");
+                Console.WriteLine(" Response  600 ─┤");
+                Console.WriteLine("   Time         ┤");
+                Console.WriteLine("   (ms)    500 ─┤");
+                Console.WriteLine("                ┤");
+                Console.WriteLine("           400 ─┤");
+                Console.WriteLine("                ┤");
+                Console.WriteLine("           300 ─┤");
+                Console.WriteLine("                ┤");
+                Console.WriteLine("           200 ─┤");
+                Console.WriteLine("                ┤");
+                Console.WriteLine("           100 ─┤");
+                Console.WriteLine("                ┤");
             }
-            
+
 
             // Draw X axis of graph
-            drawXAxis();
+            Console.Write(compactGraph ? "             0 └" : "              0 └");
+            // Save start of graph plotting area
+            plotStartX = Console.CursorLeft;
+            plotStartY = Console.CursorTop;
+            Console.WriteLine(new String('─', xAxisLength));
+            Console.WriteLine();
 
             // Draw info (and get location info for each label)
-            Console.Write("       Sent: ");
+            Console.WriteLine("                 Packet Statistics:");
+            Console.WriteLine("                {0}", new String('-', xAxisLength));
+            Console.WriteLine("                 Destination [ {0} ]", graphPing.address);
+
+            Console.Write("                     Sent: ");
             sentLabelX = Console.CursorLeft;
             sentLabelY = Console.CursorTop;
 
-            Console.ForegroundColor = ConsoleColor.DarkGreen;
-            Console.Write("       Recieved: ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("           Recieved: ");
             recLabelX = Console.CursorLeft;
             recLabelY = Console.CursorTop;
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Gray;
 
-            Console.ForegroundColor = ConsoleColor.DarkRed;
-            Console.Write("                     Failed: ");
+            Console.Write("                      RTT: ");
+            rttLabelX = Console.CursorLeft;
+            rttLabelY = Console.CursorTop;
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("             Failed: ");
             failLabelX = Console.CursorLeft;
             failLabelY = Console.CursorTop;
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Gray;
-
-            Console.WriteLine();
-            Console.Write("Current round trip time (RTT): ");
-            rttLabelX = Console.CursorLeft;
-            rttLabelY = Console.CursorTop;
-            Console.WriteLine();
-        }
-
-        /// <summary>
-        /// Draw X axis of graph
-        /// </summary>
-        private void drawXAxis()
-        {
-            Console.Write("    0 └");
-            for (int x = 0; x <= xAxisLength; x++)
-            {
-                Console.Write("─");
-            }
+            
+            Console.Write("                 Time Elasped: ");
+            timeLabelX = Console.CursorLeft;
+            timeLabelY = Console.CursorTop;
             Console.WriteLine();
         }
 
@@ -218,34 +220,40 @@ namespace PowerPing
             int cursorPositionX = Console.CursorLeft;
             int cursorPositionY = Console.CursorTop;
 
-            String blankLabel = new String(' ', 4);
+            String blankLabel = new String(' ', 6);
 
             // Update sent label
             Console.SetCursorPosition(sentLabelX, sentLabelY);
             // Clear label first
             Console.Write(blankLabel);
             // Move cursor back
-            Console.CursorLeft = Console.CursorLeft - 4;
+            Console.CursorLeft = Console.CursorLeft - 6;
             // Write label value
             Console.Write(ping.getPacketsSent);
 
             // Update recieve label
             Console.SetCursorPosition(recLabelX, recLabelY);
             Console.Write(blankLabel);
-            Console.CursorLeft = Console.CursorLeft - 4;
+            Console.CursorLeft = Console.CursorLeft - 6;
             Console.Write(ping.getPacketsRecieved);
 
             // Update fail label
             Console.SetCursorPosition(failLabelX, failLabelY);
             Console.Write(blankLabel);
-            Console.CursorLeft = Console.CursorLeft - 4;
+            Console.CursorLeft = Console.CursorLeft - 6;
             Console.Write(ping.getPacketsLost);
 
             // Update RTT label
             Console.SetCursorPosition(rttLabelX, rttLabelY);
             Console.Write(blankLabel);
-            Console.CursorLeft = Console.CursorLeft - 4;
-            Console.Write(ping.getCurrentResponseTime);
+            Console.CursorLeft = Console.CursorLeft - 6;
+            Console.Write(ping.getLastResponseTime + "ms");
+
+            // Update time label
+            Console.SetCursorPosition(timeLabelX, timeLabelY);
+            Console.Write(blankLabel + "        ");
+            Console.CursorLeft = Console.CursorLeft - 14;
+            Console.Write("{0:hh\\:mm\\:ss}", ping.getTotalRunTime);
 
             // Reset cursor to starting position
             Console.SetCursorPosition(cursorPositionX, cursorPositionY);
@@ -297,6 +305,13 @@ namespace PowerPing
             // Work out bar length
             for (int x = 0; x < replyTime; x = x + (compactGraph ? 50 : 25))
                 count++;
+
+            if (replyTime > 1000)
+                // If reply time over graph Y range draw max size column
+                count = compactGraph ? 20 : 10;
+            else if (replyTime == 0)
+                // If no reply dont draw column
+                return new String[] { "─" };
 
             count = count / 2;
 
