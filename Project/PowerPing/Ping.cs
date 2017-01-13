@@ -269,71 +269,23 @@ class Ping
 
     public void Trace() { }
 
-    public void Scan()
+    public void Scan(int depth = 1)
     {
         // Local variable setup
         IPEndPoint iep = null;
-        EndPoint ep = null;
-        IPAddress ipAddr = null;
+        EndPoint ip = null;
         ICMP packet = new ICMP();
-        int bytesRead, index = 1;
+        int bytesRead;
 
-        // create socket the socket
-        setupSocket(AddressFamily.InterNetwork);
+        // Setup socket and option
+        if (sock == null)
+            setupSocket(AddressFamily.InterNetwork);
 
-        // Set socket timeout
-        sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 500);
+        sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 500); 
+        sock.Ttl = (short) 255;
 
-        // Construct ping packet
-        packet.type = 0x08;
-        packet.code = 0x00;
-        Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2);
-        byte[] payload = Encoding.ASCII.GetBytes(message);
-        Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
-        packet.messageSize = payload.Length + 4;
-        int packetSize = packet.messageSize + 4;
-
-        // Sending loop
-        while (continous ? true : index <= count)
-        {
-            // Calculate packet checksum
-            packet.checksum = 0;
-            Buffer.BlockCopy(BitConverter.GetBytes(index), 0, packet.message, 2, 2); // Include sequence number in ping message
-            UInt16 chksm = packet.getChecksum();
-            packet.checksum = chksm;
-
-            try
-            {
-                // Send ping request
-                responseTimer.Start();
-                sock.SendTo(packet.getBytes(), packetSize, SocketFlags.None, iep);
-                sent++;
-
-                // Try recieve ping response
-                byte[] buffer = new byte[1024];
-                bytesRead = sock.ReceiveFrom(buffer, ref ep);
-                responseTimer.Stop();
-
-                // Store reply packet
-                ICMP response = new ICMP(buffer, bytesRead);
-
-                // Display reply packet
-                PowerPing.Display.displayReplyPacket(response, ep.ToString(), index, responseTimer.ElapsedMilliseconds);
-
-            }
-            catch (SocketException)
-            {
-                PowerPing.Display.displayTimeout();
-                lost++;
-            }
-            finally
-            {
-                responseTimer.Reset();
-            }
-
-            index++;
-            Thread.Sleep(interval);
-        }
+        // Verify and split address address
+        
 
 
     }
