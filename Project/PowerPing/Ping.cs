@@ -270,97 +270,156 @@ class Ping
 
     public void Trace() { }
 
-    public void Scan(int depth = 1)
+    public static void Scan(string target, int depth = 1, int wait = 250, int threads = 4)
     {
         // Local variable setup
         IPEndPoint iep = null;
         EndPoint ep = null;
         IPAddress curAddress; // Current address being scanned
         ICMP packet = new ICMP();
-        String localAddress;
+        Socket scanSocket;
         String[] splitAddress;
         int bytesRead, failed = 0, replied = 0;
         List<IPAddress> activeAddresses = new List<IPAddress>();
 
-        // Setup socket and option
-        if (sock == null)
-            setupSocket(AddressFamily.InterNetwork);
+        // If address to scan is not stated use local address
+        if (target == "")
+            target = PowerPing.Macros.GetLocalIPAddress();
 
-        sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 250); 
-        sock.Ttl = (short) 255;
-
-        // Get local address of computer
-        localAddress = PowerPing.Macros.GetLocalIPAddress();
-
-        // If local address can't be found, display error and exit
-        if (localAddress == null)
-            PowerPing.Display.displayError("Local address can't be found, ensure you are connected to a netowkr and try again.", true, true);
+        // Setup and configure socket
+        try
+        {
+            scanSocket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.Icmp);
+            scanSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 250);
+            scanSocket.Ttl = (short)255;
+        }
+        catch (SocketException)
+        {
+            PowerPing.Display.displayError("Socket cannot be created\nPlease run as Administrator and try again.", true);
+        }
 
         // Split up the address
-        splitAddress = localAddress.Split('.');
+        splitAddress = target.Split('.');
 
-        // Construct ping packet
-        packet.type = 0x08;
-        packet.code = 0x00;
-        Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2);
-        byte[] payload = Encoding.ASCII.GetBytes(message);
-        Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
-        packet.messageSize = payload.Length + 4;
-        int packetSize = packet.messageSize + 4;
+        //// Construct ping packet
+        //packet.type = 0x08;
+        //packet.code = 0x00;
+        //Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2);
+        //byte[] payload = Encoding.ASCII.GetBytes("R U Alive? =^-^=");
+        //Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
+        //packet.messageSize = payload.Length + 4;
+        //int packetSize = packet.messageSize + 4;
 
-        for (int outter = 0; outter <= 20; outter++)
-        {
+        //// Scan looping (Increment address segment by one each iteration, ping and wait for reply)
+        //for (int x = 0; x <= 255; x++)
+        //{
+        //    // Construct new address to try
+        //    IPAddress.TryParse(splitAddress[0] + "." + splitAddress[1] + "." + splitAddress[2] + "." + x, out curAddress);
 
-            // Scan looping
-            // Increment address segment by one each iteration, ping and wait for reply
-            for (int x = 0; x <= 255; x++)
-            {
-                // Build new address to try
-                IPAddress.TryParse(splitAddress[0] + "." + splitAddress[1] + "." + outter + "." + x, out curAddress);
+        //    Console.WriteLine("Trying [{0}] . . . ", curAddress.ToString());
 
-                Console.WriteLine("Trying [{0}] . . . ", curAddress.ToString());
+        //    // Set up endpoint for current address
+        //    iep = new IPEndPoint(curAddress, 0);
+        //    ep = (EndPoint)iep;
 
-                // Set up endpoint for current address
-                iep = new IPEndPoint(curAddress, 0);
-                ep = (EndPoint)iep;
+        //    try
+        //    {
+        //        // Ping address
+        //        sock.SendTo(packet.getBytes(), packetSize, SocketFlags.None, iep);
 
-                try
-                {
-                    // Ping address
-                    sock.SendTo(packet.getBytes(), packetSize, SocketFlags.None, iep);
+        //        // Wait for reply
+        //        byte[] buffer = new byte[1024];
+        //        bytesRead = sock.ReceiveFrom(buffer, ref ep);
 
-                    // Wait for reply
-                    byte[] buffer = new byte[1024];
-                    bytesRead = sock.ReceiveFrom(buffer, ref ep);
+        //        // Store reply packet
+        //        ICMP response = new ICMP(buffer, bytesRead);
 
-                    // Store reply packet
-                    ICMP response = new ICMP(buffer, bytesRead);
+        //        // Only register response if is a reply packet
+        //        if (response.type == 0x00)
+        //        {
+        //            replied++;
+        //            activeAddresses.Add(curAddress);
+        //        }
+        //        else if (response.type == 0x03)
+        //        {
+        //            failed++;
+        //        }
+        //    }
+        //    catch (SocketException)
+        //    {
+        //        failed++;
+        //    }
 
-                    replied++;
-                    activeAddresses.Add(curAddress);
-
-                    // Only register response if is a reply packet
-                    if (response.type == 0x00)
-                    {
-
-                    }
-                }
-                catch (SocketException)
-                {
-                    failed++;
-                }
-
-                // Delay between iterations
-                Thread.Sleep(50);
-            }
-
-        }
+        //    // Delay between iterations
+        //    Thread.Sleep(50);
+        //}
 
         Console.WriteLine("Scan of {0} complete", splitAddress[0] + "." + splitAddress[1] + "." + splitAddress[2] + ".###");
         Console.WriteLine("Non-Active Addresses : {0} Active Addresses : {1}", failed, replied);
         Console.WriteLine("Active Addresses : ");
         foreach (var address in activeAddresses)
-            Console.WriteLine(" - ", address.ToString());
+            Console.WriteLine(" - " + address.ToString());
+    }
+
+    private static List<IPAddress> scan_slave_thread(List<IPAddress> addrList, int waitTime)
+    {
+        // Local variable declaration
+        IPEndPoint iep;
+        EndPoint ep;
+        Socket scanSocket = null; // Should we create a socket for each thread or just use async recieve?
+        ICMP packet = new ICMP();
+        byte[] payload; // Ping message payload
+        int bytesRead, packetSize;
+        List<IPAddress> activeAddrs = new List<IPAddress>(); // Stores addresses that replied to ping
+
+        // Setup and configure socket
+        try
+        {
+            scanSocket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.Icmp);
+            scanSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, waitTime);
+            scanSocket.Ttl = (short)255;
+        }
+        catch (SocketException)
+        {
+            PowerPing.Display.displayError("Socket cannot be created\nPlease run as Administrator and try again.", true);
+        }
+
+        // Construct ping packet
+        packet.type = 0x08;
+        packet.code = 0x00;
+        Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2);
+        payload = Encoding.ASCII.GetBytes("R U Alive? =^-^=");
+        Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
+        packet.messageSize = payload.Length + 4;
+        packetSize = packet.messageSize + 4;
+
+        // Loop through and ping each item on address list
+        foreach (IPAddress addr in addrList)
+        {
+            // Setup endpoint for current address
+            iep = new IPEndPoint(addr, 0);
+            ep = (EndPoint)iep;
+
+            try
+            {
+                // Ping address
+                scanSocket.SendTo(packet.getBytes(), packetSize, SocketFlags.None, ep);
+
+                // Wait for reply
+                byte[] buffer = new byte[1024];
+                bytesRead = scanSocket.ReceiveFrom(buffer, ref ep);
+
+                // Read ICMP type in buffer
+                // Save address if reply type matched
+                if (buffer[20] == 0x00)
+                {
+                    activeAddrs.Add(addr);
+                }
+            }
+            catch (SocketException) { }
+        }
+
+        return activeAddrs;
     }
 
     public void Flood() { }
