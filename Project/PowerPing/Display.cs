@@ -230,7 +230,7 @@ namespace PowerPing
         /// </summary>
         /// <param name="errorMessage">Error message to display</param>
         /// <param name="exit">Whether to exit program after displaying error</param>
-        public static void displayError(String errorMessage, bool exit = false)
+        public static void displayError(String errorMessage, bool exit = false, bool pause = false)
         {
             Console.BackgroundColor = ConsoleColor.DarkYellow;
             Console.ForegroundColor = ConsoleColor.Black;
@@ -241,6 +241,9 @@ namespace PowerPing
             // Reset console colours
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Gray;
+
+            if (pause)
+                PowerPing.Macros.pause();
 
             if (exit)
                 Environment.Exit(0);

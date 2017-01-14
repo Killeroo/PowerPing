@@ -14,6 +14,10 @@ namespace PowerPing
 
             Console.WriteLine();
 
+            p.Scan();
+
+            Console.Read();
+
             // Check if no arguments
             if (args.Length == 0)
             {

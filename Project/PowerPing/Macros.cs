@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Xml;
 using System.Net;
+using System.Net.NetworkInformation;
 
 /* Macros class */
 // Class for miscellaneous methods 
@@ -91,6 +92,29 @@ namespace PowerPing
         public static bool isBetween(long value, long left, long right)
         {
             return value > left && value < right;
+        }
+
+        /// <summary>
+        /// Returns the local hosts IPv4 address
+        /// </summary>
+        /// <returns>IP address string, if no address found then returns a null</returns>
+        public static string GetLocalIPAddress()
+        {
+            // If not connected to a network return null
+            if (!NetworkInterface.GetIsNetworkAvailable())
+                return null;
+
+            // Get all addresses assocatied with this computer
+            var hostAddress = Dns.GetHostEntry(Dns.GetHostName());
+
+            // Loop through each associated address
+            foreach (var address in hostAddress.AddressList)
+                // If address is IPv4
+                if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    // Return the address
+                    return address.ToString();
+
+            return null;
         }
     }
 }
