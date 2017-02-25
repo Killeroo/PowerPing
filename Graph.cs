@@ -52,7 +52,7 @@ namespace PowerPing
         private void draw()
         {
             // Start ping in background thread
-            Thread pinger = new Thread(new ThreadStart(graphPing.Send));
+            Thread pinger = new Thread(new ThreadStart(graphPing.send));
             pinger.IsBackground = true;
             pinger.Start();
 
@@ -294,7 +294,7 @@ namespace PowerPing
         }
 
         /// <summary>
-        /// Generate bar for graphbased
+        /// Generate bar for graph
         /// </summary>
         /// <param name="replyTime">Reply time of packet to plot</param>
         private String[] createColumn(long replyTime)
