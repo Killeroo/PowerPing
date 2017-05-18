@@ -62,7 +62,7 @@ class Ping
         ttl = 255;
         interval = 1000;
         continous = false;
-        forceV4 = false;
+        forceV4 = true;
         forceV6 = false;
         showOutput = true;
         message = "R U Alive?";
@@ -78,13 +78,16 @@ class Ping
         ttl = 255;
         interval = 1000;
         continous = false;
-        forceV4 = false;
+        forceV4 = true;
         forceV6 = false;
         showOutput = true;
         message = "R U Alive?";
     }
 
-    public void send() // Sends a set of ping packets 
+    /// <summary>
+    /// Sends a set of ping packets
+    /// </summary>
+    public void Send() 
     {
         IPEndPoint iep = null;
         EndPoint ep = null;
@@ -94,26 +97,26 @@ class Ping
         int bytesRead, packetSize, index = 1;
 
         // check address
-        ipAddr = lookupAddress(address);
+        ipAddr = PowerPing.Helper.LookupAddress(address, forceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
         // Setup endpoint
         iep = new IPEndPoint(ipAddr, 0);
         ep = (EndPoint)iep;
 
-        // Setup socket 
-        sock = createSocket(ipAddr.AddressFamily);
+        // Setup raw socket 
+        sock = CreateRawSocket(ipAddr.AddressFamily);
 
         // Set socket options
         sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, timeout); // Timeout
-        sock.Ttl = (short)ttl; // TTL
+        sock.Ttl = (short)ttl;
 
         // Construct our ICMP packet
-        packet = createPacket(0x08, 0x00);
+        packet = CreatePacket(0x08, 0x00);
         packetSize = packet.messageSize + 4;
 
         totalRunTime.Start(); // Start timing ping operation
         if (showOutput)
-            PowerPing.Display.pingIntroMsg(ep.ToString(), this); // Display intro message
+            PowerPing.Display.PingIntroMsg(ep.ToString(), this); // Display intro message
 
         // Sending loop
         while (continous ? true : index <= count)
@@ -124,17 +127,15 @@ class Ping
             else
                 running = true;
 
-            // Calculate packet checksum
-            calPacketChksm(packet);
-
-            // Update packet sequence number
-            updatePacketSeq(packet, index);
+            // Update ICMP packet fields
+            UpdatePacketSeq(ref packet, index); // Update packet sequence number
+            CalPacketChksm(ref packet); // Calculate packet checksum
 
             try
             {
                 // Send ping request
                 responseTimer.Start();
-                sock.SendTo(packet.getBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
+                sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
                 sent++;
 
                 // Wait for response
@@ -147,7 +148,7 @@ class Ping
 
                 // Display reply packet
                 if (showOutput)
-                    PowerPing.Display.replyPacket(response, ep.ToString(), index,  responseTimer.ElapsedMilliseconds);
+                    PowerPing.Display.ReplyPacket(response, ep.ToString(), index,  responseTimer.ElapsedMilliseconds);
 
                 // Store response time
                 lastResponseTime = responseTimer.ElapsedMilliseconds;
@@ -163,7 +164,7 @@ class Ping
             catch (SocketException s)
             {
                 if (showOutput)
-                    PowerPing.Display.pingTimeout();
+                    PowerPing.Display.PingTimeout();
                 lastResponseTime = 0;
                 lost++;
             }
@@ -179,20 +180,23 @@ class Ping
         // Stop operation
         running = false;
         sock.Close();
-        this.stop();
+        this.Stop();
 
         // Display stats
         if (showOutput)
-            PowerPing.Display.pingResults(this);
+            PowerPing.Display.PingResults(this);
     }
-    public void listen() // Listen for an ICMPv4 packets 
+    /// <summary>
+    /// Listen for an ICMPv4 packets
+    /// </summary>
+    public void Listen() 
     {
         IPAddress localAddress = null;
         Socket listeningSocket = null;
 
         // Check network status
         if (!NetworkInterface.GetIsNetworkAvailable())
-            PowerPing.Display.error("Not connected to network.", true, true);
+            PowerPing.Display.Error("Not connected to network.", true, true);
 
         // Find local address
         foreach (var ip in Dns.GetHostEntry(Dns.GetHostName()).AddressList)
@@ -202,14 +206,14 @@ class Ping
         try
         {
             // Create listener socket
-            listeningSocket = createSocket(AddressFamily.InterNetwork);
+            listeningSocket = CreateRawSocket(AddressFamily.InterNetwork);
             // Bind socket to local address
             listeningSocket.Bind(new IPEndPoint(localAddress, 0));
             // Set SIO_RCVALL flag to socket IO control
             listeningSocket.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 });
 
             // Display initial message
-            PowerPing.Display.listeningIntroMsg();
+            PowerPing.Display.ListenIntroMsg();
 
             // Listening loop
             while (true)
@@ -223,20 +227,27 @@ class Ping
                 ICMP response = new ICMP(buffer, bytesRead);
 
                 // Display captured packet
-                PowerPing.Display.capturedPacket(response, remoteEndPoint.ToString(), DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead);
+                PowerPing.Display.CapturedPacket(response, remoteEndPoint.ToString(), DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead);
             }
         }
         catch (SocketException)
         {
-            PowerPing.Display.error("Socket Error - Error occured while reading from socket\nPlease try again.", true);
+            PowerPing.Display.Error("Socket Error - Error occured while reading from socket\nPlease try again.", true);
         }
         catch (NullReferenceException)
         {
-            PowerPing.Display.error("Error fetching local address, connect to a network and try again.", true);
+            PowerPing.Display.Error("Error fetching local address, connect to a network and try again.", true);
         }
     }
-    public void trace() { }
-    public void scan(string target) 
+    /// <summary>
+    /// ICMP Traceroute
+    /// </summary>
+    public void Trace() { }
+    /// <summary>
+    /// Ping scan/Network discovery
+    /// </summary>
+    /// <param name="target"></param>
+    public void Scan(string target) 
     {
         // Local variable setup
         List<IPAddress> scanList = new List<IPAddress>();
@@ -292,15 +303,21 @@ class Ping
         // Finally, fire up the threads!
         for (int i = 0; i < threads - 1; i++)
         {
-            Thread thread = new Thread(() => scan_slave(threadLists[i]));
+            Thread thread = new Thread(() => ScanThread(threadLists[i]));
             thread.Start();
         }
 
         // Display results of scan
-        PowerPing.Display.scanResults(scanList.Count, activeHosts.Count);
+        PowerPing.Display.ScanResult(scanList.Count, activeHosts.Count);
     }
-    public void flood() { }
-    public void stop() // Stop any ping operations 
+    /// <summary>
+    /// ICMP flood
+    /// </summary>
+    public void Flood() { }
+    /// <summary>
+    /// Stop any ping operations
+    /// </summary>
+    public void Stop() 
     {
         // If a ping operation is running send cancel flag
         if (running)
@@ -319,8 +336,47 @@ class Ping
         // Reset cancel flag
         cancelFlag = false;
     }
+    
+    private ICMP CreatePacket(byte type, byte code) 
+    {
+        ICMP packet = new ICMP();
 
-    private void scan_slave(List<IPAddress> addressList)
+        // Construct our ICMP packet
+        packet.type = type;
+        packet.code = code;
+        Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2); // Add seq num to ICMP message
+        byte[] payload = Encoding.ASCII.GetBytes(message);
+        Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length); // Add text into ICMP message
+        packet.messageSize = payload.Length + 4;
+        int packetSize = packet.messageSize + 4;
+
+        return packet;
+    }
+    private UInt16 CalPacketChksm(ref ICMP packet)
+    {
+        // Calculate packet checksum
+        packet.checksum = packet.GetChecksum();
+        return packet.checksum;
+    }
+    private void UpdatePacketSeq(ref ICMP packet, int seq) 
+    {
+        // update sequence number in ICMP message field
+        Buffer.BlockCopy(BitConverter.GetBytes(seq), 0, packet.message, 2, 2); // update sequence number in ICMP message field
+    }
+    private Socket CreateRawSocket(AddressFamily family) 
+    {
+        Socket s = null;
+        try
+        {
+            s = new Socket(family, SocketType.Raw, family == AddressFamily.InterNetwork ? ProtocolType.Icmp : ProtocolType.IcmpV6);
+        }
+        catch (SocketException)
+        {
+            PowerPing.Display.Error("Socket cannot be created\nPlease run as Administrator and try again.", true);
+        }
+        return s;
+    }
+    private void ScanThread(List<IPAddress> addressList)
     {
         // Local variable declaration
         int bytesRead;
@@ -331,12 +387,12 @@ class Ping
         ICMP packet = new ICMP();
 
         // Setup and configure socket
-        scanSocket = createSocket(AddressFamily.InterNetwork);
+        scanSocket = CreateRawSocket(AddressFamily.InterNetwork);
         scanSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 500);
         scanSocket.Ttl = (short)255;
 
         // Construct ping packet
-        packet = createPacket(0x08, 0x00, " ");
+        packet = CreatePacket(0x08, 0x00);
 
         // Ping each address on list
         foreach (IPAddress host in addressList)
@@ -349,7 +405,7 @@ class Ping
             {
                 // Ping host
                 st.Start();
-                scanSocket.SendTo(packet.getBytes(), packet.messageSize + 4, SocketFlags.None, ep); 
+                scanSocket.SendTo(packet.GetBytes(), packet.messageSize + 4, SocketFlags.None, ep);
                 // Wait for reply
                 byte[] buffer = new byte[1024];
                 bytesRead = scanSocket.ReceiveFrom(buffer, ref ep);
@@ -358,7 +414,7 @@ class Ping
                 // Only count hosts that send reply packets
                 if (buffer[20] == 0x00)
                 {
-                    PowerPing.Display.message("Host " + host + " is active. [Latency " + st.ElapsedMilliseconds + "ms]");
+                    PowerPing.Display.Message("Host " + host + " is active. [Latency " + st.ElapsedMilliseconds + "ms]");
                     activeHosts.Push(host);
                 }
             }
@@ -369,91 +425,4 @@ class Ping
             }
         }
     }
-    
-    private ICMP createPacket(byte type, byte code, string msg = "") 
-    {
-        ICMP packet = new ICMP();
-
-        // Construct our ICMP packet
-        packet.type = 0x08;
-        packet.code = 0x00;
-        Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2);
-        byte[] payload = Encoding.ASCII.GetBytes(msg == "" ? message : msg); // Use message unless msg contains something
-        Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
-        packet.messageSize = payload.Length + 4;
-        int packetSize = packet.messageSize + 4;
-
-        return packet;
-    }
-    private UInt16 calPacketChksm(ICMP packet)
-    {
-        // Calculate packet checksum
-        packet.checksum = 0;
-        UInt16 chksm = packet.getChecksum();
-        return chksm;
-    }
-    private void updatePacketSeq(ICMP packet, int seq) 
-    {
-        // update sequence number in ICMP message field
-        Buffer.BlockCopy(BitConverter.GetBytes(seq), 0, packet.message, 2, 2); // update sequence number in ICMP message field
-    }
-    private Socket createSocket(AddressFamily family) 
-    {
-        Socket s = null;
-        try
-        {
-            s = new Socket(family, SocketType.Raw, family == AddressFamily.InterNetwork ? ProtocolType.Icmp : ProtocolType.IcmpV6);
-        }
-        catch (SocketException)
-        {
-            PowerPing.Display.error("Socket cannot be created\nPlease run as Administrator and try again.", true);
-        }
-        return s;
-    }
-    private IPAddress lookupAddress(string address) 
-    {
-        IPAddress ipAddr = null;
-        IPAddress.TryParse(address, out ipAddr); // Parse the address to IPAddress
-
-        try
-        {
-            // Query DNS for host address
-            if (forceV4 || forceV6) // If we are forcing a particular address family
-            {
-                foreach (IPAddress a in Dns.GetHostEntry(address).AddressList)
-                {
-                    // Run through addresses until we find one that matches the family we are forcing
-                    if (a.AddressFamily == AddressFamily.InterNetwork && forceV4
-                        || a.AddressFamily == AddressFamily.InterNetworkV6 && forceV6)
-                        ipAddr = a;
-                }
-            }
-            else
-            {
-                ipAddr = Dns.GetHostAddresses(address)[0];
-            }
-        }
-        catch (SocketException)
-        {
-            PowerPing.Display.error("PowerPing could not find the host address [" + address + "]\nCheck address and try again.");
-        }
-        catch (NullReferenceException)
-        {
-            PowerPing.Display.error("PowerPing could not find the host address [" + address + "]\nCheck address and try again.");
-        }
-
-        return ipAddr;
-    }
-    private IPAddress getLocalAddress(AddressFamily af = AddressFamily.InterNetwork) // Get rid (DUPLICATE IN MACROS)
-    {
-        IPAddress address = null;
-        foreach (var ip in Dns.GetHostEntry(Dns.GetHostName()).AddressList)
-            if (ip.AddressFamily == af) {
-                address = ip;
-                break;
-            }
-        return address;
-    }
-
-
 }

@@ -29,7 +29,7 @@ namespace PowerPing
         /// <summary>
         /// Displays help message
         /// </summary>
-        public static void help()
+        public static void Help()
         {
             Version v = Assembly.GetExecutingAssembly().GetName().Version;
             string version = Assembly.GetExecutingAssembly().GetName().Name + " Version " + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ")";
@@ -60,27 +60,24 @@ namespace PowerPing
             Console.WriteLine();
             Console.WriteLine("\nWritten by Matthew Carney [matthewcarney64@gmail.com] =^-^=");
             Console.WriteLine("Find the project here [https://github.com/Killeroo/PowerPing]\n");
-            PowerPing.Macros.pause();
+            PowerPing.Helper.Pause();
         }
-
         /// <summary>
         /// Display Initial ping message to screen, declaring simple info about the ping
         /// </summary>
         /// <param name="host">Resolved host address</param>
         /// <param name="ping">Ping object</param>
-        public static void pingIntroMsg(String host, Ping ping)
+        public static void PingIntroMsg(String host, Ping ping)
         {
             Console.WriteLine("Pinging {0} [{1}] (Packet message \"{2}\") [TTL={3}]:", ping.address, host, ping.message, ping.ttl);
         }
-
         /// <summary>
         /// Display initial listening message
         /// </summary>
-        public static void listeningIntroMsg()
+        public static void ListenIntroMsg()
         {
             Console.WriteLine("Listening for ICMP Packets . . .");
         }
-
         /// <summary>
         /// Display information about reply ping packet
         /// </summary>
@@ -88,7 +85,7 @@ namespace PowerPing
         /// <param name="address">Reply address</param>
         /// <param name="index">Sequence number</param>
         /// <param name="replyTime">Time taken before reply recieved in milliseconds</param>
-        public static void replyPacket(ICMP packet, String address, int index, long replyTime)
+        public static void ReplyPacket(ICMP packet, String address, int index, long replyTime)
         {
             Console.BackgroundColor = ConsoleColor.Black;
             Console.Write("Reply from: {0} ", address);
@@ -165,11 +162,10 @@ namespace PowerPing
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.WriteLine();
         }
-
         /// <summary>
         /// Display information about a captured packet
         /// </summary>
-        public static void capturedPacket(ICMP packet, String address, String timeRecieved, int bytesRead)
+        public static void CapturedPacket(ICMP packet, String address, String timeRecieved, int bytesRead)
         {
             // Display captured packet
             Console.BackgroundColor = packet.type > 15 ? ConsoleColor.Black : typeColors[packet.type];
@@ -180,21 +176,19 @@ namespace PowerPing
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Gray;
         }
-
         /// <summary>
         /// Display results of scan
         /// </summary>
-        public static void scanResults(int scanned, int found)
+        public static void ScanResult(int scanned, int found)
         {
             Console.WriteLine("Scan complete. {0} addresses scaned. {1} hosts active.");
-            PowerPing.Macros.pause();
+            PowerPing.Helper.Pause();
         }
-
         /// <summary>
         /// Displays statistics for a ping object
         /// </summary>
         /// <param name="ping"> </param>
-        public static void pingResults(Ping ping)
+        public static void PingResults(Ping ping)
         {
             // Reset console colour
             Console.BackgroundColor = ConsoleColor.Black;
@@ -231,13 +225,12 @@ namespace PowerPing
             Console.WriteLine();
 
             // Confirm to exit
-            PowerPing.Macros.pause(true);
+            PowerPing.Helper.Pause(true);
         }
-
         /// <summary>
         /// Display Timeout message
         /// </summary>
-        public static void pingTimeout()
+        public static void PingTimeout()
         {
             Console.BackgroundColor = ConsoleColor.DarkRed;
             Console.Write("Request timed out.");
@@ -245,13 +238,12 @@ namespace PowerPing
             Console.BackgroundColor = ConsoleColor.Black;
             Console.WriteLine();
         }
-
         /// <summary>
         /// Display error message
         /// </summary>
         /// <param name="errorMessage">Error message to display</param>
         /// <param name="exit">Whether to exit program after displaying error</param>
-        public static void error(String errorMessage, bool exit = false, bool pause = false)
+        public static void Error(String errorMessage, bool exit = false, bool pause = false)
         {
             Console.BackgroundColor = ConsoleColor.DarkYellow;
             Console.ForegroundColor = ConsoleColor.Black;
@@ -264,16 +256,15 @@ namespace PowerPing
             Console.ForegroundColor = ConsoleColor.Gray;
 
             if (pause)
-                PowerPing.Macros.pause();
+                PowerPing.Helper.Pause();
 
             if (exit)
                 Environment.Exit(0);
         }
-
         /// <summary>
         /// Display a general message
         /// </summary>
-        public static void message(String message, ConsoleColor color = ConsoleColor.DarkGray)
+        public static void Message(String message, ConsoleColor color = ConsoleColor.DarkGray)
         {
             Console.BackgroundColor = color;
             Console.WriteLine(message);

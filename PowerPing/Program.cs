@@ -234,16 +234,10 @@ namespace PowerPing
             // Local variables 
             bool addrFound = false;
 
-            //Console.WriteLine();
-
-            //p.scan("192.168.56.1-255");
-
-            //Console.Read();
-
             // Check if no arguments
             if (args.Length == 0)
             {
-                PowerPing.Display.help();
+                PowerPing.Display.Help();
                 return;
             }
 
@@ -305,32 +299,32 @@ namespace PowerPing
                         case "/?":
                         case "-?":
                         case "--?": // Display help message
-                            PowerPing.Display.help();
+                            PowerPing.Display.Help();
                             Environment.Exit(0);
                             break;
                         case "/whoami":
                         case "-whoami":
                         case "--whoami": // Current computer location
-                            Macros.whoami();
+                            Helper.whoami();
                             Environment.Exit(0);
                             break;
                         case "/location":
                         case "-location":
                         case "--location": // Location lookup
-                            Macros.getAddressLocation(args[count + 1], true);
+                            Helper.GetAddressLocation(args[count + 1], true);
                             Environment.Exit(0);
                             break;
                         case "/listen":
                         case "-listen":
                         case "--listen": // Listen for ICMP packets
-                            p.listen();
+                            p.Listen();
                             Environment.Exit(0);
                             break;
                         case "/graph":
                         case "-graph":
                         case "--graph": // Graph view
                             Graph g = new Graph(args[count + 1]);
-                            g.start();
+                            g.Start();
                             break;
                         default:
                             if ((count == args.Length - 1 || count == 0) && !addrFound)
@@ -346,38 +340,38 @@ namespace PowerPing
             }
             catch (IndexOutOfRangeException)
             {
-                PowerPing.Display.error("Incorrect Argument Usage");
-                PowerPing.Display.help();
+                PowerPing.Display.Error("Incorrect Argument Usage");
+                PowerPing.Display.Help();
                 return;
             }
             catch (FormatException)
             {
-                PowerPing.Display.error("Incorrect Argument Format");
-                PowerPing.Display.help();
+                PowerPing.Display.Error("Incorrect Argument Format");
+                PowerPing.Display.Help();
                 return;
             }
             catch (Exception)
             {
-                PowerPing.Display.error("Invalid Argument or General Error Occured");
-                PowerPing.Display.help();
+                PowerPing.Display.Error("Invalid Argument or General Error Occured");
+                PowerPing.Display.Help();
                 return;
             }
 
             // only add Control C event handler when sending standard ping
             // (So statistics can still be displayed when ping interupted)
-            Console.CancelKeyPress += new ConsoleCancelEventHandler(exitHandler);
+            Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
 
             // Send ping
-            p.send();
+            p.Send();
         }
 
-        protected static void exitHandler(object sender, ConsoleCancelEventArgs args) // Event handler for control - c
+        protected static void ExitHandler(object sender, ConsoleCancelEventArgs args) // Event handler for control - c
         {
             // Cancel termination
             args.Cancel = true;
 
             // Stop ping
-            p.stop();
+            p.Stop();
 
             // Reset console colour
             Console.BackgroundColor = ConsoleColor.Black;

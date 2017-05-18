@@ -2,13 +2,14 @@
 using System.Xml;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 
 /* Macros class */
 // Class for miscellaneous methods 
 
 namespace PowerPing
 {
-    class Macros
+    class Helper
     {
         /// <summary>
         /// Gets location information about IP Address
@@ -17,7 +18,7 @@ namespace PowerPing
         /// <param name="addr">Address to get location info on. Can be in IP or address format.</param>
         /// <param name="detailed">Display detailed or simplified location info</param>
         /// <returns>none detailed information string</returns>
-        public static string getAddressLocation(string addr, bool detailed)
+        public static string GetAddressLocation(string addr, bool detailed)
         {
             string loc = null;
 
@@ -58,7 +59,7 @@ namespace PowerPing
 
             Console.WriteLine(loc);
 
-            Macros.pause();
+            Helper.Pause();
 
             return loc;
         }
@@ -68,7 +69,7 @@ namespace PowerPing
         /// </summary>
         public static void whoami()
         {
-            getAddressLocation("", true);
+            GetAddressLocation("", true);
             // TODO: Add some pc information too
         }
 
@@ -76,7 +77,7 @@ namespace PowerPing
         /// Pause program and wait for user input
         /// </summary>
         /// <param name="exit">switch to use word "exit" instead of "continue"</param>
-        public static void pause(bool exit = false)
+        public static void Pause(bool exit = false)
         {
             Console.Write("Press any key to " + (exit ? "exit" : "continue") + " . . .");
             Console.ReadLine();
@@ -89,7 +90,7 @@ namespace PowerPing
         /// <param name="left">Lower range</param>
         /// <param name="right">Upper range</param>
         /// <returns></returns>
-        public static bool isBetween(long value, long left, long right)
+        public static bool IsBetween(long value, long left, long right)
         {
             return value > left && value < right;
         }
@@ -115,6 +116,42 @@ namespace PowerPing
                     return address.ToString();
 
             return null;
+        }
+
+        /// <summary>
+        /// Resolve address string to IP Address
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="af"></param>
+        /// <returns></returns>
+        public static IPAddress LookupAddress(string address, AddressFamily af)
+        {
+            IPAddress ipAddr = null;
+            IPAddress.TryParse(address, out ipAddr); // Parse the address to IPAddress
+
+            try
+            {
+                // Query DNS for host address
+                foreach (IPAddress a in Dns.GetHostEntry(address).AddressList)
+                {
+                    // Run through addresses until we find one that matches the family we are forcing
+                    if (a.AddressFamily == af)
+                    {
+                        ipAddr = a;
+                        break;
+                    }
+                }
+            }
+            catch (SocketException)
+            {
+                PowerPing.Display.Error("PowerPing could not find the host address [" + address + "]\nCheck address and try again.");
+            }
+            catch (NullReferenceException)
+            {
+                PowerPing.Display.Error("PowerPing could not find the host address [" + address + "]\nCheck address and try again.");
+            }
+
+            return ipAddr;
         }
     }
 }

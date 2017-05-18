@@ -36,23 +36,23 @@ namespace PowerPing
             graphPing.showOutput = false;
         }
 
-        public void start()
+        public void Start()
         {
             // Hide cursor
             Console.CursorVisible = false;
 
             // Check graph is setup
             if (!isGraphSetup)
-                setup();
+                Setup();
 
             // Start drawing graph
-            draw();
+            Draw();
         }
 
-        private void draw()
+        private void Draw()
         {
             // Start ping in background thread
-            Thread pinger = new Thread(new ThreadStart(graphPing.send));
+            Thread pinger = new Thread(new ThreadStart(graphPing.Send));
             pinger.IsBackground = true;
             pinger.Start();
 
@@ -66,52 +66,49 @@ namespace PowerPing
                 Console.CursorLeft = plotStartX;
 
                 // Draw graph columns
-                drawGraphColumns();
+                DrawGraphColumns();
 
                 // Update labels
-                updateLabels(graphPing);
+                UpdateLabels(graphPing);
 
                 // Get results from ping and add to graph
-                addColumnToGraph(createColumn(graphPing.getLastResponseTime));
+                AddColumnToGraph(CreatColumn(graphPing.getLastResponseTime));
 
                 // Wait one second
                 Thread.Sleep(1000);
             }
             
         }
-
         /// <summary>
         /// Setup graph
         /// </summary>
-        private void setup() 
+        private void Setup() 
         {
-            drawBackground();
+            DrawBackground();
 
             isGraphSetup = true;
         }
-
-        private void drawGraphColumns()
+        private void DrawGraphColumns()
         {
             // Clear columns space before drawing
-            clear();
+            Clear();
 
             for (int x = 0; x < graphColumns.Count; x++)
             {
                 // Change colour for most recent column 
                 if (x == graphColumns.Count - 1)
                     Console.ForegroundColor = ConsoleColor.Green;
-                drawBar(graphColumns[x]);
+                DrawBar(graphColumns[x]);
                 Console.CursorLeft++;
             }
 
             // Reset colour after
             Console.ForegroundColor = ConsoleColor.Gray;
         }
-
         /// <summary>
         /// Draw graph background
         /// </summary>
-        private void drawBackground()
+        private void DrawBackground()
         {
             // Draw title
             Console.WriteLine("                       (PowerPing - Graph View)");
@@ -196,8 +193,7 @@ namespace PowerPing
             timeLabelY = Console.CursorTop;
             Console.WriteLine();
         }
-
-        private void drawBar(String[] bar)
+        private void DrawBar(String[] bar)
         {
             // save cursor location
             int cursorPositionX = Console.CursorLeft;
@@ -213,8 +209,7 @@ namespace PowerPing
             // Reset cursor to starting position
             Console.SetCursorPosition(cursorPositionX, cursorPositionY);
         }
-
-        private void updateLabels(Ping ping)
+        private void UpdateLabels(Ping ping)
         {
             // save cursor location
             int cursorPositionX = Console.CursorLeft;
@@ -258,46 +253,11 @@ namespace PowerPing
             // Reset cursor to starting position
             Console.SetCursorPosition(cursorPositionX, cursorPositionY);
         }
-
-        /// <summary>
-        /// Clear the plotting area of the graph
-        /// </summary>
-        private void clear()
-        {
-            // save cursor location
-            int cursorPositionX = Console.CursorLeft;
-            int cursorPositionY = Console.CursorTop;
-
-            // Set cursor position to start of plot
-            Console.SetCursorPosition(plotStartX, plotStartY);
-
-            String blankRow = new String(' ', xAxisLength);
-            String bottomRow = new String('─', xAxisLength);
-
-            for(int x = 0; x <= (compactGraph ? 10 : 20); x++)
-            {
-                // Draw black spaces
-                Console.Write(blankRow);
-                Console.CursorLeft = plotStartX;
-                Console.CursorTop--;
-
-                // Draw bottom row
-                if (x == 9 || x == 19)
-                {
-                    Console.CursorTop = plotStartY;
-                    Console.Write(bottomRow);
-                }
-            }
-
-            // Reset cursor to starting position
-            Console.SetCursorPosition(cursorPositionX, cursorPositionY);
-        }
-
         /// <summary>
         /// Generate bar for graph
         /// </summary>
         /// <param name="replyTime">Reply time of packet to plot</param>
-        private String[] createColumn(long replyTime)
+        private String[] CreatColumn(long replyTime)
         {
             String[] bar;
             int count = 0;
@@ -358,11 +318,10 @@ namespace PowerPing
             return bar;
 
         }
-
         /// <summary>
         /// Add a column to the graph list
         /// </summary>
-        private void addColumnToGraph(String[] col)
+        private void AddColumnToGraph(String[] col)
         {
             graphColumns.Add(col);
 
@@ -370,6 +329,39 @@ namespace PowerPing
             if (graphColumns.Count >= xAxisLength)
                 // Remove first element
                 graphColumns.RemoveAt(0);
+        }
+        /// <summary>
+        /// Clear the plotting area of the graph
+        /// </summary>
+        private void Clear()
+        {
+            // save cursor location
+            int cursorPositionX = Console.CursorLeft;
+            int cursorPositionY = Console.CursorTop;
+
+            // Set cursor position to start of plot
+            Console.SetCursorPosition(plotStartX, plotStartY);
+
+            String blankRow = new String(' ', xAxisLength);
+            String bottomRow = new String('─', xAxisLength);
+
+            for (int x = 0; x <= (compactGraph ? 10 : 20); x++)
+            {
+                // Draw black spaces
+                Console.Write(blankRow);
+                Console.CursorLeft = plotStartX;
+                Console.CursorTop--;
+
+                // Draw bottom row
+                if (x == 9 || x == 19)
+                {
+                    Console.CursorTop = plotStartY;
+                    Console.Write(bottomRow);
+                }
+            }
+
+            // Reset cursor to starting position
+            Console.SetCursorPosition(cursorPositionX, cursorPositionY);
         }
     }
 }

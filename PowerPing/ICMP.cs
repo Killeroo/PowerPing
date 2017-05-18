@@ -12,10 +12,8 @@ class ICMP
     public int messageSize;
     public byte[] message = new byte[1024];
 
-    // Default constructor
+    // Constructors
     public ICMP() { }
-
-    // Constructor
     public ICMP(byte[] data, int size)
     {
         type = data[20];
@@ -29,7 +27,7 @@ class ICMP
     /// Convert ICMP packet to byte array
     /// </summary>
     /// <returns>Packet in byte array</returns>
-    public byte[] getBytes()
+    public byte[] GetBytes()
     {
         byte[] data = new byte[messageSize + 9];
         Buffer.BlockCopy(BitConverter.GetBytes(type), 0, data, 0, 1);
@@ -43,11 +41,11 @@ class ICMP
     /// Calculate checksum of packet
     /// </summary>
     /// <returns>Packet checksum</returns>
-    public UInt16 getChecksum()
+    public UInt16 GetChecksum()
     {
         UInt32 chksm = 0;
 
-        byte[] data = getBytes();
+        byte[] data = GetBytes();
         int packetSize = messageSize + 8;
         int index = 0;
 

@@ -5,7 +5,6 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
 ![alt text](Screenshots/readme_screenshot.png "PowerPing in action")
 
 ## Features
-Current features are ticked, future features will be ticked when implemented
 
 - [x] Colour coded response times
 - [x] Displays type and code of each ICMP packets
