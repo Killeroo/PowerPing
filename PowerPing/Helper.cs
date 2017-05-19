@@ -124,10 +124,12 @@ namespace PowerPing
         /// <param name="address"></param>
         /// <param name="af"></param>
         /// <returns></returns>
-        public static IPAddress LookupAddress(string address, AddressFamily af)
+        public static IPAddress VerifyAddress(string address, AddressFamily af)
         {
             IPAddress ipAddr = null;
-            IPAddress.TryParse(address, out ipAddr); // Parse the address to IPAddress
+
+            // Parse the address to IPAddress
+            IPAddress.TryParse(address, out ipAddr);
 
             try
             {
@@ -142,14 +144,11 @@ namespace PowerPing
                     }
                 }
             }
-            catch (SocketException)
-            {
-                PowerPing.Display.Error("PowerPing could not find the host address [" + address + "]\nCheck address and try again.");
-            }
-            catch (NullReferenceException)
-            {
-                PowerPing.Display.Error("PowerPing could not find the host address [" + address + "]\nCheck address and try again.");
-            }
+            catch (Exception) { }
+
+            // If no address resolved then exit
+            if (ipAddr == null)
+                PowerPing.Display.Error("PowerPing could not find the host address [" + address + "]\nCheck address and try again.", true, true);
 
             return ipAddr;
         }

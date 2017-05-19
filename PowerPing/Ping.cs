@@ -34,6 +34,18 @@ class Ping
     public long getMaxReplyTime { get { return max; } }
     public long getMinReplyTime { get { return min; } }
 
+    // Timing enumerations
+    public enum Timings
+    {
+        Insane = 0,
+        Speedy = 1,
+        Nimble = 2,
+        Normal = 3,
+        Quiet = 4,
+        Sneaky = 5,
+        Paranoid = 6
+    }
+
     // Result attributes
     private int sent = 0;
     private int recieved = 0;
@@ -96,8 +108,8 @@ class Ping
         Socket sock = null;
         int bytesRead, packetSize, index = 1;
 
-        // check address
-        ipAddr = PowerPing.Helper.LookupAddress(address, forceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+        // Lookup address
+        ipAddr = PowerPing.Helper.VerifyAddress(address, forceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
         // Setup endpoint
         iep = new IPEndPoint(ipAddr, 0);
@@ -111,10 +123,16 @@ class Ping
         sock.Ttl = (short)ttl;
 
         // Construct our ICMP packet
-        packet = CreatePacket(0x08, 0x00);
+        packet.type = 0x08;
+        packet.code = 0x00;
+        Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2); // Add seq num to ICMP message
+        byte[] payload = Encoding.ASCII.GetBytes(message);
+        Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length); // Add text into ICMP message
+        packet.messageSize = payload.Length + 4;
         packetSize = packet.messageSize + 4;
 
-        totalRunTime.Start(); // Start timing ping operation
+        // Start timing ping operation
+        totalRunTime.Start();
         if (showOutput)
             PowerPing.Display.PingIntroMsg(ep.ToString(), this); // Display intro message
 
@@ -127,9 +145,11 @@ class Ping
             else
                 running = true;
 
-            // Update ICMP packet fields
-            UpdatePacketSeq(ref packet, index); // Update packet sequence number
-            CalPacketChksm(ref packet); // Calculate packet checksum
+            // Update ICMP checksum and seq
+            packet.checksum = 0;
+            Buffer.BlockCopy(BitConverter.GetBytes(index), 0, packet.message, 2, 2); // Include sequence number in ping message
+            UInt16 chksm = packet.GetChecksum();
+            packet.checksum = chksm;
 
             try
             {
@@ -161,7 +181,7 @@ class Ping
                     min = responseTimer.ElapsedMilliseconds;
 
             }
-            catch (SocketException s)
+            catch (SocketException)
             {
                 if (showOutput)
                     PowerPing.Display.PingTimeout();
@@ -244,71 +264,81 @@ class Ping
     /// </summary>
     public void Trace() { }
     /// <summary>
-    /// Ping scan/Network discovery
+    /// Recursive network scan method 
     /// </summary>
     /// <param name="target"></param>
-    public void Scan(string target) 
+    public void Scan(string target, bool recursing = false)
     {
-        // Local variable setup
         List<IPAddress> scanList = new List<IPAddress>();
         String[] ipSegments = target.Split('.');
 
-        // Check format of address (for '-'s and disallow multipl '-'s in one segment, also check format of address
-
-
-        // Holds the ranges for each ip segment
-        int[] segLower = new int[4];
-        int[] segUpper = new int[4];
- 
-        // Work out upper and lower ranges for each segment
-        for (int y = 0; y < 4; y++) 
+        if (!recursing)
         {
-            string[] ranges = ipSegments[y].Split('-');
-            segLower[y] = Convert.ToInt16(ranges[0]);
-            segUpper[y] = (ranges.Length == 1) ? segLower[y] : Convert.ToInt16(ranges[1]);
-        }
+            // Setup scan
 
-        // Build list of addresses from ranges
-        for (int seg1 = segLower[0]; seg1 <= segUpper[0]; seg1++)
-        {
-            for (int seg2 = segLower[1]; seg2 <= segUpper[1]; seg2++)
+            // Check format of address (for '-'s and disallow multipl '-'s in one segment, also check format of address
+
+
+            // Holds the ranges for each ip segment
+            int[] segLower = new int[4];
+            int[] segUpper = new int[4];
+
+            // Work out upper and lower ranges for each segment
+            for (int y = 0; y < 4; y++)
             {
-                for (int seg3 = segLower[2]; seg3 <= segUpper[2]; seg3++)
+                string[] ranges = ipSegments[y].Split('-');
+                segLower[y] = Convert.ToInt16(ranges[0]);
+                segUpper[y] = (ranges.Length == 1) ? segLower[y] : Convert.ToInt16(ranges[1]);
+            }
+
+            // Build list of addresses from ranges
+            for (int seg1 = segLower[0]; seg1 <= segUpper[0]; seg1++)
+            {
+                for (int seg2 = segLower[1]; seg2 <= segUpper[1]; seg2++)
                 {
-                    for (int seg4 = segLower[3]; seg4 <= segUpper[3]; seg4++)
+                    for (int seg3 = segLower[2]; seg3 <= segUpper[2]; seg3++)
                     {
-                        scanList.Add(new IPAddress( new byte[] { (byte)seg1, (byte)seg2, (byte)seg3, (byte)seg4 }));
+                        for (int seg4 = segLower[3]; seg4 <= segUpper[3]; seg4++)
+                        {
+                            scanList.Add(new IPAddress(new byte[] { (byte)seg1, (byte)seg2, (byte)seg3, (byte)seg4 }));
+                        }
                     }
                 }
             }
-        }
 
-        // Divide scanlist into lists for each thread
-        List<IPAddress>[] threadLists = new List<IPAddress>[threads];
-        int splitListSize = (int)Math.Ceiling(scanList.Count / (double)threads);
-        int x = 0;
+            // Divide scanlist into lists for each thread
+            List<IPAddress>[] threadLists = new List<IPAddress>[threads];
+            int splitListSize = (int)Math.Ceiling(scanList.Count / (double)threads);
+            int x = 0;
 
-        for (int i = 0; i < threadLists.Length; i++) 
-        {
-            threadLists[i] = new List<IPAddress>();
-            for (int j = x; j < x + splitListSize; j++) {
-                if (j >= scanList.Count)
-                    break; // Stop if we are out of bounds
-                threadLists[i].Add(scanList[j]);
+            for (int i = 0; i < threadLists.Length; i++)
+            {
+                threadLists[i] = new List<IPAddress>();
+                for (int j = x; j < x + splitListSize; j++)
+                {
+                    if (j >= scanList.Count)
+                        break; // Stop if we are out of bounds
+                    threadLists[i].Add(scanList[j]);
+                }
+                x += splitListSize;
             }
-            x += splitListSize;
-        }
 
-        // *Bug here*
-        // Finally, fire up the threads!
-        for (int i = 0; i < threads - 1; i++)
+            // *Bug here*
+            // Finally, fire up the threads!
+            for (int i = 0; i < threads - 1; i++)
+            {
+                Thread thread = new Thread(() => ScanThread(threadLists[i]));
+                thread.Start();
+            }
+
+            // Display results of scan
+            PowerPing.Display.ScanResult(scanList.Count, activeHosts.Count);
+
+        }
+        else
         {
-            Thread thread = new Thread(() => ScanThread(threadLists[i]));
-            thread.Start();
+            // Recursive ping sender
         }
-
-        // Display results of scan
-        PowerPing.Display.ScanResult(scanList.Count, activeHosts.Count);
     }
     /// <summary>
     /// ICMP flood
@@ -337,32 +367,6 @@ class Ping
         cancelFlag = false;
     }
     
-    private ICMP CreatePacket(byte type, byte code) 
-    {
-        ICMP packet = new ICMP();
-
-        // Construct our ICMP packet
-        packet.type = type;
-        packet.code = code;
-        Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2); // Add seq num to ICMP message
-        byte[] payload = Encoding.ASCII.GetBytes(message);
-        Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length); // Add text into ICMP message
-        packet.messageSize = payload.Length + 4;
-        int packetSize = packet.messageSize + 4;
-
-        return packet;
-    }
-    private UInt16 CalPacketChksm(ref ICMP packet)
-    {
-        // Calculate packet checksum
-        packet.checksum = packet.GetChecksum();
-        return packet.checksum;
-    }
-    private void UpdatePacketSeq(ref ICMP packet, int seq) 
-    {
-        // update sequence number in ICMP message field
-        Buffer.BlockCopy(BitConverter.GetBytes(seq), 0, packet.message, 2, 2); // update sequence number in ICMP message field
-    }
     private Socket CreateRawSocket(AddressFamily family) 
     {
         Socket s = null;
@@ -379,7 +383,7 @@ class Ping
     private void ScanThread(List<IPAddress> addressList)
     {
         // Local variable declaration
-        int bytesRead;
+        int bytesRead, packetSize;
         IPEndPoint iep;
         EndPoint ep;
         Socket scanSocket = null;
@@ -392,7 +396,13 @@ class Ping
         scanSocket.Ttl = (short)255;
 
         // Construct ping packet
-        packet = CreatePacket(0x08, 0x00);
+        packet.type = 0x08;
+        packet.code = 0x00;
+        Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2); // Add seq num to ICMP message
+        byte[] payload = Encoding.ASCII.GetBytes(message);
+        Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length); // Add text into ICMP message
+        packet.messageSize = payload.Length + 4;
+        packetSize = packet.messageSize + 4;
 
         // Ping each address on list
         foreach (IPAddress host in addressList)
@@ -405,7 +415,7 @@ class Ping
             {
                 // Ping host
                 st.Start();
-                scanSocket.SendTo(packet.GetBytes(), packet.messageSize + 4, SocketFlags.None, ep);
+                scanSocket.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, ep);
                 // Wait for reply
                 byte[] buffer = new byte[1024];
                 bytesRead = scanSocket.ReceiveFrom(buffer, ref ep);

@@ -69,7 +69,7 @@ namespace PowerPing
         /// <param name="ping">Ping object</param>
         public static void PingIntroMsg(String host, Ping ping)
         {
-            Console.WriteLine("Pinging {0} [{1}] (Packet message \"{2}\") [TTL={3}]:", ping.address, host, ping.message, ping.ttl);
+            Console.WriteLine("\nPinging {0} [{1}] (Packet message \"{2}\") [TTL={3}]:", ping.address, host, ping.message, ping.ttl);
         }
         /// <summary>
         /// Display initial listening message

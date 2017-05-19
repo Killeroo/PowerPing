@@ -4,20 +4,6 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
 ***
 ![alt text](Screenshots/readme_screenshot.png "PowerPing in action")
 
-## Features
-
-- [x] Colour coded response times
-- [x] Displays type and code of each ICMP packets
-- [x] Capture all ICMP communications for a computer
-- [x] Customisable ping payloads
-- [x] Detailed graph and statistical views
-- [x] IP location querying and whoami 
-- [ ] Local network scanning and host discovery
-- [ ] Ping Flooding
-- [ ] Send pings with custom types and size
-- [ ] Trace route functionality
-- [ ] Full IPv6 support
-
 ## Usage: 
      PowerPing [--?] | [--whoami] | [--location address] | [--listen] |
 			   [--graph address] | [--t] [--c count] [--w timeout] [--m message] 
@@ -45,6 +31,20 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
      powerping github.com --w 500 --t     -     Send pings indefinitely to github.com with a 500ms timeout
      powerping 127.0.0.1 --m Meow         -     Send ping with packet message "Meow" to loopback address
      
+## Features
+
+- [x] Colour coded response times
+- [x] Displays type and code of each ICMP packets
+- [x] Capture all ICMP communications for a computer
+- [x] Customisable ping payloads
+- [x] Detailed graph and statistical views
+- [x] IP location querying and whoami 
+- [ ] Local network scanning and host discovery
+- [ ] Ping Flooding
+- [ ] Send pings with custom types and size
+- [ ] Trace route functionality
+- [ ] Full IPv6 support
+
 ### Note: 
 **Requires _Elevated Rights (Admininstrator)_ to Run**
 
