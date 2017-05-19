@@ -34,7 +34,7 @@
     </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -46,17 +46,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Display.cs" />
+    <Compile Include="Graph.cs" />
     <Compile Include="ICMP.cs" />
-    <Compile Include="Macros.cs" />
+    <Compile Include="Helper.cs" />
     <Compile Include="Ping.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config">
+    <None Include="Properties\App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="app.manifest">
+    <None Include="Properties\app.manifest">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
