@@ -69,7 +69,10 @@ namespace PowerPing
         /// <param name="ping">Ping object</param>
         public static void PingIntroMsg(String host, Ping ping)
         {
-            Console.WriteLine("\nPinging {0} [{1}] (Packet message \"{2}\") [TTL={3}]:", ping.address, host, ping.message, ping.ttl);
+            // Load ping attributes
+            PingAttributes attrs = ping.attributes;
+
+            Console.WriteLine("\nPinging {0} [{1}] (Packet message \"{2}\") [TTL={3}]:", attrs.address, host, attrs.message, attrs.ttl);
         }
         /// <summary>
         /// Display initial listening message
@@ -190,13 +193,16 @@ namespace PowerPing
         /// <param name="ping"> </param>
         public static void PingResults(Ping ping)
         {
+            // Load attributes
+            PingAttributes attrs = ping.attributes;
+
             // Reset console colour
             Console.BackgroundColor = ConsoleColor.Black;
 
             // Display stats
             double percent = (double)ping.getPacketsLost / ping.getPacketsSent;
             percent = Math.Round(percent * 100, 1);
-            Console.WriteLine("\nPing statistics for {0}:", ping.address);
+            Console.WriteLine("\nPing statistics for {0}:", attrs.address);
 
             Console.Write("     Packet: Sent ");
             Console.BackgroundColor = ConsoleColor.Yellow;

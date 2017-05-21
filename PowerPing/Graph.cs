@@ -13,6 +13,7 @@ namespace PowerPing
 
         // Local variable declaration
         private Ping graphPing = new Ping();
+        private PingAttributes graphPingAttrs = new PingAttributes();
         private List<String[]> graphColumns = new List<string[]>();
         private bool isGraphSetup = false;
         private int xAxisLength = 40;
@@ -30,10 +31,13 @@ namespace PowerPing
         
         public Graph(string address)
         {
-            // Setup ping
-            graphPing.address = address;
-            graphPing.continous = true;
+            // Setup ping attributes
+            graphPingAttrs.address = address;
+            graphPingAttrs.continous = true;
             graphPing.showOutput = false;
+
+            // load attributes
+            graphPing.attributes = graphPingAttrs;
         }
 
         public void Start()
@@ -164,7 +168,7 @@ namespace PowerPing
             // Draw info (and get location info for each label)
             Console.WriteLine("                 Packet Statistics:");
             Console.WriteLine("                {0}", new String('-', xAxisLength));
-            Console.WriteLine("                 Destination [ {0} ]", graphPing.address);
+            Console.WriteLine("                 Destination [ {0} ]", graphPingAttrs.address);
 
             Console.Write("                     Sent: ");
             sentLabelX = Console.CursorLeft;

@@ -8,34 +8,16 @@ using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.IO;
 
 /* Ping Class */
 // For constructing and sending ping ping packets
 
 class Ping
 {
-    // Ping attributes
-    public string address { get; set; }
-    public string message { get; set; }
-    public int interval { get; set; } // Time interval between sending each ping
-    public int timeout { get; set; }
-    public int count { get; set; }
-    public int ttl { get; set; }
-    public bool continous { get; set; }
-    public bool forceV4 { get; set; }
-    public bool forceV6 { get; set; }
-    public bool showOutput { get; set; } // Hide output when sending a ping
-    public bool isRunning { get { return running; } }
-    public TimeSpan getTotalRunTime { get { return totalRunTime.Elapsed; } } // Total amount of time pings have been sending
-    public long getLastResponseTime { get { return lastResponseTime; } }
-    public int getPacketsSent { get { return sent; } }
-    public int getPacketsRecieved { get { return recieved; } }
-    public int getPacketsLost { get { return lost; } }
-    public long getMaxReplyTime { get { return max; } }
-    public long getMinReplyTime { get { return min; } }
 
     // Timing enumerations
-    public enum Timings
+    public enum Timing
     {
         Insane = 0,
         Speedy = 1,
@@ -46,55 +28,37 @@ class Ping
         Paranoid = 6
     }
 
+    // General options
+    public PingAttributes attributes { get; set; } = null;
+    public bool showOutput { get; set; } = true;
+    public int threads { get; set; } = 5;
+
+    // Ping operation getters
+    public bool isRunning { get { return running; } }
+    public TimeSpan getTotalRunTime { get { return totalRunTime.Elapsed; } } // Total amount of time pings have been sending
+    public long getLastResponseTime { get { return responseTime; } }
+    public int getPacketsSent { get { return sent; } }
+    public int getPacketsRecieved { get { return recieved; } }
+    public int getPacketsLost { get { return lost; } }
+    public long getMaxReplyTime { get { return max; } }
+    public long getMinReplyTime { get { return min; } }
+
+    private static Stopwatch responseTimer = new Stopwatch();
+    private static Stopwatch totalRunTime = new Stopwatch();
+    private ConcurrentStack<IPAddress> activeHosts = new ConcurrentStack<IPAddress>(); // Stores found hosts during Scan()
+    private bool cancelFlag = false;
+    private bool running = false;
+    private long responseTime = 0;
+
     // Result attributes
     private int sent = 0;
     private int recieved = 0;
     private int lost = 0;
     private long max = 0;
     private long min = -1;
-    
-    // Scan Variables
-    public int threads = 5; // Move to global attributes?
-    private ConcurrentStack<IPAddress> activeHosts = new ConcurrentStack<IPAddress>();
 
-    // Local variables
-    private static Stopwatch responseTimer = new Stopwatch();
-    private static Stopwatch totalRunTime = new Stopwatch();
-    private bool cancelFlag = false;
-    private bool running = false;
-    private long lastResponseTime = 0;
-
-    // Constructors
-    public Ping()
-    {
-        // Assign defaul ping values
-        address = "127.0.0.1";
-        count = 5;
-        timeout = 3000;
-        ttl = 255;
-        interval = 1000;
-        continous = false;
-        forceV4 = true;
-        forceV6 = false;
-        showOutput = true;
-        message = "R U Alive?";
-    }
-    public Ping(string addr)
-    {
-        // Use provided address
-        address = addr;
-
-        // Assign default ping values
-        count = 5;
-        timeout = 3000;
-        ttl = 255;
-        interval = 1000;
-        continous = false;
-        forceV4 = true;
-        forceV6 = false;
-        showOutput = true;
-        message = "R U Alive?";
-    }
+    // Constructor
+    public Ping() { }
 
     /// <summary>
     /// Sends a set of ping packets
@@ -109,7 +73,7 @@ class Ping
         int bytesRead, packetSize, index = 1;
 
         // Lookup address
-        ipAddr = PowerPing.Helper.VerifyAddress(address, forceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+        ipAddr = PowerPing.Helper.VerifyAddress(attributes.address, attributes.forceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
         // Setup endpoint
         iep = new IPEndPoint(ipAddr, 0);
@@ -119,14 +83,14 @@ class Ping
         sock = CreateRawSocket(ipAddr.AddressFamily);
 
         // Set socket options
-        sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, timeout); // Timeout
-        sock.Ttl = (short)ttl;
+        sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, attributes.timeout); // Socket timeout
+        sock.Ttl = (short)attributes.ttl;
 
         // Construct our ICMP packet
-        packet.type = 0x08;
-        packet.code = 0x00;
+        packet.type = attributes.type;
+        packet.code = attributes.code;
         Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2); // Add seq num to ICMP message
-        byte[] payload = Encoding.ASCII.GetBytes(message);
+        byte[] payload = Encoding.ASCII.GetBytes(attributes.message);
         Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length); // Add text into ICMP message
         packet.messageSize = payload.Length + 4;
         packetSize = packet.messageSize + 4;
@@ -137,7 +101,7 @@ class Ping
             PowerPing.Display.PingIntroMsg(ep.ToString(), this); // Display intro message
 
         // Sending loop
-        while (continous ? true : index <= count)
+        while (attributes.continous ? true : index <= attributes.count)
         {
             // Exit loop if cancel flag recieved
             if (cancelFlag) 
@@ -171,7 +135,7 @@ class Ping
                     PowerPing.Display.ReplyPacket(response, ep.ToString(), index,  responseTimer.ElapsedMilliseconds);
 
                 // Store response time
-                lastResponseTime = responseTimer.ElapsedMilliseconds;
+                responseTime = responseTimer.ElapsedMilliseconds;
                 recieved++;
 
                 // Check response time against current max and min
@@ -181,11 +145,25 @@ class Ping
                     min = responseTimer.ElapsedMilliseconds;
 
             }
+            catch (IOException)
+            {
+                if (showOutput)
+                    PowerPing.Display.Error("General transmit error");
+                responseTime = 0;
+                lost++;
+            }
             catch (SocketException)
             {
                 if (showOutput)
                     PowerPing.Display.PingTimeout();
-                lastResponseTime = 0;
+                responseTime = 0;
+                lost++;
+            }
+            catch (Exception)
+            {
+                if (showOutput)
+                    PowerPing.Display.Error("General error occured");
+                responseTime = 0;
                 lost++;
             }
             finally
@@ -194,7 +172,7 @@ class Ping
             }
 
             index++;
-            Thread.Sleep(interval);
+            Thread.Sleep(attributes.interval);
         }
 
         // Stop operation
@@ -269,76 +247,129 @@ class Ping
     /// <param name="target"></param>
     public void Scan(string target, bool recursing = false)
     {
-        List<IPAddress> scanList = new List<IPAddress>();
-        String[] ipSegments = target.Split('.');
+        //List<IPAddress> scanList = new List<IPAddress>();
+        //String[] ipSegments = target.Split('.');
 
-        if (!recursing)
-        {
-            // Setup scan
+        //if (!recursing)
+        //{
+        //    // Setup scan
 
-            // Check format of address (for '-'s and disallow multipl '-'s in one segment, also check format of address
+        //    // Check format of address (for '-'s and disallow multipl '-'s in one segment, also check format of address
 
 
-            // Holds the ranges for each ip segment
-            int[] segLower = new int[4];
-            int[] segUpper = new int[4];
+        //    // Holds the ranges for each ip segment
+        //    int[] segLower = new int[4];
+        //    int[] segUpper = new int[4];
 
-            // Work out upper and lower ranges for each segment
-            for (int y = 0; y < 4; y++)
-            {
-                string[] ranges = ipSegments[y].Split('-');
-                segLower[y] = Convert.ToInt16(ranges[0]);
-                segUpper[y] = (ranges.Length == 1) ? segLower[y] : Convert.ToInt16(ranges[1]);
-            }
+        //    // Work out upper and lower ranges for each segment
+        //    for (int y = 0; y < 4; y++)
+        //    {
+        //        string[] ranges = ipSegments[y].Split('-');
+        //        segLower[y] = Convert.ToInt16(ranges[0]);
+        //        segUpper[y] = (ranges.Length == 1) ? segLower[y] : Convert.ToInt16(ranges[1]);
+        //    }
 
-            // Build list of addresses from ranges
-            for (int seg1 = segLower[0]; seg1 <= segUpper[0]; seg1++)
-            {
-                for (int seg2 = segLower[1]; seg2 <= segUpper[1]; seg2++)
-                {
-                    for (int seg3 = segLower[2]; seg3 <= segUpper[2]; seg3++)
-                    {
-                        for (int seg4 = segLower[3]; seg4 <= segUpper[3]; seg4++)
-                        {
-                            scanList.Add(new IPAddress(new byte[] { (byte)seg1, (byte)seg2, (byte)seg3, (byte)seg4 }));
-                        }
-                    }
-                }
-            }
+        //    // Build list of addresses from ranges
+        //    for (int seg1 = segLower[0]; seg1 <= segUpper[0]; seg1++)
+        //    {
+        //        for (int seg2 = segLower[1]; seg2 <= segUpper[1]; seg2++)
+        //        {
+        //            for (int seg3 = segLower[2]; seg3 <= segUpper[2]; seg3++)
+        //            {
+        //                for (int seg4 = segLower[3]; seg4 <= segUpper[3]; seg4++)
+        //                {
+        //                    scanList.Add(new IPAddress(new byte[] { (byte)seg1, (byte)seg2, (byte)seg3, (byte)seg4 }));
+        //                }
+        //            }
+        //        }
+        //    }
 
-            // Divide scanlist into lists for each thread
-            List<IPAddress>[] threadLists = new List<IPAddress>[threads];
-            int splitListSize = (int)Math.Ceiling(scanList.Count / (double)threads);
-            int x = 0;
+        //    // Divide scanlist into lists for each thread
+        //    List<IPAddress>[] threadLists = new List<IPAddress>[threads];
+        //    int splitListSize = (int)Math.Ceiling(scanList.Count / (double)threads);
+        //    int x = 0;
 
-            for (int i = 0; i < threadLists.Length; i++)
-            {
-                threadLists[i] = new List<IPAddress>();
-                for (int j = x; j < x + splitListSize; j++)
-                {
-                    if (j >= scanList.Count)
-                        break; // Stop if we are out of bounds
-                    threadLists[i].Add(scanList[j]);
-                }
-                x += splitListSize;
-            }
+        //    for (int i = 0; i < threadLists.Length; i++)
+        //    {
+        //        threadLists[i] = new List<IPAddress>();
+        //        for (int j = x; j < x + splitListSize; j++)
+        //        {
+        //            if (j >= scanList.Count)
+        //                break; // Stop if we are out of bounds
+        //            threadLists[i].Add(scanList[j]);
+        //        }
+        //        x += splitListSize;
+        //    }
 
-            // *Bug here*
-            // Finally, fire up the threads!
-            for (int i = 0; i < threads - 1; i++)
-            {
-                Thread thread = new Thread(() => ScanThread(threadLists[i]));
-                thread.Start();
-            }
+        //    // *Bug here*
+        //    // Finally, fire up the threads!
+        //    for (int i = 0; i < threads - 1; i++)
+        //    {
+        //        Thread thread = new Thread(() => ScanThread(threadLists[i]));
+        //        thread.Start();
+        //    }
 
-            // Display results of scan
-            PowerPing.Display.ScanResult(scanList.Count, activeHosts.Count);
+        //    // Display results of scan
+        //    PowerPing.Display.ScanResult(scanList.Count, activeHosts.Count);
 
-        }
-        else
-        {
-            // Recursive ping sender
-        }
+        //}
+        //else
+        //{
+        //    // Recursive ping sender
+
+        //    // Local variable declaration
+        //    int bytesRead, packetSize;
+        //    IPEndPoint iep;
+        //    EndPoint ep;
+        //    Socket scanSocket = null;
+        //    Stopwatch st = new Stopwatch();
+        //    ICMP packet = new ICMP();
+
+        //    // Setup and configure socket
+        //    scanSocket = CreateRawSocket(AddressFamily.InterNetwork);
+        //    scanSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 500);
+        //    scanSocket.Ttl = (short)255;
+
+        //    // Construct ping packet
+        //    packet.type = 0x08;
+        //    packet.code = 0x00;
+        //    Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2); // Add seq num to ICMP message
+        //    byte[] payload = Encoding.ASCII.GetBytes(" ");
+        //    Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length); // Add text into ICMP message
+        //    packet.messageSize = payload.Length + 4;
+        //    packetSize = packet.messageSize + 4;
+
+        //    // Ping each address on list
+        //    foreach (IPAddress host in addressList)
+        //    {
+        //        // Setup endpoint for current host
+        //        iep = new IPEndPoint(host, 0);
+        //        ep = (EndPoint)iep;
+
+        //        try
+        //        {
+        //            // Ping host
+        //            st.Start();
+        //            scanSocket.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, ep);
+        //            // Wait for reply
+        //            byte[] buffer = new byte[1024];
+        //            bytesRead = scanSocket.ReceiveFrom(buffer, ref ep);
+        //            st.Stop();
+
+        //            // Only count hosts that send reply packets
+        //            if (buffer[20] == 0x00)
+        //            {
+        //                PowerPing.Display.Message("Host " + host + " is active. [Latency " + st.ElapsedMilliseconds + "ms]");
+        //                activeHosts.Push(host);
+        //            }
+        //        }
+        //        catch (SocketException) { }
+        //        finally
+        //        {
+        //            st.Reset();
+        //        }
+        //    }
+        //}
     }
     /// <summary>
     /// ICMP flood
@@ -379,60 +410,5 @@ class Ping
             PowerPing.Display.Error("Socket cannot be created\nPlease run as Administrator and try again.", true);
         }
         return s;
-    }
-    private void ScanThread(List<IPAddress> addressList)
-    {
-        // Local variable declaration
-        int bytesRead, packetSize;
-        IPEndPoint iep;
-        EndPoint ep;
-        Socket scanSocket = null;
-        Stopwatch st = new Stopwatch();
-        ICMP packet = new ICMP();
-
-        // Setup and configure socket
-        scanSocket = CreateRawSocket(AddressFamily.InterNetwork);
-        scanSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 500);
-        scanSocket.Ttl = (short)255;
-
-        // Construct ping packet
-        packet.type = 0x08;
-        packet.code = 0x00;
-        Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2); // Add seq num to ICMP message
-        byte[] payload = Encoding.ASCII.GetBytes(message);
-        Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length); // Add text into ICMP message
-        packet.messageSize = payload.Length + 4;
-        packetSize = packet.messageSize + 4;
-
-        // Ping each address on list
-        foreach (IPAddress host in addressList)
-        {
-            // Setup endpoint for current host
-            iep = new IPEndPoint(host, 0);
-            ep = (EndPoint)iep;
-
-            try
-            {
-                // Ping host
-                st.Start();
-                scanSocket.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, ep);
-                // Wait for reply
-                byte[] buffer = new byte[1024];
-                bytesRead = scanSocket.ReceiveFrom(buffer, ref ep);
-                st.Stop();
-
-                // Only count hosts that send reply packets
-                if (buffer[20] == 0x00)
-                {
-                    PowerPing.Display.Message("Host " + host + " is active. [Latency " + st.ElapsedMilliseconds + "ms]");
-                    activeHosts.Push(host);
-                }
-            }
-            catch (SocketException) { }
-            finally
-            {
-                st.Reset();
-            }
-        }
     }
 }

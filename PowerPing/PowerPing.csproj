@@ -51,6 +51,7 @@
     <Compile Include="ICMP.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Ping.cs" />
+    <Compile Include="PingAttributes.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
