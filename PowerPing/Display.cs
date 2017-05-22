@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Reflection;
 
-/* Display Class */
-// Responsible for displaying of ping results and information (designed for a console window)
+/// <summary>
+///  Responsible for displaying of ping results and information (designed for a console window) 
+/// </summary>
 
 namespace PowerPing
 {
@@ -48,6 +49,8 @@ namespace PowerPing
             Console.WriteLine("     --m message     Ping packet message");
             Console.WriteLine("     --i ttl         Time To Live");
             Console.WriteLine("     --in interval   Interval between each ping (in milliseconds)");
+            Console.WriteLine("     --pt type       Use custom ICMP type ");
+            Console.WriteLine("     --pc code       Use custom ICMP code value");
             Console.WriteLine("     --4             Force using IPv4");
             //Console.WriteLine("     --6             Force using IPv6");
             Console.WriteLine();
@@ -72,7 +75,7 @@ namespace PowerPing
             // Load ping attributes
             PingAttributes attrs = ping.attributes;
 
-            Console.WriteLine("\nPinging {0} [{1}] (Packet message \"{2}\") [TTL={3}]:", attrs.address, host, attrs.message, attrs.ttl);
+            Console.WriteLine("\nPinging {0} [{1}] (Packet message \"{2}\") [Type={4} Code={5}] [TTL={3}]:", attrs.address, host, attrs.message, attrs.ttl, attrs.type, attrs.code);
         }
         /// <summary>
         /// Display initial listening message
@@ -184,7 +187,7 @@ namespace PowerPing
         /// </summary>
         public static void ScanResult(int scanned, int found)
         {
-            Console.WriteLine("Scan complete. {0} addresses scaned. {1} hosts active.");
+            Console.WriteLine("Scan complete. {0} addresses scanned. {1} hosts active.", scanned, found);
             PowerPing.Helper.Pause();
         }
         /// <summary>

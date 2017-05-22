@@ -1,6 +1,7 @@
 ﻿/// <summary>
 /// Stores ping attributes
 /// </summary>
+/// 
 public class PingAttributes
 {
     public string address { get; set; } // Address to send the ping to

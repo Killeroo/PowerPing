@@ -1,7 +1,8 @@
 ﻿using System;
 
-/* ICMP class (Internet Control Message Protocol) */
-// For creating ICMP (ping) packet objects
+/// <summary>
+/// For creating Internet Control Message Protocol (ICMP) ping packet objects 
+/// </summary>
 
 class ICMP
 {

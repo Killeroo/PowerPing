@@ -4,8 +4,9 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
-/* Macros class */
-// Class for miscellaneous methods 
+/// <summary>
+/// Class for miscellaneous methods 
+/// </summary>
 
 namespace PowerPing
 {

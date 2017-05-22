@@ -6,18 +6,17 @@ using System.Net.Sockets;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Diagnostics;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.IO;
 
-/* Ping Class */
-// For constructing and sending ping ping packets
+/// <summary>
+/// For constructing and sending ping ping packets
+/// </summary>
 
 class Ping
 {
-
     // Timing enumerations
-    public enum Timing
+    public enum Timing_Options
     {
         Insane = 0,
         Speedy = 1,
@@ -192,10 +191,6 @@ class Ping
         IPAddress localAddress = null;
         Socket listeningSocket = null;
 
-        // Check network status
-        if (!NetworkInterface.GetIsNetworkAvailable())
-            PowerPing.Display.Error("Not connected to network.", true, true);
-
         // Find local address
         foreach (var ip in Dns.GetHostEntry(Dns.GetHostName()).AddressList)
             if (ip.AddressFamily == AddressFamily.InterNetwork)
@@ -244,8 +239,8 @@ class Ping
     /// <summary>
     /// Recursive network scan method 
     /// </summary>
-    /// <param name="target"></param>
-    public void Scan(string target, bool recursing = false)
+    /// <param name="range"></param>
+    public void Scan(string range, bool recursing = false)
     {
         //List<IPAddress> scanList = new List<IPAddress>();
         //String[] ipSegments = target.Split('.');

@@ -279,8 +279,18 @@ namespace PowerPing
                             break;
                         case "/in":
                         case "-in":
-                        case "--in":
+                        case "--in": // Interval
                             attributes.interval = Convert.ToInt16(args[count + 1]);
+                            break;
+                        case "/pt":
+                        case "-pt":
+                        case "--pt": // Ping type
+                            attributes.type = Convert.ToByte(args[count + 1]);
+                            break;
+                        case "/pc":
+                        case "-pc":
+                        case "--pc": // Ping code
+                            attributes.code = Convert.ToByte(args[count + 1]);
                             break;
                         case "/4":
                         case "-4":
