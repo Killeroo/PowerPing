@@ -66,6 +66,65 @@ namespace PowerPing
         }
 
         /// <summary>
+        /// Returns the local hosts IPv4 address
+        /// </summary>
+        /// <returns>IP address string, if no address found then returns a null</returns>
+        public static string GetLocalIPAddress()
+        {
+            // If not connected to a network return null
+            if (!NetworkInterface.GetIsNetworkAvailable())
+                return null;
+
+            // Get all addresses assocatied with this computer
+            var hostAddress = Dns.GetHostEntry(Dns.GetHostName());
+
+            // Loop through each associated address
+            foreach (var address in hostAddress.AddressList)
+                // If address is IPv4
+                if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    // Return the address
+                    return address.ToString();
+
+            return null;
+        }
+
+        /// <summary>
+        /// Resolve address string to IP Address
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="af"></param>
+        /// <returns></returns>
+        public static string VerifyAddress(string address, AddressFamily af)
+        {
+            IPAddress ipAddr = null;
+
+            // Only resolve address if not already in IP address format
+            if (IPAddress.TryParse(address, out ipAddr))
+                return ipAddr.ToString();
+
+            try
+            {
+                // Query DNS for host address
+                foreach (IPAddress a in Dns.GetHostEntry(address).AddressList)
+                {
+                    // Run through addresses until we find one that matches the family we are forcing
+                    if (a.AddressFamily == af)
+                    {
+                        ipAddr = a;
+                        break;
+                    }
+                }
+            }
+            catch (Exception) { }
+
+            // If no address resolved then exit
+            if (ipAddr == null)
+                PowerPing.Display.Error("PowerPing could not find the host address [" + address + "]\nCheck address and try again.", true, true);
+
+            return ipAddr.ToString();
+        }
+
+        /// <summary>
         /// Gets location information of current host
         /// </summary>
         public static void whoami()
@@ -96,62 +155,7 @@ namespace PowerPing
             return value > left && value < right;
         }
 
-        /// <summary>
-        /// Returns the local hosts IPv4 address
-        /// </summary>
-        /// <returns>IP address string, if no address found then returns a null</returns>
-        public static string GetLocalIPAddress()
-        {
-            // If not connected to a network return null
-            if (!NetworkInterface.GetIsNetworkAvailable())
-                return null;
 
-            // Get all addresses assocatied with this computer
-            var hostAddress = Dns.GetHostEntry(Dns.GetHostName());
 
-            // Loop through each associated address
-            foreach (var address in hostAddress.AddressList)
-                // If address is IPv4
-                if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                    // Return the address
-                    return address.ToString();
-
-            return null;
-        }
-
-        /// <summary>
-        /// Resolve address string to IP Address
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="af"></param>
-        /// <returns></returns>
-        public static IPAddress VerifyAddress(string address, AddressFamily af)
-        {
-            IPAddress ipAddr = null;
-
-            // Parse the address to IPAddress
-            IPAddress.TryParse(address, out ipAddr);
-
-            try
-            {
-                // Query DNS for host address
-                foreach (IPAddress a in Dns.GetHostEntry(address).AddressList)
-                {
-                    // Run through addresses until we find one that matches the family we are forcing
-                    if (a.AddressFamily == af)
-                    {
-                        ipAddr = a;
-                        break;
-                    }
-                }
-            }
-            catch (Exception) { }
-
-            // If no address resolved then exit
-            if (ipAddr == null)
-                PowerPing.Display.Error("PowerPing could not find the host address [" + address + "]\nCheck address and try again.", true, true);
-
-            return ipAddr;
-        }
     }
 }

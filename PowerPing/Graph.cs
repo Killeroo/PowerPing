@@ -6,10 +6,12 @@ namespace PowerPing
 {
     class Graph
     {
+        // Constants
         const string FULL_BAR_BLOCK_CHAR = "█";
         const string HALF_BAR_BLOCK_CHAR = "▄";
 
-        public bool compactGraph = true;
+        // Properties
+        public bool CompactGraph = true;
 
         // Local variable declaration
         private Ping graphPing = new Ping();
@@ -32,12 +34,9 @@ namespace PowerPing
         public Graph(string address)
         {
             // Setup ping attributes
-            graphPingAttrs.address = address;
-            graphPingAttrs.continous = true;
-            graphPing.showOutput = false;
-
-            // load attributes
-            graphPing.attributes = graphPingAttrs;
+            graphPingAttrs.Address = address;
+            graphPingAttrs.Continous = true;
+            graphPing.ShowOutput = false;
         }
 
         public void Start()
@@ -56,11 +55,9 @@ namespace PowerPing
         private void Draw()
         {
             // Start ping in background thread
-            Thread pinger = new Thread(new ThreadStart(graphPing.Send));
+            Thread pinger = new Thread(() => graphPing.Send(graphPingAttrs));
             pinger.IsBackground = true;
             pinger.Start();
-
-            //graphPing.send();
 
             // Drawing loop
             while (true)
@@ -73,10 +70,10 @@ namespace PowerPing
                 DrawGraphColumns();
 
                 // Update labels
-                UpdateLabels(graphPing);
+                UpdateLabels(graphPing.Results);
 
                 // Get results from ping and add to graph
-                AddColumnToGraph(CreatColumn(graphPing.getLastResponseTime));
+                AddColumnToGraph(CreatColumn(graphPing.Results.CurTime));
 
                 // Wait one second
                 Thread.Sleep(1000);
@@ -119,7 +116,7 @@ namespace PowerPing
             //Console.WriteLine();
 
             // Draw Y axis of graph
-            if (compactGraph)
+            if (CompactGraph)
             {
                 Console.WriteLine("         >1000 ┐");
                 Console.WriteLine("           900 ┤");
@@ -158,7 +155,7 @@ namespace PowerPing
 
 
             // Draw X axis of graph
-            Console.Write(compactGraph ? "             0 └" : "              0 └");
+            Console.Write(CompactGraph ? "             0 └" : "              0 └");
             // Save start of graph plotting area
             plotStartX = Console.CursorLeft;
             plotStartY = Console.CursorTop;
@@ -168,7 +165,7 @@ namespace PowerPing
             // Draw info (and get location info for each label)
             Console.WriteLine("                 Packet Statistics:");
             Console.WriteLine("                {0}", new String('-', xAxisLength));
-            Console.WriteLine("                 Destination [ {0} ]", graphPingAttrs.address);
+            Console.WriteLine("                 Destination [ {0} ]", graphPingAttrs.Address);
 
             Console.Write("                     Sent: ");
             sentLabelX = Console.CursorLeft;
@@ -197,6 +194,10 @@ namespace PowerPing
             timeLabelY = Console.CursorTop;
             Console.WriteLine();
         }
+        /// <summary>
+        /// Draw graph bar
+        /// </summary>
+        /// <param name="bar"></param>
         private void DrawBar(String[] bar)
         {
             // save cursor location
@@ -213,7 +214,11 @@ namespace PowerPing
             // Reset cursor to starting position
             Console.SetCursorPosition(cursorPositionX, cursorPositionY);
         }
-        private void UpdateLabels(Ping ping)
+        /// <summary>
+        /// Update graph text labels
+        /// </summary>
+        /// <param name="results"></param>
+        private void UpdateLabels(PingResults results)
         {
             // save cursor location
             int cursorPositionX = Console.CursorLeft;
@@ -228,31 +233,31 @@ namespace PowerPing
             // Move cursor back
             Console.CursorLeft = Console.CursorLeft - 6;
             // Write label value
-            Console.Write(ping.getPacketsSent);
+            Console.Write(results.Sent);
 
             // Update recieve label
             Console.SetCursorPosition(recLabelX, recLabelY);
             Console.Write(blankLabel);
             Console.CursorLeft = Console.CursorLeft - 6;
-            Console.Write(ping.getPacketsRecieved);
+            Console.Write(results.Recieved);
 
             // Update fail label
             Console.SetCursorPosition(failLabelX, failLabelY);
             Console.Write(blankLabel);
             Console.CursorLeft = Console.CursorLeft - 6;
-            Console.Write(ping.getPacketsLost);
+            Console.Write(results.Lost);
 
             // Update RTT label
             Console.SetCursorPosition(rttLabelX, rttLabelY);
             Console.Write(blankLabel);
             Console.CursorLeft = Console.CursorLeft - 6;
-            Console.Write(ping.getLastResponseTime + "ms");
+            Console.Write(results.CurTime + "ms");
 
             // Update time label
             Console.SetCursorPosition(timeLabelX, timeLabelY);
             Console.Write(blankLabel + "        ");
             Console.CursorLeft = Console.CursorLeft - 14;
-            Console.Write("{0:hh\\:mm\\:ss}", ping.getTotalRunTime);
+            Console.Write("{0:hh\\:mm\\:ss}", results.TotalRunTime);
 
             // Reset cursor to starting position
             Console.SetCursorPosition(cursorPositionX, cursorPositionY);
@@ -267,12 +272,12 @@ namespace PowerPing
             int count = 0;
 
             // Work out bar length
-            for (int x = 0; x < replyTime; x = x + (compactGraph ? 50 : 25))
+            for (int x = 0; x < replyTime; x = x + (CompactGraph ? 50 : 25))
                 count++;
 
             if (replyTime > 1000)
                 // If reply time over graph Y range draw max size column
-                count = compactGraph ? 20 : 10;
+                count = CompactGraph ? 20 : 10;
             else if (replyTime == 0)
                 // If no reply dont draw column
                 return new String[] { "─" };
@@ -290,7 +295,7 @@ namespace PowerPing
             bar[0] = "▀";
 
             // Work out top segment based on length
-            if (compactGraph) // Work out for compact graph
+            if (CompactGraph) // Work out for compact graph
             {
                 if (count + 1 % 2 == 0)
                     bar[count] = FULL_BAR_BLOCK_CHAR;
@@ -349,7 +354,7 @@ namespace PowerPing
             String blankRow = new String(' ', xAxisLength);
             String bottomRow = new String('─', xAxisLength);
 
-            for (int x = 0; x <= (compactGraph ? 10 : 20); x++)
+            for (int x = 0; x <= (CompactGraph ? 10 : 20); x++)
             {
                 // Draw black spaces
                 Console.Write(blankRow);

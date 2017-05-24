@@ -2,7 +2,7 @@
 using System.Reflection;
 
 /// <summary>
-///  Responsible for displaying of ping results and information (designed for a console window) 
+///  Responsible for displaying ping results, information and other output (designed for console) 
 /// </summary>
 
 namespace PowerPing
@@ -11,19 +11,19 @@ namespace PowerPing
     class Display
     {
         private static ConsoleColor[] typeColors = new ConsoleColor[] {ConsoleColor.DarkGreen, ConsoleColor.Black, ConsoleColor.Black,
-                                               ConsoleColor.DarkRed, ConsoleColor.DarkMagenta, ConsoleColor.DarkBlue, ConsoleColor.Black,
-                                               ConsoleColor.Black, ConsoleColor.DarkYellow, ConsoleColor.DarkYellow, ConsoleColor.DarkRed,
-                                               ConsoleColor.DarkRed, ConsoleColor.DarkBlue, ConsoleColor.DarkBlue, ConsoleColor.DarkBlue,
-                                               ConsoleColor.DarkBlue};
+                                                                       ConsoleColor.DarkRed, ConsoleColor.DarkMagenta, ConsoleColor.DarkBlue, ConsoleColor.Black,
+                                                                       ConsoleColor.Black, ConsoleColor.DarkYellow, ConsoleColor.DarkYellow, ConsoleColor.DarkRed,
+                                                                       ConsoleColor.DarkRed, ConsoleColor.DarkBlue, ConsoleColor.DarkBlue, ConsoleColor.DarkBlue,
+                                                                       ConsoleColor.DarkBlue};
 
         // Type code values
         private static string[] destUnreachableCodeValues = new string[] {"Network unreachable", "Host unreachable", "Protocol unreachable",
-                                                        "Port unreachable", "Fragmentation needed & DF flag set", "Source route failed",
-                                                        "Destination network unkown", "Destination host unknown", "Source host isolated",
-                                                        "Communication with destination network prohibited", "Communication with destination network prohibited",
-                                                        "Network unreachable for ICMP", "Host unreachable for ICMP"};
+                                                                          "Port unreachable", "Fragmentation needed & DF flag set", "Source route failed",
+                                                                          "Destination network unkown", "Destination host unknown", "Source host isolated",
+                                                                          "Communication with destination network prohibited", "Communication with destination network prohibited",
+                                                                          "Network unreachable for ICMP", "Host unreachable for ICMP"};
         private static string[] redirectCodeValues = new string[] {"Packet redirected for the network", "Packet redirected for the host",
-                                                 "Packet redirected for the ToS & network", "Packet redirected for the ToS & host"};
+                                                                   "Packet redirected for the ToS & network", "Packet redirected for the ToS & host"};
         private static string[] timeExceedCodeValues = new string[] { "TTL expired in transit", "Fragment reassembly time exceeded" };
         private static string[] badParameterCodeValues = new string[] { "IP header pointer indicates error", "IP header missing an option", "Bad IP header length" };
 
@@ -40,7 +40,8 @@ namespace PowerPing
             Console.WriteLine("     and result colourization.");
             Console.WriteLine("\nUsage: PowerPing [--?] | [--whoami] | [--location address] | [--listen] |");
             Console.WriteLine("                 [--graph address] | [--t] [--c count] [--w timeout] ");
-            Console.WriteLine("                 [--m message] [--i TTL] [--in interval] [--4] target_name");
+            Console.WriteLine("                 [--m message] [--i TTL] [--in interval] [--pt type]");
+            Console.WriteLine("                 [--pc code] [--4] target_name");
             Console.WriteLine("\nOptions:");
             Console.WriteLine("     --?             Displays this help message");
             Console.WriteLine("     --t             Ping the target until stopped (Control-C to stop)");
@@ -49,7 +50,7 @@ namespace PowerPing
             Console.WriteLine("     --m message     Ping packet message");
             Console.WriteLine("     --i ttl         Time To Live");
             Console.WriteLine("     --in interval   Interval between each ping (in milliseconds)");
-            Console.WriteLine("     --pt type       Use custom ICMP type ");
+            Console.WriteLine("     --pt type       Use custom ICMP type");
             Console.WriteLine("     --pc code       Use custom ICMP code value");
             Console.WriteLine("     --4             Force using IPv4");
             //Console.WriteLine("     --6             Force using IPv6");
@@ -73,9 +74,15 @@ namespace PowerPing
         public static void PingIntroMsg(String host, Ping ping)
         {
             // Load ping attributes
-            PingAttributes attrs = ping.attributes;
+            PingAttributes attrs = ping.Attributes;
 
-            Console.WriteLine("\nPinging {0} [{1}] (Packet message \"{2}\") [Type={4} Code={5}] [TTL={3}]:", attrs.address, host, attrs.message, attrs.ttl, attrs.type, attrs.code);
+            Console.Write("\nPinging {0} ", host);
+
+            // Only show resolved address if inputted address and resolved address are different
+            if (!String.Equals(host, attrs.Address)) 
+                Console.Write("[{0}] ", attrs.Address);
+
+            Console.WriteLine("(Packet message \"{0}\") [Type={1} Code={2}] [TTL={3}]:", attrs.Message, attrs.Type, attrs.Code, attrs.Ttl);
         }
         /// <summary>
         /// Display initial listening message
@@ -164,7 +171,7 @@ namespace PowerPing
                 Console.ForegroundColor = ConsoleColor.Yellow;
             else if (replyTime > 500L)
                 Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("{0}ms", replyTime < 1 ? "<1" : replyTime.ToString());
+            Console.Write("{0}ms ", replyTime < 1 ? "<1" : replyTime.ToString());
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.WriteLine();
         }
@@ -197,40 +204,41 @@ namespace PowerPing
         public static void PingResults(Ping ping)
         {
             // Load attributes
-            PingAttributes attrs = ping.attributes;
+            PingAttributes attrs = ping.Attributes;
+            PingResults results = ping.Results;
 
             // Reset console colour
             Console.BackgroundColor = ConsoleColor.Black;
 
             // Display stats
-            double percent = (double)ping.getPacketsLost / ping.getPacketsSent;
+            double percent = (double)results.Lost / results.Sent;
             percent = Math.Round(percent * 100, 1);
-            Console.WriteLine("\nPing statistics for {0}:", attrs.address);
+            Console.WriteLine("\nPing statistics for {0}:", attrs.Address);
 
             Console.Write("     Packet: Sent ");
             Console.BackgroundColor = ConsoleColor.Yellow;
             Console.ForegroundColor = ConsoleColor.Black;
-            Console.Write("[ " + ping.getPacketsSent + " ]");
+            Console.Write("[ " + results.Sent + " ]");
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(", Recieved ");
             Console.BackgroundColor = ConsoleColor.Green;
             Console.ForegroundColor = ConsoleColor.Black;
-            Console.Write("[ " + ping.getPacketsRecieved + " ]");
+            Console.Write("[ " + results.Recieved + " ]");
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(", Lost ");
             Console.BackgroundColor = ConsoleColor.Red;
             Console.ForegroundColor = ConsoleColor.Black;
-            Console.Write("[ " + ping.getPacketsLost + " ]");
+            Console.Write("[ " + results.Lost + " ]");
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.WriteLine(" (" + percent + "% loss)");
 
             Console.WriteLine("Response times:");
-            Console.WriteLine("     Minimum [ {0}ms ], Maximum [ {1}ms ]", ping.getMinReplyTime, ping.getMaxReplyTime);
+            Console.WriteLine("     Minimum [ {0}ms ], Maximum [ {1}ms ]", results.MinTime, results.MaxTime);
 
-            Console.WriteLine("Total elapsed time (HH:MM:SS.FFF): {0:hh\\:mm\\:ss\\.fff}", ping.getTotalRunTime);
+            Console.WriteLine("Total elapsed time (HH:MM:SS.FFF): {0:hh\\:mm\\:ss\\.fff}", results.TotalRunTime);
             Console.WriteLine();
 
             // Confirm to exit

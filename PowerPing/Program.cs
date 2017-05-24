@@ -219,6 +219,7 @@
 
  */
 using System;
+using System.Net.Sockets;
 
 // Custom packet type
 // dsipaly Powerping version at start
@@ -253,60 +254,61 @@ namespace PowerPing
                         case "/c":
                         case "-c":
                         case "--c": // Ping count
-                            attributes.count = Convert.ToInt16(args[count + 1]);
+                            attributes.Count = Convert.ToInt32(args[count + 1]);
                             break;
                         case "/t":
                         case "-t":
                         case "--t": // Infinitely send
-                            attributes.continous = true;
+                            attributes.Continous = true;
                             break;
                         case "/w":
                         case "-w":
                         case "--w": // Timeout
-                            attributes.timeout = Convert.ToInt16(args[count + 1]);
+                            attributes.Timeout = Convert.ToInt32(args[count + 1]);
                             break;
                         case "/m":
                         case "-m":
                         case "--m": // Message
-                            if (args[count + 1].Contains("--"))
-                                throw new Exception();
-                            attributes.message = args[count + 1];
+                            if (args[count + 1].Contains("--") || args[count + 1].Contains("//") || args[count + 1].Contains("-"))
+                                throw new FormatException();
+                            attributes.Message = args[count + 1];
+                            /// Add Length check
                             break;
                         case "/i":
                         case "-i":
                         case "--i": // Time To Live
-                            attributes.ttl = Convert.ToInt16(args[count + 1]);
+                            attributes.Ttl = Convert.ToInt16(args[count + 1]);
                             break;
                         case "/in":
                         case "-in":
                         case "--in": // Interval
-                            attributes.interval = Convert.ToInt16(args[count + 1]);
+                            attributes.Interval = Convert.ToInt32(args[count + 1]);
                             break;
                         case "/pt":
                         case "-pt":
                         case "--pt": // Ping type
-                            attributes.type = Convert.ToByte(args[count + 1]);
+                            attributes.Type = Convert.ToByte(args[count + 1]);
                             break;
                         case "/pc":
                         case "-pc":
                         case "--pc": // Ping code
-                            attributes.code = Convert.ToByte(args[count + 1]);
+                            attributes.Code = Convert.ToByte(args[count + 1]);
                             break;
                         case "/4":
                         case "-4":
                         case "--4": // Force ping with IPv4
-                            if (attributes.forceV6)
+                            if (attributes.ForceV6)
                                 // Reset IPv4 force if already set (change force both v4 and v6)
-                                attributes.forceV6 = false;
-                            attributes.forceV4 = true;
+                                attributes.ForceV6 = false;
+                            attributes.ForceV4 = true;
                             break;
                         case "/6":
                         case "-6":
                         case "--6": // Force ping with IPv6
-                            if (attributes.forceV4)
+                            if (attributes.ForceV4)
                                 // Reset IPv4 force if already set
-                                attributes.forceV4 = false;
-                            attributes.forceV6 = true;
+                                attributes.ForceV4 = false;
+                            attributes.ForceV6 = true;
                             break;
                         case "/?":
                         case "-?":
@@ -341,7 +343,7 @@ namespace PowerPing
                         default:
                             if ((count == args.Length - 1 || count == 0) && !addrFound)
                             { // Assume first or last argument is address
-                                attributes.address = args[count];
+                                attributes.Address = args[count];
                                 addrFound = true;
                             }
                             if (args[count].Contains("--"))
@@ -373,11 +375,10 @@ namespace PowerPing
             // (So statistics can still be displayed when ping interupted)
             Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
 
-            // Load ping attributes
-            p.attributes = attributes;
+            //p.ShowOutput = false;
 
             // Send ping
-            p.Send();
+            p.Send(attributes);
         }
 
         protected static void ExitHandler(object sender, ConsoleCancelEventArgs args) // Event handler for control - c
