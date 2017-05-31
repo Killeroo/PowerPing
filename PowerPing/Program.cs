@@ -220,6 +220,7 @@
  */
 using System;
 using System.Net.Sockets;
+using System.Threading;
 
 // Custom packet type
 // dsipaly Powerping version at start
@@ -340,13 +341,19 @@ namespace PowerPing
                             Graph g = new Graph(args[count + 1]);
                             g.Start();
                             break;
+                        case "/flood":
+                        case "-flood":
+                        case "--flood": // Graph view
+                            p.Flood(args[count + 1]);
+                            Environment.Exit(0);
+                            break;
                         default:
                             if ((count == args.Length - 1 || count == 0) && !addrFound)
                             { // Assume first or last argument is address
                                 attributes.Address = args[count];
                                 addrFound = true;
                             }
-                            if (args[count].Contains("--"))
+                            if (args[count].Contains("--") || args[count].Contains("//") || args[count].Contains("-"))
                                 throw new Exception();
                             break;
                     }
@@ -374,8 +381,6 @@ namespace PowerPing
             // only add Control C event handler when sending standard ping
             // (So statistics can still be displayed when ping interupted)
             Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
-
-            //p.ShowOutput = false;
 
             // Send ping
             p.Send(attributes);

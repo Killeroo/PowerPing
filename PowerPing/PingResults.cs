@@ -18,6 +18,7 @@ namespace PowerPing
         public long MaxTime { get; private set; } // Highest ping reply time
         public long MinTime { get; private set; } // Lowest ping reply time
         public long CurTime { get; private set; }// Most recent packet response time
+        // Status (IPStatus enum)
 
         // Local variables
         private Stopwatch operationTimer = new Stopwatch();
@@ -32,8 +33,7 @@ namespace PowerPing
             MinTime = 0;
             CurTime = -1;
 
-            // Start total operation timer
-            /// Add stop option?
+            // Start timing operation
             operationTimer.Start();
         }
 

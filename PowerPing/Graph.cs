@@ -52,6 +52,9 @@ namespace PowerPing
             Draw();
         }
 
+        /// <summary>
+        /// Stores graph drawing loop
+        /// </summary>
         private void Draw()
         {
             // Start ping in background thread
@@ -80,7 +83,7 @@ namespace PowerPing
             }
             
         }
-        /// <summary>
+        ///<summary>
         /// Setup graph
         /// </summary>
         private void Setup() 
@@ -89,6 +92,9 @@ namespace PowerPing
 
             isGraphSetup = true;
         }
+        /// <summary>
+        /// Draw all graph coloums/bars
+        /// </summary>
         private void DrawGraphColumns()
         {
             // Clear columns space before drawing

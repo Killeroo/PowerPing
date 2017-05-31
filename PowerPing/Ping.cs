@@ -101,11 +101,11 @@ namespace PowerPing
             }
             catch (SocketException)
             {
-                PowerPing.Display.Error("Socket Error - Error occured while reading from socket\nPlease try again.", true);
+                PowerPing.Display.Error("Could not read packet from socket");
             }
-            catch (NullReferenceException)
+            catch (Exception)
             {
-                PowerPing.Display.Error("Error fetching local address, connect to a network and try again.", true);
+                PowerPing.Display.Error("General exception occured", true);
             }
         }
         /// <summary>
@@ -197,24 +197,74 @@ namespace PowerPing
         /// <summary>
         /// ICMP flood
         /// </summary>
-        public void Flood()
+        public void Flood(string address)
         {
-            // Setup ping attributes
             PingAttributes attrs = new PingAttributes();
+            Thread[] floodThreads = new Thread[Threads];
+            Ping p = new Ping();
+
+            // Verify address
+            attrs.Address = Helper.VerifyAddress(address, AddressFamily.InterNetwork);
+
+            // Setup ping attributes
             attrs.Interval = 0;
             attrs.Timeout = 100;
+            attrs.Message = "R U Dead Yet?";
             attrs.Continous = true;
 
+            // Disable output for faster speeds
+            p.ShowOutput = false;
+
             // Start threads
-            for (int i = 0; i < Threads - 1; i++)
+            //for (int i = 0; i < Threads - 1; i++)
+            //{
+            //    floodThreads[i] = new Thread(() =>
+            //    {
+            //        Ping p = new Ping();
+            //        //p.ShowOutput = false;
+            //        p.Send(attrs);
+            //    });
+            //    floodThreads[i].IsBackground = true;
+            //    floodThreads[i].Start();
+            //}
+
+            //for (int i = 0; i < Threads - 1; i++)
+            //{
+            //    floodThreads[i].Abort();
+            //}
+
+            // Start flood thread
+            var thread = new Thread(() =>
             {
-                Thread thread = new Thread(() => SendICMP(attrs));
-                //thread.Start();
+                p.Send(attrs);
+            });
+            thread.IsBackground = true;
+            thread.Start();
+
+            IsRunning = true;
+
+            // Results loop 
+            while (IsRunning)
+            {
+                // Update results text
+                Display.FloodResults(p.Results);
+
+                // Check for exit flag
+                if (this.cancelFlag)
+                    break;
+
+                // Wait before updating (save our CPU load)
+                Thread.Sleep(1000);
             }
 
-            // Start operation
+            // Cleanup
+            IsRunning = false;
+            p.Stop();
+            thread.Abort();
 
-            // Add loop here to listen for cancel flag
+            // Display results
+            Display.PingResults(p);
+            
         }
         /// <summary>
         /// Stop any ping operations
@@ -302,12 +352,11 @@ namespace PowerPing
                 try
                 {
                     // Send ping request
-                    /// Try restart here?
                     sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
                     Results.Sent++;
 
                     // Wait for response
-                    byte[] buffer = new byte[1024];
+                    byte[] buffer = new byte[5096];
                     bytesRead = sock.ReceiveFrom(buffer, ref ep);
                     responseTimer.Stop();
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Text;
 
 /// <summary>
 ///  Responsible for displaying ping results, information and other output (designed for console) 
@@ -10,6 +11,20 @@ namespace PowerPing
 
     class Display
     {
+        // Stores console cursor position, used for updating text at position
+        private struct CursorPosition 
+        {
+            public int Left;
+            public int Top;
+
+            public CursorPosition(int l, int t)
+            {
+                Left = l;
+                Top = t;
+            }
+        };
+
+        // ICMP type colour values
         private static ConsoleColor[] typeColors = new ConsoleColor[] {ConsoleColor.DarkGreen, ConsoleColor.Black, ConsoleColor.Black,
                                                                        ConsoleColor.DarkRed, ConsoleColor.DarkMagenta, ConsoleColor.DarkBlue, ConsoleColor.Black,
                                                                        ConsoleColor.Black, ConsoleColor.DarkYellow, ConsoleColor.DarkYellow, ConsoleColor.DarkRed,
@@ -26,6 +41,8 @@ namespace PowerPing
                                                                    "Packet redirected for the ToS & network", "Packet redirected for the ToS & host"};
         private static string[] timeExceedCodeValues = new string[] { "TTL expired in transit", "Fragment reassembly time exceeded" };
         private static string[] badParameterCodeValues = new string[] { "IP header pointer indicates error", "IP header missing an option", "Bad IP header length" };
+        private static StringBuilder sb = new StringBuilder();
+        private static CursorPosition sentPos = new CursorPosition(0, 0); // Stores sent label pos for ping flooding
 
         /// <summary>
         /// Displays help message
@@ -34,36 +51,51 @@ namespace PowerPing
         {
             Version v = Assembly.GetExecutingAssembly().GetName().Version;
             string version = Assembly.GetExecutingAssembly().GetName().Name + " Version " + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ")";
-            Console.WriteLine(version);
-            Console.WriteLine("\nDescription:");
-            Console.WriteLine("     This advanced ping utility provides geoip querying, ICMP packet info");
-            Console.WriteLine("     and result colourization.");
-            Console.WriteLine("\nUsage: PowerPing [--?] | [--whoami] | [--location address] | [--listen] |");
-            Console.WriteLine("                 [--graph address] | [--t] [--c count] [--w timeout] ");
-            Console.WriteLine("                 [--m message] [--i TTL] [--in interval] [--pt type]");
-            Console.WriteLine("                 [--pc code] [--4] target_name");
-            Console.WriteLine("\nOptions:");
-            Console.WriteLine("     --?             Displays this help message");
-            Console.WriteLine("     --t             Ping the target until stopped (Control-C to stop)");
-            Console.WriteLine("     --c count       Number of pings to send");
-            Console.WriteLine("     --w timeout     Time to wait for reply (in milliseconds)");
-            Console.WriteLine("     --m message     Ping packet message");
-            Console.WriteLine("     --i ttl         Time To Live");
-            Console.WriteLine("     --in interval   Interval between each ping (in milliseconds)");
-            Console.WriteLine("     --pt type       Use custom ICMP type");
-            Console.WriteLine("     --pc code       Use custom ICMP code value");
-            Console.WriteLine("     --4             Force using IPv4");
-            //Console.WriteLine("     --6             Force using IPv6");
-            Console.WriteLine();
-            Console.WriteLine("     --whoami        Location info for current host");
-            Console.WriteLine("     --location addr Location info for an address");
-            Console.WriteLine();
-            Console.WriteLine("     --listen        Listen for ICMP packets");
-            Console.WriteLine();
-            Console.WriteLine("     --graph addrs   Ping an address, display results in graph view");
-            Console.WriteLine();
-            Console.WriteLine("\nWritten by Matthew Carney [matthewcarney64@gmail.com] =^-^=");
-            Console.WriteLine("Find the project here [https://github.com/Killeroo/PowerPing]\n");
+
+            // Reset string builder
+            sb.Clear();
+
+            // Add message string
+            sb.AppendLine(version);
+            sb.AppendLine();
+            sb.AppendLine("Description:");
+            sb.AppendLine("     This advanced ping utility provides geoip querying, ICMP packet info");
+            sb.AppendLine("     and result colourization.");
+            sb.AppendLine();
+            sb.AppendLine("Usage: PowerPing [--?] | [--whoami] | [--location address] | [--listen] |");
+            sb.AppendLine("                 [--graph address] | [--flood address] | [--t] [--c count]");
+            sb.AppendLine("                 [--w timeout] [--m message] [--i TTL] [--in interval] ");
+            sb.AppendLine("                 [--pt type] [--pc code] [--4] target_name");
+            sb.AppendLine();
+            sb.AppendLine("Options:");
+            sb.AppendLine("     --?             Displays this help message");
+            sb.AppendLine("     --t             Ping the target until stopped (Control-C to stop)");
+            sb.AppendLine("     --c count       Number of pings to send");
+            sb.AppendLine("     --w timeout     Time to wait for reply (in milliseconds)");
+            sb.AppendLine("     --m message     Ping packet message");
+            sb.AppendLine("     --i ttl         Time To Live");
+            sb.AppendLine("     --in interval   Interval between each ping (in milliseconds)");
+            sb.AppendLine("     --pt type       Use custom ICMP type");
+            sb.AppendLine("     --pc code       Use custom ICMP code value");
+            sb.AppendLine("     --4             Force using IPv4");
+            //sb.AppendLine("     --6             Force using IPv6");
+            sb.AppendLine();
+            sb.AppendLine("     --whoami        Location info for current host");
+            sb.AppendLine("     --location addr Location info for an address");
+            sb.AppendLine();
+            sb.AppendLine("     --listen        Listen for ICMP packets");
+            sb.AppendLine("     --flood addr    Send high volume of ICMP packets to address");
+            sb.AppendLine();
+            sb.AppendLine("     --graph addrs   Ping an address, display results in graph view");
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine("Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=");
+            sb.AppendLine("Find the project here [https://github.com/Killeroo/PowerPing]\n");
+
+            // Print string
+            Console.WriteLine(sb.ToString());
+
+            // Wait for user input
             PowerPing.Helper.Pause();
         }
         /// <summary>
@@ -76,13 +108,19 @@ namespace PowerPing
             // Load ping attributes
             PingAttributes attrs = ping.Attributes;
 
-            Console.Write("\nPinging {0} ", host);
+            // Clear builder
+            sb.Clear();
 
+            // Construct string
+            sb.AppendLine();
+            sb.AppendFormat("Pinging {0} ", host);
             // Only show resolved address if inputted address and resolved address are different
-            if (!String.Equals(host, attrs.Address)) 
-                Console.Write("[{0}] ", attrs.Address);
+            if (!String.Equals(host, attrs.Address))
+                sb.AppendFormat("[{0}] ", attrs.Address);
+            sb.AppendFormat("(Packet message \"{0}\") [Type={1} Code={2}] [TTL={3}]:", attrs.Message, attrs.Type, attrs.Code, attrs.Ttl);
 
-            Console.WriteLine("(Packet message \"{0}\") [Type={1} Code={2}] [TTL={3}]:", attrs.Message, attrs.Type, attrs.Code, attrs.Ttl);
+            // Print string
+            Console.WriteLine(sb.ToString());
         }
         /// <summary>
         /// Display initial listening message
@@ -100,10 +138,17 @@ namespace PowerPing
         /// <param name="replyTime">Time taken before reply recieved in milliseconds</param>
         public static void ReplyPacket(ICMP packet, String address, int index, long replyTime)
         {
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.Write("Reply from: {0} ", address);
-            Console.Write("Seq={0} ", index);
-            Console.Write("Type=");
+
+            // Clear builder
+            sb.Clear();
+
+            // Construct string
+            sb.AppendFormat("Reply from: {0} seq={1} type=", address, index);
+
+            // Print pre type string
+            Console.Write(sb.ToString());
+
+            // Print coloured type
             switch (packet.type)
             {
                 case 0:
@@ -164,6 +209,8 @@ namespace PowerPing
                     break;
             }
             Console.BackgroundColor = ConsoleColor.Black;
+
+            // Print coloured time segment
             Console.Write(" time=");
             if (replyTime <= 100L)
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -174,6 +221,7 @@ namespace PowerPing
             Console.Write("{0}ms ", replyTime < 1 ? "<1" : replyTime.ToString());
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.WriteLine();
+
         }
         /// <summary>
         /// Display information about a captured packet
@@ -245,6 +293,34 @@ namespace PowerPing
             PowerPing.Helper.Pause(true);
         }
         /// <summary>
+        /// Displays and updates results of an ICMP flood
+        /// </summary>
+        /// <param name="results"></param>
+        public static void FloodResults(PingResults results)
+        {
+            if (sentPos.Left > 0) // Check if labels have already been drawn
+            {
+                // Update labels
+                Console.CursorVisible = false;
+                CursorPosition originalPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                Console.SetCursorPosition(sentPos.Left, sentPos.Top);
+                Console.Write(results.Sent);
+                Console.SetCursorPosition(originalPos.Left, originalPos.Top);
+                Console.CursorVisible = true;
+            }
+            else 
+            {
+                // Draw labels
+                Console.WriteLine("Flooding...");
+                Console.WriteLine("Threads: 1");
+                Console.Write("Sent: ");
+                sentPos.Left = Console.CursorLeft;
+                sentPos.Top = Console.CursorTop;
+                Console.WriteLine("0");
+                Console.WriteLine("Press Control-C to stop...");
+            }
+        }
+        /// <summary>
         /// Display Timeout message
         /// </summary>
         public static void PingTimeout()
@@ -262,14 +338,12 @@ namespace PowerPing
         /// <param name="exit">Whether to exit program after displaying error</param>
         public static void Error(String errorMessage, bool exit = false, bool pause = false)
         {
-            Console.BackgroundColor = ConsoleColor.DarkYellow;
-            Console.ForegroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.Yellow;
 
             // Write error message
             Console.WriteLine("ERROR: " + errorMessage);
 
             // Reset console colours
-            Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Gray;
 
             if (pause)
