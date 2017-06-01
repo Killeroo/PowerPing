@@ -6,8 +6,9 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
 
 ## Usage: 
      PowerPing [--?] | [--whoami] | [--location address] | [--listen] |
-               [--graph address] | [--t] [--c count] [--w timeout] [--m message] 
-               [--i TTL] [--in interval] [--pt type] [--pc code] [--4] target_name
+               [--graph address] | [--flood address] | [--t] [--c count] [--w timeout]
+               [--m message] [--i TTL] [--in interval] [--pt type] [--pc code]
+               [--4] target_name
 
 ## Arguments:
      --?             Displays this help message
@@ -27,6 +28,7 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
      --location addr Location info for an address
      
      --listen        Listen for ICMP packets
+     --flood addr    Send high volume of ICMP packets to address
 
 ## Examples:
      powerping 8.8.8.8                    -     Send ping to google DNS with default values (3000ms timeout, 5 pings)
@@ -43,8 +45,8 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
 - [x] Detailed graph and statistical views
 - [x] IP location querying and whoami 
 - [x] Send pings with custom types and size
+- [x] Ping flooding
 - [ ] Local network scanning and host discovery
-- [ ] Ping Flooding
 - [ ] Trace route functionality
 - [ ] Full IPv6 support
 
