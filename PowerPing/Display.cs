@@ -42,7 +42,11 @@ namespace PowerPing
         private static string[] timeExceedCodeValues = new string[] { "TTL expired in transit", "Fragment reassembly time exceeded" };
         private static string[] badParameterCodeValues = new string[] { "IP header pointer indicates error", "IP header missing an option", "Bad IP header length" };
         private static StringBuilder sb = new StringBuilder();
+
+        // Flood results variables
         private static CursorPosition sentPos = new CursorPosition(0, 0); // Stores sent label pos for ping flooding
+        private static CursorPosition ppsLabel = new CursorPosition(0, 0); // Stores Pings per Second (pps) label 
+        private static int sentPings = 0; // Used to work out pings per second during ping flooding
 
         /// <summary>
         /// Displays help message
@@ -302,9 +306,17 @@ namespace PowerPing
             {
                 // Update labels
                 Console.CursorVisible = false;
+                // Store original cursor position
                 CursorPosition originalPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                // Update Sent label
                 Console.SetCursorPosition(sentPos.Left, sentPos.Top);
                 Console.Write(results.Sent);
+                // Update Pings per Second label
+                Console.SetCursorPosition(ppsLabel.Left, ppsLabel.Top);
+                Console.Write("          "); // Blank first
+                Console.SetCursorPosition(ppsLabel.Left, ppsLabel.Top);
+                Console.Write(results.Sent - sentPings);
+                // Reset to original cursor position
                 Console.SetCursorPosition(originalPos.Left, originalPos.Top);
                 Console.CursorVisible = true;
             }
@@ -317,8 +329,14 @@ namespace PowerPing
                 sentPos.Left = Console.CursorLeft;
                 sentPos.Top = Console.CursorTop;
                 Console.WriteLine("0");
+                Console.Write("Pings per Second: ");
+                ppsLabel.Left = Console.CursorLeft;
+                ppsLabel.Top = Console.CursorTop;
+                Console.WriteLine();
                 Console.WriteLine("Press Control-C to stop...");
             }
+
+            sentPings = results.Sent;
         }
         /// <summary>
         /// Display Timeout message
