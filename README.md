@@ -6,9 +6,9 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
 
 ## Usage: 
      PowerPing [--?] | [--whoami] | [--location address] | [--listen] |
-               [--graph address] | [--flood address] | [--t] [--c count] [--w timeout]
-               [--m message] [--i TTL] [--in interval] [--pt type] [--pc code]
-               [--4] target_name
+               [--graph address] | [--compactgraph address] | [--flood address] | 
+               [--t] [--c count] [--w timeout] [--m message] [--i TTL] [--in interval]
+               [--pt type] [--pc code] [--4] target_name
 
 ## Arguments:
      --?             Displays this help message
@@ -23,6 +23,7 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
      --4             Force using IPv4
      
      --graph address Ping an address, display results in graph view
+     --compactgraph  Ping address, use compact graph view
      
      --whoami        Location info for current host
      --location addr Location info for an address
