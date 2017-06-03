@@ -11,7 +11,7 @@ namespace PowerPing
         const string HALF_BAR_BLOCK_CHAR = "▄";
 
         // Properties
-        public bool CompactGraph = true;
+        public bool CompactGraph = false;
 
         // Local variable declaration
         private Ping graphPing = new Ping();
@@ -34,7 +34,7 @@ namespace PowerPing
         public Graph(string address)
         {
             // Setup ping attributes
-            graphPingAttrs.Address = address;
+            graphPingAttrs.Address = Helper.VerifyAddress(address, System.Net.Sockets.AddressFamily.InterNetwork);
             graphPingAttrs.Continous = true;
             graphPing.ShowOutput = false;
         }
@@ -88,6 +88,10 @@ namespace PowerPing
         /// </summary>
         private void Setup() 
         {
+            // Determine Xaxis size
+            if (!CompactGraph)
+                xAxisLength = Console.WindowWidth - 20;
+
             DrawBackground();
 
             isGraphSetup = true;
@@ -118,7 +122,7 @@ namespace PowerPing
         private void DrawBackground()
         {
             // Draw title
-            Console.WriteLine("                       (PowerPing - Graph View)");
+            Console.WriteLine("{0}(PowerPing - Graph View)", new String(' ', xAxisLength / 2));
             //Console.WriteLine();
 
             // Draw Y axis of graph
@@ -169,8 +173,8 @@ namespace PowerPing
             Console.WriteLine();
 
             // Draw info (and get location info for each label)
-            Console.WriteLine("                 Packet Statistics:");
-            Console.WriteLine("                {0}", new String('-', xAxisLength));
+            Console.WriteLine("                 Ping Statistics:");
+            Console.WriteLine("                ---------------------------------------------");
             Console.WriteLine("                 Destination [ {0} ]", graphPingAttrs.Address);
 
             Console.Write("                     Sent: ");

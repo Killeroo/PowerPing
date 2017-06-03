@@ -67,8 +67,8 @@ namespace PowerPing
             sb.AppendLine("     and result colourization.");
             sb.AppendLine();
             sb.AppendLine("Usage: PowerPing [--?] | [--whoami] | [--location address] | [--listen] |");
-            sb.AppendLine("                 [--graph address] | [--flood address] | [--t] [--c count]");
-            sb.AppendLine("                 [--w timeout] [--m message] [--i TTL] [--in interval] ");
+            sb.AppendLine("                 [--graph address] | [--compactgraph address] | [--flood address] |");
+            sb.AppendLine("                 [--t] [--c count] [--w timeout] [--m message] [--i TTL] [--in interval] ");
             sb.AppendLine("                 [--pt type] [--pc code] [--4] target_name");
             sb.AppendLine();
             sb.AppendLine("Options:");
@@ -90,7 +90,8 @@ namespace PowerPing
             sb.AppendLine("     --listen        Listen for ICMP packets");
             sb.AppendLine("     --flood addr    Send high volume of ICMP packets to address");
             sb.AppendLine();
-            sb.AppendLine("     --graph addrs   Ping an address, display results in graph view");
+            sb.AppendLine("     --graph addrs   Ping address, display results in graph view");
+            sb.AppendLine("     --compactgraph  Ping address, use compact graph view");
             sb.AppendLine();
             sb.AppendLine();
             sb.AppendLine("Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=");

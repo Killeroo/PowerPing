@@ -236,6 +236,7 @@ namespace PowerPing
             // Local variables 
             bool addrFound = false;
             PingAttributes attributes = new PingAttributes();
+            Graph g = null;
 
             // Check if no arguments
             if (args.Length == 0)
@@ -243,8 +244,7 @@ namespace PowerPing
                 PowerPing.Display.Help();
                 return;
             }
-
-            // ADD TYPE AND CODE
+            
             // Loop through arguments
             try
             {
@@ -273,7 +273,7 @@ namespace PowerPing
                             if (args[count + 1].Contains("--") || args[count + 1].Contains("//") || args[count + 1].Contains("-"))
                                 throw new FormatException();
                             attributes.Message = args[count + 1];
-                            /// Add Length check
+                            /// TODO: Add Length check
                             break;
                         case "/i":
                         case "-i":
@@ -338,7 +338,14 @@ namespace PowerPing
                         case "/graph":
                         case "-graph":
                         case "--graph": // Graph view
-                            Graph g = new Graph(args[count + 1]);
+                            g = new Graph(args[count + 1]);
+                            g.Start();
+                            break;
+                        case "/compactgraph":
+                        case "-compactgraph":
+                        case "--compactgraph": // Compact graph view
+                            g = new Graph(args[count + 1]);
+                            g.CompactGraph = true;
                             g.Start();
                             break;
                         case "/flood":
