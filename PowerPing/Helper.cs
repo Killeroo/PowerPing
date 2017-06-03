@@ -38,7 +38,8 @@ namespace PowerPing
                         Console.WriteLine("Queried address: --{0}--", addr);
                         foreach (XmlElement element in elements)
                             Console.WriteLine(element.Name + ": " + (element.InnerText == "" ? "NA" : element.InnerText));
-                        Console.WriteLine("(IP location info by freegeoip.net)");
+                        Console.WriteLine("DNS Lookup: --{0}--", Helper.VerifyAddress(addr, AddressFamily.InterNetwork));
+                        Console.WriteLine("(IP location info from freegeoip.net)");
                     }
                     else
                     {

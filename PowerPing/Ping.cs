@@ -27,7 +27,7 @@ namespace PowerPing
         public int Threads { get; set; } = 5;
 
         // Local variables
-        private ConcurrentStack<IPAddress> activeHosts = new ConcurrentStack<IPAddress>(); // Stores found hosts during Scan()
+        private ConcurrentStack<string> activeHosts = new ConcurrentStack<string>(); // Stores found hosts during Scan()
         private bool cancelFlag = false;
 
         // Constructor
@@ -118,81 +118,78 @@ namespace PowerPing
         /// <param name="range"></param>
         public void Scan(string range, bool recursing = false)
         {
-            List<IPAddress> scanList = new List<IPAddress>();
+            List<string> scanList = new List<string>(); // List of addresses to scan
             String[] ipSegments = range.Split('.');
+            List<string>[] addressLists = new List<string>[Threads]; // Lists of addresses to be scanned in each thread
+            PingAttributes attrs = new PingAttributes();
 
-            if (!recursing)
+            // Check format of address (for '-'s and disallow multipl '-'s in one segment, also check format of address
+            if (!range.Contains("-"))
+                Display.Error("Scan - No range specified, must be specified in format: 192.168.1.1-254", true, true);
+
+            // Holds the ranges for each ip segment
+            int[] segLower = new int[4];
+            int[] segUpper = new int[4];
+
+            // Work out upper and lower ranges for each segment
+            for (int y = 0; y < 4; y++)
             {
-                // Setup scan
+                string[] ranges = ipSegments[y].Split('-');
+                segLower[y] = Convert.ToInt16(ranges[0]);
+                segUpper[y] = (ranges.Length == 1) ? segLower[y] : Convert.ToInt16(ranges[1]);
+            }
 
-                // Check format of address (for '-'s and disallow multipl '-'s in one segment, also check format of address
-
-
-                // Holds the ranges for each ip segment
-                int[] segLower = new int[4];
-                int[] segUpper = new int[4];
-
-                // Work out upper and lower ranges for each segment
-                for (int y = 0; y < 4; y++)
+            // Build list of addresses from ranges
+            for (int seg1 = segLower[0]; seg1 <= segUpper[0]; seg1++)
+            {
+                for (int seg2 = segLower[1]; seg2 <= segUpper[1]; seg2++)
                 {
-                    string[] ranges = ipSegments[y].Split('-');
-                    segLower[y] = Convert.ToInt16(ranges[0]);
-                    segUpper[y] = (ranges.Length == 1) ? segLower[y] : Convert.ToInt16(ranges[1]);
-                }
-
-                // Build list of addresses from ranges
-                for (int seg1 = segLower[0]; seg1 <= segUpper[0]; seg1++)
-                {
-                    for (int seg2 = segLower[1]; seg2 <= segUpper[1]; seg2++)
+                    for (int seg3 = segLower[2]; seg3 <= segUpper[2]; seg3++)
                     {
-                        for (int seg3 = segLower[2]; seg3 <= segUpper[2]; seg3++)
+                        for (int seg4 = segLower[3]; seg4 <= segUpper[3]; seg4++)
                         {
-                            for (int seg4 = segLower[3]; seg4 <= segUpper[3]; seg4++)
-                            {
-                                scanList.Add(new IPAddress(new byte[] { (byte)seg1, (byte)seg2, (byte)seg3, (byte)seg4 }));
-                            }
+                            scanList.Add(new IPAddress(new byte[] { (byte)seg1, (byte)seg2, (byte)seg3, (byte)seg4 }).ToString());
                         }
                     }
                 }
-
-                // Divide scanlist into lists for each thread
-                List<IPAddress>[] threadLists = new List<IPAddress>[Threads];
-                int splitListSize = (int)Math.Ceiling(scanList.Count / (double)Threads);
-                int x = 0;
-
-                for (int i = 0; i < threadLists.Length; i++)
-                {
-                    threadLists[i] = new List<IPAddress>();
-                    for (int j = x; j < x + splitListSize; j++)
-                    {
-                        if (j >= scanList.Count)
-                            break; // Stop if we are out of bounds
-                        threadLists[i].Add(scanList[j]);
-                    }
-                    x += splitListSize;
-                }
-
-                // *Bug here*
-                // Finally, fire up the threads!
-                for (int i = 0; i < Threads - 1; i++)
-                {
-                    //Thread thread = new Thread(() => ScanThread(threadLists[i]));
-                    //thread.Start();
-                }
-
-                // Display results of scan
-                PowerPing.Display.ScanResult(scanList.Count, activeHosts.Count);
             }
-            else
+
+            // Divide scanlist into lists for each thread
+            int splitListSize = (int)Math.Ceiling(scanList.Count / (double)Threads);
+            int x = 0;
+
+            for (int i = 0; i < addressLists.Length; i++)
             {
-                // Recursive ping sender
-
-                // Setup ping attributes
-                PingAttributes attrs = new PingAttributes();
-
-                // Start ping operation
-
+                addressLists[i] = new List<string>();
+                for (int j = x; j < x + splitListSize; j++)
+                {
+                    if (j >= scanList.Count)
+                        break; // Stop if we are out of bounds
+                    addressLists[i].Add(scanList[j]);
+                }
+                x += splitListSize;
             }
+
+            // Setup scan ping attributes
+            attrs.Timeout = 500;
+            attrs.Interval = 0;
+            attrs.OpType = OperationTypes.Scanning;
+            
+            // Finally, fire up the threads!
+            for (int i = 0; i < Threads - 1; i++)
+            {
+                Thread thread = new Thread(() =>
+                {
+                    attrs.AddressList = addressLists[i].ToArray();
+                    Ping p = new Ping();
+                    p.Send(attrs);
+                });
+                thread.IsBackground = true;
+                thread.Start();
+            }
+
+            // Display results of scan
+            PowerPing.Display.ScanResult(scanList.Count, activeHosts.Count);
         }
         /// <summary>
         /// ICMP flood
@@ -210,6 +207,7 @@ namespace PowerPing
             attrs.Interval = 0;
             attrs.Timeout = 100;
             attrs.Message = "R U Dead Yet?";
+            attrs.OpType = OperationTypes.Flooding;
             attrs.Continous = true;
 
             // Disable output for faster speeds
@@ -365,9 +363,10 @@ namespace PowerPing
 
                     // Display reply packet
                     if (ShowOutput)
-                        PowerPing.Display.ReplyPacket(response, ep.ToString(), index, responseTimer.ElapsedMilliseconds);
+                        PowerPing.Display.ReplyPacket(response, ep.ToString(), index, responseTimer.ElapsedMilliseconds, bytesRead);
 
-                    // Store response time
+                    // Store response info
+                    Results.SetPacketType(response.type);
                     Results.SetCurResponseTime(responseTimer.ElapsedMilliseconds);
                     Results.Recieved++;
 

@@ -50,6 +50,7 @@
     <Compile Include="Graph.cs" />
     <Compile Include="ICMP.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="OperationTypes.cs" />
     <Compile Include="Ping.cs" />
     <Compile Include="PingAttributes.cs" />
     <Compile Include="PingResults.cs" />

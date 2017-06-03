@@ -13,12 +13,14 @@ namespace PowerPing
         // Properties
         public TimeSpan TotalRunTime { get { return operationTimer.Elapsed; } } // Total ping operation runtime
         public int Sent { get; set; } // Number of sent ping packets
-        public int Recieved { get; set; } // Number of recieved reply packets
+        public int Recieved { get; set; } // Number of recieved packets
         public int Lost { get; set; }  // Amount of lost packets
         public long MaxTime { get; private set; } // Highest ping reply time
         public long MinTime { get; private set; } // Lowest ping reply time
-        public long CurTime { get; private set; }// Most recent packet response time
-        // Status (IPStatus enum)
+        public long CurTime { get; private set; } // Most recent packet response time
+        public int ErrorPackets { get; private set; } // Number of Error packet recieved
+        public int GoodPackets { get; private set; } // Number of good replies recieved
+        public int OtherPackets { get; private set; } // Number of other packet types recieved
 
         // Local variables
         private Stopwatch operationTimer = new Stopwatch();
@@ -32,6 +34,9 @@ namespace PowerPing
             MaxTime = 0;
             MinTime = 0;
             CurTime = -1;
+            ErrorPackets = 0;
+            GoodPackets = 0;
+            OtherPackets = 0;
 
             // Start timing operation
             operationTimer.Start();
@@ -53,6 +58,19 @@ namespace PowerPing
                 MinTime = time;
 
             CurTime = time;
+        }
+
+        public void SetPacketType(int type)
+        {
+            if (type == 0)
+                // Successful replies
+                GoodPackets++;
+            else if (type == 3 || type == 4 || type == 5 || type == 11)
+                // Error packet types
+                ErrorPackets++;
+            else
+                // Other packet type
+                OtherPackets++;
         }
     }
 

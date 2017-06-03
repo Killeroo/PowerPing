@@ -141,14 +141,14 @@ namespace PowerPing
         /// <param name="address">Reply address</param>
         /// <param name="index">Sequence number</param>
         /// <param name="replyTime">Time taken before reply recieved in milliseconds</param>
-        public static void ReplyPacket(ICMP packet, String address, int index, long replyTime)
+        public static void ReplyPacket(ICMP packet, String address, int index, long replyTime, int bytesRead)
         {
 
             // Clear builder
             sb.Clear();
 
             // Construct string
-            sb.AppendFormat("Reply from: {0} seq={1} type=", address, index);
+            sb.AppendFormat("Reply from: {0} seq={1} bytes={2} type=", address, index, bytesRead);
 
             // Print pre type string
             Console.Write(sb.ToString());
@@ -268,7 +268,7 @@ namespace PowerPing
             percent = Math.Round(percent * 100, 1);
             Console.WriteLine("\nPing statistics for {0}:", attrs.Address);
 
-            Console.Write("     Packet: Sent ");
+            Console.Write("     Sent ");//Packet: Sent ");
             Console.BackgroundColor = ConsoleColor.Yellow;
             Console.ForegroundColor = ConsoleColor.Black;
             Console.Write("[ " + results.Sent + " ]");
@@ -290,6 +290,20 @@ namespace PowerPing
 
             Console.WriteLine("Response times:");
             Console.WriteLine("     Minimum [ {0}ms ], Maximum [ {1}ms ]", results.MinTime, results.MaxTime);
+
+            Console.WriteLine("Packet types:");
+            Console.Write("     ");
+            Console.BackgroundColor = ConsoleColor.DarkGreen;
+            Console.Write(" Good = {0} ", results.GoodPackets);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.Write(" ");
+            Console.BackgroundColor = ConsoleColor.DarkRed;
+            Console.Write(" Errors = {0} ", results.ErrorPackets);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.Write(" ");
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.WriteLine(" Unknown = {0} ", results.OtherPackets);
+            Console.BackgroundColor = ConsoleColor.Black;
 
             Console.WriteLine("Total elapsed time (HH:MM:SS.FFF): {0:hh\\:mm\\:ss\\.fff}", results.TotalRunTime);
             Console.WriteLine();
