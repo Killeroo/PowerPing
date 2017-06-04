@@ -66,6 +66,7 @@ namespace PowerPing
         {
             IPAddress localAddress = null;
             Socket listeningSocket = null;
+            PingResults results = new PingResults();
 
             // Find local address
             foreach (var ip in Dns.GetHostEntry(Dns.GetHostName()).AddressList)
@@ -97,11 +98,16 @@ namespace PowerPing
 
                     // Display captured packet
                     PowerPing.Display.CapturedPacket(response, remoteEndPoint.ToString(), DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead);
+
+                    // Store results
+                    results.SetPacketType(response.type);
+                    results.Recieved++;
                 }
             }
             catch (SocketException)
             {
                 PowerPing.Display.Error("Could not read packet from socket");
+                results.Lost++;
             }
             catch (Exception)
             {
@@ -369,7 +375,6 @@ namespace PowerPing
                     Results.SetPacketType(response.type);
                     Results.SetCurResponseTime(responseTimer.ElapsedMilliseconds);
                     Results.Recieved++;
-
                 }
                 catch (IOException)
                 {

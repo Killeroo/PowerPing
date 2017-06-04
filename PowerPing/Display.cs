@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Reflection;
 using System.Text;
+using System.Linq;
+using System.Collections;
 
 /// <summary>
 ///  Responsible for displaying ping results, information and other output (designed for console) 
@@ -11,6 +13,11 @@ namespace PowerPing
 
     class Display
     {
+        // Properties
+        public static bool Short = false;
+        public static bool NoColor = false;
+        public static bool DisplayMessage = false;
+
         // Stores console cursor position, used for updating text at position
         private struct CursorPosition 
         {
@@ -24,12 +31,29 @@ namespace PowerPing
             }
         };
 
-        // ICMP type colour values
-        private static ConsoleColor[] typeColors = new ConsoleColor[] {ConsoleColor.DarkGreen, ConsoleColor.Black, ConsoleColor.Black,
-                                                                       ConsoleColor.DarkRed, ConsoleColor.DarkMagenta, ConsoleColor.DarkBlue, ConsoleColor.Black,
-                                                                       ConsoleColor.Black, ConsoleColor.DarkYellow, ConsoleColor.DarkYellow, ConsoleColor.DarkRed,
-                                                                       ConsoleColor.DarkRed, ConsoleColor.DarkBlue, ConsoleColor.DarkBlue, ConsoleColor.DarkBlue,
-                                                                       ConsoleColor.DarkBlue};
+        // ICMP types and colour values
+        private static string[] packetTypes = new string[] {"ECHO REPLY", "UNASSIGNED", "UNASSIGNED", "DESTINATION UNREACHABLE", "SOURCE QUENCH (DEP)", "PING REDIRECT",
+                                                            "ALTERNATE HOST ADDRESS (DEP)", "UNASSIGNED", "ECHO REQUEST", "ROUTER ADVERTISEMENT", "ROUTER SOLICITATION",
+                                                            "TIME EXCEEDED", "PARAMETER PROBLEM", "TIMESTAMP REQUEST", "TIMESTAMP REPLY", "INFORMATION REQUEST (DEP)",
+                                                            "INFORMATION REPLY (DEP)", "ADDRESS MASK REQUEST (DEP)", "ADDRESS MASK REPLY (DEP)", "RESERVED FOR SECURITY",
+                                                            "RESERVED FOR ROBUSTNESS EXPERIMENT", "RESERVED FOR ROBUSTNESS EXPERIMENT", "RESERVED FOR ROBUSTNESS EXPERIMENT",
+                                                            "RESERVED FOR ROBUSTNESS EXPERIMENT", "RESERVED FOR ROBUSTNESS EXPERIMENT", "RESERVED FOR ROBUSTNESS EXPERIMENT",
+                                                            "RESERVED FOR ROBUSTNESS EXPERIMENT", "RESERVED FOR ROBUSTNESS EXPERIMENT", "RESERVED FOR ROBUSTNESS EXPERIMENT",
+                                                            "TRACEROUTE (DEP)", "DATAGRAM CONVERSATION ERROR (DEP)", "MOBILE HOST REDIRECT (DEP)", "IPv6 WHERE-ARE-YOU (DEP)",
+                                                            "IPv6 HERE-I-AM (DEP)", "MOBILE REGISTRATION REQUEST (DEP)", "MOBILE REGISTRATION REPLY (DEP)", "DOMAIN NAME REQUEST (DEP)",
+                                                            "DOMAIN NAME REPLY (DEP)", "SKIP ALGORITHM DISCOVERY PROTOCOL (DEP)", "PHOTURIS PROTOCOL SECURITY FAILURES",
+                                                            "EXPERIMENTAL"};
+        private static ConsoleColor[] typeColors = new ConsoleColor[] { ConsoleColor.DarkGreen, ConsoleColor.Black, ConsoleColor.Black, ConsoleColor.DarkRed, 
+                                                                        ConsoleColor.DarkMagenta, ConsoleColor.DarkBlue, ConsoleColor.DarkMagenta, ConsoleColor.Black,
+                                                                        ConsoleColor.DarkYellow, ConsoleColor.DarkCyan, ConsoleColor.DarkCyan, ConsoleColor.DarkRed,
+                                                                        ConsoleColor.DarkRed, ConsoleColor.DarkBlue, ConsoleColor.DarkBlue,ConsoleColor.DarkMagenta,
+                                                                        ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta, ConsoleColor.White,
+                                                                        ConsoleColor.White, ConsoleColor.White, ConsoleColor.White, ConsoleColor.White,
+                                                                        ConsoleColor.White, ConsoleColor.White, ConsoleColor.White, ConsoleColor.White,
+                                                                        ConsoleColor.White, ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta,
+                                                                        ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta,
+                                                                        ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta, ConsoleColor.DarkRed,
+                                                                        ConsoleColor.White};
 
         // Type code values
         private static string[] destUnreachableCodeValues = new string[] {"Network unreachable", "Host unreachable", "Protocol unreachable",
@@ -69,7 +93,7 @@ namespace PowerPing
             sb.AppendLine("Usage: PowerPing [--?] | [--whoami] | [--location address] | [--listen] |");
             sb.AppendLine("                 [--graph address] | [--compactgraph address] | [--flood address] |");
             sb.AppendLine("                 [--t] [--c count] [--w timeout] [--m message] [--i TTL] [--in interval] ");
-            sb.AppendLine("                 [--pt type] [--pc code] [--4] target_name");
+            sb.AppendLine("                 [--pt type] [--pc code] [--dm] [--4] [--short] [--nocolor] target_name");
             sb.AppendLine();
             sb.AppendLine("Options:");
             sb.AppendLine("     --?             Displays this help message");
@@ -81,13 +105,16 @@ namespace PowerPing
             sb.AppendLine("     --in interval   Interval between each ping (in milliseconds)");
             sb.AppendLine("     --pt type       Use custom ICMP type");
             sb.AppendLine("     --pc code       Use custom ICMP code value");
+            sb.AppendLine("     --dm            Display contents of ICMP message field");
             sb.AppendLine("     --4             Force using IPv4");
             //sb.AppendLine("     --6             Force using IPv6");
+            sb.AppendLine("     --short         Use shorter messages");
+            sb.AppendLine("     --nocolor       Do not colourize ping results");
             sb.AppendLine();
             sb.AppendLine("     --whoami        Location info for current host");
             sb.AppendLine("     --location addr Location info for an address");
             sb.AppendLine();
-            sb.AppendLine("     --listen        Listen for ICMP packets");
+            sb.AppendLine("     --listen        Listen for all ICMP packet activity on computer");
             sb.AppendLine("     --flood addr    Send high volume of ICMP packets to address");
             sb.AppendLine();
             sb.AppendLine("     --graph addrs   Ping address, display results in graph view");
@@ -119,10 +146,13 @@ namespace PowerPing
             // Construct string
             sb.AppendLine();
             sb.AppendFormat("Pinging {0} ", host);
-            // Only show resolved address if inputted address and resolved address are different
             if (!String.Equals(host, attrs.Address))
+                // Only show resolved address if inputted address and resolved address are different
                 sb.AppendFormat("[{0}] ", attrs.Address);
-            sb.AppendFormat("(Packet message \"{0}\") [Type={1} Code={2}] [TTL={3}]:", attrs.Message, attrs.Type, attrs.Code, attrs.Ttl);
+            if (!Short)
+                // Only show extra detail when not in Short mode
+                sb.AppendFormat("(Packet message \"{0}\") [Type={1} Code={2}] ", attrs.Message, attrs.Type, attrs.Code);
+            sb.AppendFormat("[TTL={0}]:", attrs.Ttl);
 
             // Print string
             Console.WriteLine(sb.ToString());
@@ -143,77 +173,47 @@ namespace PowerPing
         /// <param name="replyTime">Time taken before reply recieved in milliseconds</param>
         public static void ReplyPacket(ICMP packet, String address, int index, long replyTime, int bytesRead)
         {
+            // Display with no colour
+            if (NoColor)
+            {
+                if (Short) // Show short hand reply
+                    Console.WriteLine("Reply from: {0} type={1} time={2}ms", address, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type], replyTime);
+                else
+                    Console.WriteLine("Reply from: {0} seq={1} bytes={2} type={3} time={4}ms", address, index, bytesRead, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type], replyTime);
+                return;
+            }
 
-            // Clear builder
-            sb.Clear();
-
-            // Construct string
-            sb.AppendFormat("Reply from: {0} seq={1} bytes={2} type=", address, index, bytesRead);
-
-            // Print pre type string
-            Console.Write(sb.ToString());
+            // Show shortened or normal reply info
+            if (Short)
+                Console.Write("Reply from: {0} type=", address);
+            else
+                Console.Write("Reply from: {0} seq={1} bytes={2} type=", address, index, bytesRead);
 
             // Print coloured type
-            switch (packet.type)
+            Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
+            switch (packet.type) // Display speific type code values
             {
-                case 0:
-                    Console.BackgroundColor = ConsoleColor.DarkGreen;
-                    Console.Write("ECHO REPLY");
-                    break;
-                case 8:
-                    Console.BackgroundColor = ConsoleColor.DarkYellow;
-                    Console.Write("ECHO REQUEST");
-                    break;
                 case 3:
-                    Console.BackgroundColor = ConsoleColor.DarkRed;
-                    Console.Write(packet.code > 13 ? "DESTINATION UNREACHABLE" : destUnreachableCodeValues[packet.code].ToUpper());
-                    break;
-                case 4:
-                    Console.BackgroundColor = ConsoleColor.DarkMagenta;
-                    Console.Write("SOURCE QUENCH");
+                    Console.Write(packet.code > destUnreachableCodeValues.Length ? packetTypes[packet.type] : destUnreachableCodeValues[packet.code]);
                     break;
                 case 5:
-                    Console.BackgroundColor = ConsoleColor.DarkBlue;
-                    Console.Write(packet.code > 3 ? "PING REDIRECT" : redirectCodeValues[packet.code].ToUpper());
-                    break;
-                case 9:
-                    Console.BackgroundColor = ConsoleColor.DarkYellow;
-                    Console.Write("ROUTER ADVERTISEMENT");
-                    break;
-                case 10:
-                    Console.BackgroundColor = ConsoleColor.DarkYellow;
-                    Console.Write("ROUTER SOLICITATION");
+                    Console.Write(packet.code > redirectCodeValues.Length ? packetTypes[packet.type] : redirectCodeValues[packet.code]);
                     break;
                 case 11:
-                    Console.BackgroundColor = ConsoleColor.DarkRed;
-                    Console.Write(packet.code > 1 ? "TIME EXCEEDED" : timeExceedCodeValues[packet.code].ToUpper());
+                    Console.Write(packet.code > timeExceedCodeValues.Length ? packetTypes[packet.type] : timeExceedCodeValues[packet.code]);
                     break;
                 case 12:
-                    Console.BackgroundColor = ConsoleColor.DarkRed;
-                    Console.Write(packet.code > 2 ? "PARAMETER PROBLEM" : badParameterCodeValues[packet.code].ToUpper());
-                    break;
-                case 13:
-                    Console.BackgroundColor = ConsoleColor.DarkBlue;
-                    Console.Write("TIMESTAMP REQUEST");
-                    break;
-                case 14:
-                    Console.BackgroundColor = ConsoleColor.DarkBlue;
-                    Console.Write("TIMESTAMP REPLY");
-                    break;
-                case 15:
-                    Console.BackgroundColor = ConsoleColor.DarkBlue;
-                    Console.Write("INFORMATION REQUEST");
-                    break;
-                case 16:
-                    Console.BackgroundColor = ConsoleColor.DarkBlue;
-                    Console.Write("INFORMATION REPLY");
+                    Console.Write(packet.code > badParameterCodeValues.Length ? packetTypes[packet.type] : badParameterCodeValues[packet.code]);
                     break;
                 default:
-                    Console.BackgroundColor = ConsoleColor.DarkYellow;
-                    Console.Write("UNKNOWN TYPE");
+                    Console.Write(packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type]);
                     break;
             }
             Console.BackgroundColor = ConsoleColor.Black;
+
+            // Display ICMP message (if specified)
+            if (DisplayMessage)
+                Console.Write(" msg=\"{0}\"", new string(Encoding.ASCII.GetString(packet.message).Where(c => !char.IsControl(c)).ToArray()));
 
             // Print coloured time segment
             Console.Write(" time=");
@@ -234,8 +234,8 @@ namespace PowerPing
         public static void CapturedPacket(ICMP packet, String address, String timeRecieved, int bytesRead)
         {
             // Display captured packet
-            Console.BackgroundColor = packet.type > 15 ? ConsoleColor.Black : typeColors[packet.type];
-            Console.ForegroundColor = packet.type < 16 ? ConsoleColor.Black : ConsoleColor.Gray;
+            Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
+            //Console.ForegroundColor = packet.type < 16 ? ConsoleColor.Black : ConsoleColor.Gray;
             Console.WriteLine("{0}: ICMPv4: {1} bytes from {2} [type {3}] [code {4}]", timeRecieved, bytesRead, address, packet.type, packet.code);
 
             // Reset console colours

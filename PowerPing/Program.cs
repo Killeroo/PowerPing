@@ -295,6 +295,11 @@ namespace PowerPing
                         case "--pc": // Ping code
                             attributes.Code = Convert.ToByte(args[count + 1]);
                             break;
+                        case "/dm":
+                        case "-dm":
+                        case "--dm": // Display packet message
+                            Display.DisplayMessage = true;
+                            break;
                         case "/4":
                         case "-4":
                         case "--4": // Force ping with IPv4
@@ -316,6 +321,16 @@ namespace PowerPing
                         case "--?": // Display help message
                             PowerPing.Display.Help();
                             Environment.Exit(0);
+                            break;
+                        case "/short":
+                        case "-short":
+                        case "--short": // Use short hand messages
+                            Display.Short = true;
+                            break;
+                        case "/nocolor":
+                        case "-nocolor":
+                        case "--nocolor": // No color mode
+                            Display.NoColor = true;
                             break;
                         case "/whoami":
                         case "-whoami":

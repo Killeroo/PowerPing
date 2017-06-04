@@ -8,7 +8,7 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
      PowerPing [--?] | [--whoami] | [--location address] | [--listen] |
                [--graph address] | [--compactgraph address] | [--flood address] | 
                [--t] [--c count] [--w timeout] [--m message] [--i TTL] [--in interval]
-               [--pt type] [--pc code] [--4] target_name
+               [--pt type] [--pc code] [--dm] [--4] [--short] [--nocolor] target_name
 
 ## Arguments:
      --?             Displays this help message
@@ -20,7 +20,10 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
      --in interval   Interval between each ping (in milliseconds)
      --pt type       Use custom ICMP type
      --pc code       use custom ICMP code value
+     --dm            Display contents of ICMP message field
      --4             Force using IPv4
+     --short         Use shorter messages
+     --nocolor       Do not colourize ping results
      
      --graph address Ping an address, display results in graph view
      --compactgraph  Ping address, use compact graph view
