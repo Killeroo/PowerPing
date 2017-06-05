@@ -338,20 +338,32 @@ namespace PowerPing
                             switch (Convert.ToInt16(args[count + 1]))
                             {
                                 case 0: // Paranoid
-                                    //attributes.Timeout = 
-                                    //attributes.Interval = 
+                                    attributes.Timeout = 10000;
+                                    attributes.Interval = 300000;
                                     break;
                                 case 1: // Sneaky
+                                    attributes.Timeout = 5000;
+                                    attributes.Interval = 120000;
                                     break;
                                 case 2: // Quiet
+                                    attributes.Timeout = 5000;
+                                    attributes.Interval = 30000;
                                     break;
                                 case 3: // Polite
+                                    attributes.Timeout = 3000;
+                                    attributes.Timeout = 3000;
                                     break;
                                 case 4: // Nimble
+                                    attributes.Timeout = 2000;
+                                    attributes.Interval = 750;
                                     break;
                                 case 5: // Speedy
+                                    attributes.Timeout = 1500;
+                                    attributes.Interval = 500;
                                     break;
                                 case 6: // Insane
+                                    attributes.Timeout = 750;
+                                    attributes.Interval = 100;
                                     break;
                             }
                             break;

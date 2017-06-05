@@ -93,7 +93,7 @@ namespace PowerPing
             sb.AppendLine("Usage: PowerPing [--?] | [--li] | [--whoami] | [--loc address] | [--g address] |");
             sb.AppendLine("                 [--cg address] | [--fl address] | [--t] [--c count] [--w timeout]  ");
             sb.AppendLine("                 [--m message] [--i TTL] [--in interval] [--pt type] [--pc code]");
-            sb.AppendLine("                 [--dm] [--4] [--short] [--nocolor] target_name");
+            sb.AppendLine("                 [--dm] [--4] [--short] [--nocolor] [--ti timing] target_name");
             sb.AppendLine();
             sb.AppendLine("Options:");
             sb.AppendLine("     --?             Displays this help message");
@@ -110,6 +110,11 @@ namespace PowerPing
             //sb.AppendLine("     --6             Force using IPv6");
             sb.AppendLine("     --sh            Show less detailed replies");
             sb.AppendLine("     --nc            No colour");
+            sb.AppendLine("     --ti timing     Timing level:");
+            sb.AppendLine("                          0 - Paranoid    4 - Nimble");
+            sb.AppendLine("                          1 - Sneaky      5 - Speedy");
+            sb.AppendLine("                          2 - Quiet       6 - Insane");
+            sb.AppendLine("                          3 - Polite");
             sb.AppendLine();
             sb.AppendLine("     --li            Listen for ICMP packets");
             sb.AppendLine("     --fl address    Send high volume of pings to address");

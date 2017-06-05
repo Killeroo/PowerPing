@@ -8,7 +8,7 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
      PowerPing [--?] | [--li] | [--whoami] | [--loc address] | [--g address] |
                [--cg address] | [--fl address] | [--t] [--c count] [--w timeout] 
                [--m message] [--i TTL] [--in interval] [--pt type] [--pc code] 
-               [--dm] [--4] [--sh] [--nc] target_name
+               [--dm] [--4] [--sh] [--nc] [--ti timing] target_name
 
 ## Arguments:
      --?             Displays this help message
@@ -24,6 +24,11 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
      --4             Force using IPv4
      --sh            Show less detailed replies
      --nc            No colour
+     --ti timing     Timing level:
+                          0 - Paranoid    4 - Nimble
+                          1 - Sneaky      5 - Speedy
+                          2 - Quiet       6 - Insane
+                          3 - Polite
      
      --li            Listen for ICMP packets
      --fl address    Send high volume of ICMP packets to address
