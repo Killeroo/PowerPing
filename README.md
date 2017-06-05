@@ -5,10 +5,10 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
 ![alt text](Screenshots/readme_screenshot.png "PowerPing in action")
 
 ## Usage: 
-     PowerPing [--?] | [--li] | [--whoami] | [--loc address] | [--g address] | 
-	           [--cg address] | [--fl address] | [--t] [--c count] [--w timeout] 
-			   [--m message] [--i TTL] [--in interval] [--pt type] [--pc code] 
-			   [--dm] [--4] [--sh] [--nc] target_name
+     PowerPing [--?] | [--li] | [--whoami] | [--loc address] | [--g address] |
+               [--cg address] | [--fl address] | [--t] [--c count] [--w timeout] 
+               [--m message] [--i TTL] [--in interval] [--pt type] [--pc code] 
+               [--dm] [--4] [--sh] [--nc] target_name
 
 ## Arguments:
      --?             Displays this help message
@@ -51,6 +51,12 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
 - [ ] Local network scanning and host discovery
 - [ ] Trace route functionality
 - [ ] Full IPv6 support
+
+## Screenshots
+
+![alt text](Screenshots/readme_screenshot2.png "Powerping Graph view")
+![alt text](Screenshots/readme_screenshot3.png "Powerping Listening")
+![alt text](Screenshots/readme_screenshot4.png "Location functions") ![alt text](Screenshots/readme_screenshot5.png "PowerPing stress testing")
 
 ### Note: 
 **Requires _Elevated Rights (Admininstrator)_ to Run**
