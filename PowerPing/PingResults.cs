@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 /// <summary>
@@ -21,6 +22,7 @@ namespace PowerPing
         public int ErrorPackets { get; private set; } // Number of Error packet recieved
         public int GoodPackets { get; private set; } // Number of good replies recieved
         public int OtherPackets { get; private set; } // Number of other packet types recieved
+        public static ConcurrentStack<string> ActiveHosts = new ConcurrentStack<string>(); // Stores found hosts during scan
 
         // Local variables
         private Stopwatch operationTimer = new Stopwatch();

@@ -56,7 +56,6 @@
     <Compile Include="PingResults.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TimingOptions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\App.config">

@@ -27,7 +27,6 @@ namespace PowerPing
         public int Threads { get; set; } = 5;
 
         // Local variables
-        private ConcurrentStack<string> activeHosts = new ConcurrentStack<string>(); // Stores found hosts during Scan()
         private bool cancelFlag = false;
 
         // Constructor
@@ -195,7 +194,7 @@ namespace PowerPing
             }
 
             // Display results of scan
-            PowerPing.Display.ScanResult(scanList.Count, activeHosts.Count);
+            //PowerPing.Display.ScanResult(scanList.Count, activeHosts.Count);
         }
         /// <summary>
         /// ICMP flood

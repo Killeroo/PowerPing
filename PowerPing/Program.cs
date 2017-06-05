@@ -332,6 +332,29 @@ namespace PowerPing
                         case "--nc": // No color mode
                             Display.NoColor = true;
                             break;
+                        case "/ti":
+                        case "-ti":
+                        case "--ti": // Timing option
+                            switch (Convert.ToInt16(args[count + 1]))
+                            {
+                                case 0: // Paranoid
+                                    //attributes.Timeout = 
+                                    //attributes.Interval = 
+                                    break;
+                                case 1: // Sneaky
+                                    break;
+                                case 2: // Quiet
+                                    break;
+                                case 3: // Polite
+                                    break;
+                                case 4: // Nimble
+                                    break;
+                                case 5: // Speedy
+                                    break;
+                                case 6: // Insane
+                                    break;
+                            }
+                            break;
                         case "/whoami":
                         case "-whoami":
                         case "--whoami": // Current computer location
