@@ -322,14 +322,14 @@ namespace PowerPing
                             PowerPing.Display.Help();
                             Environment.Exit(0);
                             break;
-                        case "/short":
-                        case "-short":
-                        case "--short": // Use short hand messages
+                        case "/sh":
+                        case "-sh":
+                        case "--sh": // Use short hand messages
                             Display.Short = true;
                             break;
-                        case "/nocolor":
-                        case "-nocolor":
-                        case "--nocolor": // No color mode
+                        case "/nc":
+                        case "-nc":
+                        case "--nc": // No color mode
                             Display.NoColor = true;
                             break;
                         case "/whoami":
@@ -338,34 +338,34 @@ namespace PowerPing
                             Helper.whoami();
                             Environment.Exit(0);
                             break;
-                        case "/location":
-                        case "-location":
-                        case "--location": // Location lookup
+                        case "/loc":
+                        case "-loc":
+                        case "--loc": // Location lookup
                             Helper.GetAddressLocation(args[count + 1], true);
                             Environment.Exit(0);
                             break;
-                        case "/listen":
-                        case "-listen":
-                        case "--listen": // Listen for ICMP packets
+                        case "/li":
+                        case "-li":
+                        case "--li": // Listen for ICMP packets
                             p.Listen();
                             Environment.Exit(0);
                             break;
-                        case "/graph":
-                        case "-graph":
-                        case "--graph": // Graph view
+                        case "/g":
+                        case "-g":
+                        case "--g": // Graph view
                             g = new Graph(args[count + 1]);
                             g.Start();
                             break;
-                        case "/compactgraph":
-                        case "-compactgraph":
-                        case "--compactgraph": // Compact graph view
+                        case "/cg":
+                        case "-cg":
+                        case "--cg": // Compact graph view
                             g = new Graph(args[count + 1]);
                             g.CompactGraph = true;
                             g.Start();
                             break;
-                        case "/flood":
-                        case "-flood":
-                        case "--flood": // Graph view
+                        case "/fl":
+                        case "-fl":
+                        case "--fl": // Graph view
                             p.Flood(args[count + 1]);
                             Environment.Exit(0);
                             break;

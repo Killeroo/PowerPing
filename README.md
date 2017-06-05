@@ -5,10 +5,10 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
 ![alt text](Screenshots/readme_screenshot.png "PowerPing in action")
 
 ## Usage: 
-     PowerPing [--?] | [--whoami] | [--location address] | [--listen] |
-               [--graph address] | [--compactgraph address] | [--flood address] | 
-               [--t] [--c count] [--w timeout] [--m message] [--i TTL] [--in interval]
-               [--pt type] [--pc code] [--dm] [--4] [--short] [--nocolor] target_name
+     PowerPing [--?] | [--li] | [--whoami] | [--loc address] | [--g address] | 
+	           [--cg address] | [--fl address] | [--t] [--c count] [--w timeout] 
+			   [--m message] [--i TTL] [--in interval] [--pt type] [--pc code] 
+			   [--dm] [--4] [--sh] [--nc] target_name
 
 ## Arguments:
      --?             Displays this help message
@@ -20,19 +20,17 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
      --in interval   Interval between each ping (in milliseconds)
      --pt type       Use custom ICMP type
      --pc code       use custom ICMP code value
-     --dm            Display contents of ICMP message field
+     --dm            Display ICMP messages
      --4             Force using IPv4
-     --short         Use shorter messages
-     --nocolor       Do not colourize ping results
+     --sh            Show less detailed replies
+     --nc            No colour
      
-     --graph address Ping an address, display results in graph view
-     --compactgraph  Ping address, use compact graph view
-     
+     --li            Listen for ICMP packets
+     --fl address    Send high volume of ICMP packets to address
+     --g address     Graph view
+     --cg address    Compact graph view
+     --loc address   Location info for an address
      --whoami        Location info for current host
-     --location addr Location info for an address
-     
-     --listen        Listen for ICMP packets
-     --flood addr    Send high volume of ICMP packets to address
 
 ## Examples:
      powerping 8.8.8.8                    -     Send ping to google DNS with default values (3000ms timeout, 5 pings)
