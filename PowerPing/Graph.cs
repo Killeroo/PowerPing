@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace PowerPing
 {
@@ -18,6 +19,8 @@ namespace PowerPing
         private PingAttributes graphPingAttrs = new PingAttributes();
         private List<String[]> graphColumns = new List<string[]>();
         private bool isGraphSetup = false;
+        private bool cancelFlag = false;
+        private bool running = false;
         private int xAxisLength = 40;
 
         // Location of graph plotting space
@@ -51,6 +54,20 @@ namespace PowerPing
             // Start drawing graph
             Draw();
         }
+        public void Stop()
+        {
+            cancelFlag = true;
+
+            if (running)
+            {
+                cancelFlag = true;
+
+                // wait till ping stops running
+                while (running)
+                    Task.Delay(25);
+            }
+
+        }
 
         /// <summary>
         /// Stores graph drawing loop
@@ -61,10 +78,15 @@ namespace PowerPing
             Thread pinger = new Thread(() => graphPing.Send(graphPingAttrs));
             pinger.IsBackground = true;
             pinger.Start();
+            running = true;
 
             // Drawing loop
             while (true)
             {
+                // Stop look if we get a cancel flag
+                if (cancelFlag)
+                    break; 
+
                 // Reset position
                 Console.CursorTop = plotStartY;
                 Console.CursorLeft = plotStartX;
@@ -81,7 +103,11 @@ namespace PowerPing
                 // Wait one second
                 Thread.Sleep(1000);
             }
-            
+
+            // Clean up
+            running = false;
+            graphPing.Stop();
+            pinger.Abort();
         }
         ///<summary>
         /// Setup graph

@@ -219,8 +219,6 @@
 
  */
 using System;
-using System.Net.Sockets;
-using System.Threading;
 
 // Custom packet type
 // dsipaly Powerping version at start
@@ -230,13 +228,13 @@ namespace PowerPing
     class Program
     {
         private static Ping p = new Ping();
+        private static Graph g = null;
 
         static void Main(string[] args)
         {
             // Local variables 
             bool addrFound = false;
             PingAttributes attributes = new PingAttributes();
-            Graph g = null;
 
             // Check if no arguments
             if (args.Length == 0)
@@ -244,7 +242,7 @@ namespace PowerPing
                 PowerPing.Display.Help();
                 return;
             }
-            
+
             // Loop through arguments
             try
             {
@@ -390,6 +388,7 @@ namespace PowerPing
                         case "--g": // Graph view
                             g = new Graph(args[count + 1]);
                             g.Start();
+                            Environment.Exit(0);
                             break;
                         case "/cg":
                         case "-cg":
@@ -397,10 +396,12 @@ namespace PowerPing
                             g = new Graph(args[count + 1]);
                             g.CompactGraph = true;
                             g.Start();
+                            Environment.Exit(0);
                             break;
                         case "/fl":
                         case "-fl":
-                        case "--fl": // Graph view
+                        case "--fl": // Flood
+                            Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
                             p.Flood(args[count + 1]);
                             Environment.Exit(0);
                             break;
@@ -435,7 +436,7 @@ namespace PowerPing
                 return;
             }
 
-            // only add Control C event handler when sending standard ping
+            // Control C event handler 
             // (So statistics can still be displayed when ping interupted)
             Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
 
@@ -450,6 +451,10 @@ namespace PowerPing
 
             // Stop ping
             p.Stop();
+
+            // Stop graph if it is running
+            if (g != null)
+                g.Stop();
 
             // Reset console colour
             Console.BackgroundColor = ConsoleColor.Black;

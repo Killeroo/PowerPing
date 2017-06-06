@@ -111,10 +111,10 @@ namespace PowerPing
             sb.AppendLine("     --sh            Show less detailed replies");
             sb.AppendLine("     --nc            No colour");
             sb.AppendLine("     --ti timing     Timing level:");
-            sb.AppendLine("                          0 - Paranoid    4 - Nimble");
-            sb.AppendLine("                          1 - Sneaky      5 - Speedy");
-            sb.AppendLine("                          2 - Quiet       6 - Insane");
-            sb.AppendLine("                          3 - Polite");
+            sb.AppendLine("                     0 - Paranoid    4 - Nimble");
+            sb.AppendLine("                     1 - Sneaky      5 - Speedy");
+            sb.AppendLine("                     2 - Quiet       6 - Insane");
+            sb.AppendLine("                     3 - Polite");
             sb.AppendLine();
             sb.AppendLine("     --li            Listen for ICMP packets");
             sb.AppendLine("     --fl address    Send high volume of pings to address");
@@ -295,16 +295,16 @@ namespace PowerPing
 
             Console.WriteLine("Packet types:");
             Console.Write("     ");
-            Console.BackgroundColor = ConsoleColor.DarkGreen;
-            Console.Write(" Good = {0} ", results.GoodPackets);
+            //Console.BackgroundColor = ConsoleColor.DarkGreen;
+            Console.Write("[ Good = {0} ]", results.GoodPackets);
             Console.BackgroundColor = ConsoleColor.Black;
             Console.Write(" ");
-            Console.BackgroundColor = ConsoleColor.DarkRed;
-            Console.Write(" Errors = {0} ", results.ErrorPackets);
+            //Console.BackgroundColor = ConsoleColor.DarkRed;
+            Console.Write("[ Errors = {0} ]", results.ErrorPackets);
             Console.BackgroundColor = ConsoleColor.Black;
             Console.Write(" ");
-            Console.BackgroundColor = ConsoleColor.DarkBlue;
-            Console.WriteLine(" Unknown = {0} ", results.OtherPackets);
+            //Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.WriteLine("[ Unknown = {0} ]", results.OtherPackets);
             Console.BackgroundColor = ConsoleColor.Black;
 
             Console.WriteLine("Total elapsed time (HH:MM:SS.FFF): {0:hh\\:mm\\:ss\\.fff}", results.TotalRunTime);
@@ -354,6 +354,30 @@ namespace PowerPing
             }
 
             sentPings = results.Sent;
+        }
+        public static void ListenResults(PingResults results)
+        {
+            Console.WriteLine("Captured Packets:");
+            Console.WriteLine("     Caught [ {0} ] Lost [ {1} ]");
+
+            Console.WriteLine("Packet types:");
+            Console.Write("     ");
+            Console.BackgroundColor = ConsoleColor.DarkGreen;
+            Console.Write("[ Good = {0} ]", results.GoodPackets);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.Write(" ");
+            Console.BackgroundColor = ConsoleColor.DarkRed;
+            Console.Write("[ Errors = {0} ]", results.ErrorPackets);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.Write(" ");
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.WriteLine("[ Unknown = {0} ]", results.OtherPackets);
+            Console.BackgroundColor = ConsoleColor.Black;
+
+            Console.WriteLine("Total elapsed time (HH:MM:SS.FFF): {0:hh\\:mm\\:ss\\.fff}", results.TotalRunTime);
+            Console.WriteLine();
+
+            Helper.Pause(true);
         }
         /// <summary>
         /// Display Timeout message

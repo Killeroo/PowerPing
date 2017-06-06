@@ -72,6 +72,8 @@ namespace PowerPing
                 if (ip.AddressFamily == AddressFamily.InterNetwork)
                     localAddress = ip;
 
+            IsRunning = true;
+
             try
             {
                 // Create listener socket
@@ -101,6 +103,9 @@ namespace PowerPing
                     // Store results
                     results.SetPacketType(response.type);
                     results.Recieved++;
+
+                    if (cancelFlag)
+                        break;
                 }
             }
             catch (SocketException)
@@ -112,6 +117,13 @@ namespace PowerPing
             {
                 PowerPing.Display.Error("General exception occured", true);
             }
+
+            // Clean up
+            IsRunning = false;
+            listeningSocket.Close();
+
+            // Display results
+            Display.ListenResults(results);
         }
         /// <summary>
         /// ICMP Traceroute
