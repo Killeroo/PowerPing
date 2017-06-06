@@ -25,10 +25,10 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
      --sh            Show less detailed replies
      --nc            No colour
      --ti timing     Timing level:
-                          0 - Paranoid    4 - Nimble
-                          1 - Sneaky      5 - Speedy
-                          2 - Quiet       6 - Insane
-                          3 - Polite
+                     0 - Paranoid    4 - Nimble
+                     1 - Sneaky      5 - Speedy
+                     2 - Quiet       6 - Insane
+                     3 - Polite
      
      --li            Listen for ICMP packets
      --fl address    Send high volume of ICMP packets to address
