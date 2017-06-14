@@ -235,6 +235,7 @@ namespace PowerPing
             // Local variables 
             bool addrFound = false;
             PingAttributes attributes = new PingAttributes();
+            attributes.Address = "";
 
             // Check if no arguments
             if (args.Length == 0)
@@ -243,7 +244,20 @@ namespace PowerPing
                 return;
             }
 
-            // Loop through arguments
+            // Find address first
+            for (int count = 0; count < args.Length; count++)
+            {
+                if (args[count].Contains("--") || args[count].Contains("/") || args[count].Contains("-"))
+                    continue;
+
+                if ((count == args.Length - 1 || count == 0) && !addrFound)
+                { // Assume first or last argument is address
+                    attributes.Address = args[count];
+                    addrFound = true;
+                }
+            }
+
+            // Loop through other arguments
             try
             {
                 for (int count = 0; count < args.Length; count++)
@@ -374,26 +388,33 @@ namespace PowerPing
                         case "/loc":
                         case "-loc":
                         case "--loc": // Location lookup
-                            Helper.GetAddressLocation(args[count + 1], true);
+                            if (attributes.Address != "")
+                                throw new FormatException();
+                            Helper.GetAddressLocation(attributes.Address, true);
                             Environment.Exit(0);
                             break;
                         case "/li":
                         case "-li":
                         case "--li": // Listen for ICMP packets
                             p.Listen();
+                            attributes.OpType = OperationTypes.Listening;
                             Environment.Exit(0);
                             break;
                         case "/g":
                         case "-g":
                         case "--g": // Graph view
-                            g = new Graph(args[count + 1]);
+                            if (attributes.Address != "")
+                                throw new FormatException();
+                            g = new Graph(attributes.Address); /// Look at argument behind?
                             g.Start();
                             Environment.Exit(0);
                             break;
                         case "/cg":
                         case "-cg":
                         case "--cg": // Compact graph view
-                            g = new Graph(args[count + 1]);
+                            if (attributes.Address != "")
+                                throw new FormatException();
+                            g = new Graph(attributes.Address);
                             g.CompactGraph = true;
                             g.Start();
                             Environment.Exit(0);
@@ -401,21 +422,22 @@ namespace PowerPing
                         case "/fl":
                         case "-fl":
                         case "--fl": // Flood
+                            if (attributes.Address != "")
+                                throw new FormatException();
+                            attributes.OpType = OperationTypes.Flooding;
                             Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
-                            p.Flood(args[count + 1]);
+                            p.Flood(attributes.Address);
                             Environment.Exit(0);
                             break;
                         default:
-                            if ((count == args.Length - 1 || count == 0) && !addrFound)
-                            { // Assume first or last argument is address
-                                attributes.Address = args[count];
-                                addrFound = true;
-                            }
-                            if (args[count].Contains("--") || args[count].Contains("//") || args[count].Contains("-"))
+                            if (args[count].Contains("--") || args[count].Contains("/") || args[count].Contains("-"))
                                 throw new Exception();
                             break;
                     }
                 }
+
+                if (attributes.Address != "")
+                    throw new FormatException();
             }
             catch (IndexOutOfRangeException)
             {

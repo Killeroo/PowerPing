@@ -5,10 +5,9 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
 ![alt text](Screenshots/readme_screenshot.png "PowerPing in action")
 
 ## Usage: 
-     PowerPing [--?] | [--li] | [--whoami] | [--loc address] | [--g address] |
-               [--cg address] | [--fl address] | [--t] [--c count] [--w timeout] 
-               [--m message] [--i TTL] [--in interval] [--pt type] [--pc code] 
-               [--dm] [--4] [--sh] [--nc] [--ti timing] target_name
+     PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] | [--fl] | 
+               [--t] [--c count] [--w timeout] [--m message] [--i TTL] [--in interval] 
+               [--pt type] [--pc code] [--dm] [--4] [--sh] [--nc] [--ti timing] target_name
 
 ## Arguments:
      --?             Displays this help message
@@ -31,10 +30,10 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
                      3 - Polite
      
      --li            Listen for ICMP packets
-     --fl address    Send high volume of ICMP packets to address
-     --g address     Graph view
-     --cg address    Compact graph view
-     --loc address   Location info for an address
+     --fl            Send high volume of ICMP packets to address
+     --g             Graph view
+     --cg            Compact graph view
+     --loc           Location info for an address
      --whoami        Location info for current host
 
 ## Examples:

@@ -8,5 +8,6 @@ namespace PowerPing
         Normal = 0,
         Flooding = 2,
         Scanning = 3,
+        Listening = 4,
     }
 }
