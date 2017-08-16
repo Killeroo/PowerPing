@@ -61,7 +61,6 @@ namespace PowerPing
 
             CurTime = time;
         }
-
         public void SetPacketType(int type)
         {
             if (type == 0)

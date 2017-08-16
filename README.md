@@ -41,6 +41,9 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
      powerping github.com --w 500 --t     -     Send pings indefinitely to github.com with a 500ms timeout
      powerping 127.0.0.1 --m Meow         -     Send ping with packet message "Meow" to loopback address
      powerping 127.0.0.1 --pt 3 --pc 2    -     Send ping with ICMP type 3 (dest unreachable) and code 2
+	 powerping 8.8.8.8 /c 5 -w 500 --sh   -     Different argument switches (/, - or --) can be used in any combination
+	 powerping google.com /ti Paranoid    -     Sends using the 'Paranoid' timing option
+	 powerping google.com /ti 1           -     Same as above
      
 ## Features
 

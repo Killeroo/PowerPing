@@ -347,36 +347,45 @@ namespace PowerPing
                         case "/ti":
                         case "-ti":
                         case "--ti": // Timing option
-                            switch (Convert.ToInt16(args[count + 1]))
+                            switch (args[count + 1 ].ToLower()) //Convert.ToInt16(args[count + 1]))
                             {
-                                case 0: // Paranoid
+                                case "0":
+                                case "paranoid":
                                     attributes.Timeout = 10000;
                                     attributes.Interval = 300000;
                                     break;
-                                case 1: // Sneaky
+                                case "1": 
+                                case "sneaky":
                                     attributes.Timeout = 5000;
                                     attributes.Interval = 120000;
                                     break;
-                                case 2: // Quiet
+                                case "2":
+                                case "quiet":
                                     attributes.Timeout = 5000;
                                     attributes.Interval = 30000;
                                     break;
-                                case 3: // Polite
+                                case "3":
+                                case "polite":
                                     attributes.Timeout = 3000;
                                     attributes.Timeout = 3000;
                                     break;
-                                case 4: // Nimble
+                                case "4":
+                                case "nimble":
                                     attributes.Timeout = 2000;
                                     attributes.Interval = 750;
                                     break;
-                                case 5: // Speedy
+                                case "5":
+                                case "speedy":
                                     attributes.Timeout = 1500;
                                     attributes.Interval = 500;
                                     break;
-                                case 6: // Insane
+                                case "6":
+                                case "insane":
                                     attributes.Timeout = 750;
                                     attributes.Interval = 100;
                                     break;
+                                default: // Unknown timing type
+                                    throw new IndexOutOfRangeException();
                             }
                             break;
                         case "/whoami":
@@ -436,7 +445,7 @@ namespace PowerPing
                     }
                 }
 
-                if (attributes.Address != "")
+                if (attributes.Address == "")
                     throw new FormatException();
             }
             catch (IndexOutOfRangeException)
