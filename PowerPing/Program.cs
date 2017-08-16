@@ -237,6 +237,10 @@ namespace PowerPing
             PingAttributes attributes = new PingAttributes();
             attributes.Address = "";
 
+            // Setup console
+            Display.DefaultForegroundColor = Console.ForegroundColor;
+            Display.DefaultBackgroundColor = Console.BackgroundColor;
+
             // Check if no arguments
             if (args.Length == 0)
             {
@@ -406,7 +410,6 @@ namespace PowerPing
                         case "-li":
                         case "--li": // Listen for ICMP packets
                             p.Listen();
-                            attributes.OpType = OperationTypes.Listening;
                             Environment.Exit(0);
                             break;
                         case "/g":
@@ -433,7 +436,6 @@ namespace PowerPing
                         case "--fl": // Flood
                             if (attributes.Address != "")
                                 throw new FormatException();
-                            attributes.OpType = OperationTypes.Flooding;
                             Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
                             p.Flood(attributes.Address);
                             Environment.Exit(0);

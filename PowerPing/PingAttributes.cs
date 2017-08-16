@@ -19,7 +19,6 @@ namespace PowerPing
         public bool Continous { get; set; } // Continously send pings
         public bool ForceV4 { get; set; } // Force use of IPv4
         public bool ForceV6 { get; set; } // Force use of IPv6
-        public OperationTypes OpType { get; set; } // Type of operation being performed
         public string[] AddressList { get; set; } // Optional attribute: Used when scanning, stores addresses to ping
 
         public PingAttributes()
@@ -36,7 +35,6 @@ namespace PowerPing
             Continous = false;
             ForceV4 = true;
             ForceV6 = false;
-            OpType = OperationTypes.Normal;
             AddressList = null;
         }
     }

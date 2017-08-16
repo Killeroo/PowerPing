@@ -26,7 +26,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\Build\</OutputPath>
+    <OutputPath>..\build\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -50,7 +50,6 @@
     <Compile Include="Graph.cs" />
     <Compile Include="ICMP.cs" />
     <Compile Include="Helper.cs" />
-    <Compile Include="OperationTypes.cs" />
     <Compile Include="Ping.cs" />
     <Compile Include="PingAttributes.cs" />
     <Compile Include="PingResults.cs" />

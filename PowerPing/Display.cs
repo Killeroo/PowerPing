@@ -17,6 +17,8 @@ namespace PowerPing
         public static bool Short = false;
         public static bool NoColor = false;
         public static bool DisplayMessage = false;
+        public static ConsoleColor DefaultForegroundColor;
+        public static ConsoleColor DefaultBackgroundColor;
 
         // Stores console cursor position, used for updating text at position
         private struct CursorPosition 
@@ -211,7 +213,7 @@ namespace PowerPing
                     Console.Write(packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type]);
                     break;
             }
-            Console.BackgroundColor = ConsoleColor.Black;
+            ResetColor();
 
             // Display ICMP message (if specified)
             if (DisplayMessage)
@@ -226,7 +228,7 @@ namespace PowerPing
             else if (replyTime > 500L)
                 Console.ForegroundColor = ConsoleColor.Red;
             Console.Write("{0}ms ", replyTime < 1 ? "<1" : replyTime.ToString());
-            Console.ForegroundColor = ConsoleColor.Gray;
+            ResetColor();
             Console.WriteLine();
 
         }
@@ -241,8 +243,7 @@ namespace PowerPing
             Console.WriteLine("{0}: ICMPv4: {1} bytes from {2} [type {3}] [code {4}]", timeRecieved, bytesRead, address, packet.type, packet.code);
 
             // Reset console colours
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.Gray;
+            ResetColor();
         }
         /// <summary>
         /// Display results of scan
@@ -262,8 +263,7 @@ namespace PowerPing
             PingAttributes attrs = ping.Attributes;
             PingResults results = ping.Results;
 
-            // Reset console colour
-            Console.BackgroundColor = ConsoleColor.Black;
+            ResetColor();
 
             // Display stats
             double percent = (double)results.Lost / results.Sent;
@@ -271,46 +271,56 @@ namespace PowerPing
             Console.WriteLine("\nStats for {0}:", attrs.Address);
             Console.WriteLine("------------------------");
 
-            Console.Write("   General: Sent ");//Packet: Sent ");
-            //Console.BackgroundColor = ConsoleColor.Yellow;
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Write("[ " + results.Sent + " ]");
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.Write(", Recieved ");
-            //Console.BackgroundColor = ConsoleColor.Green;
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("[ " + results.Recieved + " ]");
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.Write(", Lost ");
-            //Console.BackgroundColor = ConsoleColor.Red;
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("[ " + results.Lost + " ]");
-            //Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine(" (" + percent + "% loss)");
-
-            Console.Write("     Times:");
-            Console.WriteLine(" Minimum [ {0}ms ], Maximum [ {1}ms ]", results.MinTime, results.MaxTime);
-
-            Console.Write("   Packets:");
-            Console.Write(" Good ");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("[ {0} ]", results.GoodPackets);
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.Write(", Errors ");
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("[ {0} ]", results.ErrorPackets);
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.Write(", Unknown ");
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("[ {0} ]", results.OtherPackets);
-            Console.ForegroundColor = ConsoleColor.Gray;
-
-            Console.WriteLine("Total time: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
-
-            Console.WriteLine();
+            if (NoColor)
+            {
+                Console.Write("   General: Sent ");
+                Console.Write("[ " + results.Sent + " ]");
+                Console.Write(", Recieved ");
+                Console.Write("[ " + results.Recieved + " ]");
+                Console.Write(", Lost ");
+                Console.Write("[ " + results.Lost + " ]");
+                Console.WriteLine(" (" + percent + "% loss)");
+                Console.Write("     Times:");
+                Console.WriteLine(" Minimum [ {0}ms ], Maximum [ {1}ms ]", results.MinTime, results.MaxTime);
+                Console.Write("   Packets: Good [ {0} ]", results.GoodPackets);
+                Console.Write(", Errors [ {0} ]", results.ErrorPackets);
+                Console.Write(", Unknown [ {0} ]", results.OtherPackets);
+                Console.WriteLine("Total time: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.Write("   General: Sent ");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write("[ " + results.Sent + " ]");
+                ResetColor();
+                Console.Write(", Recieved ");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("[ " + results.Recieved + " ]");
+                ResetColor();
+                Console.Write(", Lost ");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("[ " + results.Lost + " ]");
+                ResetColor();
+                Console.WriteLine(" (" + percent + "% loss)");
+                Console.Write("     Times:");
+                Console.WriteLine(" Minimum [ {0}ms ], Maximum [ {1}ms ]", results.MinTime, results.MaxTime);
+                Console.Write("   Packets:");
+                Console.Write(" Good ");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("[ {0} ]", results.GoodPackets);
+                ResetColor();
+                Console.Write(", Errors ");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("[ {0} ]", results.ErrorPackets);
+                ResetColor();
+                Console.Write(", Unknown ");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("[ {0} ]", results.OtherPackets);
+                ResetColor();
+                Console.WriteLine("Total time: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
+                Console.WriteLine();
+            }
 
             // Confirm to exit
             PowerPing.Helper.Pause(true);
@@ -366,15 +376,15 @@ namespace PowerPing
             Console.Write("     ");
             Console.BackgroundColor = ConsoleColor.DarkGreen;
             Console.Write("[ Good = {0} ]", results.GoodPackets);
-            Console.BackgroundColor = ConsoleColor.Black;
+            ResetColor();
             Console.Write(" ");
             Console.BackgroundColor = ConsoleColor.DarkRed;
             Console.Write("[ Errors = {0} ]", results.ErrorPackets);
-            Console.BackgroundColor = ConsoleColor.Black;
+            ResetColor();
             Console.Write(" ");
             Console.BackgroundColor = ConsoleColor.DarkBlue;
             Console.WriteLine("[ Unknown = {0} ]", results.OtherPackets);
-            Console.BackgroundColor = ConsoleColor.Black;
+            ResetColor();
 
             Console.WriteLine("Total elapsed time (HH:MM:SS.FFF): {0:hh\\:mm\\:ss\\.fff}", results.TotalRunTime);
             Console.WriteLine();
@@ -389,7 +399,7 @@ namespace PowerPing
             Console.BackgroundColor = ConsoleColor.DarkRed;
             Console.Write("Request timed out.");
             // Make double sure we dont get the red line bug
-            Console.BackgroundColor = ConsoleColor.Black;
+            ResetColor();
             Console.WriteLine();
         }
         /// <summary>
@@ -405,7 +415,7 @@ namespace PowerPing
             Console.WriteLine("ERROR: " + errorMessage);
 
             // Reset console colours
-            Console.ForegroundColor = ConsoleColor.Gray;
+            ResetColor();
 
             if (pause)
                 PowerPing.Helper.Pause();
@@ -420,6 +430,12 @@ namespace PowerPing
         {
             Console.BackgroundColor = color;
             Console.WriteLine(message);
+        }
+
+        private static void ResetColor()
+        {
+            Console.BackgroundColor = DefaultBackgroundColor;
+            Console.ForegroundColor = DefaultForegroundColor;
         }
     }
 }

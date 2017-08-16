@@ -190,7 +190,6 @@ namespace PowerPing
             // Setup scan ping attributes
             attrs.Timeout = 500;
             attrs.Interval = 0;
-            attrs.OpType = OperationTypes.Scanning;
             
             // Finally, fire up the threads!
             for (int i = 0; i < Threads - 1; i++)
@@ -224,7 +223,6 @@ namespace PowerPing
             attrs.Interval = 0;
             attrs.Timeout = 100;
             attrs.Message = "R U Dead Yet?";
-            attrs.OpType = OperationTypes.Flooding;
             attrs.Continous = true;
 
             // Disable output for faster speeds
