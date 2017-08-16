@@ -140,8 +140,8 @@ namespace PowerPing
         /// <param name="exit">switch to use word "exit" instead of "continue"</param>
         public static void Pause(bool exit = false)
         {
-            Console.Write("Press any key to " + (exit ? "exit" : "continue") + " . . .");
-            Console.ReadLine();
+            Console.Write("Press any key to " + (exit ? "exit" : "continue") + " . . .\n");
+            Console.ReadKey();
         }
 
         /// <summary>

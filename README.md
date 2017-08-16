@@ -1,10 +1,10 @@
 # PowerPing - Advanced Windows Ping 
 
-[![version](https://img.shields.io/badge/version-1.1.8-green.svg)]() ![maintained](https://img.shields.io/maintenance/yes/2017.svg) ![](http://img.badgesize.io/Killeroo/PowerPing/master/PowerPing.sln.svg)
+[![version](https://img.shields.io/badge/version-1.1.8-green.svg)]() ![maintained](https://img.shields.io/maintenance/yes/2017.svg) ![](http://img.badgesize.io/Killeroo/PowerPing/master/build/PowerPing.exe.svg)
 
 Small improved command line ICMP ping program lovingly inspired by windows and unix, written in C#.
 
-Download it here: [[Github]](https://github.com/Killeroo/PowerPing/releases) [[Softpedia]](http://www.softpedia.com/progDownload/PowerPing-Download-255701.html)
+Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/master/build) [[Github]](https://github.com/Killeroo/PowerPing/releases) [[Softpedia]](http://www.softpedia.com/progDownload/PowerPing-Download-255701.html)
 ***
 ![alt text](Screenshots/readme_screenshot.png "PowerPing in action")
 
