@@ -6,7 +6,7 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
 
 Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/master/build) [[Github]](https://github.com/Killeroo/PowerPing/releases) [[Softpedia]](http://www.softpedia.com/progDownload/PowerPing-Download-255701.html)
 ***
-![alt text](Screenshots/readme_screenshot.png "PowerPing in action")
+![](https://github.com/killeroo/PowerPing/Screenshots/readme_screenshot.png "PowerPing in action")
 
 ## Usage: 
      PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] | [--fl] | 
@@ -67,9 +67,9 @@ Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/m
 
 ## Screenshots
 
-![alt text](Screenshots/readme_screenshot2.png "Powerping Graph view")
-![alt text](Screenshots/readme_screenshot3.png "Powerping Listening")
-![alt text](Screenshots/readme_screenshot4.png "Location functions") ![alt text](Screenshots/readme_screenshot5.png "PowerPing stress testing")
+![](https://github.com/killeroo/PowerPing/Screenshots/readme_screenshot2.png "Powerping Graph view")
+![](https://github.com/killeroo/PowerPing/Screenshots/readme_screenshot3.png "Powerping Listening")
+![](https://github.com/killeroo/PowerPing/Screenshots/readme_screenshot4.png "Location functions") ![alt text](Screenshots/readme_screenshot5.png "PowerPing stress testing")
 
 ### Note: 
 **Requires _Elevated Rights (Admininstrator)_ to Run**
