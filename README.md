@@ -11,7 +11,7 @@ Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/m
 ## Usage: 
      PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] | [--fl] | 
                [--t] [--c count] [--w timeout] [--m message] [--i TTL] [--in interval] 
-               [--pt type] [--pc code] [--dm] [--4] [--sh] [--nc] [--ti timing] target_name
+               [--pt type] [--pc code] [--dm] [--4] [--sh] [--nc] [--ts] [--ti timing] target_name
 
 ## Arguments:
      --?             Displays this help message
@@ -27,6 +27,7 @@ Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/m
      --4             Force using IPv4
      --sh            Show less detailed replies
      --nc            No colour
+     --ts            Display timestamp
      --ti timing     Timing level:
                      0 - Paranoid    4 - Nimble
                      1 - Sneaky      5 - Speedy

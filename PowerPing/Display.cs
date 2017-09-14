@@ -17,6 +17,7 @@ namespace PowerPing
         public static bool Short = false;
         public static bool NoColor = false;
         public static bool DisplayMessage = false;
+        public static bool TimeStamp = false;
         public static ConsoleColor DefaultForegroundColor;
         public static ConsoleColor DefaultBackgroundColor;
 
@@ -94,7 +95,7 @@ namespace PowerPing
             sb.AppendLine();
             sb.AppendLine("Usage: PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] | [--fl] | ");
             sb.AppendLine("                 [--t] [--c count] [--w timeout] [--m message] [--i TTL] [--in interval]");
-            sb.AppendLine("                 [--pt type] [--pc code] [--dm] [--4] [--short] [--nocolor] [--ti timing]");
+            sb.AppendLine("                 [--pt type] [--pc code] [--dm] [--4] [--short] [--nocolor] [--ts] [--ti timing]");
             sb.AppendLine("                 target_name");
             sb.AppendLine();
             sb.AppendLine("Options:");
@@ -112,6 +113,7 @@ namespace PowerPing
             //sb.AppendLine("     --6             Force using IPv6");
             sb.AppendLine("     --sh            Show less detailed replies");
             sb.AppendLine("     --nc            No colour");
+            sb.AppendLine("     --ts            Display timestamp");
             sb.AppendLine("     --ti timing     Timing level:");
             sb.AppendLine("                     0 - Paranoid    4 - Nimble");
             sb.AppendLine("                     1 - Sneaky      5 - Speedy");
@@ -229,6 +231,11 @@ namespace PowerPing
                 Console.ForegroundColor = ConsoleColor.Red;
             Console.Write("{0}ms ", replyTime < 1 ? "<1" : replyTime.ToString());
             ResetColor();
+
+            // Display timestamp
+            if (TimeStamp)
+                Console.Write("@ {0}", DateTime.Now.ToString("HH:mm:ss"));
+
             Console.WriteLine();
 
         }

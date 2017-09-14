@@ -348,6 +348,11 @@ namespace PowerPing
                         case "--nc": // No color mode
                             Display.NoColor = true;
                             break;
+                        case "/ts":
+                        case "-ts":
+                        case "--ts": // Display timestamp
+                            Display.TimeStamp = true;
+                            break;
                         case "/ti":
                         case "-ti":
                         case "--ti": // Timing option
