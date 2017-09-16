@@ -27,7 +27,7 @@ namespace PowerPing
         public int Threads { get; set; } = 5;
 
         // Local variables
-        private bool cancelFlag = false;
+        private ManualResetEvent cancelEvent = new ManualResetEvent(false);
 
         // Constructor
         public Ping() { }
@@ -104,7 +104,7 @@ namespace PowerPing
                     results.SetPacketType(response.type);
                     results.Recieved++;
 
-                    if (cancelFlag)
+                    if (cancelEvent.WaitOne(0))
                         break;
                 }
             }
@@ -262,12 +262,9 @@ namespace PowerPing
                 // Update results text
                 Display.FloodResults(p.Results);
 
-                // Check for exit flag
-                if (this.cancelFlag)
+                // Wait before updating (save our CPU load) and check for cancel event
+                if (cancelEvent.WaitOne(1000))
                     break;
-
-                // Wait before updating (save our CPU load)
-                Thread.Sleep(1000);
             }
 
             // Cleanup
@@ -284,18 +281,18 @@ namespace PowerPing
         /// </summary>
         public void Stop()
         {
-            // If a ping operation is running send cancel flag
+            // If a ping operation is running set cancel event
             if (IsRunning)
             {
-                cancelFlag = true;
+                cancelEvent.Set();
 
                 // wait till ping stops running
                 while (IsRunning)
                     Task.Delay(25);
             }
 
-            // Reset cancel flag
-            cancelFlag = false;
+            // Reset cancel event
+            cancelEvent.Reset();
         }
 
         private Socket CreateRawSocket(AddressFamily family)
@@ -350,8 +347,8 @@ namespace PowerPing
             // Sending loop
             while (Attributes.Continous ? true : index <= Attributes.Count)
             {
-                // Exit loop if cancel flag recieved
-                if (cancelFlag)
+                // Exit loop if cancel event is set
+                if (cancelEvent.WaitOne(0))
                     break;
                 else
                     IsRunning = true;
@@ -410,7 +407,7 @@ namespace PowerPing
                 {
                     // Increment seq and wait for interval
                     index++;
-                    Thread.Sleep(Attributes.Interval);
+                    cancelEvent.WaitOne(Attributes.Interval);
 
                     responseTimer.Restart();
                 }  
