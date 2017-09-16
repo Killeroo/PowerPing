@@ -73,7 +73,7 @@ namespace PowerPing
         // Flood results variables
         private static CursorPosition sentPos = new CursorPosition(0, 0); // Stores sent label pos for ping flooding
         private static CursorPosition ppsLabel = new CursorPosition(0, 0); // Stores Pings per Second (pps) label 
-        private static int sentPings = 0; // Used to work out pings per second during ping flooding
+        private static long sentPings = 0; // Used to work out pings per second during ping flooding
 
         /// <summary>
         /// Displays help message

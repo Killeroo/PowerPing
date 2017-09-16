@@ -376,7 +376,7 @@ namespace PowerPing
                                 case "3":
                                 case "polite":
                                     attributes.Timeout = 3000;
-                                    attributes.Timeout = 3000;
+                                    attributes.Interval = 3000;
                                     break;
                                 case "4":
                                 case "nimble":
@@ -439,7 +439,7 @@ namespace PowerPing
                         case "/fl":
                         case "-fl":
                         case "--fl": // Flood
-                            if (attributes.Address != "")
+                            if (attributes.Address == "")
                                 throw new FormatException();
                             Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
                             p.Flood(attributes.Address);
