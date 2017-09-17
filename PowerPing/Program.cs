@@ -420,16 +420,16 @@ namespace PowerPing
                         case "/g":
                         case "-g":
                         case "--g": // Graph view
-                            if (attributes.Address != "")
+                            if (attributes.Address == "")
                                 throw new FormatException();
-                            g = new Graph(attributes.Address); /// Look at argument behind?
+                            g = new Graph(attributes.Address); 
                             g.Start();
                             Environment.Exit(0);
                             break;
                         case "/cg":
                         case "-cg":
                         case "--cg": // Compact graph view
-                            if (attributes.Address != "")
+                            if (attributes.Address == "")
                                 throw new FormatException();
                             g = new Graph(attributes.Address);
                             g.CompactGraph = true;
