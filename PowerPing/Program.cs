@@ -445,6 +445,15 @@ namespace PowerPing
                             p.Flood(attributes.Address);
                             Environment.Exit(0);
                             break;
+                        case "/sc":
+                        case "-sc":
+                        case "--sc":
+                            //if (attributes.Address == "")
+                            //    throw new FormatException();
+                            /// Check for presense of -
+                            p.Scan(args[count + 1]);
+                            Helper.Pause();
+                            break;
                         default:
                             if (args[count].Contains("--") || args[count].Contains("/") || args[count].Contains("-"))
                                 throw new Exception();

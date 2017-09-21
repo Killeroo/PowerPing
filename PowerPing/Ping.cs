@@ -50,8 +50,8 @@ namespace PowerPing
             if (ShowOutput)
                 PowerPing.Display.PingIntroMsg(inputAddress, this);
 
-            // Perform ping operation
-            this.SendICMP(Attributes);
+            // Perform ping operation and store results
+            Results = this.SendICMP(Attributes);
 
             // Display stats
             if (ShowOutput)
@@ -171,41 +171,67 @@ namespace PowerPing
                 }
             }
 
-            // Divide scanlist into lists for each thread
-            int splitListSize = (int)Math.Ceiling(scanList.Count / (double)Threads);
-            int x = 0;
+            //// Divide scanlist into lists for each thread
+            //int splitListSize = (int)Math.Ceiling(scanList.Count / (double)Threads);
+            //int x = 0;
 
-            for (int i = 0; i < addressLists.Length; i++)
-            {
-                addressLists[i] = new List<string>();
-                for (int j = x; j < x + splitListSize; j++)
-                {
-                    if (j >= scanList.Count)
-                        break; // Stop if we are out of bounds
-                    addressLists[i].Add(scanList[j]);
-                }
-                x += splitListSize;
-            }
+            //for (int i = 0; i < addressLists.Length; i++)
+            //{
+            //    addressLists[i] = new List<string>();
+            //    for (int j = x; j < x + splitListSize; j++)
+            //    {
+            //        if (j >= scanList.Count)
+            //            break; // Stop if we are out of bounds
+            //        addressLists[i].Add(scanList[j]);
+            //    }
+            //    x += splitListSize;
+            //}
 
             // Setup scan ping attributes
             attrs.Timeout = 500;
             attrs.Interval = 0;
-            
-            // Finally, fire up the threads!
-            for (int i = 0; i < Threads - 1; i++)
+            attrs.Count = 1;
+            ShowOutput = false;
+
+            PingResults results = new PingResults();
+            List<string> activeHosts = new List<string>();
+            Stopwatch scanTime = new Stopwatch();
+            int scanned = 0;
+
+            scanTime.Start();
+            //// Finally, fire up the threads!
+            //for (int i = 0; i < Threads - 1; i++)
+            //{
+            //    Thread thread = new Thread(() =>
+            //    {
+            //        attrs.AddressList = addressLists[i].ToArray();
+            //        Ping p = new Ping();
+            //        p.Send(attrs);
+            //    });
+            //    thread.IsBackground = true;
+            //    thread.Start();
+            //}
+
+            foreach (string host in scanList)
             {
-                Thread thread = new Thread(() =>
-                {
-                    attrs.AddressList = addressLists[i].ToArray();
-                    Ping p = new Ping();
-                    p.Send(attrs);
-                });
-                thread.IsBackground = true;
-                thread.Start();
+                // Update host
+                attrs.Address = host;
+                scanned++;
+
+                // Send ping
+                results = SendICMP(attrs);
+
+                // Update dispaly
+                Display.ScanResults(scanned, activeHosts.Count, scanList.Count, scanTime.Elapsed);
+
+                // Add to list if active
+                if (results.Lost == 0 & results.ErrorPackets != 1)
+                    activeHosts.Add(host);
             }
 
             // Display results of scan
-            //PowerPing.Display.ScanResult(scanList.Count, activeHosts.Count);
+            PowerPing.Display.EndScanResults(scanList.Count, activeHosts.Count, activeHosts);
+            scanTime.Stop();
         }
         /// <summary>
         /// ICMP flood
@@ -308,7 +334,7 @@ namespace PowerPing
             }
             return s;
         }
-        private void SendICMP(PingAttributes attrs)
+        private PingResults SendICMP(PingAttributes attrs)
         {
             IPEndPoint iep = null;
             EndPoint ep = null;
@@ -316,10 +342,11 @@ namespace PowerPing
             ICMP packet = new ICMP();
             Socket sock = null;
             Stopwatch responseTimer = new Stopwatch();
+            PingResults results = new PingResults();
             int bytesRead, packetSize, index = 1;
 
             // Convert to IPAddress
-            ipAddr = IPAddress.Parse(Attributes.Address);
+            ipAddr = IPAddress.Parse(attrs.Address);
 
             // Setup endpoint
             iep = new IPEndPoint(ipAddr, 0);
@@ -329,15 +356,15 @@ namespace PowerPing
             sock = CreateRawSocket(ipAddr.AddressFamily);
 
             // Set socket options
-            sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, Attributes.Timeout); // Socket timeout
-            sock.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.IpTimeToLive, Attributes.Ttl);
+            sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, attrs.Timeout); // Socket timeout
+            sock.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.IpTimeToLive, attrs.Ttl);
             //sock.Ttl = (short)attributes.ttl;
 
             // Construct our ICMP packet
-            packet.type = Attributes.Type;
-            packet.code = Attributes.Code;
+            packet.type = attrs.Type;
+            packet.code = attrs.Code;
             Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2); // Add seq num to ICMP message
-            byte[] payload = Encoding.ASCII.GetBytes(Attributes.Message);
+            byte[] payload = Encoding.ASCII.GetBytes(attrs.Message);
             Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length); // Add text into ICMP message
             packet.messageSize = payload.Length + 4;
             packetSize = packet.messageSize + 4;
@@ -345,7 +372,7 @@ namespace PowerPing
             responseTimer.Start();
 
             // Sending loop
-            while (Attributes.Continous ? true : index <= Attributes.Count)
+            while (attrs.Continous ? true : index <= attrs.Count)
             {
                 // Exit loop if cancel event is set
                 if (cancelEvent.WaitOne(0))
@@ -363,7 +390,7 @@ namespace PowerPing
                 {
                     // Send ping request
                     sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
-                    Results.Sent++;
+                    results.Sent++;
 
                     // Wait for response
                     byte[] buffer = new byte[5096];
@@ -375,39 +402,39 @@ namespace PowerPing
 
                     // Display reply packet
                     if (ShowOutput)
-                        PowerPing.Display.ReplyPacket(response, ep.ToString(), index, responseTimer.ElapsedMilliseconds, bytesRead);
+                        PowerPing.Display.ReplyPacket(response, ep.ToString(), index, responseTimer.Elapsed, bytesRead);
 
                     // Store response info
-                    Results.SetPacketType(response.type);
-                    Results.SetCurResponseTime(responseTimer.ElapsedMilliseconds);
-                    Results.Recieved++;
+                    results.SetPacketType(response.type);
+                    results.SetCurResponseTime(responseTimer.ElapsedMilliseconds);
+                    results.Recieved++;
                 }
                 catch (IOException)
                 {
                     if (ShowOutput)
                         PowerPing.Display.Error("General transmit error");
-                    Results.SetCurResponseTime(-1);
-                    Results.Lost++;
+                    results.SetCurResponseTime(-1);
+                    results.Lost++;
                 }
                 catch (SocketException)
                 {
                     if (ShowOutput)
                         PowerPing.Display.PingTimeout();
-                    Results.SetCurResponseTime(-1);
-                    Results.Lost++;
+                    results.SetCurResponseTime(-1);
+                    results.Lost++;
                 }
                 catch (Exception)
                 {
                     if (ShowOutput)
                         PowerPing.Display.Error("General error occured");
-                    Results.SetCurResponseTime(-1);
-                    Results.Lost++;
+                    results.SetCurResponseTime(-1);
+                    results.Lost++;
                 }
                 finally
                 {
                     // Increment seq and wait for interval
                     index++;
-                    cancelEvent.WaitOne(Attributes.Interval);
+                    cancelEvent.WaitOne(attrs.Interval);
 
                     responseTimer.Restart();
                 }  
@@ -416,6 +443,8 @@ namespace PowerPing
             // Clean up
             IsRunning = false;
             sock.Close();
+
+            return results;
         }
     }
 

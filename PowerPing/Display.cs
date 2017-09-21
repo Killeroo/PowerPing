@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Text;
 using System.Linq;
-using System.Collections;
+using System.Collections.Generic;
 
 /// <summary>
 ///  Responsible for displaying ping results, information and other output (designed for console) 
@@ -31,6 +31,12 @@ namespace PowerPing
             {
                 Left = l;
                 Top = t;
+            }
+
+            public void SetToPosition()
+            {
+                Console.CursorLeft = Left;
+                Console.CursorTop = Top;
             }
         };
 
@@ -70,10 +76,17 @@ namespace PowerPing
         private static string[] badParameterCodeValues = new string[] { "IP header pointer indicates error", "IP header missing an option", "Bad IP header length" };
         private static StringBuilder sb = new StringBuilder();
 
-        // Flood results variables
-        private static CursorPosition sentPos = new CursorPosition(0, 0); // Stores sent label pos for ping flooding
-        private static CursorPosition ppsLabel = new CursorPosition(0, 0); // Stores Pings per Second (pps) label 
-        private static long sentPings = 0; // Used to work out pings per second during ping flooding
+        // Cursor position variables
+        private static CursorPosition sentPos = new CursorPosition(0, 0); 
+        private static CursorPosition ppsPos = new CursorPosition(0, 0); 
+        private static CursorPosition progBarPos = new CursorPosition(0, 0); 
+        private static CursorPosition scanInfoPos = new CursorPosition(0, 0);
+        private static CursorPosition curAddrPos = new CursorPosition(0, 0);
+        private static CursorPosition scanTimePos = new CursorPosition(0, 0);
+        private static CursorPosition perComplPos = new CursorPosition(0, 0);
+
+        // Used to work out pings per second during ping flooding
+        private static long sentPings = 0; 
 
         /// <summary>
         /// Displays help message
@@ -87,7 +100,9 @@ namespace PowerPing
             sb.Clear();
 
             // Add message string
+            sb.AppendLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             sb.AppendLine(version);
+            sb.AppendLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             sb.AppendLine();
             sb.AppendLine("Description:");
             sb.AppendLine("     Advanced ping utility provides geoip querying, ICMP packet customization, ");
@@ -177,15 +192,15 @@ namespace PowerPing
         /// <param name="address">Reply address</param>
         /// <param name="index">Sequence number</param>
         /// <param name="replyTime">Time taken before reply recieved in milliseconds</param>
-        public static void ReplyPacket(ICMP packet, String address, int index, long replyTime, int bytesRead)
+        public static void ReplyPacket(ICMP packet, String address, int index, TimeSpan replyTime, int bytesRead)
         {
             // Display with no colour
             if (NoColor)
             {
                 if (Short) // Show short hand reply
-                    Console.WriteLine("Reply from: {0} type={1} time={2}ms", address, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type], replyTime);
+                    Console.WriteLine("Reply from: {0} type={1} time={2:0.0}ms", address, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type], replyTime);
                 else
-                    Console.WriteLine("Reply from: {0} seq={1} bytes={2} type={3} time={4}ms", address, index, bytesRead, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type], replyTime);
+                    Console.WriteLine("Reply from: {0} seq={1} bytes={2} type={3} time={4:0.0}ms", address, index, bytesRead, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type], replyTime);
                 return;
             }
 
@@ -223,13 +238,13 @@ namespace PowerPing
 
             // Print coloured time segment
             Console.Write(" time=");
-            if (replyTime <= 100L)
+            if (replyTime <= TimeSpan.FromMilliseconds(100))
                 Console.ForegroundColor = ConsoleColor.Green;
-            else if (replyTime <= 500L)
+            else if (replyTime <= TimeSpan.FromMilliseconds(500))
                 Console.ForegroundColor = ConsoleColor.Yellow;
-            else if (replyTime > 500L)
+            else
                 Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("{0}ms ", replyTime < 1 ? "<1" : replyTime.ToString());
+            Console.Write("{0:0.0}ms ", replyTime.TotalMilliseconds);
             ResetColor();
 
             // Display timestamp
@@ -255,9 +270,66 @@ namespace PowerPing
         /// <summary>
         /// Display results of scan
         /// </summary>
-        public static void ScanResult(int scanned, int found)
+        public static void ScanResults(int scanned, int found, int total, TimeSpan curTime, string curAddr = "---.---.---.---")
         {
+            // Check if cursor position is already set
+            if (progBarPos.Left != 0)
+            {
+                // Store original cursor position
+                CursorPosition originalPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                Console.CursorVisible = false;
+
+                // Update labels
+                curAddrPos.SetToPosition();
+                Console.WriteLine(new String(' ', 20));
+                curAddrPos.SetToPosition();
+                Console.Write("{0}...", curAddr);
+                scanInfoPos.SetToPosition();
+                Console.WriteLine("Sent: {0} Hosts: {1}", scanned, found);
+                //progBarPos.SetToPosition();
+                //Console.WriteLine(new String(' ', 20));
+                progBarPos.SetToPosition();
+                Console.WriteLine(new String('#', (scanned / total) * 20));
+                perComplPos.SetToPosition();
+                Console.WriteLine("{0}%", (scanned / total) * 100);
+                scanTimePos.SetToPosition();
+                Console.Write("{0:hh\\:mm\\:ss}", curTime);
+
+                // Reset to original cursor position
+                Console.SetCursorPosition(originalPos.Left, originalPos.Top);
+            }
+            else
+            {
+                // Setup labels
+                Console.Write("Pinging ");
+                curAddrPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                Console.WriteLine(curAddr);
+                scanInfoPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                Console.WriteLine("Sent: 0 Hosts: 0");
+                Console.Write("Scanning [");
+                progBarPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                Console.Write("                    ] ");
+                perComplPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                Console.WriteLine("0%");
+                Console.Write("Ellapsed: ");
+                scanTimePos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                Console.WriteLine("12:00:00");
+            }
+            
+        }
+        public static void EndScanResults(int scanned, int found, List<string> foundHosts)
+        {
+            Console.CursorVisible = true;
+
             Console.WriteLine("Scan complete. {0} addresses scanned. {1} hosts active.", scanned, found);
+            if (found != 0)
+            {
+                foreach (string host in foundHosts)
+                {
+                    Console.WriteLine("|");
+                    Console.WriteLine("-- {0}", host);
+                }
+            }
             PowerPing.Helper.Pause();
         }
         /// <summary>
@@ -340,18 +412,18 @@ namespace PowerPing
         {
             if (sentPos.Left > 0) // Check if labels have already been drawn
             {
-                // Update labels
-                Console.CursorVisible = false;
                 // Store original cursor position
                 CursorPosition originalPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-                // Update Sent label
+                Console.CursorVisible = false;
+
+                // Update labels
                 Console.SetCursorPosition(sentPos.Left, sentPos.Top);
                 Console.Write(results.Sent);
-                // Update Pings per Second label
-                Console.SetCursorPosition(ppsLabel.Left, ppsLabel.Top);
+                Console.SetCursorPosition(ppsPos.Left, ppsPos.Top);
                 Console.Write("          "); // Blank first
-                Console.SetCursorPosition(ppsLabel.Left, ppsLabel.Top);
+                Console.SetCursorPosition(ppsPos.Left, ppsPos.Top);
                 Console.Write(results.Sent - sentPings);
+
                 // Reset to original cursor position
                 Console.SetCursorPosition(originalPos.Left, originalPos.Top);
                 Console.CursorVisible = true;
@@ -366,8 +438,8 @@ namespace PowerPing
                 sentPos.Top = Console.CursorTop;
                 Console.WriteLine("0");
                 Console.Write("Pings per Second: ");
-                ppsLabel.Left = Console.CursorLeft;
-                ppsLabel.Top = Console.CursorTop;
+                ppsPos.Left = Console.CursorLeft;
+                ppsPos.Top = Console.CursorTop;
                 Console.WriteLine();
                 Console.WriteLine("Press Control-C to stop...");
             }
