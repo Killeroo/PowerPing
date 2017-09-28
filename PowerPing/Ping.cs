@@ -419,7 +419,7 @@ namespace PowerPing
                 catch (SocketException)
                 {
                     if (ShowOutput)
-                        PowerPing.Display.PingTimeout();
+                        PowerPing.Display.PingTimeout(index);
                     results.SetCurResponseTime(-1);
                     results.Lost++;
                 }

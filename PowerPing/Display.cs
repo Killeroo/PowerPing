@@ -473,10 +473,15 @@ namespace PowerPing
         /// <summary>
         /// Display Timeout message
         /// </summary>
-        public static void PingTimeout()
+        public static void PingTimeout(int seq)
         {
             Console.BackgroundColor = ConsoleColor.DarkRed;
-            Console.Write("Request timed out.");
+            Console.Write("Request timed out. seq={0} ", seq);
+
+            // Display timestamp
+            if (TimeStamp)
+                Console.Write("@ {0}", DateTime.Now.ToString("HH:mm:ss"));
+
             // Make double sure we dont get the red line bug
             ResetColor();
             Console.WriteLine();
