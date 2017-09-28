@@ -406,7 +406,7 @@ namespace PowerPing
                         case "/loc":
                         case "-loc":
                         case "--loc": // Location lookup
-                            if (attributes.Address != "")
+                            if (attributes.Address == "")
                                 throw new FormatException();
                             Helper.GetAddressLocation(attributes.Address, true);
                             Environment.Exit(0);
