@@ -222,7 +222,7 @@ namespace PowerPing
                 results = SendICMP(attrs);
 
                 // Update dispaly
-                Display.ScanResults(scanned, activeHosts.Count, scanList.Count, scanTime.Elapsed);
+                Display.ScanResults(scanned, activeHosts.Count, scanList.Count, scanTime.Elapsed, range, attrs.Address);
 
                 // Add to list if active
                 if (results.Lost == 0 & results.ErrorPackets != 1)

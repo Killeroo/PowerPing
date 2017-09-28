@@ -270,7 +270,7 @@ namespace PowerPing
         /// <summary>
         /// Display results of scan
         /// </summary>
-        public static void ScanResults(int scanned, int found, int total, TimeSpan curTime, string curAddr = "---.---.---.---")
+        public static void ScanResults(int scanned, int found, int total, TimeSpan curTime, string range, string curAddr = "---.---.---.---")
         {
             // Check if cursor position is already set
             if (progBarPos.Left != 0)
@@ -278,22 +278,22 @@ namespace PowerPing
                 // Store original cursor position
                 CursorPosition originalPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.CursorVisible = false;
-
                 // Update labels
                 curAddrPos.SetToPosition();
                 Console.WriteLine(new String(' ', 20));
-                curAddrPos.SetToPosition();
-                Console.Write("{0}...", curAddr);
                 scanInfoPos.SetToPosition();
-                Console.WriteLine("Sent: {0} Hosts: {1}", scanned, found);
-                //progBarPos.SetToPosition();
-                //Console.WriteLine(new String(' ', 20));
-                progBarPos.SetToPosition();
-                Console.WriteLine(new String('#', (scanned / total) * 20));
-                perComplPos.SetToPosition();
-                Console.WriteLine("{0}%", (scanned / total) * 100);
+                Console.WriteLine("Sent: {0} Found Hosts: {1}", scanned, found);
                 scanTimePos.SetToPosition();
                 Console.Write("{0:hh\\:mm\\:ss}", curTime);
+                curAddrPos.SetToPosition();
+                Console.Write("{0}...", curAddr);
+                progBarPos.SetToPosition();
+                double s = scanned;
+                double tot = total;
+                double blockPercent = (s / tot) * 30;
+                Console.WriteLine(new String('#', Convert.ToInt32(blockPercent)));
+                perComplPos.SetToPosition();
+                Console.WriteLine("{0}%", Math.Round((s / tot) * 100, 0));
 
                 // Reset to original cursor position
                 Console.SetCursorPosition(originalPos.Left, originalPos.Top);
@@ -301,19 +301,20 @@ namespace PowerPing
             else
             {
                 // Setup labels
+                Console.WriteLine("Scanning range [ {0} ]", range);
+                scanInfoPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                Console.WriteLine("Sent: 0 Hosts: 0");
                 Console.Write("Pinging ");
                 curAddrPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.WriteLine(curAddr);
-                scanInfoPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-                Console.WriteLine("Sent: 0 Hosts: 0");
-                Console.Write("Scanning [");
-                progBarPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-                Console.Write("                    ] ");
-                perComplPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-                Console.WriteLine("0%");
                 Console.Write("Ellapsed: ");
                 scanTimePos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.WriteLine("12:00:00");
+                Console.Write("Progress [");
+                progBarPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                Console.Write("                              ] ");
+                perComplPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                Console.WriteLine("0%");
             }
             
         }
@@ -321,6 +322,7 @@ namespace PowerPing
         {
             Console.CursorVisible = true;
 
+            Console.WriteLine();
             Console.WriteLine("Scan complete. {0} addresses scanned. {1} hosts active.", scanned, found);
             if (found != 0)
             {
@@ -330,6 +332,7 @@ namespace PowerPing
                     Console.WriteLine("-- {0}", host);
                 }
             }
+            Console.WriteLine();
             PowerPing.Helper.Pause();
         }
         /// <summary>
