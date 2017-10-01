@@ -49,6 +49,9 @@ namespace PowerPing
             Display.DefaultForegroundColor = Console.ForegroundColor;
             Display.DefaultBackgroundColor = Console.BackgroundColor;
 
+            // Show current version info
+            Display.Version();
+
             // Check if no arguments
             if (args.Length == 0)
             {
@@ -80,9 +83,6 @@ namespace PowerPing
                     addrFound = true;
                 }
             }
-
-            // Show current version info
-            Display.Version();
 
             // Loop through other arguments
             try
