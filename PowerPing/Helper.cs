@@ -3,6 +3,8 @@ using System.Xml;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.IO;
+using System.Reflection;
 
 /// <summary>
 /// Class for miscellaneous methods 
@@ -10,7 +12,7 @@ using System.Net.Sockets;
 
 namespace PowerPing
 {
-    class Helper
+    public static class Helper
     {
         /// <summary>
         /// Gets location information about IP Address
@@ -39,7 +41,6 @@ namespace PowerPing
                         foreach (XmlElement element in elements)
                             Console.WriteLine(element.Name + ": " + (element.InnerText == "" ? "NA" : element.InnerText));
                         Console.WriteLine("DNS Lookup: --{0}--", Helper.VerifyAddress(addr, AddressFamily.InterNetwork));
-                        Console.WriteLine("(IP location info from freegeoip.net)");
                     }
                     else
                     {
@@ -156,7 +157,30 @@ namespace PowerPing
             return value > left && value < right;
         }
 
+        // Extension method for determining build time
+        // Source: http://stackoverflow.com/a/1600990
+        public static DateTime GetLinkerTime(this Assembly assembly, TimeZoneInfo target = null)
+        {
+            var filePath = assembly.Location;
+            const int c_PeHeaderOffset = 60;
+            const int c_LinkerTimestampOffset = 8;
 
+            var buffer = new byte[2048];
+
+            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                stream.Read(buffer, 0, 2048);
+
+            var offset = BitConverter.ToInt32(buffer, c_PeHeaderOffset);
+            var secondsSince1970 = BitConverter.ToInt32(buffer, offset + c_LinkerTimestampOffset);
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+            var linkTimeUtc = epoch.AddSeconds(secondsSince1970);
+
+            var tz = target ?? TimeZoneInfo.Local;
+            var localTime = TimeZoneInfo.ConvertTimeFromUtc(linkTimeUtc, tz);
+
+            return localTime;
+        }
 
     }
 }

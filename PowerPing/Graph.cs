@@ -13,6 +13,7 @@ namespace PowerPing
 
         // Properties
         public bool CompactGraph = false;
+        public int EndCursorPosY = 0; // Position to move cursor to when graph exits
 
         // Local variable declaration
         private Ping graphPing = new Ping();
@@ -60,8 +61,6 @@ namespace PowerPing
 
             if (running)
             {
-                cancelFlag = true;
-
                 // wait till ping stops running
                 while (running)
                     Task.Delay(25);
@@ -229,6 +228,8 @@ namespace PowerPing
             timeLabelX = Console.CursorLeft;
             timeLabelY = Console.CursorTop;
             Console.WriteLine();
+
+            EndCursorPosY = Console.CursorTop;
         }
         /// <summary>
         /// Draw graph bar

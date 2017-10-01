@@ -51,7 +51,7 @@ namespace PowerPing
                 PowerPing.Display.PingIntroMsg(inputAddress, this);
 
             // Perform ping operation and store results
-            Results = this.SendICMP(Attributes);
+            this.SendICMP(Attributes);
 
             // Display stats
             if (ShowOutput)
@@ -218,6 +218,11 @@ namespace PowerPing
                 attrs.Address = host;
                 scanned++;
 
+                // Reset global results for accurate results 
+                // (results need to be set globally while running for graph but need to be semi local for scan 
+                // or results bleed through so active hosts can't be determined)
+                this.Results = new PingResults();
+
                 // Send ping
                 results = SendICMP(attrs);
 
@@ -342,7 +347,6 @@ namespace PowerPing
             ICMP packet = new ICMP();
             Socket sock = null;
             Stopwatch responseTimer = new Stopwatch();
-            PingResults results = new PingResults();
             int bytesRead, packetSize, index = 1;
 
             // Convert to IPAddress
@@ -390,7 +394,7 @@ namespace PowerPing
                 {
                     // Send ping request
                     sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
-                    results.Sent++;
+                    Results.Sent++;
 
                     // Wait for response
                     byte[] buffer = new byte[5096];
@@ -405,30 +409,30 @@ namespace PowerPing
                         PowerPing.Display.ReplyPacket(response, ep.ToString(), index, responseTimer.Elapsed, bytesRead);
 
                     // Store response info
-                    results.SetPacketType(response.type);
-                    results.SetCurResponseTime(responseTimer.ElapsedMilliseconds);
-                    results.Recieved++;
+                    Results.SetPacketType(response.type);
+                    Results.SetCurResponseTime(responseTimer.ElapsedMilliseconds);
+                    Results.Recieved++;
                 }
                 catch (IOException)
                 {
                     if (ShowOutput)
                         PowerPing.Display.Error("General transmit error");
-                    results.SetCurResponseTime(-1);
-                    results.Lost++;
+                    Results.SetCurResponseTime(-1);
+                    Results.Lost++;
                 }
                 catch (SocketException)
                 {
                     if (ShowOutput)
                         PowerPing.Display.PingTimeout(index);
-                    results.SetCurResponseTime(-1);
-                    results.Lost++;
+                    Results.SetCurResponseTime(-1);
+                    Results.Lost++;
                 }
                 catch (Exception)
                 {
                     if (ShowOutput)
                         PowerPing.Display.Error("General error occured");
-                    results.SetCurResponseTime(-1);
-                    results.Lost++;
+                    Results.SetCurResponseTime(-1);
+                    Results.Lost++;
                 }
                 finally
                 {
@@ -444,7 +448,7 @@ namespace PowerPing
             IsRunning = false;
             sock.Close();
 
-            return results;
+            return Results;
         }
     }
 

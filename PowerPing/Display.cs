@@ -3,6 +3,8 @@ using System.Reflection;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reflection;
+using PowerPing;
 
 /// <summary>
 ///  Responsible for displaying ping results, information and other output (designed for console) 
@@ -16,6 +18,7 @@ namespace PowerPing
         // Properties
         public static bool Short = false;
         public static bool NoColor = false;
+        public static bool NoInput = false;
         public static bool DisplayMessage = false;
         public static bool TimeStamp = false;
         public static ConsoleColor DefaultForegroundColor;
@@ -89,67 +92,89 @@ namespace PowerPing
         private static long sentPings = 0; 
 
         /// <summary>
+        /// Displays current version number and build date
+        /// </summary>
+        public static void Version()
+        {
+            Version v = Assembly.GetExecutingAssembly().GetName().Version;
+            DateTime buildInfo = Assembly.GetExecutingAssembly().GetLinkerTime();
+            string version = Assembly.GetExecutingAssembly().GetName().Name + " Version " + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ")";
+            string buildTime = buildInfo.Day + "/" + buildInfo.Month + "/" + buildInfo.Year + " " + buildInfo.TimeOfDay;
+
+            // Clear builder
+            sb.Clear();
+
+            // Construct string
+            sb.AppendFormat("{0} [Built {1}]", version, buildTime);
+
+            // Print string
+            Console.WriteLine(sb.ToString());
+        }
+        /// <summary>
         /// Displays help message
         /// </summary>
         public static void Help()
         {
-            Version v = Assembly.GetExecutingAssembly().GetName().Version;
-            string version = Assembly.GetExecutingAssembly().GetName().Name + " Version " + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ")";
-
             // Reset string builder
             sb.Clear();
 
             // Add message string
-            sb.AppendLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            sb.AppendLine(version);
-            sb.AppendLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            sb.AppendLine("__________                         __________.__                ");
+            sb.AppendLine(@"\______   \______  _  __ __________\______   \__| ____    ____  ");
+            sb.AppendLine(@" |     ___/  _ \ \/ \/ // __ \_  __ \     ___/  |/    \  / ___\ ");
+            sb.AppendLine(@" |    |  (  <_> )     /\  ___/|  | \/    |   |  |   |  \/ /_/  >");
+            sb.AppendLine(@" |____|   \____/ \/\_/  \___  >__|  |____|   |__|___|  /\___  / ");
+            sb.AppendLine(@"                            \/                       \//_____/  ");
             sb.AppendLine();
             sb.AppendLine("Description:");
             sb.AppendLine("     Advanced ping utility provides geoip querying, ICMP packet customization, ");
             sb.AppendLine("     graphs and result colourization.");
             sb.AppendLine();
-            sb.AppendLine("Usage: PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] | [--fl] | ");
-            sb.AppendLine("                 [--t] [--c count] [--w timeout] [--m message] [--i TTL] [--in interval]");
-            sb.AppendLine("                 [--pt type] [--pc code] [--dm] [--4] [--short] [--nocolor] [--ts] [--ti timing]");
-            sb.AppendLine("                 target_name");
+            sb.AppendLine("Usage: PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] |");
+            sb.AppendLine("                 [--fl] | [--t] [--c count] [--w timeout] [--m message] ");
+            sb.AppendLine("                 [--i TTL] [--in interval] [--pt type] [--pc code] [--dm]");
+            sb.AppendLine("                  [--4] [--short] [--nocolor] [--ts] [--ti timing] target_name");
             sb.AppendLine();
             sb.AppendLine("Options:");
-            sb.AppendLine("     --?             Displays this help message");
-            sb.AppendLine("     --t             Ping the target until stopped (Control-C to stop)");
-            sb.AppendLine("     --c count       Number of pings to send");
-            sb.AppendLine("     --w timeout     Time to wait for reply (in milliseconds)");
-            sb.AppendLine("     --m message     Ping packet message");
-            sb.AppendLine("     --i ttl         Time To Live");
-            sb.AppendLine("     --in interval   Interval between each ping (in milliseconds)");
-            sb.AppendLine("     --pt type       Use custom ICMP type");
-            sb.AppendLine("     --pc code       Use custom ICMP code value");
-            sb.AppendLine("     --dm            Display ICMP messages");
-            sb.AppendLine("     --4             Force using IPv4");
+            sb.AppendLine(" --help       [--?]            Displays this help message");
+            sb.AppendLine(" --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)");
+            sb.AppendLine(" --displaymsg [--dm]           Display ICMP messages");
+            sb.AppendLine(" --ipv4       [--4]            Force using IPv4");
             //sb.AppendLine("     --6             Force using IPv6");
-            sb.AppendLine("     --sh            Show less detailed replies");
-            sb.AppendLine("     --nc            No colour");
-            sb.AppendLine("     --ts            Display timestamp");
-            sb.AppendLine("     --ti timing     Timing level:");
-            sb.AppendLine("                     0 - Paranoid    4 - Nimble");
-            sb.AppendLine("                     1 - Sneaky      5 - Speedy");
-            sb.AppendLine("                     2 - Quiet       6 - Insane");
-            sb.AppendLine("                     3 - Polite");
+            sb.AppendLine(" --shorthand  [--sh]           Show less detailed replies");
+            sb.AppendLine(" --nocolor    [--nc]           No colour");
+            sb.AppendLine(" --noinput    [--ni]           Require no user input");
+            sb.AppendLine(" --timestamp  [--ts]           Display timestamp");
+            sb.AppendLine(" --count      [--c]   number   Number of pings to send");
+            sb.AppendLine(" --timeout    [--w]   number   Time to wait for reply (in milliseconds)");
+            sb.AppendLine(" --ttl        [--i]   number   Time To Live");
+            sb.AppendLine(" --interval   [--in]  number   Interval between each ping (in milliseconds)");
+            sb.AppendLine(" --type       [--pt]  number   Use custom ICMP type");
+            sb.AppendLine(" --code       [--pc]  number   Use custom ICMP code value");
+            sb.AppendLine(" --message    [--m]   message  Ping packet message");
+            sb.AppendLine(" --timing     [--ti]  timing   Timing levels:");
+            sb.AppendLine("                                   0 - Paranoid    4 - Nimble");
+            sb.AppendLine("                                   1 - Sneaky      5 - Speedy");
+            sb.AppendLine("                                   2 - Quiet       6 - Insane");
+            sb.AppendLine("                                   3 - Polite");
             sb.AppendLine();
-            sb.AppendLine("     --li            Listen for ICMP packets");
-            sb.AppendLine("     --fl            Send high volume of pings to address");
-            sb.AppendLine("     --g             Graph view");
-            sb.AppendLine("     --cg            Compact graph view");
-            sb.AppendLine("     --loc           Location info for an address");
-            sb.AppendLine("     --whoami        Location info for current host");
+            sb.AppendLine(" --listen     [--li]  address  Listen for ICMP packets");
+            sb.AppendLine(" --flood      [--fl]  address  Send high volume of pings to address");
+            sb.AppendLine(" --graph      [--g]   address  Graph view");
+            sb.AppendLine(" --compact    [--cg]  address  Compact graph view");
+            sb.AppendLine(" --location   [--loc] address  Location info for an address");
+            sb.AppendLine(" --whoami                      Location info for current host");
             sb.AppendLine();
+            sb.AppendLine("(Location info provided by http://freegeoip.net)");
             sb.AppendLine("Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=");
             sb.AppendLine("Find the project here [https://github.com/Killeroo/PowerPing]");
 
             // Print string
             Console.WriteLine(sb.ToString());
 
-            // Wait for user input
-            PowerPing.Helper.Pause();
+            if (!NoInput)
+                // Wait for user input
+                PowerPing.Helper.Pause();
         }
         /// <summary>
         /// Display Initial ping message to screen, declaring simple info about the ping
@@ -333,7 +358,9 @@ namespace PowerPing
                 }
             }
             Console.WriteLine();
-            PowerPing.Helper.Pause();
+
+            if (!NoInput)
+                PowerPing.Helper.Pause();
         }
         /// <summary>
         /// Displays statistics for a ping object
@@ -404,8 +431,9 @@ namespace PowerPing
                 Console.WriteLine();
             }
 
-            // Confirm to exit
-            PowerPing.Helper.Pause(true);
+            if (!NoInput)
+                // Confirm to exit
+                PowerPing.Helper.Pause(true);
         }
         /// <summary>
         /// Displays and updates results of an ICMP flood
@@ -435,7 +463,7 @@ namespace PowerPing
             {
                 // Draw labels
                 Console.WriteLine("Flooding...");
-                Console.WriteLine("Threads: 1");
+                //Console.WriteLine("Threads: 1");
                 Console.Write("Sent: ");
                 sentPos.Left = Console.CursorLeft;
                 sentPos.Top = Console.CursorTop;
@@ -471,7 +499,8 @@ namespace PowerPing
             Console.WriteLine("Total elapsed time (HH:MM:SS.FFF): {0:hh\\:mm\\:ss\\.fff}", results.TotalRunTime);
             Console.WriteLine();
 
-            Helper.Pause(true);
+            if (!NoInput)
+                Helper.Pause(true);
         }
         /// <summary>
         /// Display Timeout message
@@ -494,18 +523,22 @@ namespace PowerPing
         /// </summary>
         /// <param name="errorMessage">Error message to display</param>
         /// <param name="exit">Whether to exit program after displaying error</param>
-        public static void Error(String errorMessage, bool exit = false, bool pause = false)
+        public static void Error(String errorMessage, bool exit = false, bool pause = false, bool newline = true)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
 
             // Write error message
-            Console.WriteLine("ERROR: " + errorMessage);
+            if (newline)
+                Console.WriteLine("ERROR: " + errorMessage);
+            else
+                Console.Write("ERROR: " + errorMessage);
 
             // Reset console colours
             ResetColor();
 
             if (pause)
-                PowerPing.Helper.Pause();
+                if (!NoInput)
+                    PowerPing.Helper.Pause();
 
             if (exit)
                 Environment.Exit(0);
@@ -513,10 +546,19 @@ namespace PowerPing
         /// <summary>
         /// Display a general message
         /// </summary>
-        public static void Message(String message, ConsoleColor color = ConsoleColor.DarkGray)
+        public static void Message(String message, ConsoleColor color = ConsoleColor.DarkGray, bool newline = true)
         {
-            Console.BackgroundColor = color;
-            Console.WriteLine(message);
+            if (color == ConsoleColor.DarkGray)
+                color = DefaultForegroundColor; // Use default foreground color if gray is being used
+
+            Console.ForegroundColor = color;
+
+            if (newline)
+                Console.WriteLine(message);
+            else
+                Console.Write(message);
+
+            ResetColor();
         }
 
         private static void ResetColor()
