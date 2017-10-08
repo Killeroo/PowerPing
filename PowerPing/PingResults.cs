@@ -16,13 +16,13 @@ namespace PowerPing
         public long Sent { get; set; } // Number of sent ping packets
         public long Recieved { get; set; } // Number of recieved packets
         public long Lost { get; set; }  // Amount of lost packets
-        public long MaxTime { get; private set; } // Highest ping reply time
-        public long MinTime { get; private set; } // Lowest ping reply time
-        public long CurTime { get; private set; } // Most recent packet response time
+        public double MaxTime { get; private set; } // Highest ping reply time
+        public double MinTime { get; private set; } // Lowest ping reply time
+        public double CurTime { get; private set; } // Most recent packet response time
         public long ErrorPackets { get; private set; } // Number of Error packet recieved
         public long GoodPackets { get; private set; } // Number of good replies recieved
         public long OtherPackets { get; private set; } // Number of other packet types recieved
-        public static ConcurrentStack<string> ActiveHosts = new ConcurrentStack<string>(); // Stores found hosts during scan
+        //public static ConcurrentStack<string> ActiveHosts = new ConcurrentStack<string>(); // Stores found hosts during scan
 
         // Local variables
         private Stopwatch operationTimer = new Stopwatch();
@@ -44,7 +44,7 @@ namespace PowerPing
             operationTimer.Start();
         }
 
-        public void SetCurResponseTime(long time)
+        public void SetCurResponseTime(double time)
         {
             if (time == -1)
             {
@@ -64,13 +64,10 @@ namespace PowerPing
         public void SetPacketType(int type)
         {
             if (type == 0)
-                // Successful replies
                 GoodPackets++;
             else if (type == 3 || type == 4 || type == 5 || type == 11)
-                // Error packet types
                 ErrorPackets++;
             else
-                // Other packet type
                 OtherPackets++;
         }
     }

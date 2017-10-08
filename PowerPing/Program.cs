@@ -27,6 +27,7 @@ SOFTWARE.
 */
 
 using System;
+using System.Linq;
 
 // dsipaly Powerping version at start
 
@@ -285,7 +286,7 @@ namespace PowerPing
                                     attributes.Interval = 100;
                                     break;
                                 default: // Unknown timing type
-                                    throw new FormatException();
+                                    throw new ArgumentFormatException();
                             }
                             break;
                         case "/whoami":
@@ -301,7 +302,7 @@ namespace PowerPing
                         case "-loc":
                         case "--loc": // Location lookup
                             if (attributes.Address == "")
-                                throw new ApplicationException();
+                                throw new AddressNotFoundException();
                             Helper.GetAddressLocation(attributes.Address, true);
                             Environment.Exit(0);
                             break;
@@ -321,7 +322,7 @@ namespace PowerPing
                         case "-g":
                         case "--g": // Graph view
                             if (attributes.Address == "")
-                                throw new ApplicationException();
+                                throw new AddressNotFoundException();
                             g = new Graph(attributes.Address); 
                             g.Start();
                             Environment.Exit(0);
@@ -333,7 +334,7 @@ namespace PowerPing
                         case "-cg":
                         case "--cg": // Compact graph view
                             if (attributes.Address == "")
-                                throw new ApplicationException();
+                                throw new AddressNotFoundException();
                             g = new Graph(attributes.Address);
                             g.CompactGraph = true;
                             g.Start();
@@ -346,7 +347,7 @@ namespace PowerPing
                         case "-fl":
                         case "--fl": // Flood
                             if (attributes.Address == "")
-                                throw new ApplicationException();
+                                throw new AddressNotFoundException();
                             Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
                             p.Flood(attributes.Address);
                             Environment.Exit(0);
@@ -358,14 +359,14 @@ namespace PowerPing
                         case "-sc":
                         case "--sc": // Scan
                             if (attributes.Address == "" || !attributes.Address.Contains("-"))
-                                throw new ApplicationException();//FormatException();
+                                throw new AddressNotFoundException();//FormatException();
                             p.Scan(args[count + 1]);
                             Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
                             Environment.Exit(0);
                             break;
                         default:
                             if (args[count].Contains("--") || args[count].Contains("/") || args[count].Contains("-"))
-                                throw new ArgumentException();//Exception();
+                                throw new AddressNotFoundException();//ArgumentException();//Exception();
                             break;
                     }
                 }
@@ -397,7 +398,7 @@ namespace PowerPing
                 Helper.Pause();
                 return;
             }
-            catch (FormatException)
+            catch (ArgumentFormatException)
             {
                 PowerPing.Display.Error("Incorrect Argument Usage", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing " + args[curArg] + " >>>" + args[curArg + 1] + "<<<\"", ConsoleColor.Red);
@@ -405,7 +406,7 @@ namespace PowerPing
                 Helper.Pause();
                 return;
             }
-            catch (ApplicationException)
+            catch (AddressNotFoundException)
             {
                 PowerPing.Display.Error("No Address Provided", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
@@ -413,9 +414,9 @@ namespace PowerPing
                 Helper.Pause();
                 return;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                PowerPing.Display.Error("A General Error Occured", false, false, false);
+                PowerPing.Display.Error("A " + e.GetType().ToString().Split('.').Last() + " Exception Occured", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
                 PowerPing.Display.Message("Use \"PowerPing /help \" or \"PowerPing /? \" for more info.");
                 Helper.Pause();
@@ -437,18 +438,15 @@ namespace PowerPing
             args.Cancel = true;
 
             // Stop ping
-            p.Stop();
+            p.Dispose();
 
             // Stop graph if it is running
             if (g != null)
-            {
-                g.Stop();
-                Console.CursorTop = g.EndCursorPosY;
-            }
+                g.Dispose();
 
             // Reset console colour
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.Gray;
+            Display.ResetColor();
+            Console.CursorVisible = true;
 
         }
     }

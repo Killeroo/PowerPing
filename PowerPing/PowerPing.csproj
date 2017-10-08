@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Display.cs" />
+    <Compile Include="Exceptions.cs" />
     <Compile Include="Graph.cs" />
     <Compile Include="ICMP.cs" />
     <Compile Include="Helper.cs" />

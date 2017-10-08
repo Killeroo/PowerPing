@@ -17,7 +17,7 @@ using System.IO;
 namespace PowerPing
 {
 
-    class Ping
+    class Ping : IDisposable
     {
         // Properties
         public PingResults Results { get; private set; } = new PingResults(); // Store current ping results
@@ -26,10 +26,8 @@ namespace PowerPing
         public bool IsRunning { get; private set; } = false;
         public int Threads { get; set; } = 5;
 
-        // Local variables
         private ManualResetEvent cancelEvent = new ManualResetEvent(false);
 
-        // Constructor
         public Ping() { }
 
         /// <summary>
@@ -37,23 +35,19 @@ namespace PowerPing
         /// </summary>
         public void Send(PingAttributes attrs)
         {
-            // Get inputted address
-            string inputAddress = attrs.Address; 
-
             // Load user inputted attributes
+            string inputAddress = attrs.Address; 
             this.Attributes = attrs;
 
             // Lookup address
             Attributes.Address = PowerPing.Helper.VerifyAddress(Attributes.Address, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
-            // Display intro message
             if (ShowOutput)
                 PowerPing.Display.PingIntroMsg(inputAddress, this);
 
             // Perform ping operation and store results
             this.SendICMP(Attributes);
 
-            // Display stats
             if (ShowOutput)
                 PowerPing.Display.PingResults(this);
 
@@ -74,27 +68,24 @@ namespace PowerPing
 
             IsRunning = true;
 
+            
             try
             {
                 // Create listener socket
                 listeningSocket = CreateRawSocket(AddressFamily.InterNetwork);
-                // Bind socket to local address
                 listeningSocket.Bind(new IPEndPoint(localAddress, 0));
-                // Set SIO_RCVALL flag to socket IO control
-                listeningSocket.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 });
+                listeningSocket.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 }); // Set SIO_RCVALL flag to socket IO control
 
-                // Display initial message
                 PowerPing.Display.ListenIntroMsg();
 
                 // Listening loop
                 while (true)
                 {
                     byte[] buffer = new byte[4096];
-                    // Endpoint for storing source address
-                    EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                    
                     // Recieve any incoming ICMPv4 packets
+                    EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
                     int bytesRead = listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint);
-                    // Create ICMP object of response
                     ICMP response = new ICMP(buffer, bytesRead);
 
                     // Display captured packet
@@ -122,7 +113,6 @@ namespace PowerPing
             IsRunning = false;
             listeningSocket.Close();
 
-            // Display results
             Display.ListenResults(results);
         }
         /// <summary>
@@ -137,8 +127,19 @@ namespace PowerPing
         {
             List<string> scanList = new List<string>(); // List of addresses to scan
             String[] ipSegments = range.Split('.');
-            List<string>[] addressLists = new List<string>[Threads]; // Lists of addresses to be scanned in each thread
+            PingResults results = new PingResults();
+            List<string> activeHosts = new List<string>();
+            List<double> activeHostTimes = new List<double>();
+            Stopwatch scanTimer = new Stopwatch();
+            int scanned = 0;
+            //List<string>[] addressLists = new List<string>[Threads]; // Lists of addresses to be scanned in each thread
+
+            // Setup scan ping attributes
             PingAttributes attrs = new PingAttributes();
+            attrs.Timeout = 500;
+            attrs.Interval = 0;
+            attrs.Count = 1;
+            ShowOutput = false;
 
             // Check format of address (for '-'s and disallow multipl '-'s in one segment, also check format of address
             if (!range.Contains("-"))
@@ -187,31 +188,9 @@ namespace PowerPing
             //    x += splitListSize;
             //}
 
-            // Setup scan ping attributes
-            attrs.Timeout = 500;
-            attrs.Interval = 0;
-            attrs.Count = 1;
-            ShowOutput = false;
+            scanTimer.Start();
 
-            PingResults results = new PingResults();
-            List<string> activeHosts = new List<string>();
-            Stopwatch scanTime = new Stopwatch();
-            int scanned = 0;
-
-            scanTime.Start();
-            //// Finally, fire up the threads!
-            //for (int i = 0; i < Threads - 1; i++)
-            //{
-            //    Thread thread = new Thread(() =>
-            //    {
-            //        attrs.AddressList = addressLists[i].ToArray();
-            //        Ping p = new Ping();
-            //        p.Send(attrs);
-            //    });
-            //    thread.IsBackground = true;
-            //    thread.Start();
-            //}
-
+            // Scan loop
             foreach (string host in scanList)
             {
                 // Update host
@@ -225,18 +204,19 @@ namespace PowerPing
 
                 // Send ping
                 results = SendICMP(attrs);
+                Display.ScanProgress(scanned, activeHosts.Count, scanList.Count, scanTimer.Elapsed, range, attrs.Address);
 
-                // Update dispaly
-                Display.ScanResults(scanned, activeHosts.Count, scanList.Count, scanTime.Elapsed, range, attrs.Address);
-
-                // Add to list if active
                 if (results.Lost == 0 & results.ErrorPackets != 1)
+                {
+                    // If host is active, add to list
                     activeHosts.Add(host);
+                    activeHostTimes.Add(results.CurTime);
+                }
+
             }
 
-            // Display results of scan
-            PowerPing.Display.EndScanResults(scanList.Count, activeHosts.Count, activeHosts);
-            scanTime.Stop();
+            scanTimer.Stop();
+            PowerPing.Display.EndScanResults(scanList.Count, activeHosts, activeHostTimes);
         }
         /// <summary>
         /// ICMP flood
@@ -284,14 +264,13 @@ namespace PowerPing
             });
             thread.IsBackground = true;
             thread.Start();
-
             IsRunning = true;
 
             // Results loop 
             while (IsRunning)
             {
                 // Update results text
-                Display.FloodResults(p.Results);
+                Display.FloodProgress(p.Results);
 
                 // Wait before updating (save our CPU load) and check for cancel event
                 if (cancelEvent.WaitOne(1000))
@@ -300,30 +279,12 @@ namespace PowerPing
 
             // Cleanup
             IsRunning = false;
-            p.Stop();
+            p.Dispose();
             thread.Abort();
 
             // Display results
             Display.PingResults(p);
             
-        }
-        /// <summary>
-        /// Stop any ping operations
-        /// </summary>
-        public void Stop()
-        {
-            // If a ping operation is running set cancel event
-            if (IsRunning)
-            {
-                cancelEvent.Set();
-
-                // wait till ping stops running
-                while (IsRunning)
-                    Task.Delay(25);
-            }
-
-            // Reset cancel event
-            cancelEvent.Reset();
         }
 
         private Socket CreateRawSocket(AddressFamily family)
@@ -410,7 +371,7 @@ namespace PowerPing
 
                     // Store response info
                     Results.SetPacketType(response.type);
-                    Results.SetCurResponseTime(responseTimer.ElapsedMilliseconds);
+                    Results.SetCurResponseTime(responseTimer.Elapsed.TotalMilliseconds);
                     Results.Recieved++;
                 }
                 catch (IOException)
@@ -450,6 +411,39 @@ namespace PowerPing
 
             return Results;
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (IsRunning)
+                {
+                    cancelEvent.Set();
+
+                    // wait till ping stops running
+                    while (IsRunning)
+                        Task.Delay(25);
+                }
+
+                // Reset cancel event
+                cancelEvent.Reset();
+
+                // Call GC to cleanup
+                System.GC.Collect();
+
+                disposedValue = true;
+            }
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+        #endregion
     }
 
 }

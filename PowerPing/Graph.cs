@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace PowerPing
 {
-    class Graph
+    class Graph : IDisposable
     {
         // Constants
         const string FULL_BAR_BLOCK_CHAR = "█";
@@ -55,18 +55,6 @@ namespace PowerPing
             // Start drawing graph
             Draw();
         }
-        public void Stop()
-        {
-            cancelFlag = true;
-
-            if (running)
-            {
-                // wait till ping stops running
-                while (running)
-                    Task.Delay(25);
-            }
-
-        }
 
         /// <summary>
         /// Stores graph drawing loop
@@ -97,7 +85,9 @@ namespace PowerPing
                 UpdateLabels(graphPing.Results);
 
                 // Get results from ping and add to graph
-                AddColumnToGraph(CreatColumn(graphPing.Results.CurTime));
+                AddColumnToGraph(CreatColumn((long) graphPing.Results.CurTime));
+
+                Console.CursorTop = EndCursorPosY;
 
                 // Wait one second
                 Thread.Sleep(1000);
@@ -105,7 +95,7 @@ namespace PowerPing
 
             // Clean up
             running = false;
-            graphPing.Stop();
+            graphPing.Dispose();
             pinger.Abort();
         }
         ///<summary>
@@ -115,7 +105,7 @@ namespace PowerPing
         {
             // Determine Xaxis size
             if (!CompactGraph)
-                xAxisLength = Console.WindowWidth - 20;
+                xAxisLength = Console.WindowWidth - 60;//20;
 
             DrawBackground();
 
@@ -147,8 +137,8 @@ namespace PowerPing
         private void DrawBackground()
         {
             // Draw title
-            Console.WriteLine("{0}(PowerPing - Graph View)", new String(' ', xAxisLength / 2));
-            //Console.WriteLine();
+//            Console.WriteLine("{0}(Graph View)", new String(' ', xAxisLength / 2));
+            Console.WriteLine();
 
             // Draw Y axis of graph
             if (CompactGraph)
@@ -199,7 +189,7 @@ namespace PowerPing
 
             // Draw info (and get location info for each label)
             Console.WriteLine("                 Ping Statistics:");
-            Console.WriteLine("                ---------------------------------------------");
+            Console.WriteLine("                -----------------------------------");
             Console.WriteLine("                 Destination [ {0} ]", graphPingAttrs.Address);
 
             Console.Write("                     Sent: ");
@@ -218,13 +208,13 @@ namespace PowerPing
             rttLabelY = Console.CursorTop;
 
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("             Failed: ");
+            Console.Write("               Lost: ");
             failLabelX = Console.CursorLeft;
             failLabelY = Console.CursorTop;
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Gray;
             
-            Console.Write("                 Time Elasped: ");
+            Console.Write("                 Time Elapsed: ");
             timeLabelX = Console.CursorLeft;
             timeLabelY = Console.CursorTop;
             Console.WriteLine();
@@ -288,7 +278,7 @@ namespace PowerPing
             Console.SetCursorPosition(rttLabelX, rttLabelY);
             Console.Write(blankLabel);
             Console.CursorLeft = Console.CursorLeft - 6;
-            Console.Write(results.CurTime + "ms");
+            Console.Write("{0:0.0}ms", results.CurTime);
 
             // Update time label
             Console.SetCursorPosition(timeLabelX, timeLabelY);
@@ -391,23 +381,48 @@ namespace PowerPing
             String blankRow = new String(' ', xAxisLength);
             String bottomRow = new String('─', xAxisLength);
 
-            for (int x = 0; x <= (CompactGraph ? 10 : 20); x++)
+            for (int x = 0; x <= (CompactGraph ? 11 : 21); x++)
             {
                 // Draw black spaces
                 Console.Write(blankRow);
                 Console.CursorLeft = plotStartX;
-                Console.CursorTop--;
-
-                // Draw bottom row
-                if (x == 9 || x == 19)
-                {
-                    Console.CursorTop = plotStartY;
-                    Console.Write(bottomRow);
-                }
+                Console.CursorTop = plotStartY - x;
             }
+
+            // Draw bottom row
+            Console.CursorTop = plotStartY;
+            Console.Write(bottomRow);
 
             // Reset cursor to starting position
             Console.SetCursorPosition(cursorPositionX, cursorPositionY);
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+
+                cancelFlag = true;
+
+                if (running)
+                {
+                    // wait till ping stops running
+                    while (running)
+                        Task.Delay(25);
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+        #endregion
     }
 }

@@ -3,8 +3,6 @@ using System.Reflection;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
-using System.Reflection;
-using PowerPing;
 
 /// <summary>
 ///  Responsible for displaying ping results, information and other output (designed for console) 
@@ -296,7 +294,7 @@ namespace PowerPing
         /// <summary>
         /// Display results of scan
         /// </summary>
-        public static void ScanResults(int scanned, int found, int total, TimeSpan curTime, string range, string curAddr = "---.---.---.---")
+        public static void ScanProgress(int scanned, int found, int total, TimeSpan curTime, string range, string curAddr = "---.---.---.---")
         {
             // Check if cursor position is already set
             if (progBarPos.Left != 0)
@@ -344,18 +342,18 @@ namespace PowerPing
             }
             
         }
-        public static void EndScanResults(int scanned, int found, List<string> foundHosts)
+        public static void EndScanResults(int scanned, List<string> foundHosts, List<double> times)
         {
             Console.CursorVisible = true;
 
             Console.WriteLine();
-            Console.WriteLine("Scan complete. {0} addresses scanned. {1} hosts active.", scanned, found);
-            if (found != 0)
+            Console.WriteLine("Scan complete. {0} addresses scanned. {1} hosts active:", scanned, foundHosts.Count);
+            if (foundHosts.Count != 0)
             {
-                foreach (string host in foundHosts)
+                for (int i = 0; i < foundHosts.Count; i++)//each (string host in foundHosts)
                 {
-                    Console.WriteLine("|");
-                    Console.WriteLine("-- {0}", host);
+                    //Console.WriteLine("|");
+                    Console.WriteLine("|-- {0} [{1:0.0}ms]", foundHosts[i], times[i]);
                 }
             }
             Console.WriteLine();
@@ -391,7 +389,7 @@ namespace PowerPing
                 Console.Write("[ " + results.Lost + " ]");
                 Console.WriteLine(" (" + percent + "% loss)");
                 Console.Write("     Times:");
-                Console.WriteLine(" Minimum [ {0}ms ], Maximum [ {1}ms ]", results.MinTime, results.MaxTime);
+                Console.WriteLine(" Minimum [ {0:0.0}ms ], Maximum [ {1:0.0}ms ]", results.MinTime, results.MaxTime);
                 Console.Write("   Packets: Good [ {0} ]", results.GoodPackets);
                 Console.Write(", Errors [ {0} ]", results.ErrorPackets);
                 Console.Write(", Unknown [ {0} ]", results.OtherPackets);
@@ -414,7 +412,7 @@ namespace PowerPing
                 ResetColor();
                 Console.WriteLine(" (" + percent + "% loss)");
                 Console.Write("     Times:");
-                Console.WriteLine(" Minimum [ {0}ms ], Maximum [ {1}ms ]", results.MinTime, results.MaxTime);
+                Console.WriteLine(" Shortest [ {0:0.0}ms ], Longest [ {1:0.0}ms ]", results.MinTime, results.MaxTime);
                 Console.Write("   Packets:");
                 Console.Write(" Good ");
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -440,7 +438,7 @@ namespace PowerPing
         /// Displays and updates results of an ICMP flood
         /// </summary>
         /// <param name="results"></param>
-        public static void FloodResults(PingResults results)
+        public static void FloodProgress(PingResults results)
         {
             if (sentPos.Left > 0) // Check if labels have already been drawn
             {
@@ -562,7 +560,7 @@ namespace PowerPing
             ResetColor();
         }
 
-        private static void ResetColor()
+        public static void ResetColor()
         {
             Console.BackgroundColor = DefaultBackgroundColor;
             Console.ForegroundColor = DefaultForegroundColor;
