@@ -122,7 +122,7 @@ namespace PowerPing
 
             // If no address resolved then exit
             if (ipAddr == null)
-                PowerPing.Display.Error("PowerPing could not find the host address [" + address + "]\nCheck address and try again.", true, true);
+                PowerPing.Display.Error("PowerPing could not find the host address [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
 
             return ipAddr.ToString();
         }
@@ -142,7 +142,8 @@ namespace PowerPing
         /// <param name="exit">switch to use word "exit" instead of "continue"</param>
         public static void Pause(bool exit = false)
         {
-            Console.Write("Press any key to " + (exit ? "exit" : "continue") + " . . .\n");
+            Console.Write("Press any key to " + (exit ? "exit" : "continue") + " . . .");
+            Console.WriteLine();
             Console.ReadKey();
         }
 

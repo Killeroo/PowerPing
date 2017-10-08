@@ -376,7 +376,8 @@ namespace PowerPing
             // Display stats
             double percent = (double)results.Lost / results.Sent;
             percent = Math.Round(percent * 100, 1);
-            Console.WriteLine("\nStats for {0}:", attrs.Address);
+            Console.WriteLine();
+            Console.WriteLine("Stats for {0}:", attrs.Address);
             Console.WriteLine("------------------------");
 
             if (NoColor)

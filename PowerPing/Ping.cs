@@ -296,7 +296,7 @@ namespace PowerPing
             }
             catch (SocketException)
             {
-                PowerPing.Display.Error("Socket cannot be created\nPlease run as Administrator and try again.", true);
+                PowerPing.Display.Error("Socket cannot be created " + Environment.NewLine + "Please run as Administrator and try again.", true);
             }
             return s;
         }
