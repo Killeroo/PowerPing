@@ -66,7 +66,8 @@ namespace PowerPing
                 {
                     // Scan address will contain '-' so ignore it if scan argument is present
                     if (args[0] == "/sc" || args[0] == "-sc" || args[0] == "--sc" || args[0] == "/scan" || args[0] == "-scan" || args[0] == "--scan" ||
-                        args[args.Length - 1] == "/sc" || args[args.Length - 1] == "-sc" || args[args.Length - 1] == "--sc" || args[args.Length - 1] == "/scan" || args[args.Length - 1] == "-scan" || args[args.Length - 1] == "--scan")
+                        args[args.Length - 1] == "/sc" || args[args.Length - 1] == "-sc" || args[args.Length - 1] == "--sc" || 
+                        args[args.Length - 1] == "/scan" || args[args.Length - 1] == "-scan" || args[args.Length - 1] == "--scan")
                     {
                         attributes.Address = args[count];
                         addrFound = true;

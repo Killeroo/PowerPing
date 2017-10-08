@@ -62,7 +62,8 @@ namespace PowerPing
 
             Console.WriteLine(loc);
 
-            Helper.Pause();
+            if (!Display.NoInput)
+                Helper.Pause();
 
             return loc;
         }

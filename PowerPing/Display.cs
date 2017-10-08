@@ -286,6 +286,7 @@ namespace PowerPing
         {
             // Display captured packet
             Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
+            Console.ForegroundColor = ConsoleColor.Black;
             //Console.ForegroundColor = packet.type < 16 ? ConsoleColor.Black : ConsoleColor.Gray;
             Console.WriteLine("{0}: ICMPv4: {1} bytes from {2} [type {3}] [code {4}]", timeRecieved, bytesRead, address, packet.type, packet.code);
 
