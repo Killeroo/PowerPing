@@ -9,7 +9,7 @@ Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/m
 ![alt text](Screenshots/readme_screenshot.png "PowerPing in action")
 
 ## Usage: 
-     PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] | [--fl] | 
+     PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] | [--sc] | [--fl] | 
                [--t] [--c count] [--w timeout] [--m message] [--i TTL] [--in interval] 
                [--pt type] [--pc code] [--dm] [--4] [--sh] [--nc] [--ts] [--ti timing] target_name
 
@@ -17,15 +17,16 @@ Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/m
 
 - ICMP Packet customisation
 - Coloured output
-- Display customisation
+- Customizable display
 - Ping flooding
 - ICMP packet capture
-- Scanning
+- Network discovery
 - Graph view
 - Location lookup
 
 ## Arguments:
      --help       [--?]            Displays this help message
+     --examples   [--ex]           Shows example usage
      --infinite   [--t]            Ping the target until stopped (Control-C to stop)
      --displaymsg [--dm]           Display ICMP messages
      --shorthand  [--sh]           Show less detailed replies
@@ -44,7 +45,8 @@ Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/m
                                          1 - Sneaky      5 - Speedy
                                          2 - Quiet       6 - Insane
                                          3 - Polite
-
+     
+     --scan       [--sc]  address  Network scanning, specify range "127.0.0.1-55"
      --listen     [--li]  address  Listen for ICMP packets
      --flood      [--fl]  address  Send high volume of pings to address
      --graph      [--g]   address  Graph view
