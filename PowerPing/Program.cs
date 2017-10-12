@@ -210,6 +210,14 @@ namespace PowerPing
                             PowerPing.Display.Help();
                             Environment.Exit(0);
                             break;
+                        case "/examples":
+                        case "-examples":
+                        case "--examples":
+                        case "/ex":
+                        case "-ex":
+                        case "--ex": // Displays examples
+                            PowerPing.Display.Examples();
+                            break;
                         case "/shorthand":
                         case "-shorthand":
                         case "--shorthand":

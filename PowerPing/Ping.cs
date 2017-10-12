@@ -120,7 +120,7 @@ namespace PowerPing
         /// </summary>
         public void Trace() { }
         /// <summary>
-        /// Recursive network scan method 
+        /// Network scan method 
         /// </summary>
         /// <param name="range"></param>
         public void Scan(string range, bool recursing = false)

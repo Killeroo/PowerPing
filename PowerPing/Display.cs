@@ -129,12 +129,13 @@ namespace PowerPing
             sb.AppendLine("     graphs and result colourization.");
             sb.AppendLine();
             sb.AppendLine("Usage: PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] |");
-            sb.AppendLine("                 [--fl] | [--t] [--c count] [--w timeout] [--m message] ");
+            sb.AppendLine("                 [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--m message] ");
             sb.AppendLine("                 [--i TTL] [--in interval] [--pt type] [--pc code] [--dm]");
-            sb.AppendLine("                  [--4] [--short] [--nocolor] [--ts] [--ti timing] target_name");
+            sb.AppendLine("                 [--4] [--short] [--nocolor] [--ts] [--ti timing] target_name");
             sb.AppendLine();
             sb.AppendLine("Options:");
             sb.AppendLine(" --help       [--?]            Displays this help message");
+            sb.AppendLine(" --examples   [--ex]           Shows example usage");
             sb.AppendLine(" --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)");
             sb.AppendLine(" --displaymsg [--dm]           Display ICMP messages");
             sb.AppendLine(" --ipv4       [--4]            Force using IPv4");
@@ -156,12 +157,16 @@ namespace PowerPing
             sb.AppendLine("                                   2 - Quiet       6 - Insane");
             sb.AppendLine("                                   3 - Polite");
             sb.AppendLine();
+            sb.AppendLine("Features:");
+            sb.AppendLine(" --scan       [--sc]  address  Network scanning, specify range \"127.0.0.1-55\"");
             sb.AppendLine(" --listen     [--li]  address  Listen for ICMP packets");
             sb.AppendLine(" --flood      [--fl]  address  Send high volume of pings to address");
             sb.AppendLine(" --graph      [--g]   address  Graph view");
             sb.AppendLine(" --compact    [--cg]  address  Compact graph view");
             sb.AppendLine(" --location   [--loc] address  Location info for an address");
             sb.AppendLine(" --whoami                      Location info for current host");
+            sb.AppendLine();
+            sb.AppendLine("type '--examples' for more");
             sb.AppendLine();
             sb.AppendLine("(Location info provided by http://freegeoip.net)");
             sb.AppendLine("Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=");
@@ -173,6 +178,94 @@ namespace PowerPing
             if (!NoInput)
                 // Wait for user input
                 PowerPing.Helper.Pause();
+        }
+        /// <summary>
+        /// Displays example powerping usage
+        /// </summary>
+        public static void Examples()
+        {
+            sb.Clear();
+            sb.AppendLine();
+            sb.AppendLine("PowerPing Examples (Page 1 of 3");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("| powerping 8.8.8.8                  |");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("Send ping to google DNS with default values (3000ms");
+            sb.AppendLine("timeout, 5 pings)");
+            sb.AppendLine("");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("| powerping github.com --w 500 --t   |");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("Send pings indefinitely to github.com with a 500ms ");
+            sb.AppendLine("timeout (Ctrl-C to stop)");
+            sb.AppendLine("");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("| powerping 127.0.0.1 --m Meow       |");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("Send ping with packet message \"Meow\"");
+            sb.AppendLine("to localhost");
+            sb.AppendLine("");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("| powerping 127.0.0.1 --pt 3 --pc 2  |");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("Send ping with ICMP type 3 (dest unreachable)");
+            sb.AppendLine("and code 2");
+            Console.WriteLine(sb.ToString());
+            sb.Clear();
+            Helper.Pause();
+            sb.AppendLine("PowerPing Examples (Page 2 of 3");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("| powerping 127.0.0.1 --pt 3 --pc 2  |");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("| powerping 8.8.8.8 /c 5 -w 500 --sh |");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("Different argument switches (/, - or --) can");
+            sb.AppendLine("be used in any combination");
+            sb.AppendLine("");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("| powerping google.com /ti paranoid  |");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("Sends using the 'Paranoid' timing option");
+            sb.AppendLine("");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("| powerping google.com /ti 1         |");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("Same as above");
+            sb.AppendLine("");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("| powerping /sc 192.168.1.1-255      |");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("Scans for hosts on network range 192.168.1.1");
+            sb.AppendLine("through to 192.168.1.255");
+            Console.WriteLine(sb.ToString());
+            sb.Clear();
+            Helper.Pause();
+            sb.AppendLine("PowerPing Examples (Page 3 of 3");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("+ powerping --flood 192.168.1.2      +");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("'ICMP flood' sends a high volume of ping");
+            sb.AppendLine("packets to 192.168.1.2");
+            sb.AppendLine("");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("+ powerping github.com /graph        +");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("Sends pings to github.com displays results");
+            sb.AppendLine("in graph view. (also shows how address can be");
+            sb.AppendLine("specified before or after arguments)");
+            sb.AppendLine("");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("+ powerping /loc 84.23.12.4          +");
+            sb.AppendLine("--------------------------------------");
+            sb.AppendLine("Get location information for 84.23.12.4");
+            Console.WriteLine(sb.ToString());
+            sb.Clear();
+
+            if (!NoInput)
+                // Wait for user input
+                PowerPing.Helper.Pause(true);
         }
         /// <summary>
         /// Display Initial ping message to screen, declaring simple info about the ping

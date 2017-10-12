@@ -145,6 +145,9 @@ namespace PowerPing
             Console.Write("Press any key to " + (exit ? "exit" : "continue") + " . . .");
             Console.WriteLine();
             Console.ReadKey();
+
+            if (exit)
+                Environment.Exit(0);
         }
 
         /// <summary>
