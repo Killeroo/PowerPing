@@ -447,7 +447,7 @@ namespace PowerPing
                 for (int i = 0; i < foundHosts.Count; i++)//each (string host in foundHosts)
                 {
                     //Console.WriteLine("|");
-                    Console.WriteLine("|-- {0} [{1:0.0}ms]", foundHosts[i], times[i]);
+                    Console.WriteLine((i == foundHosts.Count - 1 ? "\\" : "|") + " -- {0} [{1:0.0}ms]", foundHosts[i], times[i]);
                 }
             }
             Console.WriteLine();

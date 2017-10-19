@@ -40,7 +40,7 @@ namespace PowerPing
                         Console.WriteLine("Queried address: --{0}--", addr);
                         foreach (XmlElement element in elements)
                             Console.WriteLine(element.Name + ": " + (element.InnerText == "" ? "NA" : element.InnerText));
-                        Console.WriteLine("DNS Lookup: --{0}--", Helper.VerifyAddress(addr, AddressFamily.InterNetwork));
+                        //Console.WriteLine("DNS Lookup: --{0}--", Helper.VerifyAddress(addr, AddressFamily.InterNetwork));
                     }
                     else
                     {
@@ -101,6 +101,10 @@ namespace PowerPing
         {
             IPAddress ipAddr = null;
 
+            // Check address format
+            if (Uri.CheckHostName(address) == UriHostNameType.Unknown)
+                PowerPing.Display.Error("PowerPing could not resolve host [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
+
             // Only resolve address if not already in IP address format
             if (IPAddress.TryParse(address, out ipAddr))
                 return ipAddr.ToString();
@@ -122,18 +126,9 @@ namespace PowerPing
 
             // If no address resolved then exit
             if (ipAddr == null)
-                PowerPing.Display.Error("PowerPing could not find the host address [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
+                PowerPing.Display.Error("PowerPing could not find host [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
 
             return ipAddr.ToString();
-        }
-
-        /// <summary>
-        /// Gets location information of current host
-        /// </summary>
-        public static void whoami()
-        {
-            GetAddressLocation("", true);
-            // TODO: Add some pc information too
         }
 
         /// <summary>

@@ -141,7 +141,7 @@ namespace PowerPing
             attrs.Count = 1;
             ShowOutput = false;
 
-            // Check format of address (for '-'s and disallow multipl '-'s in one segment, also check format of address
+            // Check format of address (for '-'s and disallow multipl '-'s in one segment)
             if (!range.Contains("-"))
                 Display.Error("Scan - No range specified, must be specified in format: 192.168.1.1-254", true, true);
 
@@ -149,12 +149,19 @@ namespace PowerPing
             int[] segLower = new int[4];
             int[] segUpper = new int[4];
 
-            // Work out upper and lower ranges for each segment
-            for (int y = 0; y < 4; y++)
+            try
             {
-                string[] ranges = ipSegments[y].Split('-');
-                segLower[y] = Convert.ToInt16(ranges[0]);
-                segUpper[y] = (ranges.Length == 1) ? segLower[y] : Convert.ToInt16(ranges[1]);
+                // Work out upper and lower ranges for each segment
+                for (int y = 0; y < 4; y++)
+                {
+                    string[] ranges = ipSegments[y].Split('-');
+                    segLower[y] = Convert.ToInt16(ranges[0]);
+                    segUpper[y] = (ranges.Length == 1) ? segLower[y] : Convert.ToInt16(ranges[1]);
+                }
+            }
+            catch (FormatException)
+            {
+                Display.Error("Scan - Incorrect format [" + range + "], must be specified in format: 192.168.1.1-254", true, true);
             }
 
             // Build list of addresses from ranges

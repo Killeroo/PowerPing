@@ -29,8 +29,6 @@ SOFTWARE.
 using System;
 using System.Linq;
 
-// dsipaly Powerping version at start
-
 namespace PowerPing
 {
     class Program
@@ -43,6 +41,7 @@ namespace PowerPing
             // Local variables 
             int curArg = 0;
             bool addrFound = false;
+            string opMode = ""; 
             PingAttributes attributes = new PingAttributes();
             attributes.Address = "";
 
@@ -60,32 +59,6 @@ namespace PowerPing
                 return;
             }
 
-            // Find address first
-            for (int count = 0; count < args.Length; count++)
-            {
-                if (args[count].Contains("--") || args[count].Contains("/") || args[count].Contains("-"))
-                {
-                    // Scan address will contain '-' so ignore it if scan argument is present
-                    if (args[0] == "/sc" || args[0] == "-sc" || args[0] == "--sc" || args[0] == "/scan" || args[0] == "-scan" || args[0] == "--scan" ||
-                        args[args.Length - 1] == "/sc" || args[args.Length - 1] == "-sc" || args[args.Length - 1] == "--sc" || 
-                        args[args.Length - 1] == "/scan" || args[args.Length - 1] == "-scan" || args[args.Length - 1] == "--scan")
-                    {
-                        attributes.Address = args[count];
-                        addrFound = true;
-                    }
-                    else
-                    {
-                        continue;
-                    }
-                }
-
-                if ((count == args.Length - 1 || count == 0) && !addrFound)
-                { // Assume first or last argument is address
-                    attributes.Address = args[count];
-                    addrFound = true;
-                }
-            }
-
             // Loop through other arguments
             try
             {
@@ -95,15 +68,15 @@ namespace PowerPing
 
                     switch (args[count])
                     {
-                        case "/version":
-                        case "-version":
-                        case "--version":
-                        case "/v":
-                        case "-v":
-                        case "--v":
-                            Display.Version();
-                            Environment.Exit(0);
-                            break;
+                        //case "/version":
+                        //case "-version":
+                        //case "--version":
+                        //case "/v":
+                        //case "-v":
+                        //case "--v":
+                        //    Display.Version();
+                        //    Environment.Exit(0);
+                        //    break;
                         case "/count":
                         case "-count":
                         case "--count":
@@ -135,9 +108,8 @@ namespace PowerPing
                         case "-m":
                         case "--m": // Message
                             if (args[count + 1].Contains("--") || args[count + 1].Contains("//") || args[count + 1].Contains("-"))
-                                throw new IndexOutOfRangeException();
+                                throw new ArgumentFormatException();
                             attributes.Message = args[count + 1];
-                            /// TODO: Add Length check
                             break;
                         case "/ttl":
                         case "-ttl":
@@ -186,7 +158,7 @@ namespace PowerPing
                         case "-4":
                         case "--4": // Force ping with IPv4
                             if (attributes.ForceV6)
-                                // Reset IPv4 force if already set (change force both v4 and v6)
+                                // Reset IPv6 force if already set
                                 attributes.ForceV6 = false;
                             attributes.ForceV4 = true;
                             break;
@@ -256,7 +228,7 @@ namespace PowerPing
                         case "/ti":
                         case "-ti":
                         case "--ti": // Timing option
-                            switch (args[count + 1 ].ToLower()) //Convert.ToInt16(args[count + 1]))
+                            switch (args[count + 1].ToLower()) 
                             {
                                 case "0":
                                 case "paranoid":
@@ -300,8 +272,7 @@ namespace PowerPing
                         case "/whoami":
                         case "-whoami":
                         case "--whoami": // Current computer location
-                            Helper.whoami();
-                            Environment.Exit(0);
+                            opMode = "whoami";
                             break;
                         case "/location":
                         case "-location":
@@ -309,10 +280,7 @@ namespace PowerPing
                         case "/loc":
                         case "-loc":
                         case "--loc": // Location lookup
-                            if (attributes.Address == "")
-                                throw new AddressNotFoundException();
-                            Helper.GetAddressLocation(attributes.Address, true);
-                            Environment.Exit(0);
+                            opMode = "location";
                             break;
                         case "/listen":
                         case "-listen":
@@ -320,8 +288,7 @@ namespace PowerPing
                         case "/li":
                         case "-li":
                         case "--li": // Listen for ICMP packets
-                            p.Listen();
-                            Environment.Exit(0);
+                            opMode = "listening";
                             break;
                         case "/graph":
                         case "-graph":
@@ -329,11 +296,7 @@ namespace PowerPing
                         case "/g":
                         case "-g":
                         case "--g": // Graph view
-                            if (attributes.Address == "")
-                                throw new AddressNotFoundException();
-                            g = new Graph(attributes.Address); 
-                            g.Start();
-                            Environment.Exit(0);
+                            opMode = "graphing";
                             break;
                         case "/compact":
                         case "-compact":
@@ -341,12 +304,7 @@ namespace PowerPing
                         case "/cg":
                         case "-cg":
                         case "--cg": // Compact graph view
-                            if (attributes.Address == "")
-                                throw new AddressNotFoundException();
-                            g = new Graph(attributes.Address);
-                            g.CompactGraph = true;
-                            g.Start();
-                            Environment.Exit(0);
+                            opMode = "compactgraph";
                             break;
                         case "/flood":
                         case "-flood":
@@ -354,11 +312,7 @@ namespace PowerPing
                         case "/fl":
                         case "-fl":
                         case "--fl": // Flood
-                            if (attributes.Address == "")
-                                throw new AddressNotFoundException();
-                            Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
-                            p.Flood(attributes.Address);
-                            Environment.Exit(0);
+                            opMode = "flooding";
                             break;
                         case "/scan":
                         case "-scan":
@@ -366,21 +320,15 @@ namespace PowerPing
                         case "/sc":
                         case "-sc":
                         case "--sc": // Scan
-                            if (attributes.Address == "" || !attributes.Address.Contains("-"))
-                                throw new AddressNotFoundException();//FormatException();
-                            p.Scan(args[count + 1]);
-                            Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
-                            Environment.Exit(0);
+                            opMode = "scanning";
                             break;
                         default:
-                            if (args[count].Contains("--") || args[count].Contains("/") || args[count].Contains("-"))
-                                throw new AddressNotFoundException();//ArgumentException();//Exception();
+                            // Invalid argument
+                            if ((args[count].Contains("--") || args[count].Contains("/") || args[count].Contains("-")) & !opMode.Equals("scanning"))
+                                throw new ArgumentFormatException();
                             break;
                     }
                 }
-
-                if (attributes.Address == "")
-                    throw new FormatException();
             }
             catch (IndexOutOfRangeException)
             {
@@ -392,31 +340,15 @@ namespace PowerPing
             }
             catch (OverflowException)
             {
-                PowerPing.Display.Error("Overflow while Converting", false, false, false);
+                PowerPing.Display.Error("Overflow while converting", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing " + args[curArg] + ">>>" + args[curArg + 1] + "<<<\"", ConsoleColor.Red);
                 PowerPing.Display.Message("Use \"PowerPing /help \" or \"PowerPing /? \" for help.");
                 Helper.Pause();
                 return;
             }
-            catch (ArgumentException)
-            {
-                PowerPing.Display.Error("Invalid Argument", false, false, false);
-                PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
-                PowerPing.Display.Message("Use \"PowerPing /help \" or \"PowerPing /? \" for more info.");
-                Helper.Pause();
-                return;
-            }
             catch (ArgumentFormatException)
             {
-                PowerPing.Display.Error("Incorrect Argument Usage", false, false, false);
-                PowerPing.Display.Message(" @ \"PowerPing " + args[curArg] + " >>>" + args[curArg + 1] + "<<<\"", ConsoleColor.Red);
-                PowerPing.Display.Message("Use \"PowerPing /help \" or \"PowerPing /? \" for help.");
-                Helper.Pause();
-                return;
-            }
-            catch (AddressNotFoundException)
-            {
-                PowerPing.Display.Error("No Address Provided", false, false, false);
+                PowerPing.Display.Error("Invalid argument or missing parameter", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
                 PowerPing.Display.Message("Use \"PowerPing /help \" or \"PowerPing /? \" for help.");
                 Helper.Pause();
@@ -431,13 +363,55 @@ namespace PowerPing
                 return;
             }
 
+            // Find address
+            if (opMode.Equals("") || opMode.Equals("flooding") || opMode.Equals("graphing") || opMode.Equals("compactGraph") || opMode.Equals("location"))
+            {
+                if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown && Uri.CheckHostName(args.Last()) == UriHostNameType.Unknown)
+                    PowerPing.Display.Error("PowerPing could not find a host address.", true, true);
 
-            // Control C event handler 
-            // (So statistics can still be displayed when ping interupted)
-            Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
+                if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown)
+                    attributes.Address = args.Last();
+                else
+                    attributes.Address = args.First();
+            }
 
-            // Send ping
-            p.Send(attributes);
+            // Add Control C event handler 
+            if (opMode.Equals("") || opMode.Equals("flooding")) // add graphing and compact graphing
+                Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
+
+            // Select correct function using opMode 
+            switch (opMode)
+            {
+                case "listening":
+                    p.Listen();
+                    break;
+                case "location":
+                    Helper.GetAddressLocation(attributes.Address, true);
+                    break;
+                case "whoami":
+                    Helper.GetAddressLocation("", true);
+                    break;
+                case "graphing":
+                    g = new Graph(attributes.Address);
+                    g.Start();
+                    break;
+                case "compactgraph":
+                    g = new Graph(attributes.Address);
+                    g.CompactGraph = true;
+                    g.Start();
+                    break;
+                case "flooding":
+                    p.Flood(attributes.Address);
+                    break;
+                case "scanning":
+                    p.Scan(args.Last());
+                    break;
+                case "":
+                    // Send ping normally
+                    p.Send(attributes);
+                    break;
+            }
+           
         }
 
         protected static void ExitHandler(object sender, ConsoleCancelEventArgs args) // Event handler for control - c
