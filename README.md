@@ -6,7 +6,7 @@ Small improved command line ICMP ping program lovingly inspired by windows and u
 
 Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/master/build) [[Github]](https://github.com/Killeroo/PowerPing/releases) [[Softpedia]](http://www.softpedia.com/progDownload/PowerPing-Download-255701.html)
 ***
-![alt text](Screenshots/readme_screenshot.png "PowerPing in action")
+![alt text](docs/screenshots/readme_screenshot.png "PowerPing in action")
 
 ## Usage: 
      PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] | [--sc] | [--fl] | 
@@ -25,6 +25,7 @@ Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/m
 - Location lookup
 
 ## Arguments:
+     Options
      --help       [--?]            Displays this help message
      --examples   [--ex]           Shows example usage
      --infinite   [--t]            Ping the target until stopped (Control-C to stop)
@@ -47,6 +48,7 @@ Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/m
                                          2 - Quiet       6 - Insane
                                          3 - Polite
      
+     Features:
      --scan       [--sc]  address  Network scanning, specify range "127.0.0.1-55"
      --listen     [--li]  address  Listen for ICMP packets
      --flood      [--fl]  address  Send high volume of pings to address
@@ -82,9 +84,9 @@ Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/m
 
 ## Screenshots
 
-![alt text](Screenshots/readme_screenshot2.png "Powerping Graph view")
-![alt text](Screenshots/readme_screenshot3.png "Powerping Listening")
-![alt text](Screenshots/readme_screenshot4.png "Location functions") ![alt text](Screenshots/readme_screenshot5.png "PowerPing stress testing")
+![alt text](docs/screenshots/readme_screenshot2.png "Powerping Graph view")
+![alt text](docs/screenshots/readme_screenshot3.png "Powerping Listening")
+![alt text](docs/screenshots/readme_screenshot4.png "Location functions") ![alt text](docs/screenshots/readme_screenshot5.png "PowerPing stress testing")
 
 ### Note: 
 **Requires _Elevated Rights (Admininstrator)_ to Run**
