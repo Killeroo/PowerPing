@@ -19,6 +19,7 @@ namespace PowerPing
         public static bool NoInput = false;
         public static bool DisplayMessage = false;
         public static bool TimeStamp = false;
+        public static int DecimalPlaces = 1;
         public static ConsoleColor DefaultForegroundColor;
         public static ConsoleColor DefaultBackgroundColor;
 
@@ -145,6 +146,7 @@ namespace PowerPing
             sb.AppendLine(" --nocolor    [--nc]           No colour");
             sb.AppendLine(" --noinput    [--ni]           Require no user input");
             sb.AppendLine(" --timestamp  [--ts]           Display timestamp");
+            sb.AppendLine(" --decimals   [--dp]  number   Num of decimal places to use (0 to 3)");
             sb.AppendLine(" --count      [--c]   number   Number of pings to send");
             sb.AppendLine(" --timeout    [--w]   number   Time to wait for reply (in milliseconds)");
             sb.AppendLine(" --ttl        [--i]   number   Time To Live");
@@ -315,9 +317,9 @@ namespace PowerPing
             if (NoColor)
             {
                 if (Short) // Show short hand reply
-                    Console.WriteLine("Reply from: {0} type={1} time={2:0.0}ms", address, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type], replyTime);
+                    Console.WriteLine("Reply from: {0} type={1} time={2:0." + new String('0', DecimalPlaces) + "}ms", address, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type], replyTime);
                 else
-                    Console.WriteLine("Reply from: {0} seq={1} bytes={2} type={3} time={4:0.0}ms", address, index, bytesRead, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type], replyTime);
+                    Console.WriteLine("Reply from: {0} seq={1} bytes={2} type={3} time={4:0." + new String('0', DecimalPlaces) + "}ms", address, index, bytesRead, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type], replyTime);
                 return;
             }
 
@@ -361,7 +363,7 @@ namespace PowerPing
                 Console.ForegroundColor = ConsoleColor.Yellow;
             else
                 Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("{0:0.0}ms ", replyTime.TotalMilliseconds);
+            Console.Write("{0:0." + new String('0', DecimalPlaces) + "}ms ", replyTime.TotalMilliseconds);
             ResetColor();
 
             // Display timestamp

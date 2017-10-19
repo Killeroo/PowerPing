@@ -59,7 +59,7 @@ namespace PowerPing
                 return;
             }
 
-            // Loop through other arguments
+            // Loop through arguments
             try
             {
                 for (int count = 0; count < args.Length; count++)
@@ -213,6 +213,16 @@ namespace PowerPing
                         case "-ni":
                         case "--ni": // No input mode
                             Display.NoInput = true;
+                            break;
+                        case "/decimals":
+                        case "-decimals":
+                        case "--decimals":
+                        case "/dp":
+                        case "-dp":
+                        case "--dp": // Decimal places
+                            if (Convert.ToInt32(args[count + 1]) > 3)
+                                throw new ArgumentFormatException();
+                            Display.DecimalPlaces = Convert.ToInt32(args[count + 1]);
                             break;
                         case "/timestamp":
                         case "-timestamp":
