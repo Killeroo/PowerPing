@@ -333,8 +333,10 @@ namespace PowerPing
                             opMode = "scanning";
                             break;
                         default:
-                            // Invalid argument
-                            if ((args[count].Contains("--") || args[count].Contains("/") || args[count].Contains("-")) & !opMode.Equals("scanning"))
+                            // Check for invalid argument 
+                            if ((args[count].Contains("--") || args[count].Contains("/") || args[count].Contains("-")) 
+								& !opMode.Equals("scanning") // (ignore if scanning)
+								& args[count].Length < 7) // Ignore args under 7 chars (assume they are an address)
                                 throw new ArgumentFormatException();
                             break;
                     }
@@ -344,7 +346,7 @@ namespace PowerPing
             {
                 PowerPing.Display.Error("Missing Argument Parameter", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
-                PowerPing.Display.Message("Use \"PowerPing /help \" or \"PowerPing /? \" for help.");
+                PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for help.");
                 Helper.Pause();
                 return;
             }
@@ -352,7 +354,7 @@ namespace PowerPing
             {
                 PowerPing.Display.Error("Overflow while converting", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing " + args[curArg] + ">>>" + args[curArg + 1] + "<<<\"", ConsoleColor.Red);
-                PowerPing.Display.Message("Use \"PowerPing /help \" or \"PowerPing /? \" for help.");
+                PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for help.");
                 Helper.Pause();
                 return;
             }
@@ -360,7 +362,7 @@ namespace PowerPing
             {
                 PowerPing.Display.Error("Invalid argument or missing parameter", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
-                PowerPing.Display.Message("Use \"PowerPing /help \" or \"PowerPing /? \" for help.");
+                PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for help.");
                 Helper.Pause();
                 return;
             }
@@ -368,7 +370,7 @@ namespace PowerPing
             {
                 PowerPing.Display.Error("A " + e.GetType().ToString().Split('.').Last() + " Exception Occured", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
-                PowerPing.Display.Message("Use \"PowerPing /help \" or \"PowerPing /? \" for more info.");
+                PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for more info.");
                 Helper.Pause();
                 return;
             }
