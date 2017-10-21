@@ -2,30 +2,36 @@
 
 [![version](https://img.shields.io/badge/version-1.1.9-brightgreen.svg)]() ![maintained](https://img.shields.io/maintenance/yes/2017.svg) ![](http://img.badgesize.io/Killeroo/PowerPing/master/build/PowerPing.exe.svg)
 
-Small improved command line ICMP ping program lovingly inspired by windows and unix, written in C#.
+Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
 
 Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/master/build) [[Github]](https://github.com/Killeroo/PowerPing/releases) [[Softpedia]](http://www.softpedia.com/progDownload/PowerPing-Download-255701.html)
 ***
 ![alt text](docs/screenshots/readme_screenshot.png "PowerPing in action")
+
+## Features
+
+PowerPing contains the following features (with more to come...):
+
+- [x] Basic ping functionality
+- [x] Coloured output
+- [x] Display options
+- [x] [packet customisation](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol#Control_messages)
+- [x] [scanning](https://en.wikipedia.org/wiki/Ping_sweep)
+- [x] [flooding](https://en.wikipedia.org/wiki/Ping_flood)
+- [x] [packet capture (listening)](docs/screenshots/readme_screenshot3.png)
+- [x] [location lookup](docs/screenshots/readme_screenshot4.png)
+- [x] [graphing](docs/screenshots/readme_screenshot2.png)
+- [ ] [traceroute](https://en.wikipedia.org/wiki/Traceroute)
+- [ ] [tunnelling](https://en.wikipedia.org/wiki/ICMP_tunnel)
+- [ ] [IPv6/icmpv6](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_version_6)
 
 ## Usage: 
      PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] | [--sc] | [--fl] | 
                [--t] [--c count] [--w timeout] [--m message] [--i TTL] [--in interval] 
                [--pt type] [--pc code] [--dm] [--4] [--sh] [--nc] [--ts] [--ti timing] target_name
 
-## Features
-
-- ICMP Packet customisation
-- Coloured output
-- Customizable display
-- Ping flooding
-- ICMP packet capture
-- Network discovery
-- Graph view
-- Location lookup
-
 ## Arguments:
-     Options
+     Options:
      --help       [--?]            Displays this help message
      --examples   [--ex]           Shows example usage
      --infinite   [--t]            Ping the target until stopped (Control-C to stop)
@@ -67,26 +73,20 @@ Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/m
      powerping 8.8.8.8 /c 5 -w 500 --sh   -     Different argument switches (/, - or --) can be used in any combination
      powerping google.com /ti Paranoid    -     Sends using the 'Paranoid' timing option
      powerping google.com /ti 1           -     Same as above
-     
-## Details
-
-- [x] Colour coded response times
-- [x] Displays type and code of each ICMP packets
-- [x] Capture all ICMP communications for a computer
-- [x] Customisable ping payloads
-- [x] Detailed graph and statistical views
-- [x] IP location querying and whoami 
-- [x] Send pings with custom types and size
-- [x] Ping flooding
-- [x] Local network scanning and host discovery
-- [ ] Trace route functionality
-- [ ] Full IPv6 support
 
 ## Screenshots
 
 ![alt text](docs/screenshots/readme_screenshot2.png "Powerping Graph view")
 ![alt text](docs/screenshots/readme_screenshot3.png "Powerping Listening")
 ![alt text](docs/screenshots/readme_screenshot4.png "Location functions") ![alt text](docs/screenshots/readme_screenshot5.png "PowerPing stress testing")
+
+## Contribution
+
+Feel free to [file issues or request features](https://github.com/Killeroo/PowerPing/issues) and submit [pull requests](https://github.com/Killeroo/PowerPing/pulls) – contributions are welcome.
+
+## License
+
+PowerPing is licensed under the [MIT license](docs/LICENSE).
 
 ### Note: 
 **Requires _Elevated Rights (Admininstrator)_ to Run**
