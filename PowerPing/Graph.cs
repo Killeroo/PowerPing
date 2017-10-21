@@ -414,6 +414,7 @@ namespace PowerPing
                         Task.Delay(25);
                 }
 
+                Console.CursorVisible = true;
                 disposedValue = true;
             }
         }

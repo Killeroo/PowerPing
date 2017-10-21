@@ -86,7 +86,7 @@ Feel free to [file issues or request features](https://github.com/Killeroo/Power
 
 ## License
 
-PowerPing is licensed under the [MIT license](docs/LICENSE).
+PowerPing is licensed under the [MIT license](LICENSE).
 
 ### Note: 
 **Requires _Elevated Rights (Admininstrator)_ to Run**

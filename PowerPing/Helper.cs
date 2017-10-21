@@ -139,7 +139,11 @@ namespace PowerPing
         {
             Console.Write("Press any key to " + (exit ? "exit" : "continue") + " . . .");
             Console.WriteLine();
-            Console.ReadKey();
+
+            // Work around if readkey isnt supported
+            try { Console.ReadKey(); }
+            catch (InvalidOperationException) { Console.Read(); }
+            
 
             if (exit)
                 Environment.Exit(0);

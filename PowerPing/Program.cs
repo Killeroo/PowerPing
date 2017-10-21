@@ -220,7 +220,7 @@ namespace PowerPing
                         case "/dp":
                         case "-dp":
                         case "--dp": // Decimal places
-                            if (Convert.ToInt32(args[count + 1]) > 3)
+                            if (Convert.ToInt32(args[count + 1]) > 3 || Convert.ToInt32(args[count + 1]) < 0)
                                 throw new ArgumentFormatException();
                             Display.DecimalPlaces = Convert.ToInt32(args[count + 1]);
                             break;
@@ -388,7 +388,7 @@ namespace PowerPing
             }
 
             // Add Control C event handler 
-            if (opMode.Equals("") || opMode.Equals("flooding")) // add graphing and compact graphing
+            if (opMode.Equals("") || opMode.Equals("flooding") || opMode.Equals("graphing") || opMode.Equals("compactgraph")) // add graphing and compact graphing
                 Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
 
             // Select correct function using opMode 
@@ -441,7 +441,6 @@ namespace PowerPing
             // Reset console colour
             Display.ResetColor();
             Console.CursorVisible = true;
-
         }
     }
 }
