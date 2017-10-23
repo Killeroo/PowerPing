@@ -93,7 +93,7 @@ namespace PowerPing
 
                     // Store results
                     results.SetPacketType(response.type);
-                    results.Recieved++;
+                    results.Received++;
 
                     if (cancelEvent.WaitOne(0))
                         break;
@@ -379,7 +379,7 @@ namespace PowerPing
                     // Store response info
                     Results.SetPacketType(response.type);
                     Results.SetCurResponseTime(responseTimer.Elapsed.TotalMilliseconds);
-                    Results.Recieved++;
+                    Results.Received++;
                 }
                 catch (IOException)
                 {

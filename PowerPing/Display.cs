@@ -310,7 +310,7 @@ namespace PowerPing
         /// <param name="packet">Reply packet</param>
         /// <param name="address">Reply address</param>
         /// <param name="index">Sequence number</param>
-        /// <param name="replyTime">Time taken before reply recieved in milliseconds</param>
+        /// <param name="replyTime">Time taken before reply received in milliseconds</param>
         public static void ReplyPacket(ICMP packet, String address, int index, TimeSpan replyTime, int bytesRead)
         {
             // Display with no colour
@@ -376,13 +376,13 @@ namespace PowerPing
         /// <summary>
         /// Display information about a captured packet
         /// </summary>
-        public static void CapturedPacket(ICMP packet, String address, String timeRecieved, int bytesRead)
+        public static void CapturedPacket(ICMP packet, String address, String timeReceived, int bytesRead)
         {
             // Display captured packet
             Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
             Console.ForegroundColor = ConsoleColor.Black;
             //Console.ForegroundColor = packet.type < 16 ? ConsoleColor.Black : ConsoleColor.Gray;
-            Console.WriteLine("{0}: ICMPv4: {1} bytes from {2} [type {3}] [code {4}]", timeRecieved, bytesRead, address, packet.type, packet.code);
+            Console.WriteLine("{0}: ICMPv4: {1} bytes from {2} [type {3}] [code {4}]", timeReceived, bytesRead, address, packet.type, packet.code);
 
             // Reset console colours
             ResetColor();
@@ -479,8 +479,8 @@ namespace PowerPing
             {
                 Console.Write("   General: Sent ");
                 Console.Write("[ " + results.Sent + " ]");
-                Console.Write(", Recieved ");
-                Console.Write("[ " + results.Recieved + " ]");
+                Console.Write(", Received ");
+                Console.Write("[ " + results.Received + " ]");
                 Console.Write(", Lost ");
                 Console.Write("[ " + results.Lost + " ]");
                 Console.WriteLine(" (" + percent + "% loss)");
@@ -498,9 +498,9 @@ namespace PowerPing
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.Write("[ " + results.Sent + " ]");
                 ResetColor();
-                Console.Write(", Recieved ");
+                Console.Write(", Received ");
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("[ " + results.Recieved + " ]");
+                Console.Write("[ " + results.Received + " ]");
                 ResetColor();
                 Console.Write(", Lost ");
                 Console.ForegroundColor = ConsoleColor.Red;

@@ -14,14 +14,14 @@ namespace PowerPing
         // Properties
         public TimeSpan TotalRunTime { get { return operationTimer.Elapsed; } } // Total ping operation runtime
         public long Sent { get; set; } // Number of sent ping packets
-        public long Recieved { get; set; } // Number of recieved packets
+        public long Received { get; set; } // Number of received packets
         public long Lost { get; set; }  // Amount of lost packets
         public double MaxTime { get; private set; } // Highest ping reply time
         public double MinTime { get; private set; } // Lowest ping reply time
         public double CurTime { get; private set; } // Most recent packet response time
-        public long ErrorPackets { get; private set; } // Number of Error packet recieved
-        public long GoodPackets { get; private set; } // Number of good replies recieved
-        public long OtherPackets { get; private set; } // Number of other packet types recieved
+        public long ErrorPackets { get; private set; } // Number of Error packet received
+        public long GoodPackets { get; private set; } // Number of good replies received
+        public long OtherPackets { get; private set; } // Number of other packet types received
         //public static ConcurrentStack<string> ActiveHosts = new ConcurrentStack<string>(); // Stores found hosts during scan
 
         // Local variables
@@ -31,7 +31,7 @@ namespace PowerPing
         {
             // Default properties
             Sent = 0;
-            Recieved = 0;
+            Received = 0;
             Lost = 0;
             MaxTime = 0;
             MinTime = 0;

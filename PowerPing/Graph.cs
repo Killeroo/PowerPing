@@ -197,7 +197,7 @@ namespace PowerPing
             sentLabelY = Console.CursorTop;
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("           Recieved: ");
+            Console.Write("           Received: ");
             recLabelX = Console.CursorLeft;
             recLabelY = Console.CursorTop;
             Console.WriteLine();
@@ -266,7 +266,7 @@ namespace PowerPing
             Console.SetCursorPosition(recLabelX, recLabelY);
             Console.Write(blankLabel);
             Console.CursorLeft = Console.CursorLeft - 6;
-            Console.Write(results.Recieved);
+            Console.Write(results.Received);
 
             // Update fail label
             Console.SetCursorPosition(failLabelX, failLabelY);
