@@ -140,6 +140,7 @@ namespace PowerPing
             sb.AppendLine(" --examples   [--ex]           Shows example usage");
             sb.AppendLine(" --infinite   [--t]            Ping the target indefinitely (Ctrl-C to stop)");
             sb.AppendLine(" --displaymsg [--dm]           Display ICMP messages");
+            sb.AppendLine(" --request    [--r]            Show request packets");
             sb.AppendLine(" --ipv4       [--4]            Force using IPv4");
             //sb.AppendLine("     --6             Force using IPv6");
             sb.AppendLine(" --shorthand  [--sh]           Show less detailed replies");
@@ -303,6 +304,35 @@ namespace PowerPing
         public static void ListenIntroMsg()
         {
             Console.WriteLine("Listening for ICMP Packets . . .");
+        }
+        public static void RequestPacket(ICMP packet, String address, int index)
+        {
+            Console.Write("Request to: {0}:0 seq={1} bytes={2} type=", address, index, packet.GetBytes().Length);
+
+            // Print coloured type
+            Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
+            switch (packet.type) // Display speific type code values
+            {
+                case 3:
+                    Console.Write(packet.code > destUnreachableCodeValues.Length ? packetTypes[packet.type] : destUnreachableCodeValues[packet.code]);
+                    break;
+                case 5:
+                    Console.Write(packet.code > redirectCodeValues.Length ? packetTypes[packet.type] : redirectCodeValues[packet.code]);
+                    break;
+                case 11:
+                    Console.Write(packet.code > timeExceedCodeValues.Length ? packetTypes[packet.type] : timeExceedCodeValues[packet.code]);
+                    break;
+                case 12:
+                    Console.Write(packet.code > badParameterCodeValues.Length ? packetTypes[packet.type] : badParameterCodeValues[packet.code]);
+                    break;
+                default:
+                    Console.Write(packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type]);
+                    break;
+            }
+            ResetColor();
+
+            Console.WriteLine(" code={0}", packet.code);
+
         }
         /// <summary>
         /// Display information about reply ping packet

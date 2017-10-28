@@ -279,6 +279,14 @@ namespace PowerPing
                                     throw new ArgumentFormatException();
                             }
                             break;
+                        case "/request":
+                        case "-request":
+                        case "--request":
+                        case "/r":
+                        case "-r":
+                        case "--r":
+                            p.ShowRequest = true;
+                            break;
                         case "/whoami":
                         case "-whoami":
                         case "--whoami": // Current computer location
