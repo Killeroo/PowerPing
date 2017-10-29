@@ -8,4 +8,4 @@ matrix:
       dist: trusty
       script:
       - sh build.sh dotnet
-    - mono: latest
+   # - mono: latest
