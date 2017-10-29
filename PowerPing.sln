@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerPing", "PowerPing\PowerPing.Net45\PowerPing.csproj", "{11872751-7592-42AE-9E9F-DBA96E1FC2D3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerPing", "src\PowerPing.Net45\PowerPing.csproj", "{11872751-7592-42AE-9E9F-DBA96E1FC2D3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3A8D89A7-733B-4B99-8F3C-F47B720058B4}"
 	ProjectSection(SolutionItems) = preProject
