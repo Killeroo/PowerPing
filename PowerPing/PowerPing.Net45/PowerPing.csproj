@@ -46,22 +46,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Display.cs" />
-    <Compile Include="Exceptions.cs" />
-    <Compile Include="Graph.cs" />
-    <Compile Include="ICMP.cs" />
-    <Compile Include="Helper.cs" />
-    <Compile Include="Ping.cs" />
-    <Compile Include="PingAttributes.cs" />
-    <Compile Include="PingResults.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\Display.cs" />
+    <Compile Include="..\Exceptions.cs" />
+    <Compile Include="..\Graph.cs" />
+    <Compile Include="..\ICMP.cs" />
+    <Compile Include="..\Helper.cs" />
+    <Compile Include="..\Ping.cs" />
+    <Compile Include="..\PingAttributes.cs" />
+    <Compile Include="..\PingResults.cs" />
+    <Compile Include="..\Program.cs" />
+    <Compile Include="..\Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Properties\App.config">
+    <None Include="..\Properties\App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Properties\app.manifest">
+    <None Include="..\Properties\app.manifest">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
