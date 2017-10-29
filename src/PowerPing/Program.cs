@@ -40,7 +40,6 @@ namespace PowerPing
         {
             // Local variables 
             int curArg = 0;
-            bool addrFound = false;
             string opMode = ""; 
             PingAttributes attributes = new PingAttributes();
             attributes.Address = "";

@@ -304,9 +304,26 @@ namespace PowerPing
         {
             Console.WriteLine("Listening for ICMP Packets . . .");
         }
+        /// <summary>
+        /// Display ICMP packet that have been sent
+        /// </summary>
         public static void RequestPacket(ICMP packet, String address, int index)
         {
-            Console.Write("Request to: {0}:0 seq={1} bytes={2} type=", address, index, packet.GetBytes().Length);
+            // Display with no colour
+            if (NoColor)
+            {
+                if (Short) // Show short hand reply
+                    Console.WriteLine("Request to: {0}:0 type=", address, index, packet.GetBytes().Length);
+                else
+                    Console.WriteLine("Request to: {0}:0 seq={1} bytes={2} type={3}", address, index, packet.GetBytes().Length, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type]);
+                return;
+            }
+
+            // Show shortened info
+            if (Short)
+                Console.Write("Request to: {0}:0 type=", packet.GetBytes().Length);
+            else
+                Console.Write("Request to: {0}:0 seq={1} bytes={2} type=", address, index, packet.GetBytes().Length);
 
             // Print coloured type
             Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
@@ -330,7 +347,13 @@ namespace PowerPing
             }
             ResetColor();
 
-            Console.WriteLine(" code={0}", packet.code);
+            Console.Write(" code={0}", packet.code);
+
+            // Display timestamp
+            if (TimeStamp)
+                Console.Write("@ {0}", DateTime.Now.ToString("HH:mm:ss"));
+
+            Console.WriteLine();
 
         }
         /// <summary>
@@ -352,7 +375,7 @@ namespace PowerPing
                 return;
             }
 
-            // Show shortened or normal reply info
+            // Show shortened info
             if (Short)
                 Console.Write("Reply from: {0} type=", address);
             else
