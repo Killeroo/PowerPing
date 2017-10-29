@@ -1,0 +1,11 @@
+language: csharp
+solution: PowerPing.sln
+
+matrix:
+  include:
+    - dotnet: 2.0.0
+      mono: none
+      dist: trusty
+      script:
+      - sh build.sh dotnet
+    - mono: latest
