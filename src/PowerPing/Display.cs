@@ -321,12 +321,13 @@ namespace PowerPing
 
             // Show shortened info
             if (Short)
-                Console.Write("Request to: {0}:0 type=", packet.GetBytes().Length);
+                Console.Write("Request to: {0}:0 type=", address);
             else
                 Console.Write("Request to: {0}:0 seq={1} bytes={2} type=", address, index, packet.GetBytes().Length);
 
             // Print coloured type
             Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
+            Console.ForegroundColor = ConsoleColor.Black;
             switch (packet.type) // Display speific type code values
             {
                 case 3:
@@ -383,6 +384,7 @@ namespace PowerPing
 
             // Print coloured type
             Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
+            Console.ForegroundColor = ConsoleColor.Black;
             switch (packet.type) // Display speific type code values
             {
                 case 3:
