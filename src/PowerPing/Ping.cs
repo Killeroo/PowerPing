@@ -367,7 +367,7 @@ namespace PowerPing
 
                     // Send ping request
                     sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
-                    responseTimer.Start();
+                    responseTimer.Restart();
                     Results.Sent++;
 
                     // Wait for response
@@ -414,8 +414,8 @@ namespace PowerPing
                     index++;
                     cancelEvent.WaitOne(attrs.Interval);
 
-                    //responseTimer.Restart();
-                    responseTimer.Reset();
+                    // Make sure timer is stopped
+                    responseTimer.Stop();
                 }  
             }
 
