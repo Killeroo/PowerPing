@@ -1,6 +1,6 @@
 # PowerPing - Advanced Windows Ping 
 
-[![Build Status](https://travis-ci.org/Killeroo/PowerPing.svg?branch=master)](https://travis-ci.org/Killeroo/PowerPing) [![version](https://img.shields.io/badge/version-1.1.9-brightgreen.svg)]() ![maintained](https://img.shields.io/maintenance/yes/2017.svg) 
+[![version](https://img.shields.io/badge/version-1.1.9-brightgreen.svg)]() ![maintained](https://img.shields.io/maintenance/yes/2017.svg) 
 
 Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
 
