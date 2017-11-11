@@ -327,7 +327,7 @@ namespace PowerPing
 
             // Print coloured type
             Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
-            Console.ForegroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.Gray;
             switch (packet.type) // Display speific type code values
             {
                 case 3:
@@ -384,7 +384,7 @@ namespace PowerPing
 
             // Print coloured type
             Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
-            Console.ForegroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.Gray;
             switch (packet.type) // Display speific type code values
             {
                 case 3:

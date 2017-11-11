@@ -367,7 +367,7 @@ namespace PowerPing
 
                     // Send ping request
                     sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
-                    responseTimer.Restart();
+                    responseTimer.Start();
                     Results.Sent++;
 
                     // Wait for response
