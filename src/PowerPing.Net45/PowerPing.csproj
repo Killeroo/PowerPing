@@ -26,7 +26,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\build\</OutputPath>
+    <OutputPath>..\..\build\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -34,7 +34,7 @@
     </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+    <ApplicationManifest>..\PowerPing\Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -46,22 +46,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Display.cs" />
-    <Compile Include="Exceptions.cs" />
-    <Compile Include="Graph.cs" />
-    <Compile Include="ICMP.cs" />
-    <Compile Include="Helper.cs" />
-    <Compile Include="Ping.cs" />
-    <Compile Include="PingAttributes.cs" />
-    <Compile Include="PingResults.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\PowerPing\Display.cs" />
+    <Compile Include="..\PowerPing\Exceptions.cs" />
+    <Compile Include="..\PowerPing\Graph.cs" />
+    <Compile Include="..\PowerPing\ICMP.cs" />
+    <Compile Include="..\PowerPing\Helper.cs" />
+    <Compile Include="..\PowerPing\Ping.cs" />
+    <Compile Include="..\PowerPing\PingAttributes.cs" />
+    <Compile Include="..\PowerPing\PingResults.cs" />
+    <Compile Include="..\PowerPing\Program.cs" />
+    <Compile Include="..\PowerPing\Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Properties\App.config">
+    <None Include="..\PowerPing\Properties\App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Properties\app.manifest">
+    <None Include="..\PowerPing\Properties\app.manifest">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>

@@ -126,20 +126,20 @@ namespace PowerPing
             sb.AppendLine(@"                            \/                       \//_____/  ");
             sb.AppendLine();
             sb.AppendLine("Description:");
-            sb.AppendLine("     Advanced ping utility provides geoip querying, ICMP packet customization,");
+            sb.AppendLine("     Advanced ping utility provides geoip querying, ICMP packet customization, ");
             sb.AppendLine("     graphs and result colourization.");
             sb.AppendLine();
-            sb.AppendLine("Usage: ");
-            sb.AppendLine("     PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] |");
-            sb.AppendLine("               [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--m msg]");
-            sb.AppendLine("               [--i TTL] [--in interval] [--pt type] [--pc code] [--dm]");
-            sb.AppendLine("               [--4] [--short] [--nocolor] [--ts] [--ti timing] target_name");
+            sb.AppendLine("Usage: PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] |");
+            sb.AppendLine("                 [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--m message] ");
+            sb.AppendLine("                 [--i TTL] [--in interval] [--pt type] [--pc code] [--dm]");
+            sb.AppendLine("                 [--4] [--short] [--nocolor] [--ts] [--ti timing] target_name");
             sb.AppendLine();
             sb.AppendLine("Options:");
             sb.AppendLine(" --help       [--?]            Displays this help message");
             sb.AppendLine(" --examples   [--ex]           Shows example usage");
-            sb.AppendLine(" --infinite   [--t]            Ping the target indefinitely (Ctrl-C to stop)");
+            sb.AppendLine(" --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)");
             sb.AppendLine(" --displaymsg [--dm]           Display ICMP messages");
+            sb.AppendLine(" --request    [--r]            Show request packets");
             sb.AppendLine(" --ipv4       [--4]            Force using IPv4");
             //sb.AppendLine("     --6             Force using IPv6");
             sb.AppendLine(" --shorthand  [--sh]           Show less detailed replies");
@@ -305,6 +305,59 @@ namespace PowerPing
             Console.WriteLine("Listening for ICMP Packets . . .");
         }
         /// <summary>
+        /// Display ICMP packet that have been sent
+        /// </summary>
+        public static void RequestPacket(ICMP packet, String address, int index)
+        {
+            // Display with no colour
+            if (NoColor)
+            {
+                if (Short) // Show short hand reply
+                    Console.WriteLine("Request to: {0}:0 type=", address, index, packet.GetBytes().Length);
+                else
+                    Console.WriteLine("Request to: {0}:0 seq={1} bytes={2} type={3}", address, index, packet.GetBytes().Length, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type]);
+                return;
+            }
+
+            // Show shortened info
+            if (Short)
+                Console.Write("Request to: {0}:0 type=", address);
+            else
+                Console.Write("Request to: {0}:0 seq={1} bytes={2} type=", address, index, packet.GetBytes().Length);
+
+            // Print coloured type
+            Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
+            Console.ForegroundColor = ConsoleColor.Gray;
+            switch (packet.type) // Display speific type code values
+            {
+                case 3:
+                    Console.Write(packet.code > destUnreachableCodeValues.Length ? packetTypes[packet.type] : destUnreachableCodeValues[packet.code]);
+                    break;
+                case 5:
+                    Console.Write(packet.code > redirectCodeValues.Length ? packetTypes[packet.type] : redirectCodeValues[packet.code]);
+                    break;
+                case 11:
+                    Console.Write(packet.code > timeExceedCodeValues.Length ? packetTypes[packet.type] : timeExceedCodeValues[packet.code]);
+                    break;
+                case 12:
+                    Console.Write(packet.code > badParameterCodeValues.Length ? packetTypes[packet.type] : badParameterCodeValues[packet.code]);
+                    break;
+                default:
+                    Console.Write(packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type]);
+                    break;
+            }
+            ResetColor();
+
+            Console.Write(" code={0}", packet.code);
+
+            // Display timestamp
+            if (TimeStamp)
+                Console.Write("@ {0}", DateTime.Now.ToString("HH:mm:ss"));
+
+            Console.WriteLine();
+
+        }
+        /// <summary>
         /// Display information about reply ping packet
         /// </summary>
         /// <param name="packet">Reply packet</param>
@@ -323,7 +376,7 @@ namespace PowerPing
                 return;
             }
 
-            // Show shortened or normal reply info
+            // Show shortened info
             if (Short)
                 Console.Write("Reply from: {0} type=", address);
             else
@@ -331,6 +384,7 @@ namespace PowerPing
 
             // Print coloured type
             Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
+            Console.ForegroundColor = ConsoleColor.Gray;
             switch (packet.type) // Display speific type code values
             {
                 case 3:

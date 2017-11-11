@@ -1,6 +1,6 @@
 # PowerPing - Advanced Windows Ping 
 
-[![version](https://img.shields.io/badge/version-1.1.9-brightgreen.svg)]() ![maintained](https://img.shields.io/maintenance/yes/2017.svg) ![](http://img.badgesize.io/Killeroo/PowerPing/master/build/PowerPing.exe.svg)
+[![version](https://img.shields.io/badge/version-1.2.0-brightgreen.svg)]() ![maintained](https://img.shields.io/maintenance/yes/2017.svg) ![](http://img.badgesize.io/Killeroo/PowerPing/master/build/PowerPing.exe.svg)
 
 Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
 
@@ -36,6 +36,7 @@ PowerPing contains the following features (with more to come...):
      --examples   [--ex]           Shows example usage
      --infinite   [--t]            Ping the target until stopped (Control-C to stop)
      --displaymsg [--dm]           Display ICMP messages
+     --request    [--r]           Show request packets
      --shorthand  [--sh]           Show less detailed replies
      --nocolor    [--nc]           No colour
      --noinput    [--ni]           Require no user input

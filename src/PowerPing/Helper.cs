@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Xml;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -54,12 +55,12 @@ namespace PowerPing
                     }
                 }
             }
-            catch (WebException)
+            catch (Exception)
             {
                 loc = "[Location unavaliable]";
                 Console.WriteLine("[Location unavaliable]");
             }
-
+            
             Console.WriteLine(loc);
 
             if (!Display.NoInput)

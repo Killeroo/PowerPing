@@ -40,7 +40,6 @@ namespace PowerPing
         {
             // Local variables 
             int curArg = 0;
-            bool addrFound = false;
             string opMode = ""; 
             PingAttributes attributes = new PingAttributes();
             attributes.Address = "";
@@ -278,6 +277,14 @@ namespace PowerPing
                                 default: // Unknown timing type
                                     throw new ArgumentFormatException();
                             }
+                            break;
+                        case "/request":
+                        case "-request":
+                        case "--request":
+                        case "/r":
+                        case "-r":
+                        case "--r":
+                            p.ShowRequest = true;
                             break;
                         case "/whoami":
                         case "-whoami":

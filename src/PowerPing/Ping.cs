@@ -23,6 +23,7 @@ namespace PowerPing
         public PingResults Results { get; private set; } = new PingResults(); // Store current ping results
         public PingAttributes Attributes { get; private set; } = new PingAttributes(); // Stores the current operation's attributes
         public bool ShowOutput { get; set; } = true;
+        public bool ShowRequest { get; set; } = false;
         public bool IsRunning { get; private set; } = false;
         public int Threads { get; set; } = 5;
 
@@ -341,7 +342,7 @@ namespace PowerPing
             packet.messageSize = payload.Length + 4;
             packetSize = packet.messageSize + 4;
 
-            responseTimer.Start();
+            //responseTimer.Start();
 
             // Sending loop
             while (attrs.Continous ? true : index <= attrs.Count)
@@ -360,8 +361,13 @@ namespace PowerPing
 
                 try
                 {
+                    // Show ping request
+                    if (ShowRequest)
+                        Display.RequestPacket(packet, attrs.Address, index);
+
                     // Send ping request
                     sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
+                    responseTimer.Start();
                     Results.Sent++;
 
                     // Wait for response
@@ -408,7 +414,8 @@ namespace PowerPing
                     index++;
                     cancelEvent.WaitOne(attrs.Interval);
 
-                    responseTimer.Restart();
+                    // Make sure timer is stopped
+                    responseTimer.Stop();
                 }  
             }
 
