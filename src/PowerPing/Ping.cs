@@ -415,7 +415,8 @@ namespace PowerPing
                     cancelEvent.WaitOne(attrs.Interval);
 
                     // Make sure timer is stopped
-                    responseTimer.Stop();
+                    //responseTimer.Stop();
+                    responseTimer.Reset();
                 }  
             }
 
