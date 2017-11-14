@@ -7,8 +7,8 @@ clone_folder: c:\projects\powerping
 # Build config
 configuration: Release
 platform:
-  - x86
-  - x64
+ # - x86
+ # - x64
   - Any CPU
 build:
    project: PowerPing.sln

@@ -107,7 +107,7 @@ namespace PowerPing
             if (full)
                 sb.AppendFormat("{0} [Built {1}]", version, buildTime);
             else
-                sb.AppendFormat("{0}", version)
+                sb.AppendFormat("{0}", version);
 
             // Print string
             Console.WriteLine(sb.ToString());
