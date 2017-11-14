@@ -108,7 +108,7 @@ namespace PowerPing
                 sb.AppendFormat("[Built {0}]", buildTime);
             else
                 // PowerPing v1.2.0 [build 8] OR PowerPing Version 1.2.0 [build 8]
-                sb.AppendFormat("PowerPing Version {0}", v.ToString());
+                sb.AppendFormat(version);
 
             // Print string
             Console.WriteLine(sb.ToString());
