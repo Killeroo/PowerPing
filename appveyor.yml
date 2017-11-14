@@ -10,5 +10,5 @@ build:
 
 #Artifact/Publishing 
 artifacts:
-  - path: c:\projects\powerping\build\PowerPing.exe
+  - path: \build\PowerPing.exe
     name: PowerPing
