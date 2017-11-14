@@ -1,4 +1,14 @@
-configuration: Release
+# Environment setup
+image: Visual Studio 2015
+clone_folder: c:\projects\powerping
 
+# Build config
+configuration: Release
 build:
-   verbosity: minimal
+   project: PowerPing.sln
+   verbosity: normal
+
+#Artifact/Publishing 
+artifacts:
+  - path: c:\projects\powerping\build\PowerPing.exe
+    name: PowerPing
