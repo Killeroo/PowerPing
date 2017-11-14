@@ -7,7 +7,7 @@ if [%~1]==[] (
     echo USAGE: build.bat [C:\path\to\project]
     exit /b 1
 )
-set projectPath=%~p1
+set projectPath=%~f1
 
 :: Set .NET 4.6 framework path
 set msbuildPath="%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\"
