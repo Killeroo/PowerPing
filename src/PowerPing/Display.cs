@@ -105,9 +105,9 @@ namespace PowerPing
 
             // Construct string
             if (date)
-                sb.AppendFormat("[Built {1}]", buildTime);
+                sb.AppendFormat("[Built {0}]", buildTime);
             else
-                sb.AppendFormat("{0}", v.ToString());
+                sb.AppendFormat("PowerPing Version {0}", v.ToString());
 
             // Print string
             Console.WriteLine(sb.ToString());

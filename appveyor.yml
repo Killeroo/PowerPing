@@ -4,6 +4,14 @@ version: 1.2.0.{build}-{branch}
 image: Visual Studio 2015
 clone_folder: c:\projects\powerping
 
+# Update assembly info
+assembly_info:
+  patch: true
+  file: AssemblyInfo.*
+  assembly_version: "1.2.0.{build}"
+  assembly_file_version: "{version}"
+  assembly_informational_version: "{version}"
+
 # Build config
 configuration: Release
 platform:
