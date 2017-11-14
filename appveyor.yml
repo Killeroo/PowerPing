@@ -26,7 +26,7 @@ build:
 artifacts:
   - path: \build\x86\PowerPing.exe
     name: PowerPing(x86)
-  - path: \build\PowerPing.exe
+  - path: \build\x64\PowerPing.exe
     name: PowerPing(x64)
   - path: \build\PowerPing.exe
     name: PowerPing

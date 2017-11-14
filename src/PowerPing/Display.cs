@@ -97,7 +97,7 @@ namespace PowerPing
         {
             Version v = Assembly.GetExecutingAssembly().GetName().Version;
             DateTime buildInfo = Assembly.GetExecutingAssembly().GetLinkerTime();
-            string version = Assembly.GetExecutingAssembly().GetName().Name + " Version " + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ")";
+            string version = Assembly.GetExecutingAssembly().GetName().Name + " v" + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ")";
             string buildTime = buildInfo.Day + "/" + buildInfo.Month + "/" + buildInfo.Year + " " + buildInfo.TimeOfDay;
 
             // Clear builder
@@ -107,8 +107,7 @@ namespace PowerPing
             if (date)
                 sb.AppendFormat("[Built {0}]", buildTime);
             else
-                // PowerPing v1.2.0 (r8) OR PowerPing Version 1.2.0 [build 8]
-                sb.AppendFormat("PowerPing {0} | {1}", v.ToString(), version);
+                sb.AppendFormat(version);
 
             // Print string
             Console.WriteLine(sb.ToString());
