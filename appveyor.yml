@@ -1,9 +1,15 @@
+version: 1.2.0.{build}-{branch}
+
 # Environment setup
 image: Visual Studio 2015
 clone_folder: c:\projects\powerping
 
 # Build config
 configuration: Release
+platform:
+  - x86
+  - x64
+  - Any CPU
 build:
    project: PowerPing.sln
    verbosity: normal

@@ -20,3 +20,5 @@ cd %msbuildPath%
 
 :: Run build command
 msbuild.exe %projectPath%\PowerPing.sln /p:configuration=release
+
+pause

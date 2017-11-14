@@ -93,7 +93,7 @@ namespace PowerPing
         /// <summary>
         /// Displays current version number and build date
         /// </summary>
-        public static void Version()
+        public static void Version(bool full = false)
         {
             Version v = Assembly.GetExecutingAssembly().GetName().Version;
             DateTime buildInfo = Assembly.GetExecutingAssembly().GetLinkerTime();
@@ -104,7 +104,10 @@ namespace PowerPing
             sb.Clear();
 
             // Construct string
-            sb.AppendFormat("{0} [Built {1}]", version, buildTime);
+            if (full)
+                sb.AppendFormat("{0} [Built {1}]", version, buildTime);
+            else
+                sb.AppendFormat("{0}", version)
 
             // Print string
             Console.WriteLine(sb.ToString());
@@ -130,12 +133,13 @@ namespace PowerPing
             sb.AppendLine("     customization, graphs and result colourization.");
             sb.AppendLine();
             sb.AppendLine("Usage: PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] |");
-            sb.AppendLine("                 [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--m message] ");
+            sb.AppendLine("                 [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--m \"text\"]");
             sb.AppendLine("                 [--i TTL] [--in interval] [--pt type] [--pc code] [--dm]");
             sb.AppendLine("                 [--4] [--short] [--nocolor] [--ts] [--ti timing] target_name");
             sb.AppendLine();
             sb.AppendLine("Options:");
             sb.AppendLine(" --help       [--?]            Displays this help message");
+            sb.AppendLine(" --version    [--v]            Shows version and build information");
             sb.AppendLine(" --examples   [--ex]           Shows example usage");
             sb.AppendLine(" --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)");
             sb.AppendLine(" --displaymsg [--dm]           Display ICMP messages");
@@ -181,6 +185,9 @@ namespace PowerPing
             if (!NoInput)
                 // Wait for user input
                 PowerPing.Helper.Pause();
+            
+            // Flush string builder
+            sb.Reset();
         }
         /// <summary>
         /// Displays example powerping usage

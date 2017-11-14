@@ -33,6 +33,7 @@ PowerPing contains the following features (with more to come...):
 ## Arguments:
      Options:
      --help       [--?]            Displays this help message
+     --version    [--v]            Shows version and build information
      --examples   [--ex]           Shows example usage
      --infinite   [--t]            Ping the target until stopped (Control-C to stop)
      --displaymsg [--dm]           Display ICMP messages
