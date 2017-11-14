@@ -105,7 +105,7 @@ namespace PowerPing
         {
             // Determine Xaxis size
             if (!CompactGraph)
-                xAxisLength = Console.WindowWidth - 60;//20;
+                xAxisLength = Console.WindowWidth - 30;
 
             DrawBackground();
 
