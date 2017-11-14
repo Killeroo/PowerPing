@@ -133,8 +133,7 @@ namespace PowerPing
             List<double> activeHostTimes = new List<double>();
             Stopwatch scanTimer = new Stopwatch();
             int scanned = 0;
-            //List<string>[] addressLists = new List<string>[Threads]; // Lists of addresses to be scanned in each thread
-
+            
             // Setup scan ping attributes
             PingAttributes attrs = new PingAttributes();
             attrs.Timeout = 500;
@@ -179,22 +178,6 @@ namespace PowerPing
                     }
                 }
             }
-
-            //// Divide scanlist into lists for each thread
-            //int splitListSize = (int)Math.Ceiling(scanList.Count / (double)Threads);
-            //int x = 0;
-
-            //for (int i = 0; i < addressLists.Length; i++)
-            //{
-            //    addressLists[i] = new List<string>();
-            //    for (int j = x; j < x + splitListSize; j++)
-            //    {
-            //        if (j >= scanList.Count)
-            //            break; // Stop if we are out of bounds
-            //        addressLists[i].Add(scanList[j]);
-            //    }
-            //    x += splitListSize;
-            //}
 
             scanTimer.Start();
 
@@ -246,24 +229,6 @@ namespace PowerPing
 
             // Disable output for faster speeds
             p.ShowOutput = false;
-
-            // Start threads
-            //for (int i = 0; i < Threads - 1; i++)
-            //{
-            //    floodThreads[i] = new Thread(() =>
-            //    {
-            //        Ping p = new Ping();
-            //        //p.ShowOutput = false;
-            //        p.Send(attrs);
-            //    });
-            //    floodThreads[i].IsBackground = true;
-            //    floodThreads[i].Start();
-            //}
-
-            //for (int i = 0; i < Threads - 1; i++)
-            //{
-            //    floodThreads[i].Abort();
-            //}
 
             // Start flood thread
             var thread = new Thread(() =>
@@ -342,8 +307,6 @@ namespace PowerPing
             packet.messageSize = payload.Length + 4;
             packetSize = packet.messageSize + 4;
 
-            //responseTimer.Start();
-
             // Sending loop
             while (attrs.Continous ? true : index <= attrs.Count)
             {
@@ -414,8 +377,7 @@ namespace PowerPing
                     index++;
                     cancelEvent.WaitOne(attrs.Interval);
 
-                    // Make sure timer is stopped
-                    //responseTimer.Stop();
+                    // Reset timer
                     responseTimer.Reset();
                 }  
             }

@@ -126,8 +126,8 @@ namespace PowerPing
             sb.AppendLine(@"                            \/                       \//_____/  ");
             sb.AppendLine();
             sb.AppendLine("Description:");
-            sb.AppendLine("     Advanced ping utility provides geoip querying, ICMP packet customization, ");
-            sb.AppendLine("     graphs and result colourization.");
+            sb.AppendLine("     Advanced ping utility which provides geoip querying, ICMP packet");
+            sb.AppendLine("     customization, graphs and result colourization.");
             sb.AppendLine();
             sb.AppendLine("Usage: PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] |");
             sb.AppendLine("                 [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--m message] ");
@@ -526,8 +526,7 @@ namespace PowerPing
             double percent = (double)results.Lost / results.Sent;
             percent = Math.Round(percent * 100, 1);
             Console.WriteLine();
-            Console.WriteLine("Stats for {0}:", attrs.Address);
-            Console.WriteLine("------------------------");
+            Console.WriteLine("--- Stats for {0} ---", attrs.Address);
 
             if (NoColor)
             {
