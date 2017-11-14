@@ -187,7 +187,7 @@ namespace PowerPing
                 PowerPing.Helper.Pause();
             
             // Flush string builder
-            sb.Reset();
+            sb.Clear();
         }
         /// <summary>
         /// Displays example powerping usage
