@@ -17,7 +17,7 @@ using System.IO;
 namespace PowerPing
 {
 
-    class Ping : IDisposable
+    public class Ping : IDisposable
     {
         // Properties
         public PingResults Results { get; private set; } = new PingResults(); // Store current ping results
@@ -273,7 +273,7 @@ namespace PowerPing
             }
             return s;
         }
-        private PingResults SendICMP(PingAttributes attrs)
+        public PingResults SendICMP(PingAttributes attrs)
         {
             IPEndPoint iep = null;
             EndPoint ep = null;

@@ -7,7 +7,7 @@
 namespace PowerPing
 {
 
-    class ICMP
+    public class ICMP
     {
         // Packet attributes
         public byte type;
