@@ -73,7 +73,7 @@ namespace PowerPing
                         case "/v":
                         case "-v":
                         case "--v":
-                            Display.Version();
+                            Display.Version(true);
                             Environment.Exit(0);
                             break;
                         case "/count":

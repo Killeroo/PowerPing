@@ -93,7 +93,7 @@ namespace PowerPing
         /// <summary>
         /// Displays current version number and build date
         /// </summary>
-        public static void Version(bool full = false)
+        public static void Version(bool date = false)
         {
             Version v = Assembly.GetExecutingAssembly().GetName().Version;
             DateTime buildInfo = Assembly.GetExecutingAssembly().GetLinkerTime();
@@ -104,10 +104,10 @@ namespace PowerPing
             sb.Clear();
 
             // Construct string
-            if (full)
-                sb.AppendFormat("{0} [Built {1}]", version, buildTime);
+            if (date)
+                sb.AppendFormat("[Built {1}]", buildTime);
             else
-                sb.AppendFormat("{0}", version);
+                sb.AppendFormat("{0}", v.ToString());
 
             // Print string
             Console.WriteLine(sb.ToString());
