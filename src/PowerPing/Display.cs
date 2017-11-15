@@ -359,7 +359,7 @@ namespace PowerPing
 
             // Display timestamp
             if (TimeStamp)
-                Console.Write("@ {0}", DateTime.Now.ToString("HH:mm:ss"));
+                Console.Write(" @ {0}", DateTime.Now.ToString("HH:mm:ss"));
 
             Console.WriteLine();
 
@@ -377,9 +377,9 @@ namespace PowerPing
             if (NoColor)
             {
                 if (Short) // Show short hand reply
-                    Console.WriteLine("Reply from: {0} type={1} time={2:0." + new String('0', DecimalPlaces) + "}ms", address, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type], replyTime);
+                    Console.WriteLine("Reply from: {0} type={1} time={2:0." + new String('0', DecimalPlaces) + "}ms", address, (packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type]), replyTime.TotalMilliseconds);
                 else
-                    Console.WriteLine("Reply from: {0} seq={1} bytes={2} type={3} time={4:0." + new String('0', DecimalPlaces) + "}ms", address, index, bytesRead, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type], replyTime);
+                    Console.WriteLine("Reply from: {0} seq={1} bytes={2} type={3} time={4:0." + new String('0', DecimalPlaces) + "}ms", address, index, bytesRead, (packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type]), replyTime.TotalMilliseconds);
                 return;
             }
 

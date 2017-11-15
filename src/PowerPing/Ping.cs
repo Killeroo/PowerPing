@@ -24,6 +24,7 @@ namespace PowerPing
         public PingAttributes Attributes { get; private set; } = new PingAttributes(); // Stores the current operation's attributes
         public bool ShowOutput { get; set; } = true;
         public bool ShowRequest { get; set; } = false;
+        public bool ShowReply { get; set; } = true;
         public bool IsRunning { get; private set; } = false;
         public int Threads { get; set; } = 5;
 
