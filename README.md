@@ -37,7 +37,7 @@ PowerPing contains the following features (with more to come...):
      --examples   [--ex]           Shows example usage
      --infinite   [--t]            Ping the target until stopped (Control-C to stop)
      --displaymsg [--dm]           Display ICMP messages
-     --request    [--r]           Show request packets
+     --request    [--r]            Show request packets
      --shorthand  [--sh]           Show less detailed replies
      --nocolor    [--nc]           No colour
      --noinput    [--ni]           Require no user input
