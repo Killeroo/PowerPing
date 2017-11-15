@@ -78,9 +78,11 @@ PowerPing contains the following features (with more to come...):
 
 ## Screenshots
 
-![alt text](docs/screenshots/readme_screenshot2.png "Powerping Graph view")
+![alt text](docs/screenshots/screenshot12.png "Powerping Graph view")
 ![alt text](docs/screenshots/readme_screenshot3.png "Powerping Listening")
 ![alt text](docs/screenshots/readme_screenshot4.png "Location functions") ![alt text](docs/screenshots/readme_screenshot5.png "PowerPing stress testing")
+![alt text](docs/screenshots/screenshot8.png "Powerping With no color")
+![alt text](docs/screenshots/screenshot11.png "Powerping showing request packets and ICMP data")
 
 ## Contribution
 
