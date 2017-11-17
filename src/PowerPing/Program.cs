@@ -67,15 +67,15 @@ namespace PowerPing
 
                     switch (args[count])
                     {
-                        //case "/version":
-                        //case "-version":
-                        //case "--version":
-                        //case "/v":
-                        //case "-v":
-                        //case "--v":
-                        //    Display.Version();
-                        //    Environment.Exit(0);
-                        //    break;
+                        case "/version":
+                        case "-version":
+                        case "--version":
+                        case "/v":
+                        case "-v":
+                        case "--v":
+                            Display.Version(true);
+                            Environment.Exit(0);
+                            break;
                         case "/count":
                         case "-count":
                         case "--count":

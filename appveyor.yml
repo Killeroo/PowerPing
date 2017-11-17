@@ -1,0 +1,32 @@
+version: 1.2.0.{build}-{branch}
+
+# Environment setup
+image: Visual Studio 2015
+clone_folder: c:\projects\powerping
+
+# Update assembly info
+assembly_info:
+  patch: true
+  file: AssemblyInfo.*
+  assembly_version: "1.2.0.{build}"
+  assembly_file_version: "{version}"
+  assembly_informational_version: "{version}"
+
+# Build config
+configuration: Release
+platform:
+  - x86
+  - x64
+  - Any CPU
+build:
+   project: PowerPing.sln
+   verbosity: normal
+
+#Artifact/Publishing 
+artifacts:
+  - path: \build\x86\PowerPing.exe
+    name: PowerPing(x86)
+  - path: \build\x64\PowerPing.exe
+    name: PowerPing(x64)
+  - path: \build\PowerPing.exe
+    name: PowerPing

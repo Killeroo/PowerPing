@@ -1,12 +1,12 @@
 # PowerPing - Advanced Windows Ping 
 
-[![version](https://img.shields.io/badge/version-1.2.0-brightgreen.svg)]() ![maintained](https://img.shields.io/maintenance/yes/2017.svg) ![](http://img.badgesize.io/Killeroo/PowerPing/master/build/PowerPing.exe.svg)
+[![version](https://img.shields.io/badge/version-1.2.0-brightgreen.svg)]() ![maintained](https://img.shields.io/maintenance/yes/2017.svg) [![Build status](https://ci.appveyor.com/api/projects/status/fq7jnpmlejm7jych?svg=true)](https://ci.appveyor.com/project/Killeroo/powerping)
 
 Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
 
-Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/master/build) [[Development Build]](https://github.com/Killeroo/PowerPing/blob/dev/build/PowerPing.exe) [[Github]](https://github.com/Killeroo/PowerPing/releases) [[Softpedia]](http://www.softpedia.com/progDownload/PowerPing-Download-255701.html)
+Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/master/build) [[Development Build]](https://github.com/Killeroo/PowerPing/blob/dev/build/PowerPing.exe) [[Github]](https://github.com/Killeroo/PowerPing/releases) [![Download PowerPing](https://sourceforge.net/sflogo.php?type=10&group_id=2900962)](https://sourceforge.net/projects/powerping/files/latest/download)
 ***
-![alt text](docs/screenshots/readme_screenshot.png "PowerPing in action")
+![alt text](docs/screenshots/screenshot.png "PowerPing in action")
 
 ## Features
 
@@ -33,10 +33,11 @@ PowerPing contains the following features (with more to come...):
 ## Arguments:
      Options:
      --help       [--?]            Displays this help message
+     --version    [--v]            Shows version and build information
      --examples   [--ex]           Shows example usage
      --infinite   [--t]            Ping the target until stopped (Control-C to stop)
      --displaymsg [--dm]           Display ICMP messages
-     --request    [--r]           Show request packets
+     --request    [--r]            Show request packets
      --shorthand  [--sh]           Show less detailed replies
      --nocolor    [--nc]           No colour
      --noinput    [--ni]           Require no user input
@@ -77,9 +78,13 @@ PowerPing contains the following features (with more to come...):
 
 ## Screenshots
 
-![alt text](docs/screenshots/readme_screenshot2.png "Powerping Graph view")
-![alt text](docs/screenshots/readme_screenshot3.png "Powerping Listening")
-![alt text](docs/screenshots/readme_screenshot4.png "Location functions") ![alt text](docs/screenshots/readme_screenshot5.png "PowerPing stress testing")
+![alt text](docs/screenshots/screenshot12.png "Powerping's Graph view")
+![alt text](docs/screenshots/screenshot3.png "Powerping Listening for ICMP activity")
+![alt text](docs/screenshots/screenshot16.png "Powerping in action!")
+![alt text](docs/screenshots/screenshot11.png "Powerping showing request packets and ICMP data")
+![alt text](docs/screenshots/screenshot8.png "Powerping With no color")
+
+[More screenshots can be found here](docs/screenshots/)
 
 ## Contribution
 

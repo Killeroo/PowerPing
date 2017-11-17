@@ -93,18 +93,21 @@ namespace PowerPing
         /// <summary>
         /// Displays current version number and build date
         /// </summary>
-        public static void Version()
+        public static void Version(bool date = false)
         {
             Version v = Assembly.GetExecutingAssembly().GetName().Version;
             DateTime buildInfo = Assembly.GetExecutingAssembly().GetLinkerTime();
-            string version = Assembly.GetExecutingAssembly().GetName().Name + " Version " + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ")";
+            string version = Assembly.GetExecutingAssembly().GetName().Name + " v" + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ")";
             string buildTime = buildInfo.Day + "/" + buildInfo.Month + "/" + buildInfo.Year + " " + buildInfo.TimeOfDay;
 
             // Clear builder
             sb.Clear();
 
             // Construct string
-            sb.AppendFormat("{0} [Built {1}]", version, buildTime);
+            if (date)
+                sb.AppendFormat("[Built {0}]", buildTime);
+            else
+                sb.AppendFormat(version);
 
             // Print string
             Console.WriteLine(sb.ToString());
@@ -126,16 +129,17 @@ namespace PowerPing
             sb.AppendLine(@"                            \/                       \//_____/  ");
             sb.AppendLine();
             sb.AppendLine("Description:");
-            sb.AppendLine("     Advanced ping utility provides geoip querying, ICMP packet customization, ");
-            sb.AppendLine("     graphs and result colourization.");
+            sb.AppendLine("     Advanced ping utility which provides geoip querying, ICMP packet");
+            sb.AppendLine("     customization, graphs and result colourization.");
             sb.AppendLine();
             sb.AppendLine("Usage: PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] |");
-            sb.AppendLine("                 [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--m message] ");
+            sb.AppendLine("                 [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--m \"text\"]");
             sb.AppendLine("                 [--i TTL] [--in interval] [--pt type] [--pc code] [--dm]");
             sb.AppendLine("                 [--4] [--short] [--nocolor] [--ts] [--ti timing] target_name");
             sb.AppendLine();
             sb.AppendLine("Options:");
             sb.AppendLine(" --help       [--?]            Displays this help message");
+            sb.AppendLine(" --version    [--v]            Shows version and build information");
             sb.AppendLine(" --examples   [--ex]           Shows example usage");
             sb.AppendLine(" --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)");
             sb.AppendLine(" --displaymsg [--dm]           Display ICMP messages");
@@ -181,6 +185,9 @@ namespace PowerPing
             if (!NoInput)
                 // Wait for user input
                 PowerPing.Helper.Pause();
+            
+            // Flush string builder
+            sb.Clear();
         }
         /// <summary>
         /// Displays example powerping usage
@@ -352,7 +359,7 @@ namespace PowerPing
 
             // Display timestamp
             if (TimeStamp)
-                Console.Write("@ {0}", DateTime.Now.ToString("HH:mm:ss"));
+                Console.Write(" @ {0}", DateTime.Now.ToString("HH:mm:ss"));
 
             Console.WriteLine();
 
@@ -370,9 +377,9 @@ namespace PowerPing
             if (NoColor)
             {
                 if (Short) // Show short hand reply
-                    Console.WriteLine("Reply from: {0} type={1} time={2:0." + new String('0', DecimalPlaces) + "}ms", address, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type], replyTime);
+                    Console.WriteLine("Reply from: {0} type={1} time={2:0." + new String('0', DecimalPlaces) + "}ms", address, (packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type]), replyTime.TotalMilliseconds);
                 else
-                    Console.WriteLine("Reply from: {0} seq={1} bytes={2} type={3} time={4:0." + new String('0', DecimalPlaces) + "}ms", address, index, bytesRead, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type], replyTime);
+                    Console.WriteLine("Reply from: {0} seq={1} bytes={2} type={3} time={4:0." + new String('0', DecimalPlaces) + "}ms", address, index, bytesRead, (packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type]), replyTime.TotalMilliseconds);
                 return;
             }
 
@@ -526,8 +533,7 @@ namespace PowerPing
             double percent = (double)results.Lost / results.Sent;
             percent = Math.Round(percent * 100, 1);
             Console.WriteLine();
-            Console.WriteLine("Stats for {0}:", attrs.Address);
-            Console.WriteLine("------------------------");
+            Console.WriteLine("--- Stats for {0} ---", attrs.Address);
 
             if (NoColor)
             {
