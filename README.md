@@ -6,7 +6,7 @@ Small improved command line ICMP ping program lovingly inspired by windows and l
 
 Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/master/build) [[Development Build]](https://github.com/Killeroo/PowerPing/blob/dev/build/PowerPing.exe) [[Github]](https://github.com/Killeroo/PowerPing/releases) [![Download PowerPing](https://sourceforge.net/sflogo.php?type=10&group_id=2900962)](https://sourceforge.net/projects/powerping/files/latest/download)
 ***
-![alt text](docs/screenshots/readme_screenshot.png "PowerPing in action")
+![alt text](docs/screenshots/screenshot.png "PowerPing in action")
 
 ## Features
 
@@ -78,11 +78,14 @@ PowerPing contains the following features (with more to come...):
 
 ## Screenshots
 
-![alt text](docs/screenshots/screenshot12.png "Powerping Graph view")
-![alt text](docs/screenshots/readme_screenshot3.png "Powerping Listening")
-![alt text](docs/screenshots/readme_screenshot4.png "Location functions") ![alt text](docs/screenshots/readme_screenshot5.png "PowerPing stress testing")
+![alt text](docs/screenshots/screenshot12.png "Powerping's Graph view")
+![alt text](docs/screenshots/screenshot3.png "Powerping Listening for ICMP activity")
+![alt text](docs/screenshots/screenshot4.png "Location lookup") ![alt text](docs/screenshots/screenshot14.png "Powerping after scanning")
+![alt text](docs/screenshots/screenshot15.png "Powerping stress testing an address") 
 ![alt text](docs/screenshots/screenshot8.png "Powerping With no color")
 ![alt text](docs/screenshots/screenshot11.png "Powerping showing request packets and ICMP data")
+
+[More screenshots can be found here](docs/screenshots/)
 
 ## Contribution
 
