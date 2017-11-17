@@ -80,10 +80,9 @@ PowerPing contains the following features (with more to come...):
 
 ![alt text](docs/screenshots/screenshot12.png "Powerping's Graph view")
 ![alt text](docs/screenshots/screenshot3.png "Powerping Listening for ICMP activity")
-![alt text](docs/screenshots/screenshot4.png "Location lookup") ![alt text](docs/screenshots/screenshot14.png "Powerping after scanning")
-![alt text](docs/screenshots/screenshot15.png "Powerping stress testing an address") 
-![alt text](docs/screenshots/screenshot8.png "Powerping With no color")
+![alt text](docs/screenshots/screenshot16.png "Powerping in action!")
 ![alt text](docs/screenshots/screenshot11.png "Powerping showing request packets and ICMP data")
+![alt text](docs/screenshots/screenshot8.png "Powerping With no color")
 
 [More screenshots can be found here](docs/screenshots/)
 
