@@ -67,7 +67,7 @@ namespace PowerPing
                 MinTime = time;
 
             // Work out average
-            sum += time;
+            sum += (long) time;
             AvgTime = (double) sum / Received; // Avg = Total / Count
 
             CurTime = time;

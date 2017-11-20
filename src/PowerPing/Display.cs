@@ -153,7 +153,7 @@ namespace PowerPing
             sb.AppendLine(" --decimals   [--dp]  number   Num of decimal places to use (0 to 3)");
             sb.AppendLine(" --count      [--c]   number   Number of pings to send");
             sb.AppendLine(" --timeout    [--w]   number   Time to wait for reply (in milliseconds)");
-            sb.AppendLine(" --ttl        [--i]   number   Time To Live");
+            sb.AppendLine(" --ttl        [--i]   number   Time To Live for packet");
             sb.AppendLine(" --interval   [--in]  number   Interval between each ping (in milliseconds)");
             sb.AppendLine(" --type       [--pt]  number   Use custom ICMP type");
             sb.AppendLine(" --code       [--pc]  number   Use custom ICMP code value");
@@ -166,7 +166,7 @@ namespace PowerPing
             sb.AppendLine();
             sb.AppendLine("Features:");
             sb.AppendLine(" --scan       [--sc]  address  Network scanning, specify range \"127.0.0.1-55\"");
-            sb.AppendLine(" --listen     [--li]  address  Listen for ICMP packets");
+            sb.AppendLine(" --listen     [--li]  address  Listen for ICMP packets ");
             sb.AppendLine(" --flood      [--fl]  address  Send high volume of pings to address");
             sb.AppendLine(" --graph      [--g]   address  Graph view");
             sb.AppendLine(" --compact    [--cg]  address  Compact graph view");
@@ -491,11 +491,11 @@ namespace PowerPing
                 Console.Write("Ellapsed: ");
                 scanTimePos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.WriteLine("12:00:00");
-                Console.Write("Progress [");
-                progBarPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-                Console.Write("                              ] ");
+                Console.Write("Progress: [ ");
                 perComplPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-                Console.WriteLine("0%");
+                Console.Write("     ][");
+                progBarPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                Console.WriteLine("..............................]");
             }
             
         }
