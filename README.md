@@ -45,7 +45,7 @@ PowerPing contains the following features (with more to come...):
      --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
      --count      [--c]   number   Number of pings to send
      --timeout    [--w]   number   Time to wait for reply (in milliseconds)
-     --ttl        [--i]   number   Time To Live
+     --ttl        [--i]   number   Time To Live for packet
      --interval   [--in]  number   Interval between each ping (in milliseconds)
      --type       [--pt]  number   Use custom ICMP type
      --code       [--pc]  number   Use custom ICMP code value

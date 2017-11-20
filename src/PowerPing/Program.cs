@@ -125,6 +125,8 @@ namespace PowerPing
                         case "-in":
                         case "--in": // Interval
                             attributes.Interval = Convert.ToInt32(args[count + 1]);
+                            if (attributes.Interval < 1)
+                                PowerPing.Display.Error("Ping interval cannot be less than 1ms", true, true);
                             break;
                         case "/type":
                         case "-type":

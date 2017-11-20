@@ -153,7 +153,7 @@ namespace PowerPing
             sb.AppendLine(" --decimals   [--dp]  number   Num of decimal places to use (0 to 3)");
             sb.AppendLine(" --count      [--c]   number   Number of pings to send");
             sb.AppendLine(" --timeout    [--w]   number   Time to wait for reply (in milliseconds)");
-            sb.AppendLine(" --ttl        [--i]   number   Time To Live");
+            sb.AppendLine(" --ttl        [--i]   number   Time To Live for packet");
             sb.AppendLine(" --interval   [--in]  number   Interval between each ping (in milliseconds)");
             sb.AppendLine(" --type       [--pt]  number   Use custom ICMP type");
             sb.AppendLine(" --code       [--pc]  number   Use custom ICMP code value");
@@ -166,7 +166,7 @@ namespace PowerPing
             sb.AppendLine();
             sb.AppendLine("Features:");
             sb.AppendLine(" --scan       [--sc]  address  Network scanning, specify range \"127.0.0.1-55\"");
-            sb.AppendLine(" --listen     [--li]  address  Listen for ICMP packets");
+            sb.AppendLine(" --listen     [--li]  address  Listen for ICMP packets ");
             sb.AppendLine(" --flood      [--fl]  address  Send high volume of pings to address");
             sb.AppendLine(" --graph      [--g]   address  Graph view");
             sb.AppendLine(" --compact    [--cg]  address  Compact graph view");
@@ -491,11 +491,11 @@ namespace PowerPing
                 Console.Write("Ellapsed: ");
                 scanTimePos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.WriteLine("12:00:00");
-                Console.Write("Progress [");
-                progBarPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-                Console.Write("                              ] ");
+                Console.Write("Progress: [ ");
                 perComplPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-                Console.WriteLine("0%");
+                Console.Write("     ][");
+                progBarPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                Console.WriteLine("..............................]");
             }
             
         }
@@ -531,25 +531,17 @@ namespace PowerPing
 
             // Display stats
             double percent = (double)results.Lost / results.Sent;
-            percent = Math.Round(percent * 100, 1);
+            percent = Math.Round(percent * 100, 2);
             Console.WriteLine();
             Console.WriteLine("--- Stats for {0} ---", attrs.Address);
 
             if (NoColor)
             {
-                Console.Write("   General: Sent ");
-                Console.Write("[ " + results.Sent + " ]");
-                Console.Write(", Received ");
-                Console.Write("[ " + results.Received + " ]");
-                Console.Write(", Lost ");
-                Console.Write("[ " + results.Lost + " ]");
-                Console.WriteLine(" (" + percent + "% loss)");
-                Console.Write("     Times:");
-                Console.WriteLine(" Minimum [ {0:0.0}ms ], Maximum [ {1:0.0}ms ]", results.MinTime, results.MaxTime);
-                Console.Write("   Packets: Good [ {0} ]", results.GoodPackets);
-                Console.Write(", Errors [ {0} ]", results.ErrorPackets);
-                Console.Write(", Unknown [ {0} ]", results.OtherPackets);
-                Console.WriteLine("Total time: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
+                Console.WriteLine("   General: Sent [ {0} ], Recieved [ {1} ], Lost [ {2} ] ({3}% loss)", results.Sent, results.Received, results.Lost, percent);
+                Console.WriteLine("     Times: Min [ {0:0.0}ms ] Max [ {1:0.0}ms ], Avg [ {2:0.0}ms ]", results.MinTime, results.MaxTime, results.AvgTime);
+                Console.WriteLine("     Types: Good [ {0} ], Errors [ {1} ], Unknown [ {2} ]", results.GoodPackets, results.ErrorPackets, results.OtherPackets);
+                Console.WriteLine("Started at: {0} (local time)", results.StartTime);
+                Console.WriteLine("   Runtime: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
                 Console.WriteLine();
             }
             else
@@ -568,8 +560,8 @@ namespace PowerPing
                 ResetColor();
                 Console.WriteLine(" (" + percent + "% loss)");
                 Console.Write("     Times:");
-                Console.WriteLine(" Shortest [ {0:0.0}ms ], Longest [ {1:0.0}ms ]", results.MinTime, results.MaxTime);
-                Console.Write("   Packets:");
+                Console.WriteLine(" Min [ {0:0.0}ms ], Max [ {1:0.0}ms ], Avg [ {2:0.0}ms ]", results.MinTime, results.MaxTime, results.AvgTime);
+                Console.Write("ICMP Types:");
                 Console.Write(" Good ");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write("[ {0} ]", results.GoodPackets);
@@ -582,7 +574,8 @@ namespace PowerPing
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine("[ {0} ]", results.OtherPackets);
                 ResetColor();
-                Console.WriteLine("Total time: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
+                Console.WriteLine("Started at: {0} (local time)", results.StartTime);
+                Console.WriteLine("   Runtime: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
                 Console.WriteLine();
             }
 
