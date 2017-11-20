@@ -531,17 +531,17 @@ namespace PowerPing
 
             // Display stats
             double percent = (double)results.Lost / results.Sent;
-            percent = Math.Round(percent * 100, 1);
+            percent = Math.Round(percent * 100, 2);
             Console.WriteLine();
             Console.WriteLine("--- Stats for {0} ---", attrs.Address);
 
             if (NoColor)
             {
                 Console.WriteLine("   General: Sent [ {0} ], Recieved [ {1} ], Lost [ {2} ] ({3}% loss)", results.Sent, results.Received, results.Lost, percent);
-                Console.WriteLine("     Times: Min [ {0:0.0}ms ], Max [ {1:0.0}ms ] Avg [ {2:0.0}ms ]", results.MinTime, results.MaxTime, results.AvgTime);
-                Console.WriteLine("   Packets: Good [ {0} ], Errors [ {1} ], Unknown [ {2} ]", results.GoodPackets, results.ErrorPackets, results.OtherPackets);
+                Console.WriteLine("     Times: Min [ {0:0.0}ms ] Max [ {1:0.0}ms ], Avg [ {2:0.0}ms ]", results.MinTime, results.MaxTime, results.AvgTime);
+                Console.WriteLine("     Types: Good [ {0} ], Errors [ {1} ], Unknown [ {2} ]", results.GoodPackets, results.ErrorPackets, results.OtherPackets);
                 Console.WriteLine("Started at: {0} (local time)", results.StartTime);
-                Console.WriteLine("Total time: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
+                Console.WriteLine("   Runtime: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
                 Console.WriteLine();
             }
             else
@@ -560,8 +560,8 @@ namespace PowerPing
                 ResetColor();
                 Console.WriteLine(" (" + percent + "% loss)");
                 Console.Write("     Times:");
-                Console.WriteLine(" Min [ {0:0.0}ms ], Max [ {1:0.0}ms ] Avg [ {2:0.0}ms ]", results.MinTime, results.MaxTime, results.AvgTime);
-                Console.Write("      Type:");
+                Console.WriteLine(" Min [ {0:0.0}ms ], Max [ {1:0.0}ms ], Avg [ {2:0.0}ms ]", results.MinTime, results.MaxTime, results.AvgTime);
+                Console.Write("ICMP Types:");
                 Console.Write(" Good ");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write("[ {0} ]", results.GoodPackets);
@@ -575,7 +575,7 @@ namespace PowerPing
                 Console.WriteLine("[ {0} ]", results.OtherPackets);
                 ResetColor();
                 Console.WriteLine("Started at: {0} (local time)", results.StartTime);
-                Console.WriteLine("Total time: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
+                Console.WriteLine("   Runtime: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
                 Console.WriteLine();
             }
 
