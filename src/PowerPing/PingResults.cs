@@ -12,6 +12,7 @@ namespace PowerPing
     public class PingResults
     {
         // Properties
+        public DateTime StartTime { get; private set; } // Time operatation started at 
         public TimeSpan TotalRunTime { get { return operationTimer.Elapsed; } } // Total ping operation runtime
         public long Sent { get; set; } // Number of sent ping packets
         public long Received { get; set; } // Number of received packets
@@ -42,6 +43,9 @@ namespace PowerPing
             ErrorPackets = 0;
             GoodPackets = 0;
             OtherPackets = 0;
+
+            // Get local start time
+            StartTime = DateTime.Now;
 
             // Start timing operation
             operationTimer.Start();

@@ -540,6 +540,7 @@ namespace PowerPing
                 Console.WriteLine("   General: Sent [ {0} ], Recieved [ {1} ], Lost [ {2} ] ({3}% loss)", results.Sent, results.Received, results.Lost, percent);
                 Console.WriteLine("     Times: Min [ {0:0.0}ms ], Max [ {1:0.0}ms ] Avg [ {2:0.0}ms ]", results.MinTime, results.MaxTime, results.Avg);
                 Console.WriteLine("   Packets: Good [ {0} ], Errors [ {1} ], Unknown [ {2} ]", results.GoodPackets, results.ErrorPackets, results.OtherPackets);
+                Console.WriteLine("Started at: {0} (local time)", results.StartTime);
                 Console.WriteLine("Total time: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
                 Console.WriteLine();
             }
@@ -573,6 +574,7 @@ namespace PowerPing
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine("[ {0} ]", results.OtherPackets);
                 ResetColor();
+                Console.WriteLine("Started at: {0} (local time)", results.StartTime);
                 Console.WriteLine("Total time: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
                 Console.WriteLine();
             }
