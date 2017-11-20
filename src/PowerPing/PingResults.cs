@@ -12,7 +12,7 @@ namespace PowerPing
     public class PingResults
     {
         // Properties
-        public DateTime StartTime { get; private set; } // Time operatation started at 
+        public DateTime StartTime { get; private set; } // Time operation started at 
         public TimeSpan TotalRunTime { get { return operationTimer.Elapsed; } } // Total ping operation runtime
         public long Sent { get; set; } // Number of sent ping packets
         public long Received { get; set; } // Number of received packets
@@ -68,7 +68,7 @@ namespace PowerPing
 
             // Work out average
             sum += time;
-            AvgTime = sum / Received; // Avg = Total / Count
+            AvgTime = (double) sum / Received; // Avg = Total / Count
 
             CurTime = time;
         }
