@@ -537,18 +537,9 @@ namespace PowerPing
 
             if (NoColor)
             {
-                Console.Write("   General: Sent ");
-                Console.Write("[ " + results.Sent + " ]");
-                Console.Write(", Received ");
-                Console.Write("[ " + results.Received + " ]");
-                Console.Write(", Lost ");
-                Console.Write("[ " + results.Lost + " ]");
-                Console.WriteLine(" (" + percent + "% loss)");
-                Console.Write("     Times:");
-                Console.WriteLine(" Minimum [ {0:0.0}ms ], Maximum [ {1:0.0}ms ]", results.MinTime, results.MaxTime);
-                Console.Write("   Packets: Good [ {0} ]", results.GoodPackets);
-                Console.Write(", Errors [ {0} ]", results.ErrorPackets);
-                Console.Write(", Unknown [ {0} ]", results.OtherPackets);
+                Console.WriteLine("   General: Sent [ {0} ], Recieved [ {1} ], Lost [ {2} ] ({3}% loss)", results.Sent, results.Received, results.Lost, percent);
+                Console.WriteLine("     Times: Min [ {0:0.0}ms ], Max [ {1:0.0}ms ] Avg [ {2:0.0}ms ]", results.MinTime, results.MaxTime, results.Avg);
+                Console.WriteLine("   Packets: Good [ {0} ], Errors [ {1} ], Unknown [ {2} ]", results.GoodPackets, results.ErrorPackets, results.OtherPackets);
                 Console.WriteLine("Total time: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
                 Console.WriteLine();
             }
@@ -568,8 +559,8 @@ namespace PowerPing
                 ResetColor();
                 Console.WriteLine(" (" + percent + "% loss)");
                 Console.Write("     Times:");
-                Console.WriteLine(" Shortest [ {0:0.0}ms ], Longest [ {1:0.0}ms ]", results.MinTime, results.MaxTime);
-                Console.Write("   Packets:");
+                Console.WriteLine(" Min [ {0:0.0}ms ], Max [ {1:0.0}ms ] Avg [ {2:0.0}ms ]", results.MinTime, results.MaxTime, results.Avg);
+                Console.Write("      Type:");
                 Console.Write(" Good ");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write("[ {0} ]", results.GoodPackets);

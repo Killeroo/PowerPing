@@ -347,9 +347,10 @@ namespace PowerPing
                         PowerPing.Display.ReplyPacket(response, ep.ToString(), index, responseTimer.Elapsed, bytesRead);
 
                     // Store response info
+                    Results.Received++;
                     Results.SetPacketType(response.type);
                     Results.SetCurResponseTime(responseTimer.Elapsed.TotalMilliseconds);
-                    Results.Received++;
+                    
                 }
                 catch (IOException)
                 {
