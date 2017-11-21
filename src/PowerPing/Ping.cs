@@ -350,6 +350,10 @@ namespace PowerPing
                     Results.Received++;
                     Results.SetPacketType(response.type);
                     Results.SetCurResponseTime(responseTimer.Elapsed.TotalMilliseconds);
+
+                    // Beep if specified
+		    if (attrs.BeepLevel == 1)
+		       Console.Beep();
                     
                 }
                 catch (IOException)
@@ -363,6 +367,10 @@ namespace PowerPing
                 {
                     if (ShowOutput)
                         PowerPing.Display.PingTimeout(index);
+		    
+		    if (attrs.BeepLevel == 2)
+		       Console.Beep();
+		       
                     Results.SetCurResponseTime(-1);
                     Results.Lost++;
                 }

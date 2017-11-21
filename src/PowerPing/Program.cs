@@ -76,6 +76,14 @@ namespace PowerPing
                             Display.Version(true);
                             Environment.Exit(0);
                             break;
+			case "/beep":
+			case "-beep":
+			case "--beep":
+			case "/b":
+			case "-b":
+			case "--b":
+			     
+			     break;
                         case "/count":
                         case "-count":
                         case "--count":
