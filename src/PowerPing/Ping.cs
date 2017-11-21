@@ -352,7 +352,7 @@ namespace PowerPing
                     Results.SetCurResponseTime(responseTimer.Elapsed.TotalMilliseconds);
 
                     // Beep if specified
-		    if (attrs.BeepLevel == 1)
+		    if (attrs.BeepLevel == 2)
 		       Console.Beep();
                     
                 }
@@ -368,7 +368,7 @@ namespace PowerPing
                     if (ShowOutput)
                         PowerPing.Display.PingTimeout(index);
 		    
-		    if (attrs.BeepLevel == 2)
+		    if (attrs.BeepLevel == 1)
 		       Console.Beep();
 		       
                     Results.SetCurResponseTime(-1);

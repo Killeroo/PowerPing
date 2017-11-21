@@ -135,7 +135,8 @@ namespace PowerPing
             sb.AppendLine("Usage: PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] |");
             sb.AppendLine("                 [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--m \"text\"]");
             sb.AppendLine("                 [--i TTL] [--in interval] [--pt type] [--pc code] [--dm]");
-            sb.AppendLine("                 [--4] [--short] [--nocolor] [--ts] [--ti timing] target_name");
+            sb.AppendLine("                 [--4] [--short] [--nocolor] [--ts] [--ti timing] [--b level]");
+	    sb.AppendLine("                 target_name");
             sb.AppendLine();
             sb.AppendLine("Options:");
             sb.AppendLine(" --help       [--?]            Displays this help message");
@@ -150,6 +151,7 @@ namespace PowerPing
             sb.AppendLine(" --nocolor    [--nc]           No colour");
             sb.AppendLine(" --noinput    [--ni]           Require no user input");
             sb.AppendLine(" --timestamp  [--ts]           Display timestamp");
+	    sb.AppendLine(" --beep       [--b]   number   Beep on timeout (1) or on reply (2)
             sb.AppendLine(" --decimals   [--dp]  number   Num of decimal places to use (0 to 3)");
             sb.AppendLine(" --count      [--c]   number   Number of pings to send");
             sb.AppendLine(" --timeout    [--w]   number   Time to wait for reply (in milliseconds)");

@@ -19,7 +19,7 @@ namespace PowerPing
         public bool Continous { get; set; } // Continously send pings
         public bool ForceV4 { get; set; } // Force use of IPv4
         public bool ForceV6 { get; set; } // Force use of IPv6
-	public int BeepLevel { get; set; } // Beep level - 1 for beep on reply, 2 for beep on timeout, 0 for no beep
+	public int BeepLevel { get; set; } // Beep level - 1 to beep on timeout, 2 for beep on reply, 0 for no beep
         public string[] AddressList { get; set; } // Optional attribute: Used when scanning, stores addresses to ping
 
         public PingAttributes()

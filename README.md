@@ -28,7 +28,8 @@ PowerPing contains the following features (with more to come...):
 ## Usage: 
      PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] | [--sc] | [--fl] | 
                [--t] [--c count] [--w timeout] [--m message] [--i TTL] [--in interval] 
-               [--pt type] [--pc code] [--dm] [--4] [--sh] [--nc] [--ts] [--ti timing] target_name
+               [--pt type] [--pc code] [--dm] [--4] [--sh] [--nc] [--ts] [--ti timing]
+	       [--b level] target_name
 
 ## Arguments:
      Options:
@@ -42,6 +43,7 @@ PowerPing contains the following features (with more to come...):
      --nocolor    [--nc]           No colour
      --noinput    [--ni]           Require no user input
      --timestamp  [--ts]           Display timestamp
+     --beep       [--b]   number   Beep on timeout (1) or on reply (2)
      --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
      --count      [--c]   number   Number of pings to send
      --timeout    [--w]   number   Time to wait for reply (in milliseconds)
