@@ -1,6 +1,6 @@
 # PowerPing - Advanced Windows Ping 
 
-[![version](https://img.shields.io/badge/version-1.2.0-brightgreen.svg)]() ![maintained](https://img.shields.io/maintenance/yes/2017.svg) [![Build status](https://ci.appveyor.com/api/projects/status/fq7jnpmlejm7jych?svg=true)](https://ci.appveyor.com/project/Killeroo/powerping)
+[![](https://img.shields.io/badge/version-1.2.0-brightgreen.svg)]() ![](https://img.shields.io/maintenance/yes/2017.svg) [![Build status](https://ci.appveyor.com/api/projects/status/fq7jnpmlejm7jych?svg=true)](https://ci.appveyor.com/project/Killeroo/powerping)
 
 Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
 
@@ -18,9 +18,9 @@ PowerPing contains the following features (with more to come...):
 - [x] [packet customisation](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol#Control_messages)
 - [x] [scanning](https://en.wikipedia.org/wiki/Ping_sweep)
 - [x] [flooding](https://en.wikipedia.org/wiki/Ping_flood)
-- [x] [packet capture (listening)](docs/screenshots/readme_screenshot3.png)
-- [x] [location lookup](docs/screenshots/readme_screenshot4.png)
-- [x] [graphing](docs/screenshots/readme_screenshot2.png)
+- [x] [packet capture (listening)](docs/screenshots/screenshot3.png)
+- [x] [location lookup](docs/screenshots/screenshot4.png)
+- [x] [graphing](docs/screenshots/screenshot2.png)
 - [ ] [traceroute](https://en.wikipedia.org/wiki/Traceroute)
 - [ ] [tunnelling](https://en.wikipedia.org/wiki/ICMP_tunnel)
 - [ ] [IPv6/icmpv6](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_version_6)
