@@ -76,14 +76,17 @@ namespace PowerPing
                             Display.Version(true);
                             Environment.Exit(0);
                             break;
-			case "/beep":
-			case "-beep":
-			case "--beep":
-			case "/b":
-			case "-b":
-			case "--b":
-			     
-			     break;
+			            case "/beep":
+			            case "-beep":
+			            case "--beep":
+			            case "/b":
+			            case "-b":
+			            case "--b":
+                            int level = Convert.ToInt32(args[count + 1]);
+                            if (level > 2)
+                                PowerPing.Display.Error("Invalid beep level, please use a number between 0 & 2", true, true);
+                            attributes.BeepLevel = level;
+			                break;
                         case "/count":
                         case "-count":
                         case "--count":

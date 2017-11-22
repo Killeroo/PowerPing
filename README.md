@@ -29,7 +29,7 @@ PowerPing contains the following features (with more to come...):
      PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] | [--sc] | [--fl] | 
                [--t] [--c count] [--w timeout] [--m message] [--i TTL] [--in interval] 
                [--pt type] [--pc code] [--dm] [--4] [--sh] [--nc] [--ts] [--ti timing]
-	       [--b level] target_name
+			   [--b level] target_name
 
 ## Arguments:
      Options:
