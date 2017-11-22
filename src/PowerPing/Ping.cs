@@ -332,7 +332,8 @@ namespace PowerPing
                     // Send ping request
                     sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
                     responseTimer.Start();
-                    Results.Sent++;
+                    try { checked { Results.Sent++; } }
+                    catch (OverflowException) { Results.HasOverflowed = true; }
 
                     // Wait for response
                     byte[] buffer = new byte[5096];
@@ -347,7 +348,8 @@ namespace PowerPing
                         PowerPing.Display.ReplyPacket(response, ep.ToString(), index, responseTimer.Elapsed, bytesRead);
 
                     // Store response info
-                    Results.Received++;
+                    try { checked { Results.Received++; } }
+                    catch (OverflowException) { Results.HasOverflowed = true; }
                     Results.SetPacketType(response.type);
                     Results.SetCurResponseTime(responseTimer.Elapsed.TotalMilliseconds);
                     
@@ -360,8 +362,11 @@ namespace PowerPing
                 {
                     if (ShowOutput)
                         PowerPing.Display.Error("General transmit error");
+
                     Results.SetCurResponseTime(-1);
-                    Results.Lost++;
+
+                    try { checked { Results.Lost++; } }
+                    catch (OverflowException) { Results.HasOverflowed = true; }
                 }
                 catch (SocketException)
                 {
@@ -370,17 +375,22 @@ namespace PowerPing
 		    
 		            if (attrs.BeepLevel == 1)
                         try { Console.Beep(); }
-                        catch (Exception) { }
+                        catch (Exception) { Results.HasOverflowed = true; }
 
                     Results.SetCurResponseTime(-1);
-                    Results.Lost++;
+
+                    try { checked { Results.Lost++; } }
+                    catch (OverflowException) { Results.HasOverflowed = true; }
                 }
                 catch (Exception)
                 {
                     if (ShowOutput)
                         PowerPing.Display.Error("General error occured");
+
                     Results.SetCurResponseTime(-1);
-                    Results.Lost++;
+
+                    try { checked { Results.Lost++; } }
+                    catch (OverflowException) { Results.HasOverflowed = true; }
                 }
                 finally
                 {

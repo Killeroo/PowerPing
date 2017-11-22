@@ -581,6 +581,14 @@ namespace PowerPing
                 Console.WriteLine();
             }
 
+            if (results.HasOverflowed)
+            {
+                Console.WriteLine("SIDENOTE: I don't know how you've done it but you have caused an overflow somewhere in these ping results.");
+                Console.WriteLine("Just to put that into perspective you would have to be running a normal ping program with default settings for 584,942,417,355 YEARS to achieve this!");
+                Console.WriteLine("Well done brave soul, I don't know your motive but I salute you =^-^=");
+                Console.WriteLine();
+            }
+
             if (!NoInput)
                 // Confirm to exit
                 PowerPing.Helper.Pause(true);
