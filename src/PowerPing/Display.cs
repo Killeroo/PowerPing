@@ -88,7 +88,7 @@ namespace PowerPing
         private static CursorPosition perComplPos = new CursorPosition(0, 0);
 
         // Used to work out pings per second during ping flooding
-        private static long sentPings = 0; 
+        private static ulong sentPings = 0; 
 
         /// <summary>
         /// Displays current version number and build date
