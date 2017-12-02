@@ -299,7 +299,7 @@ namespace PowerPing
                             case "/r":
                             case "-r":
                             case "--r":
-                                p.ShowRequest = true;
+                                Display.ShowRequest = true;
                                 break;
                             case "/whoami":
                             case "-whoami":

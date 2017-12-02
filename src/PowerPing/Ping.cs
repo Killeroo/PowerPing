@@ -22,9 +22,6 @@ namespace PowerPing
         // Properties
         public PingResults Results { get; private set; } = new PingResults(); // Store current ping results
         public PingAttributes Attributes { get; private set; } = new PingAttributes(); // Stores the current operation's attributes
-        public bool ShowOutput { get; set; } = true;
-        public bool ShowRequest { get; set; } = false;
-        public bool ShowReply { get; set; } = true;
         public bool IsRunning { get; private set; } = false;
         public int Threads { get; set; } = 5;
 
@@ -326,7 +323,7 @@ namespace PowerPing
                 try
                 {
                     // Show ping request
-                    if (ShowRequest)
+                    if (Display.ShowRequests)
                         Display.RequestPacket(packet, attrs.Address, index);
 
                     // Send ping request
@@ -344,7 +341,7 @@ namespace PowerPing
                     ICMP response = new ICMP(buffer, bytesRead);
 
                     // Display reply packet
-                    if (ShowOutput)
+                    if (Display.ShowReplies)
                         PowerPing.Display.ReplyPacket(response, ep.ToString(), index, responseTimer.Elapsed, bytesRead);
 
                     // Store response info

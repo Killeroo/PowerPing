@@ -19,6 +19,8 @@ namespace PowerPing
         public static bool NoInput = false;
         public static bool DisplayMessage = false;
         public static bool TimeStamp = false;
+	public static bool ShowRequests = false;
+	public static bool ShowReplies = true;
         public static int DecimalPlaces = 1;
         public static ConsoleColor DefaultForegroundColor;
         public static ConsoleColor DefaultBackgroundColor;
