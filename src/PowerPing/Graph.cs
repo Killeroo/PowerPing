@@ -40,7 +40,7 @@ namespace PowerPing
             // Setup ping attributes
             graphPingAttrs.Address = Helper.VerifyAddress(address, System.Net.Sockets.AddressFamily.InterNetwork);
             graphPingAttrs.Continous = true;
-            graphPing.ShowOutput = false;
+            Display.ShowMessages = false;
         }
 
         public void Start()

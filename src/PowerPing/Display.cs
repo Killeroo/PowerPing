@@ -19,8 +19,9 @@ namespace PowerPing
         public static bool NoInput = false;
         public static bool DisplayMessage = false;
         public static bool TimeStamp = false;
-	public static bool ShowRequests = false;
-	public static bool ShowReplies = true;
+        public static bool ShowMessages = true;
+	    public static bool ShowRequests = false;
+	    public static bool ShowReplies = true;
         public static int DecimalPlaces = 1;
         public static ConsoleColor DefaultForegroundColor;
         public static ConsoleColor DefaultBackgroundColor;
@@ -320,6 +321,9 @@ namespace PowerPing
         /// </summary>
         public static void RequestPacket(ICMP packet, String address, int index)
         {
+            if (!Display.ShowMessages)
+                return;
+
             // Display with no colour
             if (NoColor)
             {
@@ -377,6 +381,9 @@ namespace PowerPing
         /// <param name="replyTime">Time taken before reply received in milliseconds</param>
         public static void ReplyPacket(ICMP packet, String address, int index, TimeSpan replyTime, int bytesRead)
         {
+            if (!Display.ShowMessages)
+                return;
+
             // Display with no colour
             if (NoColor)
             {
