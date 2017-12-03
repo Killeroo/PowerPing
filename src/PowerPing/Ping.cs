@@ -22,9 +22,6 @@ namespace PowerPing
         // Properties
         public PingResults Results { get; private set; } = new PingResults(); // Store current ping results
         public PingAttributes Attributes { get; private set; } = new PingAttributes(); // Stores the current operation's attributes
-        public bool ShowOutput { get; set; } = true;
-        public bool ShowRequest { get; set; } = false;
-        public bool ShowReply { get; set; } = true;
         public bool IsRunning { get; private set; } = false;
         public int Threads { get; set; } = 5;
 
@@ -44,13 +41,13 @@ namespace PowerPing
             // Lookup address
             Attributes.Address = PowerPing.Helper.VerifyAddress(Attributes.Address, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
-            if (ShowOutput)
+            if (Display.ShowMessages)
                 PowerPing.Display.PingIntroMsg(inputAddress, this);
 
             // Perform ping operation and store results
             this.SendICMP(Attributes);
 
-            if (ShowOutput)
+            if (Display.ShowMessages)
                 PowerPing.Display.PingResults(this);
 
         }
@@ -140,7 +137,7 @@ namespace PowerPing
             attrs.Timeout = 500;
             attrs.Interval = 0;
             attrs.Count = 1;
-            ShowOutput = false;
+            Display.ShowMessages = false;
 
             // Check format of address (for '-'s and disallow multipl '-'s in one segment)
             if (!range.Contains("-"))
@@ -229,7 +226,7 @@ namespace PowerPing
             attrs.Continous = true;
 
             // Disable output for faster speeds
-            p.ShowOutput = false;
+            Display.ShowMessages = false;
 
             // Start flood thread
             var thread = new Thread(() =>
@@ -325,14 +322,15 @@ namespace PowerPing
 
                 try
                 {
-                    // Show ping request
-                    if (ShowRequest)
+                    // Show request packet
+                    if (Display.ShowRequests)
                         Display.RequestPacket(packet, attrs.Address, index);
 
                     // Send ping request
                     sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
                     responseTimer.Start();
-                    Results.Sent++;
+                    try { checked { Results.Sent++; } }
+                    catch (OverflowException) { Results.HasOverflowed = true; }
 
                     // Wait for response
                     byte[] buffer = new byte[5096];
@@ -343,35 +341,53 @@ namespace PowerPing
                     ICMP response = new ICMP(buffer, bytesRead);
 
                     // Display reply packet
-                    if (ShowOutput)
+                    if (Display.ShowReplies)
                         PowerPing.Display.ReplyPacket(response, ep.ToString(), index, responseTimer.Elapsed, bytesRead);
 
                     // Store response info
-                    Results.Received++;
+                    try { checked { Results.Received++; } }
+                    catch (OverflowException) { Results.HasOverflowed = true; }
                     Results.SetPacketType(response.type);
                     Results.SetCurResponseTime(responseTimer.Elapsed.TotalMilliseconds);
+                    
+		            if (attrs.BeepLevel == 2)
+                        try { Console.Beep(); }
+                        catch (Exception) { }
                     
                 }
                 catch (IOException)
                 {
-                    if (ShowOutput)
+                    if (Display.ShowMessages)
                         PowerPing.Display.Error("General transmit error");
+
                     Results.SetCurResponseTime(-1);
-                    Results.Lost++;
+
+                    try { checked { Results.Lost++; } }
+                    catch (OverflowException) { Results.HasOverflowed = true; }
                 }
                 catch (SocketException)
                 {
-                    if (ShowOutput)
+                    if (Display.ShowMessages)
                         PowerPing.Display.PingTimeout(index);
+		    
+		            if (attrs.BeepLevel == 1)
+                        try { Console.Beep(); }
+                        catch (Exception) { Results.HasOverflowed = true; }
+
                     Results.SetCurResponseTime(-1);
-                    Results.Lost++;
+
+                    try { checked { Results.Lost++; } }
+                    catch (OverflowException) { Results.HasOverflowed = true; }
                 }
                 catch (Exception)
                 {
-                    if (ShowOutput)
+                    if (Display.ShowMessages)
                         PowerPing.Display.Error("General error occured");
+
                     Results.SetCurResponseTime(-1);
-                    Results.Lost++;
+
+                    try { checked { Results.Lost++; } }
+                    catch (OverflowException) { Results.HasOverflowed = true; }
                 }
                 finally
                 {

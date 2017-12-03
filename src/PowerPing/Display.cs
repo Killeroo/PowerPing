@@ -19,6 +19,9 @@ namespace PowerPing
         public static bool NoInput = false;
         public static bool DisplayMessage = false;
         public static bool TimeStamp = false;
+        public static bool ShowMessages = true;
+	    public static bool ShowRequests = false;
+	    public static bool ShowReplies = true;
         public static int DecimalPlaces = 1;
         public static ConsoleColor DefaultForegroundColor;
         public static ConsoleColor DefaultBackgroundColor;
@@ -88,7 +91,7 @@ namespace PowerPing
         private static CursorPosition perComplPos = new CursorPosition(0, 0);
 
         // Used to work out pings per second during ping flooding
-        private static long sentPings = 0; 
+        private static ulong sentPings = 0; 
 
         /// <summary>
         /// Displays current version number and build date
@@ -135,7 +138,8 @@ namespace PowerPing
             sb.AppendLine("Usage: PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] |");
             sb.AppendLine("                 [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--m \"text\"]");
             sb.AppendLine("                 [--i TTL] [--in interval] [--pt type] [--pc code] [--dm]");
-            sb.AppendLine("                 [--4] [--short] [--nocolor] [--ts] [--ti timing] target_name");
+            sb.AppendLine("                 [--4] [--short] [--nocolor] [--ts] [--ti timing] [--b level]");
+	        sb.AppendLine("                 target_name");
             sb.AppendLine();
             sb.AppendLine("Options:");
             sb.AppendLine(" --help       [--?]            Displays this help message");
@@ -150,6 +154,7 @@ namespace PowerPing
             sb.AppendLine(" --nocolor    [--nc]           No colour");
             sb.AppendLine(" --noinput    [--ni]           Require no user input");
             sb.AppendLine(" --timestamp  [--ts]           Display timestamp");
+	        sb.AppendLine(" --beep       [--b]   number   Beep on timeout (1) or on reply (2)");
             sb.AppendLine(" --decimals   [--dp]  number   Num of decimal places to use (0 to 3)");
             sb.AppendLine(" --count      [--c]   number   Number of pings to send");
             sb.AppendLine(" --timeout    [--w]   number   Time to wait for reply (in milliseconds)");
@@ -316,6 +321,9 @@ namespace PowerPing
         /// </summary>
         public static void RequestPacket(ICMP packet, String address, int index)
         {
+            if (!Display.ShowMessages)
+                return;
+
             // Display with no colour
             if (NoColor)
             {
@@ -373,6 +381,9 @@ namespace PowerPing
         /// <param name="replyTime">Time taken before reply received in milliseconds</param>
         public static void ReplyPacket(ICMP packet, String address, int index, TimeSpan replyTime, int bytesRead)
         {
+            if (!Display.ShowMessages)
+                return;
+
             // Display with no colour
             if (NoColor)
             {
@@ -576,6 +587,14 @@ namespace PowerPing
                 ResetColor();
                 Console.WriteLine("Started at: {0} (local time)", results.StartTime);
                 Console.WriteLine("   Runtime: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
+                Console.WriteLine();
+            }
+
+            if (results.HasOverflowed)
+            {
+                Console.WriteLine("SIDENOTE: I don't know how you've done it but you have caused an overflow somewhere in these ping results.");
+                Console.WriteLine("Just to put that into perspective you would have to be running a normal ping program with default settings for 584,942,417,355 YEARS to achieve this!");
+                Console.WriteLine("Well done brave soul, I don't know your motive but I salute you =^-^=");
                 Console.WriteLine();
             }
 

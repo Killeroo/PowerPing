@@ -1,6 +1,6 @@
 # PowerPing - Advanced Windows Ping 
 
-[![version](https://img.shields.io/badge/version-1.2.0-brightgreen.svg)]() ![maintained](https://img.shields.io/maintenance/yes/2017.svg) [![Build status](https://ci.appveyor.com/api/projects/status/fq7jnpmlejm7jych?svg=true)](https://ci.appveyor.com/project/Killeroo/powerping)
+[![](https://img.shields.io/badge/version-1.2.0-brightgreen.svg)]() ![](https://img.shields.io/maintenance/yes/2017.svg) [![Build status](https://ci.appveyor.com/api/projects/status/fq7jnpmlejm7jych?svg=true)](https://ci.appveyor.com/project/Killeroo/powerping)
 
 Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
 
@@ -18,9 +18,9 @@ PowerPing contains the following features (with more to come...):
 - [x] [packet customisation](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol#Control_messages)
 - [x] [scanning](https://en.wikipedia.org/wiki/Ping_sweep)
 - [x] [flooding](https://en.wikipedia.org/wiki/Ping_flood)
-- [x] [packet capture (listening)](docs/screenshots/readme_screenshot3.png)
-- [x] [location lookup](docs/screenshots/readme_screenshot4.png)
-- [x] [graphing](docs/screenshots/readme_screenshot2.png)
+- [x] [packet capture (listening)](docs/screenshots/screenshot3.png)
+- [x] [location lookup](docs/screenshots/screenshot4.png)
+- [x] [graphing](docs/screenshots/screenshot2.png)
 - [ ] [traceroute](https://en.wikipedia.org/wiki/Traceroute)
 - [ ] [tunnelling](https://en.wikipedia.org/wiki/ICMP_tunnel)
 - [ ] [IPv6/icmpv6](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_version_6)
@@ -28,7 +28,8 @@ PowerPing contains the following features (with more to come...):
 ## Usage: 
      PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] | [--sc] | [--fl] | 
                [--t] [--c count] [--w timeout] [--m message] [--i TTL] [--in interval] 
-               [--pt type] [--pc code] [--dm] [--4] [--sh] [--nc] [--ts] [--ti timing] target_name
+               [--pt type] [--pc code] [--dm] [--4] [--sh] [--nc] [--ts] [--ti timing]
+			   [--b level] target_name
 
 ## Arguments:
      Options:
@@ -42,6 +43,7 @@ PowerPing contains the following features (with more to come...):
      --nocolor    [--nc]           No colour
      --noinput    [--ni]           Require no user input
      --timestamp  [--ts]           Display timestamp
+     --beep       [--b]   number   Beep on timeout (1) or on reply (2)
      --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
      --count      [--c]   number   Number of pings to send
      --timeout    [--w]   number   Time to wait for reply (in milliseconds)

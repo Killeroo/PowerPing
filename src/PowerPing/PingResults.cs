@@ -14,21 +14,22 @@ namespace PowerPing
         // Properties
         public DateTime StartTime { get; private set; } // Time operation started at 
         public TimeSpan TotalRunTime { get { return operationTimer.Elapsed; } } // Total ping operation runtime
-        public long Sent { get; set; } // Number of sent ping packets
-        public long Received { get; set; } // Number of received packets
-        public long Lost { get; set; }  // Amount of lost packets
+        public ulong Sent { get; set; } // Number of sent ping packets
+        public ulong Received { get; set; } // Number of received packets
+        public ulong Lost { get; set; }  // Amount of lost packets
         public double MaxTime { get; private set; } // Highest ping reply time
         public double MinTime { get; private set; } // Lowest ping reply time
         public double AvgTime { get; private set; } // Average reply time
         public double CurTime { get; private set; } // Most recent packet response time
-        public long ErrorPackets { get; private set; } // Number of Error packet received
-        public long GoodPackets { get; private set; } // Number of good replies received
-        public long OtherPackets { get; private set; } // Number of other packet types received
-        //public static ConcurrentStack<string> ActiveHosts = new ConcurrentStack<string>(); // Stores found hosts during scan
+        public ulong ErrorPackets { get; private set; } // Number of Error packet received
+        public ulong GoodPackets { get; private set; } // Number of good replies received
+        public ulong OtherPackets { get; private set; } // Number of other packet types received
+
+        public bool HasOverflowed { get; set; } = false; // Specifies if any of the results have overflowed
 
         // Local variables
         private Stopwatch operationTimer = new Stopwatch();
-        private long sum  = 0; // Sum off all reply times
+        private ulong sum  = 0; // Sum off all reply times
 
         public PingResults()
         {
@@ -66,20 +67,40 @@ namespace PowerPing
             if (time < MinTime || MinTime == 0)
                 MinTime = time;
 
-            // Work out average
-            sum += (long) time;
-            AvgTime = (double) sum / Received; // Avg = Total / Count
+            try
+            {
+                checked
+                {
+                    // Work out average
+                    sum += (ulong)time;
+                    AvgTime = (double)sum / Received; // Avg = Total / Count
+                }
+            }
+            catch (OverflowException)
+            {
+                HasOverflowed = true;
+            }
 
             CurTime = time;
         }
         public void SetPacketType(int type)
         {
-            if (type == 0)
-                GoodPackets++;
-            else if (type == 3 || type == 4 || type == 5 || type == 11)
-                ErrorPackets++;
-            else
-                OtherPackets++;
+            try
+            {
+                checked
+                {
+                    if (type == 0)
+                        GoodPackets++;
+                    else if (type == 3 || type == 4 || type == 5 || type == 11)
+                        ErrorPackets++;
+                    else
+                        OtherPackets++;
+                }
+            }
+            catch (OverflowException)
+            {
+                HasOverflowed = true;
+            }
         }
     }
 
