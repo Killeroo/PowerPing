@@ -4,7 +4,7 @@
 
 Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
 
-Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/master/build) [[Development Build]](https://github.com/Killeroo/PowerPing/blob/dev/build/PowerPing.exe) [[Github]](https://github.com/Killeroo/PowerPing/releases) [![Download PowerPing](https://sourceforge.net/sflogo.php?type=10&group_id=2900962)](https://sourceforge.net/projects/powerping/files/latest/download)
+Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/master/build) [[Development Build]](https://github.com/Killeroo/PowerPing/blob/dev/build/PowerPing.exe) [[Github]](https://github.com/Killeroo/PowerPing/releases)
 ***
 ![alt text](docs/screenshots/screenshot.png "PowerPing in action")
 
