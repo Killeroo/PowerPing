@@ -3,7 +3,7 @@
  * Written by Matthew Carney [matthewcarney64@gmail.com]
  * ************************************************************************/
 /*
-MIT License
+MIT License - PowerPing 
 
 Copyright (c) 2017 Matthew Carney
 
