@@ -26,13 +26,11 @@ using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 
-/// <summary>
-/// Stores the results of a ping operation
-/// </summary>
-
 namespace PowerPing
 {
-
+    /// <summary>
+    /// Stores the results of a ping operation
+    /// </summary>
     public class PingResults
     {
         // Properties
@@ -48,7 +46,6 @@ namespace PowerPing
         public ulong ErrorPackets { get; private set; } // Number of Error packet received
         public ulong GoodPackets { get; private set; } // Number of good replies received
         public ulong OtherPackets { get; private set; } // Number of other packet types received
-
         public bool HasOverflowed { get; set; } = false; // Specifies if any of the results have overflowed
 
         // Local variables

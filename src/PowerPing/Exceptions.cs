@@ -27,6 +27,7 @@ using System;
 namespace PowerPing
 {
     // Custom exceptions
+    // (used in arguments parsing)
     public class ArgumentFormatException : Exception { }
     public class MissingArgumentException : Exception { }
 }

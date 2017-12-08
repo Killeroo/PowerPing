@@ -28,13 +28,12 @@ using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 
-/// <summary>
-///  Responsible for displaying ping results, information and other output (designed for console) 
-/// </summary>
-
 namespace PowerPing
 {
-
+    /// <summary>
+    /// Display class, responsible for displaying all output from PowerPing
+    /// (except for graph output) designed for console output (and also stdio)
+    /// </summary>
     class Display
     {
         // Properties

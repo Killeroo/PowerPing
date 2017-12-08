@@ -22,13 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/// <summary>
-/// Stores ping attributes
-/// </summary>
-
 namespace PowerPing
 {
 
+    /// <summary>
+    /// Stores attributes of a ping operation
+    /// </summary>
     public class PingAttributes
     {
         // Properties

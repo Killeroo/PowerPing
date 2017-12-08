@@ -31,12 +31,11 @@ using System.Net.Sockets;
 using System.IO;
 using System.Reflection;
 
-/// <summary>
-/// Class for miscellaneous methods 
-/// </summary>
-
 namespace PowerPing
 {
+    /// <summary>
+    /// Class for miscellaneous methods 
+    /// </summary>
     public static class Helper
     {
         /// <summary>

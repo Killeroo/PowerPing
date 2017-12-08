@@ -24,13 +24,11 @@ SOFTWARE.
 
 using System;
 
-/// <summary>
-/// For creating Internet Control Message Protocol (ICMP) ping packet objects 
-/// </summary>
-
 namespace PowerPing
 {
-
+    /// <summary>
+    /// ICMP class, for creating Internet Control Message Protocol (ICMP) packet objects 
+    /// </summary>
     class ICMP
     {
         // Packet attributes

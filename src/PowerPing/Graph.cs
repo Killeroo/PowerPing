@@ -29,6 +29,10 @@ using System.Threading.Tasks;
 
 namespace PowerPing
 {
+    /// <summary>
+    /// Graph class, sends pings using Ping.cs and displays on
+    /// console based graph.
+    /// </summary>
     class Graph : IDisposable
     {
         // Constants
