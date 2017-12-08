@@ -15,14 +15,14 @@ PowerPing contains the following features (with more to come...):
 - [x] Basic ping functionality
 - [x] Coloured output
 - [x] Display options
-- [x] [packet customisation](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol#Control_messages)
-- [x] [scanning](https://en.wikipedia.org/wiki/Ping_sweep)
-- [x] [flooding](https://en.wikipedia.org/wiki/Ping_flood)
-- [x] [packet capture (listening)](docs/screenshots/screenshot3.png)
-- [x] [location lookup](docs/screenshots/screenshot4.png)
-- [x] [graphing](docs/screenshots/screenshot2.png)
-- [ ] [traceroute](https://en.wikipedia.org/wiki/Traceroute)
-- [ ] [tunnelling](https://en.wikipedia.org/wiki/ICMP_tunnel)
+- [x] [Packet customisation](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol#Control_messages)
+- [x] [Scanning](https://en.wikipedia.org/wiki/Ping_sweep)
+- [x] [Flooding](https://en.wikipedia.org/wiki/Ping_flood)
+- [x] [Packet capture (listening)](docs/screenshots/screenshot3.png)
+- [x] [Location lookup](docs/screenshots/screenshot4.png)
+- [x] [Graphing](docs/screenshots/screenshot2.png)
+- [ ] [Traceroute](https://en.wikipedia.org/wiki/Traceroute)
+- [ ] [Tunnelling](https://en.wikipedia.org/wiki/ICMP_tunnel)
 - [ ] [IPv6/icmpv6](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_version_6)
 
 ## Usage: 
@@ -43,6 +43,8 @@ PowerPing contains the following features (with more to come...):
      --nocolor    [--nc]           No colour
      --noinput    [--ni]           Require no user input
      --timestamp  [--ts]           Display timestamp
+     --symbols    [--s]            Renders replies and timeouts as ASCII symbols
+     --random     [--rng]          Generates random ICMP message
      --beep       [--b]   number   Beep on timeout (1) or on reply (2)
      --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
      --count      [--c]   number   Number of pings to send

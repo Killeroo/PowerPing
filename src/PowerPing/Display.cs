@@ -182,6 +182,7 @@ namespace PowerPing
             sb.AppendLine(" --noinput    [--ni]           Require no user input");
             sb.AppendLine(" --timestamp  [--ts]           Display timestamp");
             sb.AppendLine(" --symbols    [--s]            Renders replies and timeouts as ASCII symbols");
+            sb.AppendLine(" --random     [--rng]          Generates random ICMP message");
 	        sb.AppendLine(" --beep       [--b]   number   Beep on timeout (1) or on reply (2)");
             sb.AppendLine(" --decimals   [--dp]  number   Num of decimal places to use (0 to 3)");
             sb.AppendLine(" --count      [--c]   number   Number of pings to send");

@@ -23,13 +23,13 @@ SOFTWARE.
 */
 
 using System;
-using System.Collections;
 using System.Xml;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.IO;
 using System.Reflection;
+using System.Linq;
 
 namespace PowerPing
 {
@@ -185,8 +185,30 @@ namespace PowerPing
             return value > left && value < right;
         }
 
-        // Extension method for determining build time
-        // Source: http://stackoverflow.com/a/1600990
+        /// <summary>
+        /// Source: https://stackoverflow.com/a/1344242
+        /// </summary>
+        /// <param name="attrs"></param>
+        /// <returns></returns>
+        // Ref attrs?
+        public static PingAttributes RandomiseMessage(PingAttributes attrs)
+        {
+            Random rand = new Random();
+            string chars = "./,-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+            attrs.Message = new string(Enumerable.Repeat(chars, 11)
+                .Select(s => s[rand.Next(s.Length)]).ToArray());
+
+            return attrs;
+        }
+
+        /// <summary>
+        /// Extension method for determining build time
+        /// Source: http://stackoverflow.com/a/1600990
+        /// </summary>
+        /// <param name="assembly"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
         public static DateTime GetLinkerTime(this Assembly assembly, TimeZoneInfo target = null)
         {
             var filePath = assembly.Location;

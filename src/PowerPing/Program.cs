@@ -251,6 +251,14 @@ namespace PowerPing
                             case "--s":
                                 Display.UseSymbols = true;
                                 break;
+                            case "/random":
+                            case "-random":
+                            case "--random":
+                            case "/rng":
+                            case "-rng":
+                            case "--rng":
+                                attributes = Helper.RandomiseMessage(attributes);
+                                break;
                             case "/timestamp":
                             case "-timestamp":
                             case "--timestamp":
