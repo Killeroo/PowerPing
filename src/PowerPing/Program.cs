@@ -3,7 +3,7 @@
  * Written by Matthew Carney [matthewcarney64@gmail.com]
  * ************************************************************************/
 /*
-MIT License
+MIT License - PowerPing 
 
 Copyright (c) 2017 Matthew Carney
 
@@ -36,6 +36,11 @@ namespace PowerPing
         private static Ping p = new Ping();
         private static Graph g = null;
 
+        /// <summary>
+        /// Main entry point of PowerPing
+        /// Parses arguments and runs operations
+        /// </summary>
+        /// <param name="args">Program arguments</param>
         static void Main(string[] args)
         {
             // Local variables 
@@ -457,7 +462,13 @@ namespace PowerPing
            
         }
 
-        protected static void ExitHandler(object sender, ConsoleCancelEventArgs args) // Event handler for control - c
+        /// <summary>
+        /// Runs when Exit or Cancel event fires (normally when Ctrl-C)
+        /// is pressed. Used to clean up and stop operations when exiting
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        protected static void ExitHandler(object sender, ConsoleCancelEventArgs args)
         {
             // Cancel termination
             args.Cancel = true;

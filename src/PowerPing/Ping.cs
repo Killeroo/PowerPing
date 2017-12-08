@@ -1,4 +1,28 @@
-﻿using System;
+﻿/*
+MIT License - PowerPing 
+
+Copyright (c) 2017 Matthew Carney
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+using System;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net;
@@ -10,13 +34,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 
-/// <summary>
-/// For constructing and sending ping ping packets
-/// </summary>
-
 namespace PowerPing
 {
-
+    /// <summary>
+    /// Ping Class, used for constructing and sending ICMP packets.
+    /// Also contains other ping-like functions such as flooding, listening
+    /// scanning and others.
+    /// </summary>
     class Ping : IDisposable
     {
         // Properties
@@ -30,7 +54,11 @@ namespace PowerPing
         public Ping() { }
 
         /// <summary>
-        /// Sends a set of ping packets
+        /// Sends a set of ping packets, results are stores within
+        /// Ping.Results of the called object
+        ///
+        /// Acts as a basic wrapper to SendICMP and feeds it a specific
+        /// set of PingAttributes 
         /// </summary>
         public void Send(PingAttributes attrs)
         {
@@ -52,7 +80,11 @@ namespace PowerPing
 
         }
         /// <summary>
-        /// Listen for an ICMPv4 packets
+        /// Listens for all ICMPv4 activity on localhost.
+        ///
+        /// Does this by setting a raw socket to SV_IO_ALL which
+        /// will recieve all packets and filters to just show
+        /// ICMP packets. Runs until ctrl-c or exit
         /// </summary>
         public void Listen()
         {
@@ -66,8 +98,6 @@ namespace PowerPing
                     localAddress = ip;
 
             IsRunning = true;
-
-            
             try
             {
                 // Create listener socket
@@ -119,9 +149,15 @@ namespace PowerPing
         /// </summary>
         public void Trace() { }
         /// <summary>
-        /// Network scan method 
+        /// Network scanning method.
+        ///
+        /// Uses pings to scan a IP address range and identify hosts
+        /// that are active.
+        ///
+        /// range should be in format 192.0.0.1-255, where - denotes the range
+        /// This can be specified at any octlet of the address (192.0.1-100.1.255)
         /// </summary>
-        /// <param name="range"></param>
+        /// <param name="range">Range of addresses to scan</param>
         public void Scan(string range, bool recursing = false)
         {
             List<string> scanList = new List<string>(); // List of addresses to scan
@@ -208,7 +244,7 @@ namespace PowerPing
             PowerPing.Display.EndScanResults(scanList.Count, activeHosts, activeHostTimes);
         }
         /// <summary>
-        /// ICMP flood
+        /// Sends high volume of ping packets
         /// </summary>
         public void Flood(string address)
         {
@@ -258,6 +294,19 @@ namespace PowerPing
             
         }
 
+        /// <summary>
+        /// Creates a raw socket for ping operations.
+        ///
+        /// We have to use raw sockets here as we are using our own 
+        /// implementation of ICMP and only raw sockets will allow us
+        /// to send whatever data we want through it.
+        /// 
+        /// The downside is this is why we need to run as administrator
+        /// but it allows us the greater degree of control over the packets
+        /// that we need
+        /// </summary>
+        /// <param name="family">AddressFamily to use (IP4 or IP6)</param>
+        /// <returns>A raw socket</returns>
         private Socket CreateRawSocket(AddressFamily family)
         {
             Socket s = null;
@@ -271,6 +320,24 @@ namespace PowerPing
             }
             return s;
         }
+        /// <summary>
+        /// Core ICMP sending method (used by all other functions)
+        /// Takes a set of attributes, performs operation and returns a set of results.
+        ///
+        /// Works specifically by creating a raw socket, creating a ICMP object and
+        /// other socket properties (timeouts, interval etc) using the 
+        /// inputted properties (attrs), then performs ICMP operation 
+        /// before cleaning up and returning results.
+        ///
+        /// NOTE: There is a weird hack here, PingAttributes used are 
+        /// the parameter to the argument as opposed to the ones stored
+        /// in this classes Ping.Attributes (similar case with PingResults).
+        /// This is due to some functions (flood, scan) requiring to be run on seperate threads
+        /// and needing us to pass specific attributes directly to the object
+        /// trust me it works (I think..)
+        /// </summary>
+        /// <param name="attrs">Properties of pings to be sent</param>
+        /// <returns>Set of ping results</returns>
         private PingResults SendICMP(PingAttributes attrs)
         {
             IPEndPoint iep = null;
