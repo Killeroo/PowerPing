@@ -238,6 +238,14 @@ namespace PowerPing
                                     throw new ArgumentFormatException();
                                 Display.DecimalPlaces = Convert.ToInt32(args[count + 1]);
                                 break;
+                            case "/symbols":
+                            case "-symbols":
+                            case "--symbols":
+                            case "/s":
+                            case "-s":
+                            case "--s":
+                                Display.UseSymbols = true;
+                                break;
                             case "/timestamp":
                             case "-timestamp":
                             case "--timestamp":

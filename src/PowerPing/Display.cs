@@ -19,12 +19,16 @@ namespace PowerPing
         public static bool NoInput = false;
         public static bool DisplayMessage = false;
         public static bool TimeStamp = false;
+        public static bool UseSymbols = false;
         public static bool ShowMessages = true;
 	    public static bool ShowRequests = false;
 	    public static bool ShowReplies = true;
         public static int DecimalPlaces = 1;
         public static ConsoleColor DefaultForegroundColor;
         public static ConsoleColor DefaultBackgroundColor;
+
+        const string REPLY_SYMBOL = ".";
+        const string TIMEOUT_SYMBOL = "!";
 
         // Stores console cursor position, used for updating text at position
         private struct CursorPosition 
@@ -154,6 +158,7 @@ namespace PowerPing
             sb.AppendLine(" --nocolor    [--nc]           No colour");
             sb.AppendLine(" --noinput    [--ni]           Require no user input");
             sb.AppendLine(" --timestamp  [--ts]           Display timestamp");
+            sb.AppendLine(" --symbols    [--s]            Renders replies and timeouts as ASCII symbols");
 	        sb.AppendLine(" --beep       [--b]   number   Beep on timeout (1) or on reply (2)");
             sb.AppendLine(" --decimals   [--dp]  number   Num of decimal places to use (0 to 3)");
             sb.AppendLine(" --count      [--c]   number   Number of pings to send");
@@ -383,6 +388,21 @@ namespace PowerPing
         {
             if (!Display.ShowMessages)
                 return;
+
+            if (UseSymbols)
+            {
+                if (packet.type == 0x00)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write(REPLY_SYMBOL);
+                    ResetColor();
+                }
+                else
+                {
+                    PingTimeout(0);
+                }
+                return;
+            }
 
             // Display with no colour
             if (NoColor)
@@ -674,6 +694,17 @@ namespace PowerPing
         /// </summary>
         public static void PingTimeout(int seq)
         {
+            if (!Display.ShowMessages)
+                return;
+
+            if (UseSymbols)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write(TIMEOUT_SYMBOL);
+                ResetColor();
+                return;
+            }
+
             Console.BackgroundColor = ConsoleColor.DarkRed;
             Console.Write("Request timed out. seq={0} ", seq);
 
