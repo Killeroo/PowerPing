@@ -277,7 +277,7 @@ namespace PowerPing
             while (IsRunning)
             {
                 // Update results text
-                Display.FloodProgress(p.Results);
+                Display.FloodProgress(p.Results, address);
 
                 // Wait before updating (save our CPU load) and check for cancel event
                 if (cancelEvent.WaitOne(1000))

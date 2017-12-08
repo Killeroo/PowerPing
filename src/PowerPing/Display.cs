@@ -649,7 +649,7 @@ namespace PowerPing
         /// Displays and updates results of an ICMP flood
         /// </summary>
         /// <param name="results"></param>
-        public static void FloodProgress(PingResults results)
+        public static void FloodProgress(PingResults results, string target)
         {
             if (sentPos.Left > 0) // Check if labels have already been drawn
             {
@@ -672,7 +672,7 @@ namespace PowerPing
             else 
             {
                 // Draw labels
-                Console.WriteLine("Flooding...");
+                Console.WriteLine("Flooding {0}...", target);
                 //Console.WriteLine("Threads: 1");
                 Console.Write("Sent: ");
                 sentPos.Left = Console.CursorLeft;
