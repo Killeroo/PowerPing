@@ -69,13 +69,13 @@ namespace PowerPing
             // Lookup address
             Attributes.Address = PowerPing.Helper.VerifyAddress(Attributes.Address, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
-            if (Display.ShowMessages)
+            if (Display.ShowOuput)
                 PowerPing.Display.PingIntroMsg(inputAddress, this);
 
             // Perform ping operation and store results
             this.SendICMP(Attributes);
 
-            if (Display.ShowMessages)
+            if (Display.ShowOuput)
                 PowerPing.Display.PingResults(this);
 
         }
@@ -173,7 +173,7 @@ namespace PowerPing
             attrs.Timeout = 500;
             attrs.Interval = 0;
             attrs.Count = 1;
-            Display.ShowMessages = false;
+            Display.ShowOuput = false;
 
             // Check format of address (for '-'s and disallow multipl '-'s in one segment)
             if (!range.Contains("-"))
@@ -262,7 +262,7 @@ namespace PowerPing
             attrs.Continous = true;
 
             // Disable output for faster speeds
-            Display.ShowMessages = false;
+            Display.ShowOuput = false;
 
             // Start flood thread
             var thread = new Thread(() =>
@@ -277,7 +277,7 @@ namespace PowerPing
             while (IsRunning)
             {
                 // Update results text
-                Display.FloodProgress(p.Results);
+                Display.FloodProgress(p.Results, address);
 
                 // Wait before updating (save our CPU load) and check for cancel event
                 if (cancelEvent.WaitOne(1000))
@@ -424,7 +424,7 @@ namespace PowerPing
                 }
                 catch (IOException)
                 {
-                    if (Display.ShowMessages)
+                    if (Display.ShowOuput)
                         PowerPing.Display.Error("General transmit error");
 
                     Results.SetCurResponseTime(-1);
@@ -434,8 +434,8 @@ namespace PowerPing
                 }
                 catch (SocketException)
                 {
-                    if (Display.ShowMessages)
-                        PowerPing.Display.PingTimeout(index);
+                    if (Display.ShowOuput)
+                        PowerPing.Display.Timeout(index);
 		    
 		            if (attrs.BeepLevel == 1)
                         try { Console.Beep(); }
@@ -448,7 +448,7 @@ namespace PowerPing
                 }
                 catch (Exception)
                 {
-                    if (Display.ShowMessages)
+                    if (Display.ShowOuput)
                         PowerPing.Display.Error("General error occured");
 
                     Results.SetCurResponseTime(-1);
