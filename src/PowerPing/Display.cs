@@ -40,11 +40,12 @@ namespace PowerPing
         public static bool Short = false;
         public static bool NoColor = false;
         public static bool NoInput = false;
-        public static bool DisplayMessage = false;
-        public static bool TimeStamp = false;
         public static bool UseSymbols = false;
-        public static bool ShowMessages = true;
-	    public static bool ShowRequests = false;
+        public static bool ShowOuput = true;
+        public static bool ShowMessages = false;
+        public static bool ShowTimeStamp = false;
+        public static bool ShowTimeouts = true;
+        public static bool ShowRequests = false;
 	    public static bool ShowReplies = true;
         public static int DecimalPlaces = 1;
         public static ConsoleColor DefaultForegroundColor;
@@ -163,28 +164,21 @@ namespace PowerPing
             sb.AppendLine("     customization, graphs and result colourization.");
             sb.AppendLine();
             sb.AppendLine("Usage: PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] |");
-            sb.AppendLine("                 [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--m \"text\"]");
-            sb.AppendLine("                 [--i TTL] [--in interval] [--pt type] [--pc code] [--dm]");
-            sb.AppendLine("                 [--4] [--short] [--nocolor] [--ts] [--ti timing] [--b level]");
-	        sb.AppendLine("                 target_name");
+            sb.AppendLine("                 [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--dm]");
+            sb.AppendLine("                 ([--m \"text\"] | [--rng]) [--l num] [--s] [--r] [--dp places]");
+            sb.AppendLine("                 [--i TTL] [--in interval] [--pt type] [--pc code] [--b level]");
+            sb.AppendLine("                 [--4] [--short] [--nocolor] [--ts] [--ti timing] [--nt] target_name");
             sb.AppendLine();
-            sb.AppendLine("Options:");
+            sb.AppendLine("Ping Options:");
             sb.AppendLine(" --help       [--?]            Displays this help message");
             sb.AppendLine(" --version    [--v]            Shows version and build information");
             sb.AppendLine(" --examples   [--ex]           Shows example usage");
             sb.AppendLine(" --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)");
             sb.AppendLine(" --displaymsg [--dm]           Display ICMP messages");
-            sb.AppendLine(" --request    [--r]            Show request packets");
             sb.AppendLine(" --ipv4       [--4]            Force using IPv4");
             //sb.AppendLine("     --6             Force using IPv6");
-            sb.AppendLine(" --shorthand  [--sh]           Show less detailed replies");
-            sb.AppendLine(" --nocolor    [--nc]           No colour");
-            sb.AppendLine(" --noinput    [--ni]           Require no user input");
-            sb.AppendLine(" --timestamp  [--ts]           Display timestamp");
-            sb.AppendLine(" --symbols    [--s]            Renders replies and timeouts as ASCII symbols");
             sb.AppendLine(" --random     [--rng]          Generates random ICMP message");
-	        sb.AppendLine(" --beep       [--b]   number   Beep on timeout (1) or on reply (2)");
-            sb.AppendLine(" --decimals   [--dp]  number   Num of decimal places to use (0 to 3)");
+            sb.AppendLine(" --beep       [--b]   number   Beep on timeout (1) or on reply (2)");
             sb.AppendLine(" --count      [--c]   number   Number of pings to send");
             sb.AppendLine(" --timeout    [--w]   number   Time to wait for reply (in milliseconds)");
             sb.AppendLine(" --ttl        [--i]   number   Time To Live for packet");
@@ -197,6 +191,19 @@ namespace PowerPing
             sb.AppendLine("                                   1 - Sneaky      5 - Speedy");
             sb.AppendLine("                                   2 - Quiet       6 - Insane");
             sb.AppendLine("                                   3 - Polite");
+            sb.AppendLine();
+            sb.AppendLine("Display Options:");
+            sb.AppendLine(" --shorthand  [--sh]           Show less detailed replies");
+            sb.AppendLine(" --timestamp  [--ts]           Display timestamp");
+            sb.AppendLine(" --nocolor    [--nc]           No colour");
+            sb.AppendLine(" --noinput    [--ni]           Require no user input");
+            sb.AppendLine(" --symbols    [--s]            Renders replies and timeouts as ASCII symbols");
+            sb.AppendLine(" --request    [--r]            Show request packets");
+            sb.AppendLine(" --notimeouts [--nt]           Don't display timeout messages");
+            sb.AppendLine(" --limit      [--l]   number   Limits output to just replies (0) or requests (1)");
+            sb.AppendLine(" --decimals   [--dp]  number   Num of decimal places to use (0 to 3)");
+
+
             sb.AppendLine();
             sb.AppendLine("Features:");
             sb.AppendLine(" --scan       [--sc]  address  Network scanning, specify range \"127.0.0.1-55\"");
@@ -350,7 +357,7 @@ namespace PowerPing
         /// </summary>
         public static void RequestPacket(ICMP packet, String address, int index)
         {
-            if (!Display.ShowMessages)
+            if (!Display.ShowOuput)
                 return;
 
             // Display with no colour
@@ -395,7 +402,7 @@ namespace PowerPing
             Console.Write(" code={0}", packet.code);
 
             // Display timestamp
-            if (TimeStamp)
+            if (ShowTimeStamp)
                 Console.Write(" @ {0}", DateTime.Now.ToString("HH:mm:ss"));
 
             Console.WriteLine();
@@ -410,7 +417,7 @@ namespace PowerPing
         /// <param name="replyTime">Time taken before reply received in milliseconds</param>
         public static void ReplyPacket(ICMP packet, String address, int index, TimeSpan replyTime, int bytesRead)
         {
-            if (!Display.ShowMessages)
+            if (!Display.ShowOuput)
                 return;
 
             if (UseSymbols)
@@ -423,7 +430,7 @@ namespace PowerPing
                 }
                 else
                 {
-                    PingTimeout(0);
+                    Timeout(0);
                 }
                 return;
             }
@@ -468,7 +475,7 @@ namespace PowerPing
             ResetColor();
 
             // Display ICMP message (if specified)
-            if (DisplayMessage)
+            if (ShowMessages)
                 Console.Write(" msg=\"{0}\"", new string(Encoding.ASCII.GetString(packet.message).Where(c => !char.IsControl(c)).ToArray()));
 
             // Print coloured time segment
@@ -483,7 +490,7 @@ namespace PowerPing
             ResetColor();
 
             // Display timestamp
-            if (TimeStamp)
+            if (ShowTimeStamp)
                 Console.Write("@ {0}", DateTime.Now.ToString("HH:mm:ss"));
 
             Console.WriteLine();
@@ -716,9 +723,9 @@ namespace PowerPing
         /// <summary>
         /// Display Timeout message
         /// </summary>
-        public static void PingTimeout(int seq)
+        public static void Timeout(int seq)
         {
-            if (!Display.ShowMessages)
+            if (!Display.ShowOuput || !Display.ShowTimeouts)
                 return;
 
             if (UseSymbols)
@@ -733,7 +740,7 @@ namespace PowerPing
             Console.Write("Request timed out. seq={0} ", seq);
 
             // Display timestamp
-            if (TimeStamp)
+            if (ShowTimeStamp)
                 Console.Write("@ {0}", DateTime.Now.ToString("HH:mm:ss"));
 
             // Make double sure we dont get the red line bug

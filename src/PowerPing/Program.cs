@@ -168,7 +168,7 @@ namespace PowerPing
                             case "/dm":
                             case "-dm":
                             case "--dm": // Display packet message
-                                Display.DisplayMessage = true;
+                                Display.ShowMessages = true;
                                 break;
                             case "/ipv4":
                             case "-ipv4":
@@ -259,13 +259,42 @@ namespace PowerPing
                             case "--rng":
                                 attributes = Helper.RandomiseMessage(attributes);
                                 break;
+                            case "/limit":
+                            case "-limit":
+                            case "--limit":
+                            case "/l":
+                            case "-l":
+                            case "--l":
+                                if (Convert.ToInt32(args[count + 1]) == 0)
+                                {
+                                    Display.ShowReplies = true;
+                                    Display.ShowRequests = false;
+                                }
+                                else if (Convert.ToInt32(args[count + 1]) == 1)
+                                {
+                                    Display.ShowReplies = false;
+                                    Display.ShowRequests = true;
+                                }
+                                else
+                                {
+                                    throw new ArgumentFormatException();
+                                }
+                                break;
+                            case "/notimeout":
+                            case "-notimeout":
+                            case "--notimeout":
+                            case "/nt":
+                            case "-nt":
+                            case "--nt":
+                                Display.ShowTimeouts = false;
+                                break;
                             case "/timestamp":
                             case "-timestamp":
                             case "--timestamp":
                             case "/ts":
                             case "-ts":
                             case "--ts": // Display timestamp
-                                Display.TimeStamp = true;
+                                Display.ShowTimeStamp = true;
                                 break;
                             case "/timing":
                             case "-timing":
@@ -388,7 +417,7 @@ namespace PowerPing
             }
             catch (IndexOutOfRangeException)
             {
-                PowerPing.Display.Error("Missing Argument Parameter", false, false, false);
+                PowerPing.Display.Error("Missing argument parameter", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
                 PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for help.");
                 Helper.Pause();
@@ -404,7 +433,7 @@ namespace PowerPing
             }
             catch (ArgumentFormatException)
             {
-                PowerPing.Display.Error("Invalid argument or missing parameter", false, false, false);
+                PowerPing.Display.Error("Invalid argument or incorrect parameter", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
                 PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for help.");
                 Helper.Pause();
