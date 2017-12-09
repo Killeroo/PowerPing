@@ -68,7 +68,7 @@ PowerPing contains the following features (with more to come...):
     Features:
         --scan       [--sc]  address  Network scanning, specify range "127.0.0.1-55"
         --listen     [--li]  address  Listen for ICMP packets
-            --flood      [--fl]  address  Send high volume of pings to address
+        --flood      [--fl]  address  Send high volume of pings to address
         --graph      [--g]   address  Graph view
         --compact    [--cg]  address  Compact graph view
         --location   [--loc] address  Location info for an address
