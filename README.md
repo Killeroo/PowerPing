@@ -60,7 +60,7 @@ PowerPing contains the following features (with more to come...):
         --nocolor    [--nc]           No colour
         --noinput    [--ni]           Require no user input
         --symbols    [--s]            Renders replies and timeouts as ASCII symbols
-        --request    [--r]            Show request packets");
+        --request    [--r]            Show request packets
         --notimeouts [--nt]           Don't display timeout messages
         --limit      [--l]   number   Limits output to just replies (0) or requests (1)
         --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
