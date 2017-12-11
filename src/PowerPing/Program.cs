@@ -351,6 +351,14 @@ namespace PowerPing
                             case "--r":
                                 Display.ShowRequests = true;
                                 break;
+                            case "/quiet":
+                            case "-quiet":
+                            case "--quiet":
+                            case "/q":
+                            case "-q":
+                            case "--q":
+                                Display.ShowOutput = false;
+                                break;
                             case "/whoami":
                             case "-whoami":
                             case "--whoami": // Current computer location

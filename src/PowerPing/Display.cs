@@ -41,7 +41,7 @@ namespace PowerPing
         public static bool NoColor = false;
         public static bool NoInput = false;
         public static bool UseSymbols = false;
-        public static bool ShowOuput = true;
+        public static bool ShowOutput = true;
         public static bool ShowMessages = false;
         public static bool ShowTimeStamp = false;
         public static bool ShowTimeouts = true;
@@ -200,6 +200,7 @@ namespace PowerPing
             sb.AppendLine(" --symbols    [--s]            Renders replies and timeouts as ASCII symbols");
             sb.AppendLine(" --request    [--r]            Show request packets");
             sb.AppendLine(" --notimeouts [--nt]           Don't display timeout messages");
+            sb.AppendLine(" --quiet      [--q]            No output, only shows summary upon completion or exit");
             sb.AppendLine(" --limit      [--l]   number   Limits output to just replies (0) or requests (1)");
             sb.AppendLine(" --decimals   [--dp]  number   Num of decimal places to use (0 to 3)");
 
@@ -357,7 +358,7 @@ namespace PowerPing
         /// </summary>
         public static void RequestPacket(ICMP packet, String address, int index)
         {
-            if (!Display.ShowOuput)
+            if (!Display.ShowOutput)
                 return;
 
             // Display with no colour
@@ -417,7 +418,7 @@ namespace PowerPing
         /// <param name="replyTime">Time taken before reply received in milliseconds</param>
         public static void ReplyPacket(ICMP packet, String address, int index, TimeSpan replyTime, int bytesRead)
         {
-            if (!Display.ShowOuput)
+            if (!Display.ShowOutput)
                 return;
 
             if (UseSymbols)
@@ -725,7 +726,7 @@ namespace PowerPing
         /// </summary>
         public static void Timeout(int seq)
         {
-            if (!Display.ShowOuput || !Display.ShowTimeouts)
+            if (!Display.ShowOutput || !Display.ShowTimeouts)
                 return;
 
             if (UseSymbols)
