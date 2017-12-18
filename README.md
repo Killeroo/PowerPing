@@ -52,7 +52,7 @@ PowerPing contains the following features (with more to come...):
                                             0 - Paranoid    4 - Nimble
                                             1 - Sneaky      5 - Speedy
                                             2 - Quiet       6 - Insane
-                                            3 - Polite");
+                                            3 - Polite
     
     Display Options:
         --shorthand  [--sh]           Show less detailed replies
@@ -62,7 +62,7 @@ PowerPing contains the following features (with more to come...):
         --symbols    [--s]            Renders replies and timeouts as ASCII symbols
         --request    [--r]            Show request packets
         --notimeouts [--nt]           Don't display timeout messages
-	--quiet      [--q]            No output, only shows summary upon completion or exit
+        --quiet      [--q]            No output, only shows summary upon completion or exit
         --limit      [--l]   number   Limits output to just replies (0) or requests (1)
         --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
 
