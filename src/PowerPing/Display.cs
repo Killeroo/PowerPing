@@ -73,40 +73,125 @@ namespace PowerPing
             }
         };
 
-        // ICMP types and colour values
-        private static string[] packetTypes = new string[] {"ECHO REPLY", "UNASSIGNED", "UNASSIGNED", "DESTINATION UNREACHABLE", "SOURCE QUENCH (DEP)", "PING REDIRECT",
-                                                            "ALTERNATE HOST ADDRESS (DEP)", "UNASSIGNED", "ECHO REQUEST", "ROUTER ADVERTISEMENT", "ROUTER SOLICITATION",
-                                                            "TIME EXCEEDED", "PARAMETER PROBLEM", "TIMESTAMP REQUEST", "TIMESTAMP REPLY", "INFORMATION REQUEST (DEP)",
-                                                            "INFORMATION REPLY (DEP)", "ADDRESS MASK REQUEST (DEP)", "ADDRESS MASK REPLY (DEP)", "RESERVED FOR SECURITY",
-                                                            "RESERVED FOR ROBUSTNESS EXPERIMENT", "RESERVED FOR ROBUSTNESS EXPERIMENT", "RESERVED FOR ROBUSTNESS EXPERIMENT",
-                                                            "RESERVED FOR ROBUSTNESS EXPERIMENT", "RESERVED FOR ROBUSTNESS EXPERIMENT", "RESERVED FOR ROBUSTNESS EXPERIMENT",
-                                                            "RESERVED FOR ROBUSTNESS EXPERIMENT", "RESERVED FOR ROBUSTNESS EXPERIMENT", "RESERVED FOR ROBUSTNESS EXPERIMENT",
-                                                            "TRACEROUTE (DEP)", "DATAGRAM CONVERSATION ERROR (DEP)", "MOBILE HOST REDIRECT (DEP)", "IPv6 WHERE-ARE-YOU (DEP)",
-                                                            "IPv6 HERE-I-AM (DEP)", "MOBILE REGISTRATION REQUEST (DEP)", "MOBILE REGISTRATION REPLY (DEP)", "DOMAIN NAME REQUEST (DEP)",
-                                                            "DOMAIN NAME REPLY (DEP)", "SKIP ALGORITHM DISCOVERY PROTOCOL (DEP)", "PHOTURIS PROTOCOL SECURITY FAILURES",
-                                                            "EXPERIMENTAL"};
-        private static ConsoleColor[] typeColors = new ConsoleColor[] { ConsoleColor.DarkGreen, ConsoleColor.Black, ConsoleColor.Black, ConsoleColor.DarkRed, 
-                                                                        ConsoleColor.DarkMagenta, ConsoleColor.DarkBlue, ConsoleColor.DarkMagenta, ConsoleColor.Black,
-                                                                        ConsoleColor.DarkYellow, ConsoleColor.DarkCyan, ConsoleColor.DarkCyan, ConsoleColor.DarkRed,
-                                                                        ConsoleColor.DarkRed, ConsoleColor.DarkBlue, ConsoleColor.DarkBlue,ConsoleColor.DarkMagenta,
-                                                                        ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta, ConsoleColor.White,
-                                                                        ConsoleColor.White, ConsoleColor.White, ConsoleColor.White, ConsoleColor.White,
-                                                                        ConsoleColor.White, ConsoleColor.White, ConsoleColor.White, ConsoleColor.White,
-                                                                        ConsoleColor.White, ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta,
-                                                                        ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta,
-                                                                        ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta, ConsoleColor.DarkMagenta, ConsoleColor.DarkRed,
-                                                                        ConsoleColor.White};
+        // ICMP types
+        private static string[] packetTypes = new string[] {
+            "ECHO REPLY", 
+            "UNASSIGNED [TYPE 2]", 
+            "UNASSIGNED [TYPE 3]", 
+            "DESTINATION UNREACHABLE", 
+            "SOURCE QUENCH (DEP)", 
+            "PING REDIRECT",
+            "ALTERNATE HOST ADDRESS (DEP)", 
+            "UNASSIGNED", "ECHO REQUEST", 
+            "ROUTER ADVERTISEMENT", 
+            "ROUTER SOLICITATION",
+            "TIME EXCEEDED", 
+            "PARAMETER PROBLEM", 
+            "TIMESTAMP REQUEST", 
+            "TIMESTAMP REPLY", 
+            "INFORMATION REQUEST (DEP)",
+            "INFORMATION REPLY (DEP)",
+            "ADDRESS MASK REQUEST (DEP)", 
+            "ADDRESS MASK REPLY (DEP)", 
+            "RESERVED FOR SECURITY",
+            "RESERVED FOR ROBUSTNESS EXPERIMENT", 
+            "RESERVED FOR ROBUSTNESS EXPERIMENT", 
+            "RESERVED FOR ROBUSTNESS EXPERIMENT",
+            "RESERVED FOR ROBUSTNESS EXPERIMENT", 
+            "RESERVED FOR ROBUSTNESS EXPERIMENT", 
+            "RESERVED FOR ROBUSTNESS EXPERIMENT",
+            "RESERVED FOR ROBUSTNESS EXPERIMENT", 
+            "RESERVED FOR ROBUSTNESS EXPERIMENT", 
+            "RESERVED FOR ROBUSTNESS EXPERIMENT",
+            "TRACEROUTE (DEP)", 
+            "DATAGRAM CONVERSATION ERROR (DEP)", 
+            "MOBILE HOST REDIRECT (DEP)", 
+            "IPv6 WHERE-ARE-YOU (DEP)",
+            "IPv6 HERE-I-AM (DEP)", 
+            "MOBILE REGISTRATION REQUEST (DEP)", 
+            "MOBILE REGISTRATION REPLY (DEP)", 
+            "DOMAIN NAME REQUEST (DEP)",
+            "DOMAIN NAME REPLY (DEP)", 
+            "SKIP ALGORITHM DISCOVERY PROTOCOL (DEP)", 
+            "PHOTURIS PROTOCOL SECURITY FAILURES",
+            "EXPERIMENTAL"
+        };
+        // Matching colour values
+        private static ConsoleColor[] typeColors = new ConsoleColor[] { 
+            ConsoleColor.DarkGreen, 
+            ConsoleColor.Black, 
+            ConsoleColor.Black, 
+            ConsoleColor.DarkRed, 
+            ConsoleColor.DarkMagenta, 
+            ConsoleColor.DarkBlue, 
+            ConsoleColor.DarkMagenta, 
+            ConsoleColor.Black,
+            ConsoleColor.DarkYellow, 
+            ConsoleColor.DarkCyan, 
+            ConsoleColor.DarkCyan, 
+            ConsoleColor.DarkRed,
+            ConsoleColor.DarkRed, 
+            ConsoleColor.DarkBlue, 
+            ConsoleColor.DarkBlue,
+            ConsoleColor.DarkMagenta,
+            ConsoleColor.DarkMagenta, 
+            ConsoleColor.DarkMagenta, 
+            ConsoleColor.DarkMagenta, 
+            ConsoleColor.White,
+            ConsoleColor.White, 
+            ConsoleColor.White, 
+            ConsoleColor.White, 
+            ConsoleColor.White,
+            ConsoleColor.White, 
+            ConsoleColor.White, 
+            ConsoleColor.White, 
+            ConsoleColor.White,
+            ConsoleColor.White, 
+            ConsoleColor.DarkMagenta, 
+            ConsoleColor.DarkMagenta, 
+            ConsoleColor.DarkMagenta,
+            ConsoleColor.DarkMagenta, 
+            ConsoleColor.DarkMagenta, 
+            ConsoleColor.DarkMagenta, 
+            ConsoleColor.DarkMagenta,
+            ConsoleColor.DarkMagenta, 
+            ConsoleColor.DarkMagenta, 
+            ConsoleColor.DarkMagenta, 
+            ConsoleColor.DarkRed,
+            ConsoleColor.White
+        };
 
         // Type code values
-        private static string[] destUnreachableCodeValues = new string[] {"Network unreachable", "Host unreachable", "Protocol unreachable",
-                                                                          "Port unreachable", "Fragmentation needed & DF flag set", "Source route failed",
-                                                                          "Destination network unkown", "Destination host unknown", "Source host isolated",
-                                                                          "Communication with destination network prohibited", "Communication with destination network prohibited",
-                                                                          "Network unreachable for ICMP", "Host unreachable for ICMP"};
-        private static string[] redirectCodeValues = new string[] {"Packet redirected for the network", "Packet redirected for the host",
-                                                                   "Packet redirected for the ToS & network", "Packet redirected for the ToS & host"};
-        private static string[] timeExceedCodeValues = new string[] { "TTL expired in transit", "Fragment reassembly time exceeded" };
-        private static string[] badParameterCodeValues = new string[] { "IP header pointer indicates error", "IP header missing an option", "Bad IP header length" };
+        private static string[] destUnreachableCodeValues = new string[] {
+            "Network unreachable", 
+            "Host unreachable", 
+            "Protocol unreachable",
+            "Port unreachable", 
+            "Fragmentation needed & DF flag set", 
+            "Source route failed",
+            "Destination network unkown", 
+            "Destination host unknown", 
+            "Source host isolated",
+            "Communication with destination network prohibited", 
+            "Communication with destination network prohibited",
+            "Network unreachable for ICMP", 
+            "Host unreachable for ICMP"
+        };
+        private static string[] redirectCodeValues = new string[] {
+            "Packet redirected for the network", 
+            "Packet redirected for the host",
+            "Packet redirected for the ToS & network", 
+            "Packet redirected for the ToS & host"
+        };
+        private static string[] timeExceedCodeValues = new string[] { 
+            "TTL expired in transit", 
+            "Fragment reassembly time exceeded" 
+        };
+        private static string[] badParameterCodeValues = new string[] { 
+            "IP header pointer indicates error", 
+            "IP header missing an option", 
+            "Bad IP header length" 
+        };
         private static StringBuilder sb = new StringBuilder();
 
         // Cursor position variables
