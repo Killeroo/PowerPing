@@ -166,36 +166,36 @@ namespace PowerPing
             ConsoleColor.White /* 41 */
         };
 
-        // Type code values
+        // Type specific code values
         private static string[] destUnreachableCodeValues = new string[] {
-            "Network unreachable", 
-            "Host unreachable", 
-            "Protocol unreachable",
-            "Port unreachable", 
-            "Fragmentation needed & DF flag set", 
-            "Source route failed",
-            "Destination network unkown", 
-            "Destination host unknown", 
-            "Source host isolated",
-            "Communication with destination network prohibited", 
-            "Communication with destination network prohibited",
-            "Network unreachable for ICMP", 
-            "Host unreachable for ICMP"
+            "NETWORK UNREACHABLE", 
+            "HOST UNREACHABLE", 
+            "PROTOCOL UNREACHABLE",
+            "PORT UNREACHABLE", 
+            "FRAGMENTATION NEEDED & DF FLAG SET", 
+            "SOURCE ROUTE FAILED",
+            "DESTINATION NETWORK UNKOWN", 
+            "DESTINATION HOST UNKNOWN", 
+            "SOURCE HOST ISOLATED",
+            "COMMUNICATION WITH DESTINATION NETWORK PROHIBITED", 
+            "COMMUNICATION WITH DESTINATION NETWORK PROHIBITED",
+            "NETWORK UNREACHABLE FOR ICMP", 
+            "HOST UNREACHABLE FOR ICMP"
         };
         private static string[] redirectCodeValues = new string[] {
-            "Packet redirected for the network", 
-            "Packet redirected for the host",
-            "Packet redirected for the ToS & network", 
-            "Packet redirected for the ToS & host"
+            "REDIRECT FOR THE NETWORK",
+            "REDIRECT FOR THE HOST",
+            "REDIRECT FOR THE TOS & NETWORK",
+            "REDIRECT FOR THE TOS & HOST"
         };
         private static string[] timeExceedCodeValues = new string[] { 
-            "TTL expired in transit", 
-            "Fragment reassembly time exceeded" 
+            "TTL EXPIRED IN TRANSIT", 
+            "FRAGMENT REASSEMBLY TIME EXCEEDED" 
         };
         private static string[] badParameterCodeValues = new string[] { 
-            "IP header pointer indicates error", 
-            "IP header missing an option", 
-            "Bad IP header length" 
+            "IP HEADER POINTER INDICATES ERROR", 
+            "IP HEADER MISSING AN OPTION", 
+            "BAD IP HEADER LENGTH" 
         };
         private static StringBuilder sb = new StringBuilder();
 
@@ -468,8 +468,8 @@ namespace PowerPing
                 Console.Write("Request to: {0}:0 seq={1} bytes={2} type=", address, index, packet.GetBytes().Length);
 
             // Print coloured type
-            Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
-            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.White : typeColors[packet.type];
+            Console.ForegroundColor = ConsoleColor.Black;
             switch (packet.type) // Display speific type code values
             {
                 case 3:
@@ -485,7 +485,7 @@ namespace PowerPing
                     Console.Write(packet.code > badParameterCodeValues.Length ? packetTypes[packet.type] : badParameterCodeValues[packet.code]);
                     break;
                 default:
-                    Console.Write(packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type]);
+                    Console.Write(packet.type > packetTypes.Length ? "[" + packet.type + "] UNASSIGNED" : packetTypes[packet.type]);
                     break;
             }
             ResetColor();
