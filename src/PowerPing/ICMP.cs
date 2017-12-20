@@ -26,7 +26,6 @@ using System;
 
 namespace PowerPing
 {
-
     /// <summary>
     /// ICMP class, for creating Internet Control Message Protocol (ICMP) packet objects 
     /// </summary>

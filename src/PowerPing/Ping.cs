@@ -36,7 +36,6 @@ using System.IO;
 
 namespace PowerPing
 {
-
     /// <summary>
     /// Ping Class, used for constructing and sending ICMP packets.
     /// Also contains other ping-like functions such as flooding, listening
@@ -319,7 +318,6 @@ namespace PowerPing
             }
             return s;
         }
-
         /// <summary>
         /// Core ICMP sending method (used by all other functions)
         /// Takes a set of attributes, performs operation and returns a set of results.

@@ -11,8 +11,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		PerformanceTests.psess = PerformanceTests.psess
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerPing.Tests", "src\PowerPing.Tests\PowerPing.Tests.csproj", "{5EEAA537-AC11-498E-91AE-ECBCEED91255}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,18 +33,6 @@ Global
 		{11872751-7592-42AE-9E9F-DBA96E1FC2D3}.Release|x64.Build.0 = Release|x64
 		{11872751-7592-42AE-9E9F-DBA96E1FC2D3}.Release|x86.ActiveCfg = Release|x86
 		{11872751-7592-42AE-9E9F-DBA96E1FC2D3}.Release|x86.Build.0 = Release|x86
-		{5EEAA537-AC11-498E-91AE-ECBCEED91255}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5EEAA537-AC11-498E-91AE-ECBCEED91255}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5EEAA537-AC11-498E-91AE-ECBCEED91255}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{5EEAA537-AC11-498E-91AE-ECBCEED91255}.Debug|x64.Build.0 = Debug|Any CPU
-		{5EEAA537-AC11-498E-91AE-ECBCEED91255}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{5EEAA537-AC11-498E-91AE-ECBCEED91255}.Debug|x86.Build.0 = Debug|Any CPU
-		{5EEAA537-AC11-498E-91AE-ECBCEED91255}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5EEAA537-AC11-498E-91AE-ECBCEED91255}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5EEAA537-AC11-498E-91AE-ECBCEED91255}.Release|x64.ActiveCfg = Release|Any CPU
-		{5EEAA537-AC11-498E-91AE-ECBCEED91255}.Release|x64.Build.0 = Release|Any CPU
-		{5EEAA537-AC11-498E-91AE-ECBCEED91255}.Release|x86.ActiveCfg = Release|Any CPU
-		{5EEAA537-AC11-498E-91AE-ECBCEED91255}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
