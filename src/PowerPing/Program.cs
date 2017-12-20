@@ -152,7 +152,10 @@ namespace PowerPing
                             case "/pt":
                             case "-pt":
                             case "--pt": // Ping type
-                                attributes.Type = Convert.ToByte(args[count + 1]);
+                                var type = Convert.ToByte(args[count + 1]);
+                                if (type > 255)
+                                    throw new ArgumentFormatException();
+                                attributes.Type = type;
                                 break;
                             case "/code":
                             case "-code":

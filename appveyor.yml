@@ -1,4 +1,4 @@
-version: 1.2.0.{build}-{branch}
+version: 1.2.1.{build}-{branch}
 
 # Environment setup
 image: Visual Studio 2015
@@ -17,10 +17,9 @@ configuration: Release
 platform:
   - x86
   - x64
-  - Any CPU
 build:
    project: PowerPing.sln
-   verbosity: normal
+   verbosity: minimal
 
 #Artifact/Publishing 
 artifacts:
@@ -28,5 +27,3 @@ artifacts:
     name: PowerPing(x86)
   - path: \build\x64\PowerPing.exe
     name: PowerPing(x64)
-  - path: \build\PowerPing.exe
-    name: PowerPing

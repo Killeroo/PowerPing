@@ -73,92 +73,97 @@ namespace PowerPing
             }
         };
 
-        // ICMP types
+        // ICMP packet types
         private static string[] packetTypes = new string[] {
-            "ECHO REPLY", 
-            "UNASSIGNED [TYPE 2]", 
-            "UNASSIGNED [TYPE 3]", 
-            "DESTINATION UNREACHABLE", 
-            "SOURCE QUENCH (DEP)", 
-            "PING REDIRECT",
-            "ALTERNATE HOST ADDRESS (DEP)", 
-            "UNASSIGNED", "ECHO REQUEST", 
-            "ROUTER ADVERTISEMENT", 
-            "ROUTER SOLICITATION",
-            "TIME EXCEEDED", 
-            "PARAMETER PROBLEM", 
-            "TIMESTAMP REQUEST", 
-            "TIMESTAMP REPLY", 
-            "INFORMATION REQUEST (DEP)",
-            "INFORMATION REPLY (DEP)",
-            "ADDRESS MASK REQUEST (DEP)", 
-            "ADDRESS MASK REPLY (DEP)", 
-            "RESERVED FOR SECURITY",
-            "RESERVED FOR ROBUSTNESS EXPERIMENT", 
-            "RESERVED FOR ROBUSTNESS EXPERIMENT", 
-            "RESERVED FOR ROBUSTNESS EXPERIMENT",
-            "RESERVED FOR ROBUSTNESS EXPERIMENT", 
-            "RESERVED FOR ROBUSTNESS EXPERIMENT", 
-            "RESERVED FOR ROBUSTNESS EXPERIMENT",
-            "RESERVED FOR ROBUSTNESS EXPERIMENT", 
-            "RESERVED FOR ROBUSTNESS EXPERIMENT", 
-            "RESERVED FOR ROBUSTNESS EXPERIMENT",
-            "TRACEROUTE (DEP)", 
-            "DATAGRAM CONVERSATION ERROR (DEP)", 
-            "MOBILE HOST REDIRECT (DEP)", 
-            "IPv6 WHERE-ARE-YOU (DEP)",
-            "IPv6 HERE-I-AM (DEP)", 
-            "MOBILE REGISTRATION REQUEST (DEP)", 
-            "MOBILE REGISTRATION REPLY (DEP)", 
-            "DOMAIN NAME REQUEST (DEP)",
-            "DOMAIN NAME REPLY (DEP)", 
-            "SKIP ALGORITHM DISCOVERY PROTOCOL (DEP)", 
-            "PHOTURIS PROTOCOL SECURITY FAILURES",
-            "EXPERIMENTAL"
+            "ECHO REPLY", /* 0 */
+            "[1] UNASSIGNED [RESV]", /* 1 */ 
+            "[2] UNASSIGNED [RESV]", /* 2 */
+            "DESTINATION UNREACHABLE", /* 3 */
+            "SOURCE QUENCH [DEPR]", /* 4 */
+            "PING REDIRECT", /* 5 */
+            "ALTERNATE HOST ADDRESS [DEPR]", /* 6 */
+            "[7] UNASSIGNED [RESV]", /* 7 */
+            "ECHO REQUEST", /* 8 */
+            "ROUTER ADVERTISEMENT", /* 9 */
+            "ROUTER SOLICITATION", /* 10 */
+            "TIME EXCEEDED", /* 11 */
+            "PARAMETER PROBLEM", /* 12 */
+            "TIMESTAMP REQUEST", /* 13 */
+            "TIMESTAMP REPLY", /* 14 */
+            "INFORMATION REQUEST [DEPR]", /* 15 */
+            "INFORMATION REPLY [DEPR]", /* 16 */
+            "ADDRESS MASK REQUEST [DEPR]", /* 17 */
+            "ADDRESS MASK REPLY [DEPR]", /* 18 */
+            "[19] SECURITY [RESV]", /* 19 */
+            "[20] ROBUSTNESS EXPERIMENT [RESV]", /* 20 */
+            "[21] ROBUSTNESS EXPERIMENT [RESV]", /* 21 */
+            "[22] ROBUSTNESS EXPERIMENT [RESV]", /* 22 */
+            "[23] ROBUSTNESS EXPERIMENT [RESV]", /* 23 */
+            "[24] ROBUSTNESS EXPERIMENT [RESV]", /* 24 */
+            "[25] ROBUSTNESS EXPERIMENT [RESV]", /* 25 */
+            "[26] ROBUSTNESS EXPERIMENT [RESV]", /* 26 */
+            "[27] ROBUSTNESS EXPERIMENT [RESV]", /* 27 */
+            "[28] ROBUSTNESS EXPERIMENT [RESV]", /* 28 */
+            "[29] ROBUSTNESS EXPERIMENT [RESV]", /* 29 */
+            "TRACEROUTE [DEPR]", /* 30 */
+            "DATAGRAM CONVERSATION ERROR [DEPR]", /* 31 */ 
+            "MOBILE HOST REDIRECT [DEPR]", /* 32 */
+            "WHERE-ARE-YOU [DEPR]", /* 33 */
+            "HERE-I-AM [DEPR]", /* 34 */
+            "MOBILE REGISTRATION REQUEST [DEPR]", /* 35 */ 
+            "MOBILE REGISTRATION REPLY [DEPR]", /* 36 */
+            "DOMAIN NAME REQUEST [DEPR]", /* 37 */
+            "DOMAIN NAME REPLY [DEPR]", /* 38 */
+            "SKIP DISCOVERY PROTOCOL [DEPR]", /* 39 */ 
+            "PHOTURIS PROTOCOL", /* 40 */
+            "EXPERIMENTAL MOBILITY PROTOCOLS", /* 41 */
+            "[42] UNASSIGNED [RESV]" /* 42+ */
         };
-        // Matching colour values
-        private static ConsoleColor[] typeColors = new ConsoleColor[] { 
-            ConsoleColor.DarkGreen, 
-            ConsoleColor.Black, 
-            ConsoleColor.Black, 
-            ConsoleColor.DarkRed, 
-            ConsoleColor.DarkMagenta, 
-            ConsoleColor.DarkBlue, 
-            ConsoleColor.DarkMagenta, 
-            ConsoleColor.Black,
-            ConsoleColor.DarkYellow, 
-            ConsoleColor.DarkCyan, 
-            ConsoleColor.DarkCyan, 
-            ConsoleColor.DarkRed,
-            ConsoleColor.DarkRed, 
-            ConsoleColor.DarkBlue, 
-            ConsoleColor.DarkBlue,
-            ConsoleColor.DarkMagenta,
-            ConsoleColor.DarkMagenta, 
-            ConsoleColor.DarkMagenta, 
-            ConsoleColor.DarkMagenta, 
-            ConsoleColor.White,
-            ConsoleColor.White, 
-            ConsoleColor.White, 
-            ConsoleColor.White, 
-            ConsoleColor.White,
-            ConsoleColor.White, 
-            ConsoleColor.White, 
-            ConsoleColor.White, 
-            ConsoleColor.White,
-            ConsoleColor.White, 
-            ConsoleColor.DarkMagenta, 
-            ConsoleColor.DarkMagenta, 
-            ConsoleColor.DarkMagenta,
-            ConsoleColor.DarkMagenta, 
-            ConsoleColor.DarkMagenta, 
-            ConsoleColor.DarkMagenta, 
-            ConsoleColor.DarkMagenta,
-            ConsoleColor.DarkMagenta, 
-            ConsoleColor.DarkMagenta, 
-            ConsoleColor.DarkMagenta, 
-            ConsoleColor.DarkRed,
-            ConsoleColor.White
+        // Packet type colours
+        private static ConsoleColor[] typeColors = new ConsoleColor[] {
+            ConsoleColor.Green, /* 0 */
+            ConsoleColor.White, /* 1 */
+            ConsoleColor.White, /* 2 */
+            ConsoleColor.Red, /* 3 */
+            ConsoleColor.Yellow, /* 4 */
+            ConsoleColor.Blue, /* 5 */
+            ConsoleColor.Yellow, /* 6 */
+            ConsoleColor.White, /* 7 */
+            ConsoleColor.Cyan, /* 8 */ 
+            ConsoleColor.DarkCyan, /* 9 */
+            ConsoleColor.Cyan, /* 10 */
+            ConsoleColor.Red, /* 11 */
+            ConsoleColor.Red, /* 12 */
+            ConsoleColor.DarkBlue, /* 13 */
+            ConsoleColor.Blue, /* 14 */
+            ConsoleColor.DarkYellow, /* 15 */
+            ConsoleColor.Yellow, /* 16 */
+            ConsoleColor.DarkYellow, /* 17 */
+            ConsoleColor.Yellow, /* 18 */
+            ConsoleColor.White, /* 19 */
+            ConsoleColor.White, /* 20 */
+            ConsoleColor.White, /* 21 */
+            ConsoleColor.White, /* 22 */
+            ConsoleColor.White, /* 23 */
+            ConsoleColor.White, /* 24 */
+            ConsoleColor.White, /* 25 */
+            ConsoleColor.White, /* 26 */
+            ConsoleColor.White, /* 27 */
+            ConsoleColor.White, /* 28 */
+            ConsoleColor.White, /* 29 */ 
+            ConsoleColor.Yellow, /* 30 */
+            ConsoleColor.Yellow, /* 31 */
+            ConsoleColor.Yellow, /* 32 */
+            ConsoleColor.Cyan, /* 33 */
+            ConsoleColor.Green, /* 34 */
+            ConsoleColor.DarkYellow, /* 35 */
+            ConsoleColor.Yellow, /* 36 */
+            ConsoleColor.DarkYellow, /* 37 */
+            ConsoleColor.Yellow, /* 38 */
+            ConsoleColor.Yellow, /* 39 */
+            ConsoleColor.Blue, /* 40 */
+            ConsoleColor.Blue, /* 41 */
+            ConsoleColor.White /* 41 */
         };
 
         // Type code values
@@ -537,10 +542,10 @@ namespace PowerPing
             else
                 Console.Write("Reply from: {0} seq={1} bytes={2} type=", address, index, bytesRead);
 
-            // Print coloured type
-            Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
-            Console.ForegroundColor = ConsoleColor.Gray;
-            switch (packet.type) // Display speific type code values
+            // Print icmp packet type
+            Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.White : typeColors[packet.type];
+            Console.ForegroundColor = ConsoleColor.Black;
+            switch (packet.type) // Display specific type code values
             {
                 case 3:
                     Console.Write(packet.code > destUnreachableCodeValues.Length ? packetTypes[packet.type] : destUnreachableCodeValues[packet.code]);
@@ -555,7 +560,7 @@ namespace PowerPing
                     Console.Write(packet.code > badParameterCodeValues.Length ? packetTypes[packet.type] : badParameterCodeValues[packet.code]);
                     break;
                 default:
-                    Console.Write(packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type]);
+                    Console.Write(packet.type > packetTypes.Length ? "[" + packet.type +  "] UNASSIGNED" : packetTypes[packet.type]);
                     break;
             }
             ResetColor();
