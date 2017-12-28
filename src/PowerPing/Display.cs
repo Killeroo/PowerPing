@@ -451,16 +451,6 @@ namespace PowerPing
             if (!Display.ShowOutput)
                 return;
 
-            // Display with no colour
-            if (NoColor)
-            {
-                if (Short) // Show short hand reply
-                    Console.WriteLine("Request to: {0}:0 type=", address, index, packet.GetBytes().Length);
-                else
-                    Console.WriteLine("Request to: {0}:0 seq={1} bytes={2} type={3}", address, index, packet.GetBytes().Length, packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type]);
-                return;
-            }
-
             // Show shortened info
             if (Short)
                 Console.Write("Request to: {0}:0 type=", address);
@@ -468,27 +458,7 @@ namespace PowerPing
                 Console.Write("Request to: {0}:0 seq={1} bytes={2} type=", address, index, packet.GetBytes().Length);
 
             // Print coloured type
-            Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.White : typeColors[packet.type];
-            Console.ForegroundColor = ConsoleColor.Black;
-            switch (packet.type) // Display speific type code values
-            {
-                case 3:
-                    Console.Write(packet.code > destUnreachableCodeValues.Length ? packetTypes[packet.type] : destUnreachableCodeValues[packet.code]);
-                    break;
-                case 5:
-                    Console.Write(packet.code > redirectCodeValues.Length ? packetTypes[packet.type] : redirectCodeValues[packet.code]);
-                    break;
-                case 11:
-                    Console.Write(packet.code > timeExceedCodeValues.Length ? packetTypes[packet.type] : timeExceedCodeValues[packet.code]);
-                    break;
-                case 12:
-                    Console.Write(packet.code > badParameterCodeValues.Length ? packetTypes[packet.type] : badParameterCodeValues[packet.code]);
-                    break;
-                default:
-                    Console.Write(packet.type > packetTypes.Length ? "[" + packet.type + "] UNASSIGNED" : packetTypes[packet.type]);
-                    break;
-            }
-            ResetColor();
+            PacketType(packet);
 
             Console.Write(" code={0}", packet.code);
 
@@ -526,16 +496,6 @@ namespace PowerPing
                 return;
             }
 
-            // Display with no colour
-            if (NoColor)
-            {
-                if (Short) // Show short hand reply
-                    Console.WriteLine("Reply from: {0} type={1} time={2:0." + new String('0', DecimalPlaces) + "}ms", address, (packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type]), replyTime.TotalMilliseconds);
-                else
-                    Console.WriteLine("Reply from: {0} seq={1} bytes={2} type={3} time={4:0." + new String('0', DecimalPlaces) + "}ms", address, index, bytesRead, (packet.type > packetTypes.Length ? "UNASSIGNED" : packetTypes[packet.type]), replyTime.TotalMilliseconds);
-                return;
-            }
-
             // Show shortened info
             if (Short)
                 Console.Write("Reply from: {0} type=", address);
@@ -543,27 +503,7 @@ namespace PowerPing
                 Console.Write("Reply from: {0} seq={1} bytes={2} type=", address, index, bytesRead);
 
             // Print icmp packet type
-            Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.White : typeColors[packet.type];
-            Console.ForegroundColor = ConsoleColor.Black;
-            switch (packet.type) // Display specific type code values
-            {
-                case 3:
-                    Console.Write(packet.code > destUnreachableCodeValues.Length ? packetTypes[packet.type] : destUnreachableCodeValues[packet.code]);
-                    break;
-                case 5:
-                    Console.Write(packet.code > redirectCodeValues.Length ? packetTypes[packet.type] : redirectCodeValues[packet.code]);
-                    break;
-                case 11:
-                    Console.Write(packet.code > timeExceedCodeValues.Length ? packetTypes[packet.type] : timeExceedCodeValues[packet.code]);
-                    break;
-                case 12:
-                    Console.Write(packet.code > badParameterCodeValues.Length ? packetTypes[packet.type] : badParameterCodeValues[packet.code]);
-                    break;
-                default:
-                    Console.Write(packet.type > packetTypes.Length ? "[" + packet.type +  "] UNASSIGNED" : packetTypes[packet.type]);
-                    break;
-            }
-            ResetColor();
+            PacketType(packet);
 
             // Display ICMP message (if specified)
             if (ShowMessages)
@@ -571,12 +511,13 @@ namespace PowerPing
 
             // Print coloured time segment
             Console.Write(" time=");
-            if (replyTime <= TimeSpan.FromMilliseconds(100))
-                Console.ForegroundColor = ConsoleColor.Green;
-            else if (replyTime <= TimeSpan.FromMilliseconds(500))
-                Console.ForegroundColor = ConsoleColor.Yellow;
-            else
-                Console.ForegroundColor = ConsoleColor.Red;
+            if (!NoColor)
+                if (replyTime <= TimeSpan.FromMilliseconds(100))
+                    Console.ForegroundColor = ConsoleColor.Green;
+                else if (replyTime <= TimeSpan.FromMilliseconds(500))
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                else
+                    Console.ForegroundColor = ConsoleColor.Red;
             Console.Write("{0:0." + new String('0', DecimalPlaces) + "}ms ", replyTime.TotalMilliseconds);
             ResetColor();
 
@@ -584,6 +525,7 @@ namespace PowerPing
             if (ShowTimeStamp)
                 Console.Write("@ {0}", DateTime.Now.ToString("HH:mm:ss"));
 
+            // End line
             Console.WriteLine();
 
         }
@@ -878,6 +820,34 @@ namespace PowerPing
             else
                 Console.Write(message);
 
+            ResetColor();
+        }
+        public static void PacketType(ICMP packet)
+        {
+            // Print packet type and apply colour rules
+            if (!NoColor)
+            {
+                Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.White : typeColors[packet.type];
+                Console.ForegroundColor = ConsoleColor.Black;
+            }
+            switch (packet.type) 
+            {
+                case 3:
+                    Console.Write(packet.code > destUnreachableCodeValues.Length ? packetTypes[packet.type] : destUnreachableCodeValues[packet.code]);
+                    break;
+                case 5:
+                    Console.Write(packet.code > redirectCodeValues.Length ? packetTypes[packet.type] : redirectCodeValues[packet.code]);
+                    break;
+                case 11:
+                    Console.Write(packet.code > timeExceedCodeValues.Length ? packetTypes[packet.type] : timeExceedCodeValues[packet.code]);
+                    break;
+                case 12:
+                    Console.Write(packet.code > badParameterCodeValues.Length ? packetTypes[packet.type] : badParameterCodeValues[packet.code]);
+                    break;
+                default:
+                    Console.Write(packet.type > packetTypes.Length ? "[" + packet.type + "] UNASSIGNED" : packetTypes[packet.type]);
+                    break;
+            }
             ResetColor();
         }
 

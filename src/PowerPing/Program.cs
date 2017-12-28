@@ -260,7 +260,7 @@ namespace PowerPing
                             case "/rng":
                             case "-rng":
                             case "--rng":
-                                attributes = Helper.RandomiseMessage(attributes);
+                                attributes.RandomMsg = true;
                                 break;
                             case "/limit":
                             case "-limit":

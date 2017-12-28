@@ -379,9 +379,19 @@ namespace PowerPing
                 else
                     IsRunning = true;
 
-                // Update ICMP checksum and seq
+                if (attrs.RandomMsg)
+                {
+                    payload = Encoding.ASCII.GetBytes(Helper.RandomString());
+                    Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
+                }
+                else
+                {
+                    // Include sequence number in ping message
+                    Buffer.BlockCopy(BitConverter.GetBytes(index), 0, packet.message, 2, 2); 
+                }
+
+                // Update packet checksum
                 packet.checksum = 0;
-                Buffer.BlockCopy(BitConverter.GetBytes(index), 0, packet.message, 2, 2); // Include sequence number in ping message
                 UInt16 chksm = packet.GetChecksum();
                 packet.checksum = chksm;
 
