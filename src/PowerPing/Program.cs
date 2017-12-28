@@ -28,6 +28,7 @@ SOFTWARE.
 
 using System;
 using System.Linq;
+using System.Threading;
 
 namespace PowerPing
 {
@@ -476,6 +477,7 @@ namespace PowerPing
                 Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
 
             // Select correct function using opMode 
+            Thread thread;
             switch (opMode)
             {
                 case "listening":
@@ -497,14 +499,23 @@ namespace PowerPing
                     g.Start();
                     break;
                 case "flooding":
-                    p.Flood(attributes.Address);
+                    thread = new Thread(() =>
+                    {
+                        p.Flood(attributes.Address);
+                    });
+                    thread.Start();
                     break;
                 case "scanning":
                     p.Scan(args.Last());
                     break;
                 case "":
+                    thread = new Thread(() =>
+                    {
+                        p.Send(attributes);
+                    });
+                    thread.Start();
                     // Send ping normally
-                    p.Send(attributes);
+                    //p.Send(attributes);
                     break;
             }
            

@@ -414,10 +414,10 @@ namespace PowerPing
         /// </summary>
         /// <param name="host">Resolved host address</param>
         /// <param name="ping">Ping object</param>
-        public static void PingIntroMsg(String host, Ping ping)
+        public static void PingIntroMsg(String host, PingAttributes attrs)
         {
-            // Load ping attributes
-            PingAttributes attrs = ping.Attributes;
+            if (!Display.ShowOutput)
+                return;
 
             // Clear builder
             sb.Clear();
@@ -429,8 +429,11 @@ namespace PowerPing
                 // Only show resolved address if inputted address and resolved address are different
                 sb.AppendFormat("[{0}] ", attrs.Address);
             if (!Short)
-                // Only show extra detail when not in Short mode
-                sb.AppendFormat("(Packet message \"{0}\") [Type={1} Code={2}] ", attrs.Message, attrs.Type, attrs.Code);
+                if (attrs.RandomMsg)
+                    sb.AppendFormat("(*Random packet messages*) [Type={0} Code={1}] ", attrs.Type, attrs.Code);
+                else
+                    // Only show extra detail when not in Short mode
+                    sb.AppendFormat("(Packet message \"{0}\") [Type={1} Code={2}] ", attrs.Message, attrs.Type, attrs.Code);
             sb.AppendFormat("[TTL={0}]:", attrs.Ttl);
 
             // Print string

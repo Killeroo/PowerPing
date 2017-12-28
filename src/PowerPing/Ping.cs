@@ -69,7 +69,7 @@ namespace PowerPing
             // Lookup address
             Attributes.Address = PowerPing.Helper.VerifyAddress(Attributes.Address, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
-            PowerPing.Display.PingIntroMsg(inputAddress, this);
+            PowerPing.Display.PingIntroMsg(inputAddress, attrs);
 
             // Perform ping operation and store results
             this.SendICMP(Attributes);
