@@ -1,18 +1,41 @@
-﻿using System;
-using System.Collections;
+﻿/*
+MIT License - PowerPing 
+
+Copyright (c) 2017 Matthew Carney
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+using System;
 using System.Xml;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.IO;
 using System.Reflection;
-
-/// <summary>
-/// Class for miscellaneous methods 
-/// </summary>
+using System.Linq;
 
 namespace PowerPing
 {
+    /// <summary>
+    /// Class for miscellaneous methods 
+    /// </summary>
     public static class Helper
     {
         /// <summary>
@@ -162,8 +185,28 @@ namespace PowerPing
             return value > left && value < right;
         }
 
-        // Extension method for determining build time
-        // Source: http://stackoverflow.com/a/1600990
+        /// <summary>
+        /// Source: https://stackoverflow.com/a/1344242
+        /// </summary>
+        /// <param name="attrs"></param>
+        /// <returns></returns>
+        // Ref attrs?
+        public static String RandomString(int len = 11)
+        {
+            Random rand = new Random();
+            string chars = "./,-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+            return new string(Enumerable.Repeat(chars, len)
+                .Select(s => s[rand.Next(s.Length)]).ToArray());
+        }
+
+        /// <summary>
+        /// Extension method for determining build time
+        /// Source: http://stackoverflow.com/a/1600990
+        /// </summary>
+        /// <param name="assembly"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
         public static DateTime GetLinkerTime(this Assembly assembly, TimeZoneInfo target = null)
         {
             var filePath = assembly.Location;
