@@ -69,7 +69,7 @@ namespace PowerPing
             // Lookup address
             Attributes.Address = PowerPing.Helper.VerifyAddress(Attributes.Address, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
-            PowerPing.Display.PingIntroMsg(inputAddress, this);
+            PowerPing.Display.PingIntroMsg(inputAddress, attrs);
 
             // Perform ping operation and store results
             this.SendICMP(Attributes);
@@ -379,9 +379,19 @@ namespace PowerPing
                 else
                     IsRunning = true;
 
-                // Update ICMP checksum and seq
+                if (attrs.RandomMsg)
+                {
+                    payload = Encoding.ASCII.GetBytes(Helper.RandomString());
+                    Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
+                }
+                else
+                {
+                    // Include sequence number in ping message
+                    Buffer.BlockCopy(BitConverter.GetBytes(index), 0, packet.message, 2, 2); 
+                }
+
+                // Update packet checksum
                 packet.checksum = 0;
-                Buffer.BlockCopy(BitConverter.GetBytes(index), 0, packet.message, 2, 2); // Include sequence number in ping message
                 UInt16 chksm = packet.GetChecksum();
                 packet.checksum = chksm;
 

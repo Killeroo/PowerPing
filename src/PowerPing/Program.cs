@@ -28,6 +28,7 @@ SOFTWARE.
 
 using System;
 using System.Linq;
+using System.Threading;
 
 namespace PowerPing
 {
@@ -152,7 +153,10 @@ namespace PowerPing
                             case "/pt":
                             case "-pt":
                             case "--pt": // Ping type
-                                attributes.Type = Convert.ToByte(args[count + 1]);
+                                var type = Convert.ToByte(args[count + 1]);
+                                if (type > 255)
+                                    throw new ArgumentFormatException();
+                                attributes.Type = type;
                                 break;
                             case "/code":
                             case "-code":
@@ -257,7 +261,7 @@ namespace PowerPing
                             case "/rng":
                             case "-rng":
                             case "--rng":
-                                attributes = Helper.RandomiseMessage(attributes);
+                                attributes.RandomMsg = true;
                                 break;
                             case "/limit":
                             case "-limit":
@@ -473,6 +477,7 @@ namespace PowerPing
                 Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
 
             // Select correct function using opMode 
+            Thread thread;
             switch (opMode)
             {
                 case "listening":
@@ -494,14 +499,23 @@ namespace PowerPing
                     g.Start();
                     break;
                 case "flooding":
-                    p.Flood(attributes.Address);
+                    thread = new Thread(() =>
+                    {
+                        p.Flood(attributes.Address);
+                    });
+                    thread.Start();
                     break;
                 case "scanning":
                     p.Scan(args.Last());
                     break;
                 case "":
+                    thread = new Thread(() =>
+                    {
+                        p.Send(attributes);
+                    });
+                    thread.Start();
                     // Send ping normally
-                    p.Send(attributes);
+                    //p.Send(attributes);
                     break;
             }
            

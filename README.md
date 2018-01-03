@@ -4,7 +4,7 @@
 
 Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
 
-Download it here: [[Current Build]](https://github.com/Killeroo/PowerPing/tree/master/build) [[Development Build]](https://github.com/Killeroo/PowerPing/blob/dev/build/PowerPing.exe) [[Github]](https://github.com/Killeroo/PowerPing/releases)
+Download it here: [[Stable Release]](https://github.com/Killeroo/PowerPing/releases) [[Current Build]](https://github.com/Killeroo/PowerPing/tree/master/build) [[Development Build]](https://github.com/Killeroo/PowerPing/blob/dev/build/PowerPing.exe)
 ***
 ![alt text](docs/screenshots/screenshot.png "PowerPing in action")
 
@@ -15,11 +15,11 @@ PowerPing contains the following features (with more to come...):
 - [x] Basic ping functionality
 - [x] Coloured output
 - [x] Display options
-- [x] [Packet customisation](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol#Control_messages)
+- [x] [ICMP packet customisation](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol#Control_messages)
 - [x] [Scanning](https://en.wikipedia.org/wiki/Ping_sweep)
 - [x] [Flooding](https://en.wikipedia.org/wiki/Ping_flood)
-- [x] [Packet capture (listening)](docs/screenshots/screenshot3.png)
-- [x] [Location lookup](docs/screenshots/screenshot4.png)
+- [x] [ICMP packet capture (/listen)](docs/screenshots/screenshot3.png)
+- [x] [IP location lookup](docs/screenshots/screenshot4.png)
 - [x] [Graphing](docs/screenshots/screenshot2.png)
 - [ ] [Traceroute](https://en.wikipedia.org/wiki/Traceroute)
 - [ ] [Tunnelling](https://en.wikipedia.org/wiki/ICMP_tunnel)
@@ -29,7 +29,7 @@ PowerPing contains the following features (with more to come...):
      PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] | 
                [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--dm]
                [--i TTL] [--in interval] [--pt type] [--pc code] [--b level]
-			   [--4] [--short] [--nocolor] [--ts] [--ti timing] [--nt] target_name
+	           [--4] [--short] [--nocolor] [--ts] [--ti timing] [--nt] target_name
                
 ## Arguments:
     Ping Options:
@@ -94,7 +94,7 @@ PowerPing contains the following features (with more to come...):
 ![alt text](docs/screenshots/screenshot11.png "Powerping showing request packets and ICMP data")
 ![alt text](docs/screenshots/screenshot8.png "Powerping With no color")
 
-[More screenshots can be found here](docs/screenshots/)
+[More screenshots](docs/screenshots/)
 
 ## Contribution
 

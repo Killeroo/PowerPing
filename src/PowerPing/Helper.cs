@@ -191,15 +191,13 @@ namespace PowerPing
         /// <param name="attrs"></param>
         /// <returns></returns>
         // Ref attrs?
-        public static PingAttributes RandomiseMessage(PingAttributes attrs)
+        public static String RandomString(int len = 11)
         {
             Random rand = new Random();
             string chars = "./,-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-            attrs.Message = new string(Enumerable.Repeat(chars, 11)
+            return new string(Enumerable.Repeat(chars, len)
                 .Select(s => s[rand.Next(s.Length)]).ToArray());
-
-            return attrs;
         }
 
         /// <summary>
