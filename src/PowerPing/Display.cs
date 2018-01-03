@@ -848,7 +848,7 @@ namespace PowerPing
                     Console.Write(packet.code > badParameterCodeValues.Length ? packetTypes[packet.type] : badParameterCodeValues[packet.code]);
                     break;
                 default:
-                    Console.Write(packet.type > packetTypes.Length ? "[" + packet.type + "] UNASSIGNED" : packetTypes[packet.type]);
+                    Console.Write(packet.type > packetTypes.Length ? "[" + packet.type + "] UNASSIGNED " : packetTypes[packet.type]);
                     break;
             }
             ResetColor();
