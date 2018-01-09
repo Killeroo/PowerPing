@@ -1,6 +1,6 @@
 # PowerPing - Advanced Windows Ping 
 
-[![](https://img.shields.io/badge/version-1.2.1-brightgreen.svg)]() ![](https://img.shields.io/maintenance/yes/2017.svg) [![Build status](https://ci.appveyor.com/api/projects/status/fq7jnpmlejm7jych?svg=true)](https://ci.appveyor.com/project/Killeroo/powerping)
+[![](https://img.shields.io/badge/version-1.2.1-brightgreen.svg)]() ![](https://img.shields.io/maintenance/yes/2018.svg) [![Build status](https://ci.appveyor.com/api/projects/status/fq7jnpmlejm7jych?svg=true)](https://ci.appveyor.com/project/Killeroo/powerping)
 
 Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
 
@@ -88,11 +88,13 @@ PowerPing contains the following features (with more to come...):
 
 ## Screenshots
 
-![alt text](docs/screenshots/screenshot12.png "Powerping's Graph view")
-![alt text](docs/screenshots/screenshot3.png "Powerping Listening for ICMP activity")
-![alt text](docs/screenshots/screenshot16.png "Powerping in action!")
-![alt text](docs/screenshots/screenshot11.png "Powerping showing request packets and ICMP data")
-![alt text](docs/screenshots/screenshot8.png "Powerping With no color")
+![alt text](docs/screenshots/screenshot1.png "Powerping's Graph view")
+![alt text](docs/screenshots/screenshot2.png "Powerping Listening for ICMP activity")
+![alt text](docs/screenshots/screenshot3.png "Powerping looking up the location of an ip, flooding an address with pings AND scanning!")
+![alt text](docs/screenshots/screenshot4.png "Powerping showing request packets and sending random ICMP data")
+![alt text](docs/screenshots/screenshot5.png "Using the timestamp feature!")
+![alt text](docs/screenshots/screenshot6.png "Powerping displaying the results of a ping as coloured symbols!") 
+![alt text](docs/screenshots/screenshot7.png "Powerping can even run using no color if you prefer (I won't judge)")
 
 [More screenshots](docs/screenshots/)
 
