@@ -121,6 +121,7 @@ namespace PowerPing
         /// <param name="address"></param>
         /// <param name="af"></param>
         /// <returns></returns>
+        /// CHANGE NAME -> LookupAddress
         public static string VerifyAddress(string address, AddressFamily af)
         {
             IPAddress ipAddr = null;
@@ -153,6 +154,18 @@ namespace PowerPing
                 PowerPing.Display.Error("PowerPing could not find host [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
 
             return ipAddr.ToString();
+        }
+
+        /// <summary>
+        /// Performs reverse lookup of address, returning host name from a given
+        /// address
+        /// </summary>
+        /// <param name="address"></param>
+        /// <source>https://stackoverflow.com/a/716753</source>
+        /// <returns></returns>
+        public static string ReverseLookup(string address)
+        {
+
         }
 
         /// <summary>
