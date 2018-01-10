@@ -479,7 +479,7 @@ namespace PowerPing
             if (opMode.Equals("") || opMode.Equals("flooding") || opMode.Equals("graphing") || opMode.Equals("compactGraph") || opMode.Equals("location"))
             {
                 if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown && Uri.CheckHostName(args.Last()) == UriHostNameType.Unknown)
-                    PowerPing.Display.Error("PowerPing could not find a host address.", true, true);
+                    PowerPing.Display.Error("Unknown host", true, true);
 
                 if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown)
                     attributes.InputtedAddress = args.Last();
