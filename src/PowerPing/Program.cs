@@ -363,6 +363,21 @@ namespace PowerPing
                             case "--q":
                                 Display.ShowOutput = false;
                                 break;
+                            case "/resolve":
+                            case "-resolve":
+                            case "--resolve":
+                            case "/res":
+                            case "-res":
+                            case "--res":
+                                break;
+                            case "/inputaddr":
+                            case "-inputaddr":
+                            case "--inputaddr":
+                            case "/ia":
+                            case "-ia":
+                            case "--ia":
+                                Display.UseInputtedAddress = true;
+                                break;
                             case "/whoami":
                             case "-whoami":
                             case "--whoami": // Current computer location
@@ -467,9 +482,9 @@ namespace PowerPing
                     PowerPing.Display.Error("PowerPing could not find a host address.", true, true);
 
                 if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown)
-                    attributes.Address = args.Last();
+                    attributes.InputtedAddress = args.Last();
                 else
-                    attributes.Address = args.First();
+                    attributes.InputtedAddress = args.First();
             }
 
             // Add Control C event handler 
@@ -484,24 +499,24 @@ namespace PowerPing
                     p.Listen();
                     break;
                 case "location":
-                    Helper.GetAddressLocation(attributes.Address, true);
+                    Helper.GetAddressLocation(attributes.InputtedAddress, true);
                     break;
                 case "whoami":
                     Helper.GetAddressLocation("", true);
                     break;
                 case "graphing":
-                    g = new Graph(attributes.Address);
+                    g = new Graph(attributes.InputtedAddress);
                     g.Start();
                     break;
                 case "compactgraph":
-                    g = new Graph(attributes.Address);
+                    g = new Graph(attributes.InputtedAddress);
                     g.CompactGraph = true;
                     g.Start();
                     break;
                 case "flooding":
                     thread = new Thread(() =>
                     {
-                        p.Flood(attributes.Address);
+                        p.Flood(attributes.InputtedAddress);
                     });
                     thread.Start();
                     break;

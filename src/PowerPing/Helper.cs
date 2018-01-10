@@ -165,7 +165,7 @@ namespace PowerPing
         /// <returns></returns>
         public static string ReverseLookup(string address)
         {
-
+            return "";
         }
 
         /// <summary>

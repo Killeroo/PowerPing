@@ -63,13 +63,13 @@ namespace PowerPing
         public void Send(PingAttributes attrs)
         {
             // Load user inputted attributes
-            string inputAddress = attrs.Address; 
+            //string inputAddress = attrs.Address; 
             this.Attributes = attrs;
 
             // Lookup address
-            Attributes.Address = PowerPing.Helper.VerifyAddress(Attributes.Address, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+            Attributes.Address = PowerPing.Helper.VerifyAddress(Attributes.InputtedAddress, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
-            PowerPing.Display.PingIntroMsg(inputAddress, attrs);
+            PowerPing.Display.PingIntroMsg(Attributes.InputtedAddress, attrs);
 
             // Perform ping operation and store results
             this.SendICMP(Attributes);
@@ -417,7 +417,7 @@ namespace PowerPing
 
                     // Display reply packet
                     if (Display.ShowReplies)
-                        PowerPing.Display.ReplyPacket(response, ep.ToString(), index, responseTimer.Elapsed, bytesRead);
+                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress ? attrs.InputtedAddress : ep.ToString(), index, responseTimer.Elapsed, bytesRead);
 
                     // Store response info
                     try { checked { Results.Received++; } }

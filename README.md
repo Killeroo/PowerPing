@@ -63,6 +63,7 @@ PowerPing contains the following features (with more to come...):
         --request    [--r]            Show request packets
         --notimeouts [--nt]           Don't display timeout messages
         --quiet      [--q]            No output, only shows summary upon completion or exit
+		--inputaddr  [--ia]           Show input address instead of revolved one
         --limit      [--l]   number   Limits output to just replies (0) or requests (1)
         --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
 
