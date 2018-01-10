@@ -399,7 +399,7 @@ namespace PowerPing
                 {
                     // Show request packet
                     if (Display.ShowRequests)
-                        Display.RequestPacket(packet, attrs.Address, index);
+                        Display.RequestPacket(packet, Display.UseInputtedAddress ? attrs.InputtedAddress : attrs.Address, index);
 
                     // Send ping request
                     sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
