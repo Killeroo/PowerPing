@@ -121,7 +121,7 @@ namespace PowerPing
         /// <param name="address"></param>
         /// <param name="af"></param>
         /// <returns></returns>
-        /// CHANGE NAME -> LookupAddress
+        /// CHANGE NAME -> AddressLookup
         public static string VerifyAddress(string address, AddressFamily af)
         {
             IPAddress ipAddr = null;
@@ -165,7 +165,20 @@ namespace PowerPing
         /// <returns></returns>
         public static string ReverseLookup(string address)
         {
-            return "";
+            string alias = "";
+            try 
+            {
+                IPAddress hostAddr = IPAddress.Parse(address);
+                IPHostEntry hostInfo = Dns.GetHostByAddress(hostAddr);
+                string[] aliases = hostInfo.Aliases;
+                alias = aliases[0];
+            }
+            catch (Exception) { }
+
+            if (alias == "")
+                PowerPing.Display.Error("PowerPing could not find host [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
+
+            return alias;
         }
 
         /// <summary>
