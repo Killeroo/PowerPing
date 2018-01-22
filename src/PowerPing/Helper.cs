@@ -122,7 +122,7 @@ namespace PowerPing
         /// <param name="af"></param>
         /// <returns></returns>
         /// CHANGE NAME -> AddressLookup
-        public static string VerifyAddress(string address, AddressFamily af)
+        public static string AddressLookup(string address, AddressFamily af)
         {
             IPAddress ipAddr = null;
 
@@ -158,7 +158,7 @@ namespace PowerPing
 
         /// <summary>
         /// Performs reverse lookup of address, returning host name from a given
-        /// address
+        /// IP address
         /// </summary>
         /// <param name="address"></param>
         /// <source>https://stackoverflow.com/a/716753</source>
@@ -170,8 +170,7 @@ namespace PowerPing
             {
                 IPAddress hostAddr = IPAddress.Parse(address);
                 IPHostEntry hostInfo = Dns.GetHostByAddress(hostAddr);
-                string[] aliases = hostInfo.Aliases;
-                alias = aliases[0];
+                alias = hostInfo.HostName;
             }
             catch (Exception) { }
 

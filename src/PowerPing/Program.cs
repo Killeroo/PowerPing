@@ -369,6 +369,7 @@ namespace PowerPing
                             case "/res":
                             case "-res":
                             case "--res":
+                                Display.UseResolvedAddress = true;
                                 break;
                             case "/inputaddr":
                             case "-inputaddr":
