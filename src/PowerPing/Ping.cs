@@ -386,6 +386,11 @@ namespace PowerPing
                     payload = Encoding.ASCII.GetBytes(Helper.RandomString());
                     Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
                 }
+                else if (attrs.UsePingCookies)
+                {
+                    payload = Encoding.ASCII.GetBytes(DateTime.Now.ToString("HHmmssff") + "#" + index); //fffff
+                    Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
+                }
                 else
                 {
                     // Include sequence number in ping message

@@ -43,7 +43,8 @@ namespace PowerPing
         public bool Continous { get; set; } // Continously send pings
         public bool ForceV4 { get; set; } // Force use of IPv4
         public bool ForceV6 { get; set; } // Force use of IPv6 
-        public bool RandomMsg { get; set; } // Fills ICMP message field with random characters                                      
+        public bool RandomMsg { get; set; } // Fills ICMP message field with random characters    
+        public bool UsePingCookies { get; set; } // Stores timestamp and seq num in ICMP data for more accurate readings                                
 	    public int BeepLevel { get; set; } // Beep level - 1 to beep on timeout, 2 for beep on reply, 0 for no beep
         public string[] AddressList { get; set; } // Optional attribute: Used when scanning, stores addresses to ping
 
@@ -63,6 +64,7 @@ namespace PowerPing
             ForceV4 = true;
             ForceV6 = false;
             RandomMsg = false;
+            UsePingCookies = false;
 	        BeepLevel = 0;
             AddressList = null;
         }

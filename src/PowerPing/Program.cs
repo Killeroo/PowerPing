@@ -379,6 +379,14 @@ namespace PowerPing
                             case "--ia":
                                 Display.UseInputtedAddress = true;
                                 break;
+                            case "/cookies":
+                            case "-cookies":
+                            case "--cookies":
+                            case "/co":
+                            case "-co":
+                            case "--co":
+                                attributes.UsePingCookies = true;
+                                break;
                             case "/whoami":
                             case "-whoami":
                             case "--whoami": // Current computer location
