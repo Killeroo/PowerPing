@@ -47,6 +47,8 @@ namespace PowerPing
         public static bool ShowTimeouts = true;
         public static bool ShowRequests = false;
 	    public static bool ShowReplies = true;
+        public static bool UseInputtedAddress = false;
+        public static bool UseResolvedAddress = false;
         public static int DecimalPlaces = 1;
         public static ConsoleColor DefaultForegroundColor;
         public static ConsoleColor DefaultBackgroundColor;
@@ -291,6 +293,8 @@ namespace PowerPing
             sb.AppendLine(" --request    [--r]            Show request packets");
             sb.AppendLine(" --notimeouts [--nt]           Don't display timeout messages");
             sb.AppendLine(" --quiet      [--q]            No output, only shows summary upon completion or exit");
+            sb.AppendLine(" --resolve    [--res]          Display hostname from DNS");
+            sb.AppendLine(" --inputaddr  [--ia]           Show input address instead of revolved IP address");
             sb.AppendLine(" --limit      [--l]   number   Limits output to just replies (0) or requests (1)");
             sb.AppendLine(" --decimals   [--dp]  number   Num of decimal places to use (0 to 3)");
 
@@ -773,7 +777,10 @@ namespace PowerPing
             }
 
             Console.BackgroundColor = ConsoleColor.DarkRed;
-            Console.Write("Request timed out. seq={0} ", seq);
+            Console.Write("Request timed out.");
+
+            if (!Short)
+                Console.Write(" seq={0} ", seq);
 
             // Display timestamp
             if (ShowTimeStamp)

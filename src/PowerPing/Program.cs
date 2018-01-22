@@ -363,6 +363,22 @@ namespace PowerPing
                             case "--q":
                                 Display.ShowOutput = false;
                                 break;
+                            case "/resolve":
+                            case "-resolve":
+                            case "--resolve":
+                            case "/res":
+                            case "-res":
+                            case "--res":
+                                Display.UseResolvedAddress = true;
+                                break;
+                            case "/inputaddr":
+                            case "-inputaddr":
+                            case "--inputaddr":
+                            case "/ia":
+                            case "-ia":
+                            case "--ia":
+                                Display.UseInputtedAddress = true;
+                                break;
                             case "/whoami":
                             case "-whoami":
                             case "--whoami": // Current computer location
@@ -464,12 +480,12 @@ namespace PowerPing
             if (opMode.Equals("") || opMode.Equals("flooding") || opMode.Equals("graphing") || opMode.Equals("compactGraph") || opMode.Equals("location"))
             {
                 if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown && Uri.CheckHostName(args.Last()) == UriHostNameType.Unknown)
-                    PowerPing.Display.Error("PowerPing could not find a host address.", true, true);
+                    PowerPing.Display.Error("Unknown host", true, true);
 
                 if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown)
-                    attributes.Address = args.Last();
+                    attributes.Host = args.Last();
                 else
-                    attributes.Address = args.First();
+                    attributes.Host = args.First();
             }
 
             // Add Control C event handler 
@@ -484,24 +500,24 @@ namespace PowerPing
                     p.Listen();
                     break;
                 case "location":
-                    Helper.GetAddressLocation(attributes.Address, true);
+                    Helper.GetAddressLocation(attributes.Host, true);
                     break;
                 case "whoami":
                     Helper.GetAddressLocation("", true);
                     break;
                 case "graphing":
-                    g = new Graph(attributes.Address);
+                    g = new Graph(attributes.Host);
                     g.Start();
                     break;
                 case "compactgraph":
-                    g = new Graph(attributes.Address);
+                    g = new Graph(attributes.Host);
                     g.CompactGraph = true;
                     g.Start();
                     break;
                 case "flooding":
                     thread = new Thread(() =>
                     {
-                        p.Flood(attributes.Address);
+                        p.Flood(attributes.Host);
                     });
                     thread.Start();
                     break;
