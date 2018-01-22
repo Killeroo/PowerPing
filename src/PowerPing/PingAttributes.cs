@@ -34,6 +34,7 @@ namespace PowerPing
         public string Host { get; set; } // Name of host being pinged
         public string Address { get; set; } // Address to send the ping to
         public string Message { get; set; } // Message to store with in ICMP message field
+        public string Source { get; set; }
         public int Interval { get; set; } // Time interval between sending each ping
         public int Timeout { get; set; } // Recieve timeout (milliseconds)
         public int Count { get; set; } // Number of pings to send

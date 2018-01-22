@@ -361,7 +361,11 @@ namespace PowerPing
             // Set socket options
             sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, attrs.Timeout); // Socket timeout
             sock.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.IpTimeToLive, attrs.Ttl);
-            //sock.Ttl = (short)attributes.ttl;
+
+            //https://www.codeproject.com/Articles/5292/Raw-Ethernet-Packet-Sending
+            //SetSocketOption(SocketOptionLevel.Udp, SocketOptionName.NoChecksum, 1);
+            //sock.Bind((EndPoint)new IPEndPoint(attrs.Source, 0));
+            //FIX: sock.Ttl = (short)attributes.ttl;
 
             // Construct our ICMP packet
             packet.type = attrs.Type;
@@ -415,6 +419,8 @@ namespace PowerPing
                     catch (OverflowException) { Results.HasOverflowed = true; }
 
                     // Wait for response
+                    //BUFFER SIZE::::::http://www.winsocketdotnetworkprogramming.com/clientserversocketnetworkcommunication8i.html
+                    //receiveBuffer = new byte[Ipv4Header.Ipv4HeaderLength + IcmpHeader.IcmpHeaderLength + pingPayloadLength];
                     byte[] buffer = new byte[5096];
                     bytesRead = sock.ReceiveFrom(buffer, ref ep);
                     responseTimer.Stop();
