@@ -483,9 +483,9 @@ namespace PowerPing
                     PowerPing.Display.Error("Unknown host", true, true);
 
                 if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown)
-                    attributes.InputtedAddress = args.Last();
+                    attributes.Host = args.Last();
                 else
-                    attributes.InputtedAddress = args.First();
+                    attributes.Host = args.First();
             }
 
             // Add Control C event handler 
@@ -500,24 +500,24 @@ namespace PowerPing
                     p.Listen();
                     break;
                 case "location":
-                    Helper.GetAddressLocation(attributes.InputtedAddress, true);
+                    Helper.GetAddressLocation(attributes.Host, true);
                     break;
                 case "whoami":
                     Helper.GetAddressLocation("", true);
                     break;
                 case "graphing":
-                    g = new Graph(attributes.InputtedAddress);
+                    g = new Graph(attributes.Host);
                     g.Start();
                     break;
                 case "compactgraph":
-                    g = new Graph(attributes.InputtedAddress);
+                    g = new Graph(attributes.Host);
                     g.CompactGraph = true;
                     g.Start();
                     break;
                 case "flooding":
                     thread = new Thread(() =>
                     {
-                        p.Flood(attributes.InputtedAddress);
+                        p.Flood(attributes.Host);
                     });
                     thread.Start();
                     break;

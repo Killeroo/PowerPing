@@ -66,15 +66,12 @@ namespace PowerPing
             this.Attributes = attrs;
 
             // Lookup address
-            Attributes.Address = PowerPing.Helper.AddressLookup(Attributes.InputtedAddress, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+            Attributes.Address = PowerPing.Helper.AddressLookup(Attributes.Host, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
-            PowerPing.Display.PingIntroMsg(Attributes.InputtedAddress, attrs);
+            PowerPing.Display.PingIntroMsg(Attributes.Host, attrs);
 
-            // !HACK ALERT!
-            // Using inputtedaddress to display resolved address instead of making seperate logic
-            // WHY: cos i cba..
             if (Display.UseResolvedAddress)
-                Attributes.InputtedAddress = Helper.ReverseLookup(Attributes.Address);
+                Attributes.Host = Helper.ReverseLookup(Attributes.Address);
 
             // Perform ping operation and store results
             this.SendICMP(Attributes);
@@ -404,7 +401,7 @@ namespace PowerPing
                 {
                     // Show request packet
                     if (Display.ShowRequests)
-                        Display.RequestPacket(packet, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.InputtedAddress : attrs.Address, index);
+                        Display.RequestPacket(packet, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : attrs.Address, index);
 
                     // Send ping request
                     sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
@@ -422,7 +419,7 @@ namespace PowerPing
 
                     // Display reply packet
                     if (Display.ShowReplies)
-                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress? attrs.InputtedAddress : ep.ToString(), index, responseTimer.Elapsed, bytesRead);
+                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress? attrs.Host : ep.ToString(), index, responseTimer.Elapsed, bytesRead);
 
                     // Store response info
                     try { checked { Results.Received++; } }

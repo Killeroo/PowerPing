@@ -31,7 +31,7 @@ namespace PowerPing
     public class PingAttributes
     {
         // Properties
-        public string InputtedAddress { get; set; } // Address provided by user
+        public string Host { get; set; } // Name of host being pinged
         public string Address { get; set; } // Address to send the ping to
         public string Message { get; set; } // Message to store with in ICMP message field
         public int Interval { get; set; } // Time interval between sending each ping
@@ -50,7 +50,7 @@ namespace PowerPing
         public PingAttributes()
         {
             // Default attributes
-            InputtedAddress = "localhost";
+            Host = "localhost";
             Address = "127.0.0.1";
             Message = "R U Alive?";
             Interval = 1000;
