@@ -121,7 +121,7 @@ namespace PowerPing
                     PowerPing.Display.CapturedPacket(response, remoteEndPoint.ToString(), DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead);
 
                     // Store results
-                    results.SetPacketType(response.type);
+                    results.CountPacketType(response.type);
                     results.Received++;
 
                     if (cancelEvent.WaitOne(0))
@@ -146,8 +146,9 @@ namespace PowerPing
         }
         /// <summary>
         /// ICMP Traceroute
+        /// Not implemented yet
         /// </summary>
-        public void Trace() { }
+        public void Trace() { throw new NotImplementedException(); }
         /// <summary>
         /// Network scanning method.
         ///
@@ -406,7 +407,7 @@ namespace PowerPing
                     // Send ping request
                     sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
                     responseTimer.Start();
-                    try { checked { Results.Sent++; } }
+                    try { Results.Sent++; }
                     catch (OverflowException) { Results.HasOverflowed = true; }
 
                     // Wait for response
@@ -422,10 +423,10 @@ namespace PowerPing
                         PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress? attrs.Host : ep.ToString(), index, responseTimer.Elapsed, bytesRead);
 
                     // Store response info
-                    try { checked { Results.Received++; } }
+                    try { Results.Received++; }
                     catch (OverflowException) { Results.HasOverflowed = true; }
-                    Results.SetPacketType(response.type);
-                    Results.SetCurResponseTime(responseTimer.Elapsed.TotalMilliseconds);
+                    Results.CountPacketType(response.type);
+                    Results.SaveResponseTime(responseTimer.Elapsed.TotalMilliseconds);
                     
 		            if (attrs.BeepLevel == 2)
                         try { Console.Beep(); }
@@ -437,9 +438,9 @@ namespace PowerPing
                     if (Display.ShowOutput)
                         PowerPing.Display.Error("General transmit error");
 
-                    Results.SetCurResponseTime(-1);
+                    Results.SaveResponseTime(-1);
 
-                    try { checked { Results.Lost++; } }
+                    try { Results.Lost++; }
                     catch (OverflowException) { Results.HasOverflowed = true; }
                 }
                 catch (SocketException)
@@ -450,9 +451,9 @@ namespace PowerPing
                         try { Console.Beep(); }
                         catch (Exception) { Results.HasOverflowed = true; }
 
-                    Results.SetCurResponseTime(-1);
+                    Results.SaveResponseTime(-1);
 
-                    try { checked { Results.Lost++; } }
+                    try { Results.Lost++; }
                     catch (OverflowException) { Results.HasOverflowed = true; }
                 }
                 catch (Exception)
@@ -460,9 +461,9 @@ namespace PowerPing
                     if (Display.ShowOutput)
                         PowerPing.Display.Error("General error occured");
 
-                    Results.SetCurResponseTime(-1);
+                    Results.SaveResponseTime(-1);
 
-                    try { checked { Results.Lost++; } }
+                    try { Results.Lost++; }
                     catch (OverflowException) { Results.HasOverflowed = true; }
                 }
                 finally
