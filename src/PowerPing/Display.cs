@@ -34,7 +34,7 @@ namespace PowerPing
     /// Display class, responsible for displaying all output from PowerPing
     /// (except for graph output) designed for console output (and also stdio)
     /// </summary>
-    class Display
+    public static class Display
     {
         // Properties
         public static bool Short = false;
@@ -58,7 +58,7 @@ namespace PowerPing
 
         // Stores console cursor position, used for updating text at position
         // (IEquatable used for performance comparison)
-        private struct CursorPosition : IEquatable<CursorPosition> 
+        private struct CursorPosition
         {
             public int Left;
             public int Top;
@@ -67,12 +67,6 @@ namespace PowerPing
             {
                 Left = l;
                 Top = t;
-            }
-
-            public bool Equals(CursorPosition other)
-            {
-                if (other.Equals(null)) return false;
-                return (this.Equals(other));
             }
 
             public void SetToPosition()
