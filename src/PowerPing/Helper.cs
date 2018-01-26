@@ -170,11 +170,12 @@ namespace PowerPing
                 IPAddress hostAddr = IPAddress.Parse(address);
                 IPHostEntry hostInfo = Dns.GetHostByAddress(hostAddr);
                 alias = hostInfo.HostName;
-            } catch (Exception) { }
+            } catch (Exception) { } // Silently continue on lookup error
 
-            if (alias == "")
+            if (alias == "") {
                 PowerPing.Display.Error("PowerPing could not find host [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
-
+            }
+            
             return alias;
         }
 

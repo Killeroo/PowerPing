@@ -49,7 +49,7 @@ namespace PowerPing
         public bool HasOverflowed { get; set; } // Specifies if any of the results have overflowed
 
         // Local variables
-        private Stopwatch operationTimer = new Stopwatch();
+        private readonly Stopwatch operationTimer = new Stopwatch();
         private ulong sum  = 0; // Sum off all reply times
 
         public PingResults()
