@@ -96,7 +96,6 @@
     <Compile Include="..\PowerPing\PingResults.cs" />
     <Compile Include="..\PowerPing\Program.cs" />
     <Compile Include="..\PowerPing\Properties\AssemblyInfo.cs" />
-    <Compile Include="DisplayProperties.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\PowerPing\Properties\App.config">
