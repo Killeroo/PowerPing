@@ -32,7 +32,7 @@ using System.Threading;
 
 namespace PowerPing
 {
-    class Program
+    static class Program
     {
         private static Ping p = new Ping();
         private static Graph g;
@@ -65,16 +65,13 @@ namespace PowerPing
             }
 
             // Loop through arguments
-            try
-            {
-                checked
-                {
-                    for (int count = 0; count < args.Length; count++)
-                    {
+            try {
+                checked {
+
+                    for (int count = 0; count < args.Length; count++) {
                         curArg = count;
 
-                        switch (args[count])
-                        {
+                        switch (args[count]) {
                             case "/version":
                             case "-version":
                             case "--version":
@@ -308,7 +305,6 @@ namespace PowerPing
                             case "/ti":
                             case "-ti":
                             case "--ti": // Timing option
-                                int 
                                 switch (args[count + 1].ToLowerInvariant()) {
                                     case "0":
                                     case "paranoid":
@@ -445,33 +441,25 @@ namespace PowerPing
                         }
                     }
                 }
-            }
-            catch (IndexOutOfRangeException)
-            {
+            } catch (IndexOutOfRangeException) {
                 PowerPing.Display.Error("Missing argument parameter", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
                 PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for help.");
                 Helper.Pause();
                 return;
-            }
-            catch (OverflowException)
-            {
+            } catch (OverflowException) {
                 PowerPing.Display.Error("Overflow while converting", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing " + args[curArg] + ">>>" + args[curArg + 1] + "<<<\"", ConsoleColor.Red);
                 PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for help.");
                 Helper.Pause();
                 return;
-            }
-            catch (ArgumentFormatException)
-            {
+            } catch (ArgumentFormatException) {
                 PowerPing.Display.Error("Invalid argument or incorrect parameter", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
                 PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for help.");
                 Helper.Pause();
                 return;
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 PowerPing.Display.Error("A " + e.GetType().ToString().Split('.').Last() + " Exception Occured", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
                 PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for more info.");
@@ -480,25 +468,30 @@ namespace PowerPing
             }
 
             // Find address
-            if (opMode.Equals("") || opMode.Equals("flooding") || opMode.Equals("graphing") || opMode.Equals("compactGraph") || opMode.Equals("location"))
-            {
-                if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown && Uri.CheckHostName(args.Last()) == UriHostNameType.Unknown)
-                    PowerPing.Display.Error("Unknown host", true, true);
+            if (opMode.Equals("") || opMode.Equals("flooding") || opMode.Equals("graphing") 
+                || opMode.Equals("compactGraph") || opMode.Equals("location")) {
 
-                if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown)
+                if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown 
+                    && Uri.CheckHostName(args.Last()) == UriHostNameType.Unknown) {
+                    PowerPing.Display.Error("Unknown host", true, true);
+                }
+
+                if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown) {
                     attributes.Host = args.Last();
-                else
+                } else {
                     attributes.Host = args.First();
+                }
             }
 
             // Add Control C event handler 
-            if (opMode.Equals("") || opMode.Equals("flooding") || opMode.Equals("graphing") || opMode.Equals("compactgraph")) // add graphing and compact graphing
+            if (opMode.Equals("") || opMode.Equals("flooding") || opMode.Equals("graphing") 
+                || opMode.Equals("compactgraph")) {
                 Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
+            }
 
             // Select correct function using opMode 
             Thread thread;
-            switch (opMode)
-            {
+            switch (opMode) {
                 case "listening":
                     p.Listen();
                     break;
@@ -528,13 +521,19 @@ namespace PowerPing
                     p.Scan(args.Last());
                     break;
                 case "":
+                    // Send ping normally
                     thread = new Thread(() =>
                     {
                         p.Send(attributes);
                     });
                     thread.Start();
-                    // Send ping normally
-                    //p.Send(attributes);
+                    break;
+                default:
+                    thread = new Thread(() =>
+                    {
+                        p.Send(attributes);
+                    });
+                    thread.Start();
                     break;
             }
            
@@ -546,7 +545,7 @@ namespace PowerPing
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args"></param>
-        protected static void ExitHandler(object sender, ConsoleCancelEventArgs args)
+        private static void ExitHandler(object sender, ConsoleCancelEventArgs args)
         {
             // Cancel termination
             args.Cancel = true;

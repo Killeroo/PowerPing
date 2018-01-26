@@ -49,45 +49,44 @@ namespace PowerPing
         {
             string loc = null;
 
-            try
-            {
-                using (var objClient = new System.Net.WebClient())
-                {
+            try {
+
+                using (var objClient = new System.Net.WebClient()) {
+
                     var strFile = objClient.DownloadString("http://freegeoip.net/xml/" + addr);
 
                     XmlDocument xmlDoc = new XmlDocument();
                     xmlDoc.LoadXml(strFile);
                     XmlNodeList elements = (xmlDoc.DocumentElement).ChildNodes;
 
-                    if (detailed)
-                    {
+                    if (detailed) {
                         Console.WriteLine("Queried address: --{0}--", addr);
-                        foreach (XmlElement element in elements)
+                        foreach (XmlElement element in elements) {
                             Console.WriteLine(element.Name + ": " + (element.InnerText == "" ? "NA" : element.InnerText));
-                        //Console.WriteLine("DNS Lookup: --{0}--", Helper.VerifyAddress(addr, AddressFamily.InterNetwork));
-                    }
-                    else
-                    {
-                        if (elements[2].InnerText != "")
+                        }
+                    } else {
+                        if (elements[2].InnerText != "") {
                             loc = "[" + elements[2].InnerText;
-                        if (elements[3].InnerText != "")
+                        }
+                        if (elements[3].InnerText != "") {
                             loc = loc + ", " + elements[3].InnerText;
-                        if (elements[5].InnerText != "")
+                        }
+                        if (elements[5].InnerText != "") {
                             loc = loc + ", " + elements[5].InnerText;
+                        }
                         loc += "]";
                     }
                 }
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 loc = "[Location unavaliable]";
                 Console.WriteLine("[Location unavaliable]");
             }
             
             Console.WriteLine(loc);
 
-            if (!Display.NoInput)
+            if (!Display.NoInput) {
                 Helper.Pause();
+            }
 
             return loc;
         }
@@ -99,18 +98,20 @@ namespace PowerPing
         public static string GetLocalIPAddress()
         {
             // If not connected to a network return null
-            if (!NetworkInterface.GetIsNetworkAvailable())
+            if (!NetworkInterface.GetIsNetworkAvailable()) {
                 return null;
+            }
 
             // Get all addresses assocatied with this computer
             var hostAddress = Dns.GetHostEntry(Dns.GetHostName());
 
             // Loop through each associated address
-            foreach (var address in hostAddress.AddressList)
+            foreach (var address in hostAddress.AddressList) {
                 // If address is IPv4
-                if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                    // Return the address
+                if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) {
                     return address.ToString();
+                }
+            }
 
             return null;
         }
@@ -121,37 +122,35 @@ namespace PowerPing
         /// <param name="address"></param>
         /// <param name="af"></param>
         /// <returns></returns>
-        /// CHANGE NAME -> AddressLookup
         public static string AddressLookup(string address, AddressFamily af)
         {
             IPAddress ipAddr = null;
 
             // Check address format
-            if (Uri.CheckHostName(address) == UriHostNameType.Unknown)
+            if (Uri.CheckHostName(address) == UriHostNameType.Unknown) {
                 PowerPing.Display.Error("PowerPing could not resolve host [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
+            }
 
             // Only resolve address if not already in IP address format
-            if (IPAddress.TryParse(address, out ipAddr))
+            if (IPAddress.TryParse(address, out ipAddr)) {
                 return ipAddr.ToString();
+            }
 
-            try
-            {
+            try {
                 // Query DNS for host address
-                foreach (IPAddress a in Dns.GetHostEntry(address).AddressList)
-                {
+                foreach (IPAddress a in Dns.GetHostEntry(address).AddressList) {
                     // Run through addresses until we find one that matches the family we are forcing
-                    if (a.AddressFamily == af)
-                    {
+                    if (a.AddressFamily == af) {
                         ipAddr = a;
                         break;
                     }
                 }
-            }
-            catch (Exception) { }
+            } catch (Exception) { } // Silently continue on lookup error
 
             // If no address resolved then exit
-            if (ipAddr == null)
+            if (ipAddr == null) {
                 PowerPing.Display.Error("PowerPing could not find host [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
+            }
 
             return ipAddr.ToString();
         }
@@ -166,13 +165,12 @@ namespace PowerPing
         public static string ReverseLookup(string address)
         {
             string alias = "";
-            try 
-            {
+
+            try {
                 IPAddress hostAddr = IPAddress.Parse(address);
                 IPHostEntry hostInfo = Dns.GetHostByAddress(hostAddr);
                 alias = hostInfo.HostName;
-            }
-            catch (Exception) { }
+            } catch (Exception) { }
 
             if (alias == "")
                 PowerPing.Display.Error("PowerPing could not find host [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
@@ -193,9 +191,9 @@ namespace PowerPing
             try { Console.ReadKey(); }
             catch (InvalidOperationException) { Console.Read(); }
             
-
-            if (exit)
+            if (exit) {
                 Environment.Exit(0);
+            }
         }
 
         /// <summary>
@@ -240,8 +238,9 @@ namespace PowerPing
 
             var buffer = new byte[2048];
 
-            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read)) {
                 stream.Read(buffer, 0, 2048);
+            }
 
             var offset = BitConverter.ToInt32(buffer, c_PeHeaderOffset);
             var secondsSince1970 = BitConverter.ToInt32(buffer, offset + c_LinkerTimestampOffset);

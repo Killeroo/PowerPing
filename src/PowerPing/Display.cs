@@ -34,24 +34,24 @@ namespace PowerPing
     /// Display class, responsible for displaying all output from PowerPing
     /// (except for graph output) designed for console output (and also stdio)
     /// </summary>
-    public static class Display
+    public class Display
     {
         // Properties
-        public static bool Short = false;
-        public static bool NoColor = false;
-        public static bool NoInput = false;
-        public static bool UseSymbols = false;
-        public static bool ShowOutput = true;
-        public static bool ShowMessages = false;
-        public static bool ShowTimeStamp = false;
-        public static bool ShowTimeouts = true;
-        public static bool ShowRequests = false;
-	    public static bool ShowReplies = true;
-        public static bool UseInputtedAddress = false;
-        public static bool UseResolvedAddress = false;
-        public static int DecimalPlaces = 1;
-        public static ConsoleColor DefaultForegroundColor;
-        public static ConsoleColor DefaultBackgroundColor;
+        public static bool Short { get; set; } = false;
+        public static bool NoColor { get; set; } = false;
+        public static bool NoInput { get; set; } = false;
+        public static bool UseSymbols { get; set; } = false;
+        public static bool ShowOutput { get; set; } = true;
+        public static bool ShowMessages { get; set; } = false;
+        public static bool ShowTimeStamp { get; set; } = false;
+        public static bool ShowTimeouts { get; set; } = true;
+        public static bool ShowRequests { get; set; } = false;
+	    public static bool ShowReplies { get; set; } = true;
+        public static bool UseInputtedAddress { get; set; } = false;
+        public static bool UseResolvedAddress { get; set; } = false;
+        public static int DecimalPlaces { get; set; } = 1;
+        public static ConsoleColor DefaultForegroundColor { get; set; } 
+        public static ConsoleColor DefaultBackgroundColor { get; set; } 
 
         const string REPLY_SYMBOL = ".";
         const string TIMEOUT_SYMBOL = "!";
@@ -464,8 +464,9 @@ namespace PowerPing
         /// </summary>
         public static void RequestPacket(ICMP packet, String address, int index)
         {
-            if (!Display.ShowOutput)
+            if (!Display.ShowOutput) {
                 return;
+            }
 
             // Show shortened info
             if (Short) {
@@ -747,7 +748,7 @@ namespace PowerPing
         public static void ListenResults(PingResults results)
         {
             Console.WriteLine("Captured Packets:");
-            Console.WriteLine("     Caught [ {0} ] Lost [ {1} ]");
+            //Console.WriteLine("     Caught [ {0} ] Lost [ {1} ]");
 
             Console.WriteLine("Packet types:");
             Console.Write("     ");
@@ -807,17 +808,17 @@ namespace PowerPing
         /// <summary>
         /// Display error message
         /// </summary>
-        /// <param name="errorMessage">Error message to display</param>
+        /// <param name="errMsg">Error message to display</param>
         /// <param name="exit">Whether to exit program after displaying error</param>
-        public static void Error(String errorMessage, bool exit = false, bool pause = false, bool newline = true)
+        public static void Error(String errMsg, bool exit = false, bool pause = false, bool newline = true)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
 
             // Write error message
             if (newline) {
-                Console.WriteLine("ERROR: " + errorMessage);
+                Console.WriteLine("ERROR: " + errMsg);
             } else {
-                Console.Write("ERROR: " + errorMessage);
+                Console.Write("ERROR: " + errMsg);
             }
 
             // Reset console colours
@@ -834,7 +835,7 @@ namespace PowerPing
         /// <summary>
         /// Display a general message
         /// </summary>
-        public static void Message(String message, ConsoleColor color = ConsoleColor.DarkGray, bool newline = true)
+        public static void Message(String msg, ConsoleColor color = ConsoleColor.DarkGray, bool newline = true)
         {
             if (color == ConsoleColor.DarkGray) {
                 color = DefaultForegroundColor; // Use default foreground color if gray is being used
@@ -843,9 +844,9 @@ namespace PowerPing
             Console.ForegroundColor = color;
 
             if (newline) {
-                Console.WriteLine(message);
+                Console.WriteLine(msg);
             } else {
-                Console.Write(message);
+                Console.Write(msg);
             }
 
             ResetColor();
