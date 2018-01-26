@@ -34,7 +34,7 @@ namespace PowerPing
     /// Display class, responsible for displaying all output from PowerPing
     /// (except for graph output) designed for console output (and also stdio)
     /// </summary>
-    public class Display
+    class Display
     {
         // Properties
         public static bool Short { get; set; } = false;
@@ -50,7 +50,7 @@ namespace PowerPing
         public static bool UseInputtedAddress { get; set; } = false;
         public static bool UseResolvedAddress { get; set; } = false;
         public static int DecimalPlaces { get; set; } = 1;
-        public static ConsoleColor DefaultForegroundColor { get; set; } 
+        public static ConsoleColor DefaultForegroundColor { get; set; }
         public static ConsoleColor DefaultBackgroundColor { get; set; } 
 
         const string REPLY_SYMBOL = ".";

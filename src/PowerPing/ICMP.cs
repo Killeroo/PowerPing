@@ -75,8 +75,7 @@ namespace PowerPing
             int packetSize = messageSize + 8;
             int index = 0;
 
-            while (index < packetSize)
-            {
+            while (index < packetSize) {
                 chksm += Convert.ToUInt32(BitConverter.ToUInt16(data, index));
                 index += 2;
             }
