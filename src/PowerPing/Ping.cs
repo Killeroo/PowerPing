@@ -296,7 +296,7 @@ namespace PowerPing
         /// </summary>
         /// <param name="family">AddressFamily to use (IP4 or IP6)</param>
         /// <returns>A raw socket</returns>
-        private Socket CreateRawSocket(AddressFamily family)
+        private static Socket CreateRawSocket(AddressFamily family)
         {
             Socket s = null;
             try {

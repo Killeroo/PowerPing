@@ -77,7 +77,7 @@ namespace PowerPing
 
         public void SaveResponseTime(double time)
         {
-            if (time == -1) {
+            if (time == -1f) {
                 CurTime = 0;
                 return;
             }

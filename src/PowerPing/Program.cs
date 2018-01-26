@@ -520,15 +520,8 @@ namespace PowerPing
                 case "scanning":
                     p.Scan(args.Last());
                     break;
-                case "":
-                    // Send ping normally
-                    thread = new Thread(() =>
-                    {
-                        p.Send(attributes);
-                    });
-                    thread.Start();
-                    break;
                 default:
+                    // Send ping normally
                     thread = new Thread(() =>
                     {
                         p.Send(attributes);
@@ -554,8 +547,9 @@ namespace PowerPing
             p.Dispose();
 
             // Stop graph if it is running
-            if (g != null)
+            if (g != null) {
                 g.Dispose();
+            }
 
             // Reset console colour
             Display.ResetColor();

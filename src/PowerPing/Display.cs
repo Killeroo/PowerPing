@@ -748,7 +748,7 @@ namespace PowerPing
         public static void ListenResults(PingResults results)
         {
             Console.WriteLine("Captured Packets:");
-            //Console.WriteLine("     Caught [ {0} ] Lost [ {1} ]");
+            Console.WriteLine("     Caught [ 0 ] Lost [ 0 ]");
 
             Console.WriteLine("Packet types:");
             Console.Write("     ");

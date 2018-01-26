@@ -44,9 +44,9 @@ namespace PowerPing
         public int EndCursorPosY = 0; // Position to move cursor to when graph exits
 
         // Local variable declaration
-        private Ping graphPing = new Ping();
-        private PingAttributes graphPingAttrs = new PingAttributes();
-        private List<String[]> graphColumns = new List<string[]>();
+        private readonly Ping graphPing = new Ping();
+        private readonly PingAttributes graphPingAttrs = new PingAttributes();
+        private readonly List<String[]> graphColumns = new List<string[]>();
         private bool isGraphSetup = false;
         private bool cancelFlag = false;
         private bool running = false;
@@ -152,8 +152,9 @@ namespace PowerPing
 
             for (int x = 0; x < graphColumns.Count; x++) {
                 // Change colour for most recent column 
-                if (x == graphColumns.Count - 1)
+                if (x == graphColumns.Count - 1) {
                     Console.ForegroundColor = ConsoleColor.Green;
+                }
                 DrawBar(graphColumns[x]);
                 Console.CursorLeft++;
             }
