@@ -1,4 +1,28 @@
-﻿using System;
+﻿/*
+MIT License - PowerPing 
+
+Copyright (c) 2017 Matthew Carney
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+using System;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net;
@@ -10,20 +34,18 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 
-/// <summary>
-/// For constructing and sending ping ping packets
-/// </summary>
-
 namespace PowerPing
 {
-
-    public class Ping : IDisposable
+    /// <summary>
+    /// Ping Class, used for constructing and sending ICMP packets.
+    /// Also contains other ping-like functions such as flooding, listening
+    /// scanning and others.
+    /// </summary>
+    class Ping : IDisposable
     {
         // Properties
         public PingResults Results { get; private set; } = new PingResults(); // Store current ping results
         public PingAttributes Attributes { get; private set; } = new PingAttributes(); // Stores the current operation's attributes
-        public bool ShowOutput { get; set; } = true;
-        public bool ShowRequest { get; set; } = false;
         public bool IsRunning { get; private set; } = false;
         public int Threads { get; set; } = 5;
 
@@ -32,29 +54,37 @@ namespace PowerPing
         public Ping() { }
 
         /// <summary>
-        /// Sends a set of ping packets
+        /// Sends a set of ping packets, results are stores within
+        /// Ping.Results of the called object
+        ///
+        /// Acts as a basic wrapper to SendICMP and feeds it a specific
+        /// set of PingAttributes 
         /// </summary>
         public void Send(PingAttributes attrs)
         {
             // Load user inputted attributes
-            string inputAddress = attrs.Address; 
             this.Attributes = attrs;
 
             // Lookup address
-            Attributes.Address = PowerPing.Helper.VerifyAddress(Attributes.Address, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+            Attributes.Address = PowerPing.Helper.AddressLookup(Attributes.Host, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
-            if (ShowOutput)
-                PowerPing.Display.PingIntroMsg(inputAddress, this);
+            PowerPing.Display.PingIntroMsg(Attributes.Host, attrs);
+
+            if (Display.UseResolvedAddress)
+                Attributes.Host = Helper.ReverseLookup(Attributes.Address);
 
             // Perform ping operation and store results
             this.SendICMP(Attributes);
 
-            if (ShowOutput)
-                PowerPing.Display.PingResults(this);
+            PowerPing.Display.PingResults(this);
 
         }
         /// <summary>
-        /// Listen for an ICMPv4 packets
+        /// Listens for all ICMPv4 activity on localhost.
+        ///
+        /// Does this by setting a raw socket to SV_IO_ALL which
+        /// will recieve all packets and filters to just show
+        /// ICMP packets. Runs until ctrl-c or exit
         /// </summary>
         public void Listen()
         {
@@ -68,8 +98,6 @@ namespace PowerPing
                     localAddress = ip;
 
             IsRunning = true;
-
-            
             try
             {
                 // Create listener socket
@@ -121,9 +149,15 @@ namespace PowerPing
         /// </summary>
         public void Trace() { }
         /// <summary>
-        /// Network scan method 
+        /// Network scanning method.
+        ///
+        /// Uses pings to scan a IP address range and identify hosts
+        /// that are active.
+        ///
+        /// range should be in format 192.0.0.1-255, where - denotes the range
+        /// This can be specified at any octlet of the address (192.0.1-100.1.255)
         /// </summary>
-        /// <param name="range"></param>
+        /// <param name="range">Range of addresses to scan</param>
         public void Scan(string range, bool recursing = false)
         {
             List<string> scanList = new List<string>(); // List of addresses to scan
@@ -139,7 +173,7 @@ namespace PowerPing
             attrs.Timeout = 500;
             attrs.Interval = 0;
             attrs.Count = 1;
-            ShowOutput = false;
+            Display.ShowOutput = false;
 
             // Check format of address (for '-'s and disallow multipl '-'s in one segment)
             if (!range.Contains("-"))
@@ -210,7 +244,7 @@ namespace PowerPing
             PowerPing.Display.EndScanResults(scanList.Count, activeHosts, activeHostTimes);
         }
         /// <summary>
-        /// ICMP flood
+        /// Sends high volume of ping packets
         /// </summary>
         public void Flood(string address)
         {
@@ -219,7 +253,7 @@ namespace PowerPing
             Ping p = new Ping();
 
             // Verify address
-            attrs.Address = Helper.VerifyAddress(address, AddressFamily.InterNetwork);
+            attrs.Address = Helper.AddressLookup(address, AddressFamily.InterNetwork);
 
             // Setup ping attributes
             attrs.Interval = 0;
@@ -228,7 +262,7 @@ namespace PowerPing
             attrs.Continous = true;
 
             // Disable output for faster speeds
-            p.ShowOutput = false;
+            Display.ShowOutput = false;
 
             // Start flood thread
             var thread = new Thread(() =>
@@ -243,7 +277,7 @@ namespace PowerPing
             while (IsRunning)
             {
                 // Update results text
-                Display.FloodProgress(p.Results);
+                Display.FloodProgress(p.Results, address);
 
                 // Wait before updating (save our CPU load) and check for cancel event
                 if (cancelEvent.WaitOne(1000))
@@ -260,6 +294,19 @@ namespace PowerPing
             
         }
 
+        /// <summary>
+        /// Creates a raw socket for ping operations.
+        ///
+        /// We have to use raw sockets here as we are using our own 
+        /// implementation of ICMP and only raw sockets will allow us
+        /// to send whatever data we want through it.
+        /// 
+        /// The downside is this is why we need to run as administrator
+        /// but it allows us the greater degree of control over the packets
+        /// that we need
+        /// </summary>
+        /// <param name="family">AddressFamily to use (IP4 or IP6)</param>
+        /// <returns>A raw socket</returns>
         private Socket CreateRawSocket(AddressFamily family)
         {
             Socket s = null;
@@ -273,7 +320,25 @@ namespace PowerPing
             }
             return s;
         }
-        public PingResults SendICMP(PingAttributes attrs)
+        /// <summary>
+        /// Core ICMP sending method (used by all other functions)
+        /// Takes a set of attributes, performs operation and returns a set of results.
+        ///
+        /// Works specifically by creating a raw socket, creating a ICMP object and
+        /// other socket properties (timeouts, interval etc) using the 
+        /// inputted properties (attrs), then performs ICMP operation 
+        /// before cleaning up and returning results.
+        ///
+        /// NOTE: There is a weird hack here, PingAttributes used are 
+        /// the parameter to the argument as opposed to the ones stored
+        /// in this classes Ping.Attributes (similar case with PingResults).
+        /// This is due to some functions (flood, scan) requiring to be run on seperate threads
+        /// and needing us to pass specific attributes directly to the object
+        /// trust me it works (I think..)
+        /// </summary>
+        /// <param name="attrs">Properties of pings to be sent</param>
+        /// <returns>Set of ping results</returns>
+        private PingResults SendICMP(PingAttributes attrs)
         {
             IPEndPoint iep = null;
             EndPoint ep = null;
@@ -316,22 +381,33 @@ namespace PowerPing
                 else
                     IsRunning = true;
 
-                // Update ICMP checksum and seq
+                if (attrs.RandomMsg)
+                {
+                    payload = Encoding.ASCII.GetBytes(Helper.RandomString());
+                    Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
+                }
+                else
+                {
+                    // Include sequence number in ping message
+                    Buffer.BlockCopy(BitConverter.GetBytes(index), 0, packet.message, 2, 2); 
+                }
+
+                // Update packet checksum
                 packet.checksum = 0;
-                Buffer.BlockCopy(BitConverter.GetBytes(index), 0, packet.message, 2, 2); // Include sequence number in ping message
                 UInt16 chksm = packet.GetChecksum();
                 packet.checksum = chksm;
 
                 try
                 {
-                    // Show ping request
-                    if (ShowRequest)
-                        Display.RequestPacket(packet, attrs.Address, index);
+                    // Show request packet
+                    if (Display.ShowRequests)
+                        Display.RequestPacket(packet, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : attrs.Address, index);
 
                     // Send ping request
                     sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
                     responseTimer.Start();
-                    Results.Sent++;
+                    try { checked { Results.Sent++; } }
+                    catch (OverflowException) { Results.HasOverflowed = true; }
 
                     // Wait for response
                     byte[] buffer = new byte[5096];
@@ -342,34 +418,52 @@ namespace PowerPing
                     ICMP response = new ICMP(buffer, bytesRead);
 
                     // Display reply packet
-                    if (ShowOutput)
-                        PowerPing.Display.ReplyPacket(response, ep.ToString(), index, responseTimer.Elapsed, bytesRead);
+                    if (Display.ShowReplies)
+                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress? attrs.Host : ep.ToString(), index, responseTimer.Elapsed, bytesRead);
 
                     // Store response info
+                    try { checked { Results.Received++; } }
+                    catch (OverflowException) { Results.HasOverflowed = true; }
                     Results.SetPacketType(response.type);
                     Results.SetCurResponseTime(responseTimer.Elapsed.TotalMilliseconds);
-                    Results.Received++;
+                    
+		            if (attrs.BeepLevel == 2)
+                        try { Console.Beep(); }
+                        catch (Exception) { }
+                    
                 }
                 catch (IOException)
                 {
-                    if (ShowOutput)
+                    if (Display.ShowOutput)
                         PowerPing.Display.Error("General transmit error");
+
                     Results.SetCurResponseTime(-1);
-                    Results.Lost++;
+
+                    try { checked { Results.Lost++; } }
+                    catch (OverflowException) { Results.HasOverflowed = true; }
                 }
                 catch (SocketException)
                 {
-                    if (ShowOutput)
-                        PowerPing.Display.PingTimeout(index);
+                    PowerPing.Display.Timeout(index);
+		    
+		            if (attrs.BeepLevel == 1)
+                        try { Console.Beep(); }
+                        catch (Exception) { Results.HasOverflowed = true; }
+
                     Results.SetCurResponseTime(-1);
-                    Results.Lost++;
+
+                    try { checked { Results.Lost++; } }
+                    catch (OverflowException) { Results.HasOverflowed = true; }
                 }
                 catch (Exception)
                 {
-                    if (ShowOutput)
+                    if (Display.ShowOutput)
                         PowerPing.Display.Error("General error occured");
+
                     Results.SetCurResponseTime(-1);
-                    Results.Lost++;
+
+                    try { checked { Results.Lost++; } }
+                    catch (OverflowException) { Results.HasOverflowed = true; }
                 }
                 finally
                 {
