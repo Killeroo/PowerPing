@@ -59,7 +59,6 @@ namespace PowerPing
         const string HELP_MESSAGE = @"";
 
         // Stores console cursor position, used for updating text at position
-        // (IEquatable used for performance comparison)
         private struct CursorPosition
         {
             public int Left;

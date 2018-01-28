@@ -58,8 +58,7 @@ namespace PowerPing
             Display.Version();
 
             // Check if no arguments
-            if (args.Length == 0)
-            {
+            if (args.Length == 0) {
                 PowerPing.Display.Help();
                 return;
             }

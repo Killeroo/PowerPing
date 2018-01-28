@@ -38,15 +38,16 @@ namespace PowerPing
         public int Interval { get; set; } // Time interval between sending each ping
         public int Timeout { get; set; } // Recieve timeout (milliseconds)
         public int Count { get; set; } // Number of pings to send
-        public int Ttl { get; set; } // Time to live
+        public int Ttl { get; set; } // Time to live                                
+        public int BeepLevel { get; set; } // Beep level - 1 to beep on timeout, 2 for beep on reply, 0 for no beep
+        public int RecieveBufferSize { get; set; }
         public byte Type { get; set; } // ICMP type field value
         public byte Code { get; set; } // ICMP code field value
         public bool Continous { get; set; } // Continously send pings
         public bool ForceV4 { get; set; } // Force use of IPv4
         public bool ForceV6 { get; set; } // Force use of IPv6 
         public bool RandomMsg { get; set; } // Fills ICMP message field with random characters    
-        public bool UsePingCookies { get; set; } // Stores timestamp and seq num in ICMP data for more accurate readings                                
-	    public int BeepLevel { get; set; } // Beep level - 1 to beep on timeout, 2 for beep on reply, 0 for no beep
+        public bool UsePingCookies { get; set; } // Stores timestamp and seq num in ICMP data for more accurate readings
         public string[] AddressList { get; set; } // Optional attribute: Used when scanning, stores addresses to ping
 
         public PingAttributes()
@@ -68,6 +69,7 @@ namespace PowerPing
             UsePingCookies = false;
 	        BeepLevel = 0;
             AddressList = null;
+            RecieveBufferSize = 32; 
         }
     }
 

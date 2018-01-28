@@ -47,7 +47,8 @@ namespace PowerPing
         public PingResults Results { get; private set; } = new PingResults(); // Store current ping results
         public PingAttributes Attributes { get; private set; } = new PingAttributes(); // Stores the current operation's attributes
         public bool IsRunning { get; private set; } = false;
-        public int Threads { get; set; } = 5;
+
+        const int MAX_BUFFER_SIZE = 65000;
 
         private ManualResetEvent cancelEvent = new ManualResetEvent(false);
 
@@ -222,8 +223,7 @@ namespace PowerPing
                 results = SendICMP(attrs);
                 Display.ScanProgress(scanned, activeHosts.Count, scanList.Count, scanTimer.Elapsed, range, attrs.Address);
 
-                if (results.Lost == 0 && results.ErrorPackets != 1)
-                {
+                if (results.Lost == 0 && results.ErrorPackets != 1) {
                     // If host is active, add to list
                     activeHosts.Add(host);
                     activeHostTimes.Add(results.CurTime);
@@ -372,17 +372,14 @@ namespace PowerPing
                     IsRunning = true;
                 }
 
+                // Fill ICMP message field
                 if (attrs.RandomMsg) {
                     payload = Encoding.ASCII.GetBytes(Helper.RandomString());
                     Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
-                }
-                else if (attrs.UsePingCookies)
-                {
+                } else if (attrs.UsePingCookies) {
                     payload = Encoding.ASCII.GetBytes(DateTime.Now.ToString("HHmmssff") + "#" + index); //fffff
                     Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
-                }
-                else
-                {
+                } else {
                     // Include sequence number in ping message
                     Buffer.BlockCopy(BitConverter.GetBytes(index), 0, packet.message, 2, 2); 
                 }
@@ -393,6 +390,7 @@ namespace PowerPing
                 packet.checksum = chksm;
 
                 try {
+
                     // Show request packet
                     if (Display.ShowRequests) {
                         Display.RequestPacket(packet, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : attrs.Address, index);
@@ -405,9 +403,7 @@ namespace PowerPing
                     catch (OverflowException) { Results.HasOverflowed = true; }
 
                     // Wait for response
-                    //BUFFER SIZE::::::http://www.winsocketdotnetworkprogramming.com/clientserversocketnetworkcommunication8i.html
-                    //receiveBuffer = new byte[Ipv4Header.Ipv4HeaderLength + IcmpHeader.IcmpHeaderLength + pingPayloadLength];
-                    byte[] buffer = new byte[5096];
+                    byte[] buffer = new byte[5096]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
                     bytesRead = sock.ReceiveFrom(buffer, ref ep);
                     responseTimer.Stop();
 
