@@ -32,10 +32,10 @@ using System.Threading;
 
 namespace PowerPing
 {
-    class Program
+    static class Program
     {
         private static Ping p = new Ping();
-        private static Graph g = null;
+        private static Graph g;
 
         /// <summary>
         /// Main entry point of PowerPing
@@ -65,16 +65,13 @@ namespace PowerPing
             }
 
             // Loop through arguments
-            try
-            {
-                checked
-                {
-                    for (int count = 0; count < args.Length; count++)
-                    {
+            try {
+                checked {
+
+                    for (int count = 0; count < args.Length; count++) {
                         curArg = count;
 
-                        switch (args[count])
-                        {
+                        switch (args[count]) {
                             case "/version":
                             case "-version":
                             case "--version":
@@ -91,8 +88,9 @@ namespace PowerPing
                             case "-b":
                             case "--b":
                                 int level = Convert.ToInt32(args[count + 1]);
-                                if (level > 2)
+                                if (level > 2) {
                                     PowerPing.Display.Error("Invalid beep level, please use a number between 0 & 2", true, true);
+                                }
                                 attributes.BeepLevel = level;
                                 break;
                             case "/count":
@@ -125,8 +123,9 @@ namespace PowerPing
                             case "/m":
                             case "-m":
                             case "--m": // Message
-                                if (args[count + 1].Contains("--") || args[count + 1].Contains("//") || args[count + 1].Contains("-"))
+                                if (args[count + 1].Contains("--") || args[count + 1].Contains("//") || args[count + 1].Contains("-")) {
                                     throw new ArgumentFormatException();
+                                }
                                 attributes.Message = args[count + 1];
                                 break;
                             case "/ttl":
@@ -144,8 +143,9 @@ namespace PowerPing
                             case "-in":
                             case "--in": // Interval
                                 attributes.Interval = Convert.ToInt32(args[count + 1]);
-                                if (attributes.Interval < 1)
+                                if (attributes.Interval < 1) {
                                     PowerPing.Display.Error("Ping interval cannot be less than 1ms", true, true);
+                                }
                                 break;
                             case "/type":
                             case "-type":
@@ -154,8 +154,9 @@ namespace PowerPing
                             case "-pt":
                             case "--pt": // Ping type
                                 var type = Convert.ToByte(args[count + 1]);
-                                if (type > 255)
+                                if (type > 255) {
                                     throw new ArgumentFormatException();
+                                }
                                 attributes.Type = type;
                                 break;
                             case "/code":
@@ -180,9 +181,10 @@ namespace PowerPing
                             case "/4":
                             case "-4":
                             case "--4": // Force ping with IPv4
-                                if (attributes.ForceV6)
+                                if (attributes.ForceV6) {
                                     // Reset IPv6 force if already set
                                     attributes.ForceV6 = false;
+                                }
                                 attributes.ForceV4 = true;
                                 break;
                             case "/ipv6":
@@ -191,9 +193,10 @@ namespace PowerPing
                             case "/6":
                             case "-6":
                             case "--6": // Force ping with IPv6
-                                if (attributes.ForceV4)
+                                if (attributes.ForceV4) {
                                     // Reset IPv4 force if already set
                                     attributes.ForceV4 = false;
+                                }
                                 attributes.ForceV6 = true;
                                 break;
                             case "/help":
@@ -243,8 +246,9 @@ namespace PowerPing
                             case "/dp":
                             case "-dp":
                             case "--dp": // Decimal places
-                                if (Convert.ToInt32(args[count + 1]) > 3 || Convert.ToInt32(args[count + 1]) < 0)
+                                if (Convert.ToInt32(args[count + 1]) > 3 || Convert.ToInt32(args[count + 1]) < 0) {
                                     throw new ArgumentFormatException();
+                                }
                                 Display.DecimalPlaces = Convert.ToInt32(args[count + 1]);
                                 break;
                             case "/symbols":
@@ -269,18 +273,13 @@ namespace PowerPing
                             case "/l":
                             case "-l":
                             case "--l":
-                                if (Convert.ToInt32(args[count + 1]) == 0)
-                                {
+                                if (Convert.ToInt32(args[count + 1]) == 0) {
                                     Display.ShowReplies = true;
                                     Display.ShowRequests = false;
-                                }
-                                else if (Convert.ToInt32(args[count + 1]) == 1)
-                                {
+                                } else if (Convert.ToInt32(args[count + 1]) == 1) {
                                     Display.ShowReplies = false;
                                     Display.ShowRequests = true;
-                                }
-                                else
-                                {
+                                } else {
                                     throw new ArgumentFormatException();
                                 }
                                 break;
@@ -306,8 +305,7 @@ namespace PowerPing
                             case "/ti":
                             case "-ti":
                             case "--ti": // Timing option
-                                switch (args[count + 1].ToLower())
-                                {
+                                switch (args[count + 1].ToLowerInvariant()) {
                                     case "0":
                                     case "paranoid":
                                         attributes.Timeout = 10000;
@@ -443,40 +441,33 @@ namespace PowerPing
                             default:
                                 // Check for invalid argument 
                                 if ((args[count].Contains("--") || args[count].Contains("/") || args[count].Contains("-"))
-                                    & !opMode.Equals("scanning") // (ignore if scanning)
-                                    & args[count].Length < 7) // Ignore args under 7 chars (assume they are an address)
+                                    && !opMode.Equals("scanning") // (ignore if scanning)
+                                    && args[count].Length < 7) { // Ignore args under 7 chars (assume they are an address)
                                     throw new ArgumentFormatException();
+                                }
                                 break;
                         }
                     }
                 }
-            }
-            catch (IndexOutOfRangeException)
-            {
+            } catch (IndexOutOfRangeException) {
                 PowerPing.Display.Error("Missing argument parameter", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
                 PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for help.");
                 Helper.Pause();
                 return;
-            }
-            catch (OverflowException)
-            {
+            } catch (OverflowException) {
                 PowerPing.Display.Error("Overflow while converting", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing " + args[curArg] + ">>>" + args[curArg + 1] + "<<<\"", ConsoleColor.Red);
                 PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for help.");
                 Helper.Pause();
                 return;
-            }
-            catch (ArgumentFormatException)
-            {
+            } catch (ArgumentFormatException) {
                 PowerPing.Display.Error("Invalid argument or incorrect parameter", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
                 PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for help.");
                 Helper.Pause();
                 return;
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 PowerPing.Display.Error("A " + e.GetType().ToString().Split('.').Last() + " Exception Occured", false, false, false);
                 PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
                 PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for more info.");
@@ -485,25 +476,30 @@ namespace PowerPing
             }
 
             // Find address
-            if (opMode.Equals("") || opMode.Equals("flooding") || opMode.Equals("graphing") || opMode.Equals("compactGraph") || opMode.Equals("location"))
-            {
-                if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown && Uri.CheckHostName(args.Last()) == UriHostNameType.Unknown)
-                    PowerPing.Display.Error("Unknown host", true, true);
+            if (opMode.Equals("") || opMode.Equals("flooding") || opMode.Equals("graphing") 
+                || opMode.Equals("compactGraph") || opMode.Equals("location")) {
 
-                if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown)
+                if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown 
+                    && Uri.CheckHostName(args.Last()) == UriHostNameType.Unknown) {
+                    PowerPing.Display.Error("Unknown host", true, true);
+                }
+
+                if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown) {
                     attributes.Host = args.Last();
-                else
+                } else {
                     attributes.Host = args.First();
+                }
             }
 
             // Add Control C event handler 
-            if (opMode.Equals("") || opMode.Equals("flooding") || opMode.Equals("graphing") || opMode.Equals("compactgraph")) // add graphing and compact graphing
+            if (opMode.Equals("") || opMode.Equals("flooding") || opMode.Equals("graphing") 
+                || opMode.Equals("compactgraph")) {
                 Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
+            }
 
             // Select correct function using opMode 
             Thread thread;
-            switch (opMode)
-            {
+            switch (opMode) {
                 case "listening":
                     p.Listen();
                     break;
@@ -532,14 +528,13 @@ namespace PowerPing
                 case "scanning":
                     p.Scan(args.Last());
                     break;
-                case "":
+                default:
+                    // Send ping normally
                     thread = new Thread(() =>
                     {
                         p.Send(attributes);
                     });
                     thread.Start();
-                    // Send ping normally
-                    //p.Send(attributes);
                     break;
             }
            
@@ -551,7 +546,7 @@ namespace PowerPing
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args"></param>
-        protected static void ExitHandler(object sender, ConsoleCancelEventArgs args)
+        private static void ExitHandler(object sender, ConsoleCancelEventArgs args)
         {
             // Cancel termination
             args.Cancel = true;
@@ -560,8 +555,9 @@ namespace PowerPing
             p.Dispose();
 
             // Stop graph if it is running
-            if (g != null)
+            if (g != null) {
                 g.Dispose();
+            }
 
             // Reset console colour
             Display.ResetColor();

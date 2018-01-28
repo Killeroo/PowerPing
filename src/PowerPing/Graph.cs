@@ -44,9 +44,9 @@ namespace PowerPing
         public int EndCursorPosY = 0; // Position to move cursor to when graph exits
 
         // Local variable declaration
-        private Ping graphPing = new Ping();
-        private PingAttributes graphPingAttrs = new PingAttributes();
-        private List<String[]> graphColumns = new List<string[]>();
+        private readonly Ping graphPing = new Ping();
+        private readonly PingAttributes graphPingAttrs = new PingAttributes();
+        private readonly List<String[]> graphColumns = new List<string[]>();
         private bool isGraphSetup = false;
         private bool cancelFlag = false;
         private bool running = false;
@@ -77,8 +77,9 @@ namespace PowerPing
             Console.CursorVisible = false;
 
             // Check graph is setup
-            if (!isGraphSetup)
+            if (!isGraphSetup) {
                 Setup();
+            }
 
             // Start drawing graph
             Draw();
@@ -96,11 +97,12 @@ namespace PowerPing
             running = true;
 
             // Drawing loop
-            while (true)
-            {
+            while (true) {
+
                 // Stop look if we get a cancel flag
-                if (cancelFlag)
+                if (cancelFlag) {
                     break; 
+                }
 
                 // Reset position
                 Console.CursorTop = plotStartY;
@@ -113,7 +115,7 @@ namespace PowerPing
                 UpdateLabels(graphPing.Results);
 
                 // Get results from ping and add to graph
-                AddColumnToGraph(CreatColumn((long) graphPing.Results.CurTime));
+                AddColumnToGraph(CreateColumn((long) graphPing.Results.CurTime));
 
                 Console.CursorTop = EndCursorPosY;
 
@@ -132,8 +134,9 @@ namespace PowerPing
         private void Setup() 
         {
             // Determine Xaxis size
-            if (!CompactGraph)
+            if (!CompactGraph) {
                 xAxisLength = Console.WindowWidth - 30;
+            }
 
             DrawBackground();
 
@@ -147,11 +150,11 @@ namespace PowerPing
             // Clear columns space before drawing
             Clear();
 
-            for (int x = 0; x < graphColumns.Count; x++)
-            {
+            for (int x = 0; x < graphColumns.Count; x++) {
                 // Change colour for most recent column 
-                if (x == graphColumns.Count - 1)
+                if (x == graphColumns.Count - 1) {
                     Console.ForegroundColor = ConsoleColor.Green;
+                }
                 DrawBar(graphColumns[x]);
                 Console.CursorLeft++;
             }
@@ -165,12 +168,10 @@ namespace PowerPing
         private void DrawBackground()
         {
             // Draw title
-//            Console.WriteLine("{0}(Graph View)", new String(' ', xAxisLength / 2));
             Console.WriteLine();
 
             // Draw Y axis of graph
-            if (CompactGraph)
-            {
+            if (CompactGraph) {
                 Console.WriteLine("         >1000 ┐");
                 Console.WriteLine("           900 ┤");
                 Console.WriteLine("           800 ┤");
@@ -181,9 +182,7 @@ namespace PowerPing
                 Console.WriteLine("           300 ┤");
                 Console.WriteLine("           200 ┤");
                 Console.WriteLine("           100 ┤");
-            }
-            else
-            {
+            } else {
                 Console.WriteLine("          >1000 ┐");
                 Console.WriteLine("                ┤");
                 Console.WriteLine("           900 ─┤");
@@ -321,21 +320,23 @@ namespace PowerPing
         /// Generate bar for graph
         /// </summary>
         /// <param name="replyTime">Reply time of packet to plot</param>
-        private String[] CreatColumn(long replyTime)
+        private String[] CreateColumn(long replyTime)
         {
             String[] bar;
             int count = 0;
 
             // Work out bar length
-            for (int x = 0; x < replyTime; x = x + (CompactGraph ? 50 : 25))
+            for (int x = 0; x < replyTime; x = x + (CompactGraph ? 50 : 25)) {
                 count++;
+            }
 
-            if (replyTime > 1000)
+            if (replyTime > 1000) {
                 // If reply time over graph Y range draw max size column
                 count = CompactGraph ? 20 : 10;
-            else if (replyTime == 0)
+            } else if (replyTime == 0) {
                 // If no reply dont draw column
                 return new String[] { "─" };
+            }
 
             count = count / 2;
 
@@ -343,40 +344,42 @@ namespace PowerPing
             bar = new String[count + 1];
 
             // Fill bar
-            for (int x = 0; x < count + 1; x = x + 1)// + 2)
+            for (int x = 0; x < count + 1; x = x + 1) {
                 bar[x] = FULL_BAR_BLOCK_CHAR;
+            }
 
             // Replace lowest bar segment
             bar[0] = "▀";
 
             // Work out top segment based on length
-            if (CompactGraph) // Work out for compact graph
-            {
-                if (count + 1 % 2 == 0)
+            if (CompactGraph) { // Work out for compact graph
+                if (count + 1 % 2 == 0) {
                     bar[count] = FULL_BAR_BLOCK_CHAR;
-                else if (replyTime <= 100)
-                    if (replyTime <= 50)
+                } else if (replyTime <= 100) {
+                    if (replyTime <= 50) {
                         bar[count] = "▀";
-                    else
+                    } else {
                         bar[count] = HALF_BAR_BLOCK_CHAR;
-                else
+                    }
+                } else {
                     bar[count] = FULL_BAR_BLOCK_CHAR;
-            }
-            else // Work out for full graph
-            {
-                if (count + 1 % 2 == 0)
+                }
+            } else { // Work out for full graph
+                if (count + 1 % 2 == 0) {
                     bar[count] = FULL_BAR_BLOCK_CHAR;
-                else if (replyTime <= 100)
-                    if (replyTime <= 25)
-                        bar[count] = "▀";//HALF_BAR_BLOCK_CHAR;
-                    else if (replyTime <= 50)
+                } else if (replyTime <= 100) {
+                    if (replyTime <= 25) {
+                        bar[count] = "▀";
+                    } else if (replyTime <= 50) {
                         bar[count] = HALF_BAR_BLOCK_CHAR;
-                    else if (replyTime <= 75)
+                    } else if (replyTime <= 75) {
                         bar[count] = FULL_BAR_BLOCK_CHAR;
-                    else
-                        bar[count] = HALF_BAR_BLOCK_CHAR;//FULL_BAR_BLOCK_CHAR;//"▀";
-                else
-                    bar[count] = FULL_BAR_BLOCK_CHAR;//HALF_BAR_BLOCK_CHAR;
+                    } else {
+                        bar[count] = HALF_BAR_BLOCK_CHAR;
+                    }
+                } else {
+                    bar[count] = FULL_BAR_BLOCK_CHAR;
+                }
             }
 
             return bar;
@@ -390,9 +393,10 @@ namespace PowerPing
             graphColumns.Add(col);
 
             // If number of columns exceeds x Axis length
-            if (graphColumns.Count >= xAxisLength)
+            if (graphColumns.Count >= xAxisLength) {
                 // Remove first element
                 graphColumns.RemoveAt(0);
+            }
         }
         /// <summary>
         /// Clear the plotting area of the graph
@@ -409,8 +413,7 @@ namespace PowerPing
             String blankRow = new String(' ', xAxisLength);
             String bottomRow = new String('─', xAxisLength);
 
-            for (int x = 0; x <= (CompactGraph ? 11 : 21); x++)
-            {
+            for (int x = 0; x <= (CompactGraph ? 11 : 21); x++) {
                 // Draw black spaces
                 Console.Write(blankRow);
                 Console.CursorLeft = plotStartX;
@@ -435,11 +438,11 @@ namespace PowerPing
 
                 cancelFlag = true;
 
-                if (running)
-                {
+                if (running) {
                     // wait till ping stops running
-                    while (running)
+                    while (running) {
                         Task.Delay(25);
+                    }
                 }
 
                 Console.CursorVisible = true;
