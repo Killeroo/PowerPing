@@ -56,6 +56,8 @@ namespace PowerPing
         const string REPLY_SYMBOL = ".";
         const string TIMEOUT_SYMBOL = "!";
 
+        const string HELP_MESSAGE = @"";
+
         // Stores console cursor position, used for updating text at position
         private struct CursorPosition 
         {
