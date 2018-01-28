@@ -69,7 +69,7 @@ namespace PowerPing
             UsePingCookies = false;
 	        BeepLevel = 0;
             AddressList = null;
-            RecieveBufferSize = 32; 
+            RecieveBufferSize = 5096; 
         }
     }
 

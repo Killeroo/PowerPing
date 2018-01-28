@@ -384,6 +384,19 @@ namespace PowerPing
                             case "--co":
                                 attributes.UsePingCookies = true;
                                 break;
+                            case "/recvbuff":
+                            case "-recvbuff":
+                            case "--recvbuff":
+                            case "/rb":
+                            case "-rb":
+                            case "--rb":
+                                int recvbuff = Convert.ToInt32(args[count + 1]);
+                                if (recvbuff < 65000) {
+                                    attributes.RecieveBufferSize = recvbuff;
+                                } else {
+                                    throw new ArgumentFormatException();
+                                }
+                                break;
                             case "/whoami":
                             case "-whoami":
                             case "--whoami": // Current computer location

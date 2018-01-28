@@ -56,10 +56,88 @@ namespace PowerPing
         const string REPLY_SYMBOL = ".";
         const string TIMEOUT_SYMBOL = "!";
 
-        const string HELP_MESSAGE = @"";
+        const string HELP_MESSAGE =
+            @"__________                         __________.__                
+\______   \______  _  __ __________\______   \__| ____    ____  
+ |     ___/  _ \ \/ \/ // __ \_  __ \     ___/  |/    \  / ___\ 
+ |    |  (  <_> )     /\  ___/|  | \/    |   |  |   |  \/ /_/  >
+ |____|   \____/ \/\_/  \___  >__|  |____|   |__|___|  /\___  / 
+                            \/                       \//_____/  
+
+Description:
+        Advanced ping utility which provides geoip querying, ICMP packet
+        customization, graphs and result colourization.
+
+Usage: PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] |
+                    [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--dm]
+                    ([--m ""text""] | [--rng]) [--l num] [--s] [--r] [--dp places]
+                    [--i TTL]
+        [--in interval]
+        [--pt type]
+        [--pc code]
+        [--b level]
+        [--4]
+        [--short] [--nocolor]
+        [--ts]
+        [--ti timing]
+        [--nt]
+        target_name
+
+Ping Options:
+    --help[--?] Displays this help message
+    --version[--v] Shows version and build information
+    --examples[--ex] Shows example usage
+    --infinite[--t] Ping the target until stopped(Ctrl-C to stop)
+    --displaymsg[--dm] Display ICMP messages
+    --ipv4[--4] Force using IPv4
+    --random[--rng] Generates random ICMP message
+    --beep[--b] number   Beep on timeout(1) or on reply(2)
+    --count[--c] number   Number of pings to send
+    --timeout[--w] number   Time to wait for reply(in milliseconds)
+    --ttl[--i] number   Time To Live for packet
+    --interval[--in] number   Interval between each ping(in milliseconds)
+    --type[--pt] number   Use custom ICMP type
+    --code[--pc] number   Use custom ICMP code value
+    --message[--m] message  Ping packet message
+    --timing[--ti] timing   Timing levels:
+                                    0 - Paranoid    4 - Nimble
+                                    1 - Sneaky      5 - Speedy
+                                    2 - Quiet       6 - Insane
+                                    3 - Polite
+
+Display Options:
+    --shorthand[--sh] Show less detailed replies
+    --timestamp[--ts] Display timestamp
+    --nocolor[--nc] No colour
+    --noinput[--ni] Require no user input
+    --symbols[--s] Renders replies and timeouts as ASCII symbols
+    --request[--r] Show request packets
+    --notimeouts[--nt] Don't display timeout messages
+    --quiet[--q] No output, only shows summary upon completion or exit
+    --resolve[--res] Display hostname from DNS
+    --inputaddr[--ia] Show input address instead of revolved IP address
+    --limit[--l] number   Limits output to just replies(0) or requests(1)
+    --decimals[--dp] number   Num of decimal places to use(0 to 3)
+
+
+
+Features:
+    --scan[--sc] address  Network scanning, specify range ""127.0.0.1-55""
+    --listen[--li] address  Listen for ICMP packets
+    --flood[--fl] address  Send high volume of pings to address
+    --graph[--g] address  Graph view
+    --compact[--cg] address  Compact graph view
+    --location[--loc] address  Location info for an address
+    --whoami Location info for current host
+
+type '--examples' for more
+
+(Location info provided by http://freegeoip.net)
+Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=
+Find the project here[https://github.com/Killeroo/PowerPing]";
 
         // Stores console cursor position, used for updating text at position
-        private struct CursorPosition
+    private struct CursorPosition
         {
             public int Left;
             public int Top;
@@ -247,75 +325,7 @@ namespace PowerPing
             sb.Clear();
 
             // Add message string
-            sb.AppendLine("__________                         __________.__                ");
-            sb.AppendLine(@"\______   \______  _  __ __________\______   \__| ____    ____  ");
-            sb.AppendLine(@" |     ___/  _ \ \/ \/ // __ \_  __ \     ___/  |/    \  / ___\ ");
-            sb.AppendLine(@" |    |  (  <_> )     /\  ___/|  | \/    |   |  |   |  \/ /_/  >");
-            sb.AppendLine(@" |____|   \____/ \/\_/  \___  >__|  |____|   |__|___|  /\___  / ");
-            sb.AppendLine(@"                            \/                       \//_____/  ");
-            sb.AppendLine();
-            sb.AppendLine("Description:");
-            sb.AppendLine("     Advanced ping utility which provides geoip querying, ICMP packet");
-            sb.AppendLine("     customization, graphs and result colourization.");
-            sb.AppendLine();
-            sb.AppendLine("Usage: PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] |");
-            sb.AppendLine("                 [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--dm]");
-            sb.AppendLine("                 ([--m \"text\"] | [--rng]) [--l num] [--s] [--r] [--dp places]");
-            sb.AppendLine("                 [--i TTL] [--in interval] [--pt type] [--pc code] [--b level]");
-            sb.AppendLine("                 [--4] [--short] [--nocolor] [--ts] [--ti timing] [--nt] target_name");
-            sb.AppendLine();
-            sb.AppendLine("Ping Options:");
-            sb.AppendLine(" --help       [--?]            Displays this help message");
-            sb.AppendLine(" --version    [--v]            Shows version and build information");
-            sb.AppendLine(" --examples   [--ex]           Shows example usage");
-            sb.AppendLine(" --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)");
-            sb.AppendLine(" --displaymsg [--dm]           Display ICMP messages");
-            sb.AppendLine(" --ipv4       [--4]            Force using IPv4");
-            sb.AppendLine(" --random     [--rng]          Generates random ICMP message");
-            sb.AppendLine(" --beep       [--b]   number   Beep on timeout (1) or on reply (2)");
-            sb.AppendLine(" --count      [--c]   number   Number of pings to send");
-            sb.AppendLine(" --timeout    [--w]   number   Time to wait for reply (in milliseconds)");
-            sb.AppendLine(" --ttl        [--i]   number   Time To Live for packet");
-            sb.AppendLine(" --interval   [--in]  number   Interval between each ping (in milliseconds)");
-            sb.AppendLine(" --type       [--pt]  number   Use custom ICMP type");
-            sb.AppendLine(" --code       [--pc]  number   Use custom ICMP code value");
-            sb.AppendLine(" --message    [--m]   message  Ping packet message");
-            sb.AppendLine(" --timing     [--ti]  timing   Timing levels:");
-            sb.AppendLine("                                   0 - Paranoid    4 - Nimble");
-            sb.AppendLine("                                   1 - Sneaky      5 - Speedy");
-            sb.AppendLine("                                   2 - Quiet       6 - Insane");
-            sb.AppendLine("                                   3 - Polite");
-            sb.AppendLine();
-            sb.AppendLine("Display Options:");
-            sb.AppendLine(" --shorthand  [--sh]           Show less detailed replies");
-            sb.AppendLine(" --timestamp  [--ts]           Display timestamp");
-            sb.AppendLine(" --nocolor    [--nc]           No colour");
-            sb.AppendLine(" --noinput    [--ni]           Require no user input");
-            sb.AppendLine(" --symbols    [--s]            Renders replies and timeouts as ASCII symbols");
-            sb.AppendLine(" --request    [--r]            Show request packets");
-            sb.AppendLine(" --notimeouts [--nt]           Don't display timeout messages");
-            sb.AppendLine(" --quiet      [--q]            No output, only shows summary upon completion or exit");
-            sb.AppendLine(" --resolve    [--res]          Display hostname from DNS");
-            sb.AppendLine(" --inputaddr  [--ia]           Show input address instead of revolved IP address");
-            sb.AppendLine(" --limit      [--l]   number   Limits output to just replies (0) or requests (1)");
-            sb.AppendLine(" --decimals   [--dp]  number   Num of decimal places to use (0 to 3)");
-
-
-            sb.AppendLine();
-            sb.AppendLine("Features:");
-            sb.AppendLine(" --scan       [--sc]  address  Network scanning, specify range \"127.0.0.1-55\"");
-            sb.AppendLine(" --listen     [--li]  address  Listen for ICMP packets ");
-            sb.AppendLine(" --flood      [--fl]  address  Send high volume of pings to address");
-            sb.AppendLine(" --graph      [--g]   address  Graph view");
-            sb.AppendLine(" --compact    [--cg]  address  Compact graph view");
-            sb.AppendLine(" --location   [--loc] address  Location info for an address");
-            sb.AppendLine(" --whoami                      Location info for current host");
-            sb.AppendLine();
-            sb.AppendLine("type '--examples' for more");
-            sb.AppendLine();
-            sb.AppendLine("(Location info provided by http://freegeoip.net)");
-            sb.AppendLine("Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=");
-            sb.AppendLine("Find the project here [https://github.com/Killeroo/PowerPing]");
+            sb.AppendLine(HELP_MESSAGE);
 
             // Print string
             Console.WriteLine(sb.ToString());

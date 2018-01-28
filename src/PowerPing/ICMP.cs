@@ -44,6 +44,7 @@ namespace PowerPing
         {
             type = data[20];
             code = data[21];
+            // TODO: ICMP_COOKIES: Debug here to check ensure whole message field is saved
             checksum = BitConverter.ToUInt16(data, 22);
             messageSize = size - 24;
             Buffer.BlockCopy(data, 24, message, 0, messageSize);
