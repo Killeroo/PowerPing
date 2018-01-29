@@ -51,56 +51,101 @@ namespace PowerPing
         public static bool UseResolvedAddress { get; set; } = false;
         public static int DecimalPlaces { get; set; } = 1;
         public static ConsoleColor DefaultForegroundColor { get; set; }
-        public static ConsoleColor DefaultBackgroundColor { get; set; } 
+        public static ConsoleColor DefaultBackgroundColor { get; set; }
 
-        const string REPLY_SYMBOL = ".";
-        const string TIMEOUT_SYMBOL = "!";
+        // Stores console cursor position, used for updating text at position
+        private struct CursorPosition
+        {
+            public int Left;
+            public int Top;
 
+            public CursorPosition(int l, int t)
+            {
+                Left = l;
+                Top = t;
+            }
+
+            public void SetToPosition()
+            {
+                Console.CursorLeft = Left;
+                Console.CursorTop = Top;
+            }
+        };
+
+        #region Messages
+
+        // General messages
         const string TIMESTAMP_LAYOUT = " @ {0}";
+        const string TIMEOUT_TXT = "Request timed out.";
+        const string TIMEOT_SEQ_TXT = " seq={0} ";
+        const string ERROR_TXT = "ERROR: ";
 
-        const string PING_INTRO = "Pinging {0} ";
-        const string PING_INTRO_MSG = "(Packet message \"{0}\") [Type={1} Code={2}] [TTL={3}]";
-        const string PING_INTRO_RND_MSG = "(*Random packet messages*) [Type={0} Code={1}] [TTL={2}]";
+        // Intro messages
+        const string INTRO_ADDR_TXT = "Pinging {0} ";
+        const string INTRO_MSG = "(Packet message \"{0}\") [Type={1} Code={2}] [TTL={3}]";
+        const string INTRO_RNG_MSG = "(*Random packet messages*) [Type={0} Code={1}] [TTL={2}]";
 
+        // Flood messages
+        const string FLOOD_INTO_TXT = "Flooding {0}...";
+        const string FLOOD_SEND_TXT = "Sent: ";
+        const string FLOOD_PPS_TXT = "Pings per Second: ";
+        const string FLOOD_EXIT_TXT = "Press Control-C to stop...";
+
+        // Listen messages
         const string LISTEN_INTRO_MSG = "Listening for ICMP Packets ...";
-
-        const string REQUEST_MSG = "Request to: {0}:0 seq={1} bytes={2} type=";
-        const string REQUEST_MSG_SHORT = "Request to: {0}:0 type=";
-
-        const string REPLY_MSG = "Reply from: {0} seq={1} bytes={2} type=";
-        const string REPLY_MSG_SHORT = "Reply from: {0} type=";
-
         const string CAPTURED_PACKET_MSG = "{0}: ICMPv4: {1} bytes from {2} [type {3}] [code {4}]";
 
+        // Request messages
+        const string REQUEST_MSG = "Request to: {0}:0 seq={1} bytes={2} type=";
+        const string REQUEST_MSG_SHORT = "Request to: {0}:0 type=";
+        const string REQUEST_CODE_TXT = " code={0}";
+
+        // Reply messages
+        const string REPLY_MSG = "Reply from: {0} seq={1} bytes={2} type=";
+        const string REPLY_MSG_SHORT = "Reply from: {0} type=";
+        const string REPLY_MSG_TXT = " msg=\"{0}\"";
+        const string REPLY_TIME_TXT = " time=";
+
+        // Scan messages
+        const string SCAN_RANGE_TXT = "Scanning range [ {0} ]";
+        const string SCAN_HOSTS_TXT = "Sent: {0} Found Hosts: {1}";
+        const string SCAN_CUR_ADDR_TXT = "Pinging ";
+        const string SCAN_ELPS_TIME_TXT = "Ellapsed: ";
+        const string SCAN_PROG_TXT = "Progress: ";
         const string SCAN_RESULT_MSG = "Scan complete. {0} addresses scanned. {1} hosts active:";
-        const string SCAN_ENTRY = " -- {0} [{1:0.0}ms]";
+        const string SCAN_RESULT_ENTRY = " -- {0} [{1:0.0}ms]";
         const string SCAN_CONNECTOR_CHAR = "|";
         const string SCAN_END_CHAR = @"\";
 
-        const string PING_RESULT_HEADER = "--- Stats for {0} ---";
-        const string PING_RESULT_LINE_1 = "   General: Sent [ {0} ], Recieved [ {1} ], Lost [ {2} ] ({3}% loss)";
-        const string PING_RESULT_LINE_2 = "     Times: Min [ {0:0.0}ms ] Max [ {1:0.0}ms ] Avg [ {2:0.0}ms ]";
-        const string PING_RESULT_LINE_3 = "     Types: Good [ {0} ], Errors [ {1} ], Unknown [ {2} ]";
-        const string PING_RESULT_GENERAL_TAG = "   General: ";
-        const string PING_RESULT_TIMES_TAG = "     Times: ";
-        const string PING_RESULT_TYPES_TAG = "     Types: ";
-        const string PING_RESULT_SENT_TXT = "Sent ";
-        const string PING_RESULT_RECV_TXT = ", Recieved ";
-        const string PING_RESULT_LOST_TXT = ", Lost ";
-        const string PING_RESULT_MIN_TXT = "Min ";
-        const string PING_RESULT_MAX_TXT = ", Max ";
-        const string PING_RESULT_AVG_TXT = ", Avg ";
-        const string PING_RESULT_PERCENT_LOST_TXT = " ({0}% loss)";
-        const string PING_RESULT_START_TIME_MSG = "Started at: {0} (local time)";
-        const string PING_RESULT_RUNTIME_MSG = "   Runtime: {0:hh\\:mm\\:ss\\.f}";
-        const string PING_RESULT_INFO_BOX = "[ {0} ]";
-        const string PING_RESULT_OVERFLOW_MSG = 
+        // End results messages
+        const string RESULTS_HEADER = "--- Stats for {0} ---";
+        const string RESULTS_GENERAL_TAG = "   General: ";
+        const string RESULTS_TIMES_TAG = "     Times: ";
+        const string RESULTS_TYPES_TAG = "     Types: ";
+        const string RESULTS_SENT_TXT = "Sent ";
+        const string RESULTS_RECV_TXT = ", Recieved ";
+        const string RESULTS_LOST_TXT = ", Lost ";
+        const string RESULTS_PERCENT_LOST_TXT = " ({0}% loss)";
+        const string RESULTS_MIN_TXT = "Min ";
+        const string RESULTS_MAX_TXT = ", Max ";
+        const string RESULTS_AVG_TXT = ", Avg ";
+        const string RESULTS_PKT_GOOD = " Good ";
+        const string RESULTS_PKT_ERR = ", Errors ";
+        const string RESULTS_PKT_UKN = ", Unknown ";
+        const string RESULTS_START_TIME_TXT = "Started at: {0} (local time)";
+        const string RESULTS_RUNTIME_TXT = "   Runtime: {0:hh\\:mm\\:ss\\.f}";
+        const string RESULTS_INFO_BOX = "[ {0} ]";
+        const string RESULTS_TIME_TXT = " Min [ {0:0.0}ms ], Max [ {1:0.0}ms ], Avg [ {2:0.0}ms ]";
+        const string RESULTS_OVERFLOW_MSG = 
 @"SIDENOTE: I don't know how you've done it but you have caused an overflow somewhere in these ping results.
 Just to put that into perspective you would have to be running a normal ping program with default settings for 584,942,417,355 YEARS to achieve this!
 Well done brave soul, I don't know your motive but I salute you =^-^=";
 
+        // Symbol characters
+        const string REPLY_SYMBOL = ".";
+        const string TIMEOUT_SYMBOL = "!";
 
-        const string HELP_MESSAGE =
+        const string HELP_MSG =
 @"__________                         __________.__                
 \______   \______  _  __ __________\______   \__| ____    ____  
  |     ___/  _ \ \/ \/ // __ \_  __ \     ___/  |/    \  / ___\ 
@@ -245,24 +290,9 @@ specified before or after arguments).
 --------------------------------------
 Get location information for 84.23.12.4";
 
-        // Stores console cursor position, used for updating text at position
-        private struct CursorPosition
-        {
-            public int Left;
-            public int Top;
+        #endregion
 
-            public CursorPosition(int l, int t)
-            {
-                Left = l;
-                Top = t;
-            }
-
-            public void SetToPosition()
-            {
-                Console.CursorLeft = Left;
-                Console.CursorTop = Top;
-            }
-        };
+        #region Packet type and code messages (and colour rules)
 
         // ICMP packet types
         private static string[] packetTypes = new [] {
@@ -388,6 +418,9 @@ Get location information for 84.23.12.4";
             "IP HEADER MISSING AN OPTION", 
             "BAD IP HEADER LENGTH" 
         };
+
+        #endregion
+
         private static StringBuilder sb = new StringBuilder();
 
         // Cursor position variables
@@ -434,7 +467,7 @@ Get location information for 84.23.12.4";
             sb.Clear();
 
             // Add message string
-            sb.AppendLine(HELP_MESSAGE);
+            sb.AppendLine(HELP_MSG);
 
             // Print string
             Console.WriteLine(sb.ToString());
@@ -486,7 +519,7 @@ Get location information for 84.23.12.4";
 
             // Construct string
             sb.AppendLine();
-            sb.AppendFormat(PING_INTRO, host);
+            sb.AppendFormat(INTRO_ADDR_TXT, host);
             if (!String.Equals(host, attrs.Address)) {
                 // Only show resolved address if inputted address and resolved address are different
                 sb.AppendFormat("[{0}] ", attrs.Address);
@@ -494,9 +527,9 @@ Get location information for 84.23.12.4";
 
             if (!Short) { // Only show extra detail when not in Short mode
                 if (attrs.RandomMsg) {
-                    sb.AppendFormat(PING_INTRO_RND_MSG, attrs.Type, attrs.Code, attrs.Ttl);
+                    sb.AppendFormat(INTRO_RNG_MSG, attrs.Type, attrs.Code, attrs.Ttl);
                 } else {
-                    sb.AppendFormat(PING_INTRO_MSG, attrs.Message, attrs.Type, attrs.Code, attrs.Ttl);
+                    sb.AppendFormat(INTRO_MSG, attrs.Message, attrs.Type, attrs.Code, attrs.Ttl);
                 }
             }
 
@@ -528,7 +561,7 @@ Get location information for 84.23.12.4";
 
             // Print coloured type
             PacketType(packet);
-            Console.Write(" code={0}", packet.code);
+            Console.Write(REQUEST_CODE_TXT, packet.code);
 
             // Display timestamp
             if (ShowTimeStamp) {
@@ -576,11 +609,11 @@ Get location information for 84.23.12.4";
 
             // Display ICMP message (if specified)
             if (ShowMessages) {
-                Console.Write(" msg=\"{0}\"", new string(Encoding.ASCII.GetString(packet.message).Where(c => !char.IsControl(c)).ToArray()));
+                Console.Write(REPLY_MSG_TXT, new string(Encoding.ASCII.GetString(packet.message).Where(c => !char.IsControl(c)).ToArray()));
             }
 
             // Print coloured time segment
-            Console.Write(" time=");
+            Console.Write(REPLY_TIME_TXT);
             if (!NoColor) {
                 if (replyTime <= TimeSpan.FromMilliseconds(100)) {
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -631,7 +664,7 @@ Get location information for 84.23.12.4";
                 curAddrPos.SetToPosition();
                 Console.WriteLine(new String(' ', 20));
                 scanInfoPos.SetToPosition();
-                Console.WriteLine("Sent: {0} Found Hosts: {1}", scanned, found);
+                Console.WriteLine(SCAN_HOSTS_TXT, scanned, found);
                 scanTimePos.SetToPosition();
                 Console.Write("{0:hh\\:mm\\:ss}", curTime);
                 curAddrPos.SetToPosition();
@@ -650,16 +683,17 @@ Get location information for 84.23.12.4";
             } else {
 
                 // Setup labels
-                Console.WriteLine("Scanning range [ {0} ]", range);
+                Console.WriteLine(SCAN_RANGE_TXT, range);
                 scanInfoPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-                Console.WriteLine("Sent: 0 Hosts: 0");
-                Console.Write("Pinging ");
+                Console.WriteLine(SCAN_HOSTS_TXT);
+                Console.Write(SCAN_CUR_ADDR_TXT);
                 curAddrPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.WriteLine(curAddr);
-                Console.Write("Ellapsed: ");
+                Console.Write(SCAN_ELPS_TIME_TXT);
                 scanTimePos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.WriteLine("12:00:00");
-                Console.Write("Progress: [ ");
+                Console.Write(SCAN_PROG_TXT);
+                Console.Write("[ ");
                 perComplPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.Write("     ][");
                 progBarPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
@@ -675,7 +709,7 @@ Get location information for 84.23.12.4";
             Console.WriteLine(SCAN_RESULT_MSG, scanned, foundHosts.Count);
             if (foundHosts.Count != 0) {
                 for (int i = 0; i < foundHosts.Count; i++) {
-                    Console.WriteLine((i == foundHosts.Count - 1 ? SCAN_END_CHAR : SCAN_CONNECTOR_CHAR) + SCAN_ENTRY, foundHosts[i], times[i]);
+                    Console.WriteLine((i == foundHosts.Count - 1 ? SCAN_END_CHAR : SCAN_CONNECTOR_CHAR) + SCAN_RESULT_ENTRY, foundHosts[i], times[i]);
                 }
             }
             Console.WriteLine();
@@ -700,51 +734,74 @@ Get location information for 84.23.12.4";
             double percent = (double)results.Lost / results.Sent;
             percent = Math.Round(percent * 100, 2);
             Console.WriteLine();
-            Console.WriteLine(PING_RESULT_HEADER, attrs.Address);
+            Console.WriteLine(RESULTS_HEADER, attrs.Address);
 
+            //   General: Sent [ 0 ], Recieved [ 0 ], Lost [ 0 ] (0% loss)
+            Console.Write(RESULTS_GENERAL_TAG + RESULTS_SENT_TXT);
             if (NoColor) {
-                Console.WriteLine(PING_RESULT_GENERAL_TAG + PING_RESULT_LINE_1, results.Sent, results.Received, results.Lost, percent);
-                Console.WriteLine(PING_RESULT_TIMES_TAG + PING_RESULT_LINE_2, results.MinTime, results.MaxTime, results.AvgTime);
-                Console.WriteLine(PING_RESULT_TYPES_TAG + PING_RESULT_LINE_3, results.GoodPackets, results.ErrorPackets, results.OtherPackets);
-                Console.WriteLine(PING_RESULT_START_TIME_MSG, results.StartTime);
-                Console.WriteLine(PING_RESULT_RUNTIME_MSG, results.TotalRunTime);
-                Console.WriteLine();
+                Console.Write(RESULTS_INFO_BOX, results.Sent);
             } else {
-                Console.Write("   General: Sent ");
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write(PING_RESULT_INFO_BOX, results.Sent);
+                Console.Write(RESULTS_INFO_BOX, results.Sent);
                 ResetColor();
-                Console.Write(", Received ");
+            }
+            Console.Write(RESULTS_RECV_TXT);
+            if (NoColor) {
+                Console.Write(RESULTS_INFO_BOX, results.Received);
+            } else {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write(PING_RESULT_INFO_BOX, results.Received);
+                Console.Write(RESULTS_INFO_BOX, results.Received);
                 ResetColor();
-                Console.Write(", Lost ");
+            }
+            Console.Write(RESULTS_LOST_TXT);
+            if (NoColor) {
+                Console.Write(RESULTS_INFO_BOX, results.Lost);
+            } else {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write(PING_RESULT_INFO_BOX, results.Lost);
+                Console.Write(RESULTS_INFO_BOX, results.Lost);
                 ResetColor();
-                Console.WriteLine(PING_RESULT_PERCENT_LOST, percent);
-                Console.Write("     Times:");
-                Console.WriteLine(" Min [ {0:0.0}ms ], Max [ {1:0.0}ms ], Avg [ {2:0.0}ms ]", results.MinTime, results.MaxTime, results.AvgTime);
-                Console.Write("ICMP Types:");
-                Console.Write(" Good ");
+            }
+            Console.WriteLine(RESULTS_PERCENT_LOST_TXT, percent);
+
+            //     Times: Min [ 0ms ] Max [ 0ms ] Avg [ 0ms ]
+            Console.WriteLine(RESULTS_TIMES_TAG + RESULTS_TIME_TXT, results.MinTime, results.MaxTime, results.AvgTime);
+
+            //     Types: Good [ 0 ], Errors [ 0 ], Unknown [ 0 ]
+            Console.Write(RESULTS_TYPES_TAG);
+            Console.Write(RESULTS_PKT_GOOD);
+            if (NoColor) {
+                Console.Write(RESULTS_INFO_BOX, results.GoodPackets);
+            } else {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write(PING_RESULT_INFO_BOX, results.GoodPackets);
+                Console.Write(RESULTS_INFO_BOX, results.GoodPackets);
                 ResetColor();
-                Console.Write(", Errors ");
+            }
+            Console.Write(RESULTS_PKT_ERR);
+            if (NoColor) {
+                Console.Write(RESULTS_INFO_BOX, results.GoodPackets);
+            } else {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write(PING_RESULT_INFO_BOX, results.ErrorPackets);
+                Console.Write(RESULTS_INFO_BOX, results.ErrorPackets);
                 ResetColor();
-                Console.Write(", Unknown ");
+            }
+            Console.Write(RESULTS_PKT_UKN);
+            if (NoColor) {
+                Console.Write(RESULTS_INFO_BOX, results.GoodPackets);
+            } else {
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine(PING_RESULT_INFO_BOX, results.OtherPackets);
+                Console.WriteLine(RESULTS_INFO_BOX, results.OtherPackets);
                 ResetColor();
-                Console.WriteLine(PING_RESULT_START_TIME, results.StartTime);
-                Console.WriteLine(PING_RESULT_RUNTIME, results.TotalRunTime);
-                Console.WriteLine();
             }
 
+            // Started at: 0:00:00 (local time)
+            Console.WriteLine(RESULTS_START_TIME_TXT, results.StartTime);
+
+            //Runtime: hh:mm:ss.f
+            Console.WriteLine(RESULTS_RUNTIME_TXT, results.TotalRunTime);
+            Console.WriteLine();
+
             if (results.HasOverflowed) {
-                Console.WriteLine(PING_RESULT_OVERFLOW_MSG);
+                Console.WriteLine(RESULTS_OVERFLOW_MSG);
                 Console.WriteLine();
             }
 
@@ -759,7 +816,8 @@ Get location information for 84.23.12.4";
         /// <param name="results"></param>
         public static void FloodProgress(PingResults results, string target)
         {
-            if (sentPos.Left > 0) { // Check if labels have already been drawn
+            // Check if labels have already been drawn
+            if (sentPos.Left > 0) { 
 
                 // Store original cursor position
                 CursorPosition originalPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
@@ -780,45 +838,23 @@ Get location information for 84.23.12.4";
             } else {
 
                 // Draw labels
-                Console.WriteLine("Flooding {0}...", target);
-                Console.Write("Sent: ");
+                Console.WriteLine(FLOOD_INTO_TXT, target);
+                Console.Write(FLOOD_SEND_TXT);
                 sentPos.Left = Console.CursorLeft;
                 sentPos.Top = Console.CursorTop;
                 Console.WriteLine("0");
-                Console.Write("Pings per Second: ");
+                Console.Write(FLOOD_PPS_TXT);
                 ppsPos.Left = Console.CursorLeft;
                 ppsPos.Top = Console.CursorTop;
                 Console.WriteLine();
-                Console.WriteLine("Press Control-C to stop...");
+                Console.WriteLine(FLOOD_EXIT_TXT);
             }
 
             sentPings = results.Sent;
         }
         public static void ListenResults(PingResults results)
         {
-            Console.WriteLine("Captured Packets:");
-            Console.WriteLine("     Caught [ 0 ] Lost [ 0 ]");
-
-            Console.WriteLine("Packet types:");
-            Console.Write("     ");
-            Console.BackgroundColor = ConsoleColor.DarkGreen;
-            Console.Write("[ Good = {0} ]", results.GoodPackets);
-            ResetColor();
-            Console.Write(" ");
-            Console.BackgroundColor = ConsoleColor.DarkRed;
-            Console.Write("[ Errors = {0} ]", results.ErrorPackets);
-            ResetColor();
-            Console.Write(" ");
-            Console.BackgroundColor = ConsoleColor.DarkBlue;
-            Console.WriteLine("[ Unknown = {0} ]", results.OtherPackets);
-            ResetColor();
-
-            Console.WriteLine("Total elapsed time (HH:MM:SS.FFF): {0:hh\\:mm\\:ss\\.fff}", results.TotalRunTime);
-            Console.WriteLine();
-
-            if (!NoInput) {
-                Helper.Pause(true);
-            }
+            throw new NotImplementedException();
         }
         /// <summary>
         /// Display Timeout message
@@ -837,17 +873,19 @@ Get location information for 84.23.12.4";
                 return;
             }
 
-            Console.BackgroundColor = ConsoleColor.DarkRed;
-            Console.Write("Request timed out.");
+            if (!NoColor) {
+                Console.BackgroundColor = ConsoleColor.DarkRed;
+            }
+            Console.Write(TIMEOUT_TXT);
 
             // Short hand
             if (!Short) {
-                Console.Write(" seq={0} ", seq);
+                Console.Write(TIMEOT_SEQ_TXT, seq);
             }
 
             // Display timestamp
             if (ShowTimeStamp) {
-                Console.Write("@ {0}", DateTime.Now.ToString("HH:mm:ss"));
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
             }
 
             // Make double sure we dont get the red line bug
@@ -865,9 +903,9 @@ Get location information for 84.23.12.4";
 
             // Write error message
             if (newline) {
-                Console.WriteLine("ERROR: " + errMsg);
+                Console.WriteLine(ERROR_TXT + errMsg);
             } else {
-                Console.Write("ERROR: " + errMsg);
+                Console.Write(ERROR_TXT + errMsg);
             }
 
             // Reset console colours
