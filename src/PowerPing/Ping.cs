@@ -232,7 +232,7 @@ namespace PowerPing
             }
 
             scanTimer.Stop();
-            PowerPing.Display.EndScanResults(scanList.Count, activeHosts, activeHostTimes);
+            PowerPing.Display.ScanResults(scanList.Count, activeHosts, activeHostTimes);
         }
         /// <summary>
         /// Sends high volume of ping packets
@@ -315,9 +315,9 @@ namespace PowerPing
         /// inputted properties (attrs), then performs ICMP operation 
         /// before cleaning up and returning results.
         ///
-        /// NOTE: There is a weird hack here, PingAttributes used are 
-        /// the parameter to the argument as opposed to the ones stored
-        /// in this classes Ping.Attributes (similar case with PingResults).
+        /// NOTE: There is a weird hack here, The set of PingAttributes used are 
+        /// those provided in the parameter as opposed to the ones stored
+        /// in this class (Ping.Attributes) (similar case with PingResults).
         /// This is due to some functions (flood, scan) requiring to be run on seperate threads
         /// and needing us to pass specific attributes directly to the object
         /// trust me it works (I think..)
@@ -472,10 +472,8 @@ namespace PowerPing
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
-            {
-                if (IsRunning)
-                {
+            if (!disposedValue) {
+                if (IsRunning) {
                     cancelEvent.Set();
 
                     // wait till ping stops running
