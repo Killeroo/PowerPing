@@ -4,26 +4,31 @@
 
 Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
 
-Download it here: [[Stable Release]](https://github.com/Killeroo/PowerPing/releases) [[Current Build]](https://github.com/Killeroo/PowerPing/tree/master/build) [[Development Build]](https://github.com/Killeroo/PowerPing/blob/dev/build/PowerPing.exe)
+Download it here: [[Stable Release]](https://github.com/Killeroo/PowerPing/releases)
+
+Nightly Builds: [[Master Build]](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx64%2FPowerPing.exe?job=Platform%3A%20x64&branch=master) [[Development Build]](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx64%2FPowerPing.exe?job=Platform%3A%20x64&branch=dev) [x86 versions for [master](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx86%2FPowerPing.exe?job=Platform%3A%20x86&branch=master) & [dev](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx86%2FPowerPing.exe?job=Platform%3A%20x86&branch=dev)]
 ***
 ![alt text](docs/screenshots/screenshot.png "PowerPing in action")
 
 ## Features
 
-PowerPing contains the following features (with more to come...):
+PowerPing contains the following features:
 
-- [x] Basic ping functionality
-- [x] Coloured output
-- [x] Display options
-- [x] [ICMP packet customisation](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol#Control_messages)
-- [x] [Scanning](https://en.wikipedia.org/wiki/Ping_sweep)
-- [x] [Flooding](https://en.wikipedia.org/wiki/Ping_flood)
-- [x] [ICMP packet capture (/listen)](docs/screenshots/screenshot3.png)
-- [x] [IP location lookup](docs/screenshots/screenshot4.png)
-- [x] [Graphing](docs/screenshots/screenshot2.png)
-- [ ] [Traceroute](https://en.wikipedia.org/wiki/Traceroute)
-- [ ] [Tunnelling](https://en.wikipedia.org/wiki/ICMP_tunnel)
-- [ ] [IPv6/icmpv6](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_version_6)
+- Basic ping functionality
+- Coloured output
+- Display options
+- [ICMP packet customisation](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol#Control_messages)
+- [Scanning](https://en.wikipedia.org/wiki/Ping_sweep)
+- [Flooding](https://en.wikipedia.org/wiki/Ping_flood)
+- [ICMP packet capture (/listen)](docs/screenshots/screenshot3.png)
+- [IP location lookup](docs/screenshots/screenshot4.png)
+- [Graphing](docs/screenshots/screenshot2.png)
+
+The following features are planned for a future release:
+
+- [Traceroute (v1.2.5)](https://en.wikipedia.org/wiki/Traceroute)
+- [Tunnelling (v1.3.0)](https://en.wikipedia.org/wiki/ICMP_tunnel)
+- [IPv6/ICMPv6 (v1.3.0)](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_version_6)
 
 ## Usage: 
      PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] | 

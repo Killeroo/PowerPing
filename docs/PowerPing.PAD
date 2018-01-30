@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XML_DIZ_INFO>
+	<MASTER_PAD_VERSION_INFO>
+		<MASTER_PAD_VERSION>3.10</MASTER_PAD_VERSION>
+		<MASTER_PAD_EDITOR>Online PAD Generator 1.33 - http://www.padbuilder.com</MASTER_PAD_EDITOR>
+		<MASTER_PAD_INFO>Portable Application Description, or PAD for short, is a data set that is used by shareware authors to disseminate information to anyone interested in their software products. To find out more go to http://www.asp-shareware.org/pad</MASTER_PAD_INFO>
+	</MASTER_PAD_VERSION_INFO>
+	<Company_Info>
+		<Company_Name>Matthew Carney</Company_Name>
+		<Address_1 />
+		<Address_2 />
+		<City_Town />
+		<State_Province />
+		<Zip_Postal_Code />
+		<Country />
+		<Company_WebSite_URL>https://github.com/Killeroo/PowerPing</Company_WebSite_URL>
+		<Contact_Info>
+			<Author_First_Name>Matthew</Author_First_Name>
+			<Author_Last_Name>Carney</Author_Last_Name>
+			<Author_Email>matthewcarney64@gmail.com</Author_Email>
+			<Contact_First_Name>Matthew</Contact_First_Name>
+			<Contact_Last_Name>Carney</Contact_Last_Name>
+			<Contact_Email>matthewcarney64@gmail.com</Contact_Email>
+		</Contact_Info>
+		<Support_Info>
+			<Sales_Email />
+			<Support_Email>matthewcarney64@gmail.com</Support_Email>
+			<General_Email>matthewcarney64@gmail.com</General_Email>
+			<Sales_Phone />
+			<Support_Phone />
+			<General_Phone />
+			<Fax_Phone />
+		</Support_Info>
+	</Company_Info>
+	<Program_Info>
+		<Program_Name>PowerPing</Program_Name>
+		<Program_Version>v1.2.1</Program_Version>
+		<Program_Release_Month />
+		<Program_Release_Day />
+		<Program_Release_Year />
+		<Program_Cost_Dollars />
+		<Program_Cost_Other_Code />
+		<Program_Cost_Other />
+		<Program_Type>Freeware</Program_Type>
+		<Program_Release_Status>Major Update</Program_Release_Status>
+		<Program_Install_Support>No Install Support</Program_Install_Support>
+		<Program_OS_Support>Win7 x32,Win7 x64,WinOther,WinServer,WinVista,WinVista x64</Program_OS_Support>
+		<Program_Language>English</Program_Language>
+		<Program_Change_Info />
+		<Program_Specific_Category>Utilities</Program_Specific_Category>
+		<Program_Category_Class>Network &amp; Internet::Trace &amp; Ping Tools</Program_Category_Class>
+		<Program_Categories />
+		<Program_System_Requirements />
+		<File_Info>
+			<File_Size_Bytes />
+			<File_Size_K />
+			<File_Size_MB />
+		</File_Info>
+		<Expire_Info>
+			<Has_Expire_Info>N</Has_Expire_Info>
+			<Expire_Count />
+			<Expire_Based_On />
+			<Expire_Other_Info />
+			<Expire_Month />
+			<Expire_Day />
+			<Expire_Year />
+		</Expire_Info>
+	</Program_Info>
+	<Program_Descriptions>
+		<English>
+			<Keywords>ping icmp windows console</Keywords>
+			<Char_Desc_45>Advanced Windows Ping </Char_Desc_45>
+			<Char_Desc_80>Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.</Char_Desc_80>
+			<Char_Desc_250>Features: - [x] Basic ping functionality - [x] Coloured output - [x] Display options - [x] ICMP packet customisation - [x] Scanning - [x] Flooding - [x] ICMP packet capture (/listen) - [x] IP location lookup - [x] Graphing</Char_Desc_250>
+			<Char_Desc_450 />
+			<Char_Desc_2000>Arguments:  Ping Options:     --help       [--?]            Displays this help message"     --version    [--v]            Shows version and build information     --examples   [--ex]           Shows example usage     --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)     --displaymsg [--dm]           Display ICMP messages     --ipv4       [--4]            Force using IPv4     --random     [--rng]          Generates random ICMP message     --beep       [--b]   number   Beep on timeout (1) or on reply (2)     --count      [--c]   number   Number of pings to send     --timeout    [--w]   number   Time to wait for reply (in milliseconds)     --ttl        [--i]   number   Time To Live for packet     --interval   [--in]  number   Interval between each ping (in milliseconds)     --type       [--pt]  number   Use custom ICMP type     --code       [--pc]  number   Use custom ICMP code value     --message    [--m]   message  Ping packet message     --timing     [--ti]  timing   Timing levels:                                         0 - Paranoid    4 - Nimble                                         1 - Sneaky      5 - Speedy                                         2 - Quiet       6 - Insane                                         3 - Polite  Display Options:     --shorthand  [--sh]           Show less detailed replies     --timestamp  [--ts]           Display timestamp     --nocolor    [--nc]           No colour     --noinput    [--ni]           Require no user input     --symbols    [--s]            Renders replies and timeouts as ASCII symbols     --request    [--r]            Show request packets     --notimeouts [--nt]           Don't display timeout messages     --quiet      [--q]            No output, only shows summary upon completion or exit     --resolve    [--res]          Display hostname from DNS     --inputaddr  [--ia]           Show input address instead of revolved one     --limit      [--l]   number   Limits output to just replies (0) o</Char_Desc_2000>
+		</English>
+	</Program_Descriptions>
+	<Web_Info>
+		<Application_URLs>
+			<Application_Info_URL>PowerPing</Application_Info_URL>
+			<Application_Order_URL />
+			<Application_Screenshot_URL>https://raw.githubusercontent.com/Killeroo/PowerPing/master/docs/screenshots/screenshot.png</Application_Screenshot_URL>
+			<Application_Icon_URL />
+			<Application_XML_File_URL />
+		</Application_URLs>
+		<Download_URLs>
+			<Primary_Download_URL>https://github.com/Killeroo/PowerPing/releases</Primary_Download_URL>
+			<Secondary_Download_URL>https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx64%2FPowerPing.exe?job=Platform%3A%20x64&amp;bran</Secondary_Download_URL>
+			<Additional_Download_URL_1>https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx86%2FPowerPing.exe?job=Platform%3A%20x86&amp;bran</Additional_Download_URL_1>
+			<Additional_Download_URL_2 />
+		</Download_URLs>
+	</Web_Info>
+	<Permissions>
+		<Distribution_Permissions />
+		<EULA />
+	</Permissions>
+</XML_DIZ_INFO>
