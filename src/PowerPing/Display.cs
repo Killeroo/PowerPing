@@ -51,93 +51,10 @@ namespace PowerPing
         public static bool UseResolvedAddress { get; set; } = false;
         public static int DecimalPlaces { get; set; } = 1;
         public static ConsoleColor DefaultForegroundColor { get; set; }
-        public static ConsoleColor DefaultBackgroundColor { get; set; } 
-
-        const string REPLY_SYMBOL = ".";
-        const string TIMEOUT_SYMBOL = "!";
-
-        const string HELP_MESSAGE =
-            @"__________                         __________.__                
-\______   \______  _  __ __________\______   \__| ____    ____  
- |     ___/  _ \ \/ \/ // __ \_  __ \     ___/  |/    \  / ___\ 
- |    |  (  <_> )     /\  ___/|  | \/    |   |  |   |  \/ /_/  >
- |____|   \____/ \/\_/  \___  >__|  |____|   |__|___|  /\___  / 
-                            \/                       \//_____/  
-
-Description:
-        Advanced ping utility which provides geoip querying, ICMP packet
-        customization, graphs and result colourization.
-
-Usage: PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] |
-                    [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--dm]
-                    ([--m ""text""] | [--rng]) [--l num] [--s] [--r] [--dp places]
-                    [--i TTL]
-        [--in interval]
-        [--pt type]
-        [--pc code]
-        [--b level]
-        [--4]
-        [--short] [--nocolor]
-        [--ts]
-        [--ti timing]
-        [--nt]
-        target_name
-
-Ping Options:
-    --help[--?] Displays this help message
-    --version[--v] Shows version and build information
-    --examples[--ex] Shows example usage
-    --infinite[--t] Ping the target until stopped(Ctrl-C to stop)
-    --displaymsg[--dm] Display ICMP messages
-    --ipv4[--4] Force using IPv4
-    --random[--rng] Generates random ICMP message
-    --beep[--b] number   Beep on timeout(1) or on reply(2)
-    --count[--c] number   Number of pings to send
-    --timeout[--w] number   Time to wait for reply(in milliseconds)
-    --ttl[--i] number   Time To Live for packet
-    --interval[--in] number   Interval between each ping(in milliseconds)
-    --type[--pt] number   Use custom ICMP type
-    --code[--pc] number   Use custom ICMP code value
-    --message[--m] message  Ping packet message
-    --timing[--ti] timing   Timing levels:
-                                    0 - Paranoid    4 - Nimble
-                                    1 - Sneaky      5 - Speedy
-                                    2 - Quiet       6 - Insane
-                                    3 - Polite
-
-Display Options:
-    --shorthand[--sh] Show less detailed replies
-    --timestamp[--ts] Display timestamp
-    --nocolor[--nc] No colour
-    --noinput[--ni] Require no user input
-    --symbols[--s] Renders replies and timeouts as ASCII symbols
-    --request[--r] Show request packets
-    --notimeouts[--nt] Don't display timeout messages
-    --quiet[--q] No output, only shows summary upon completion or exit
-    --resolve[--res] Display hostname from DNS
-    --inputaddr[--ia] Show input address instead of revolved IP address
-    --limit[--l] number   Limits output to just replies(0) or requests(1)
-    --decimals[--dp] number   Num of decimal places to use(0 to 3)
-
-
-
-Features:
-    --scan[--sc] address  Network scanning, specify range ""127.0.0.1-55""
-    --listen[--li] address  Listen for ICMP packets
-    --flood[--fl] address  Send high volume of pings to address
-    --graph[--g] address  Graph view
-    --compact[--cg] address  Compact graph view
-    --location[--loc] address  Location info for an address
-    --whoami Location info for current host
-
-type '--examples' for more
-
-(Location info provided by http://freegeoip.net)
-Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=
-Find the project here[https://github.com/Killeroo/PowerPing]";
+        public static ConsoleColor DefaultBackgroundColor { get; set; }
 
         // Stores console cursor position, used for updating text at position
-    private struct CursorPosition
+        private struct CursorPosition
         {
             public int Left;
             public int Top;
@@ -154,6 +71,228 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
                 Console.CursorTop = Top;
             }
         };
+
+        #region Messages
+
+        // General messages
+        const string TIMESTAMP_LAYOUT = " @ {0}";
+        const string TIMEOUT_TXT = "Request timed out.";
+        const string TIMEOT_SEQ_TXT = " seq={0} ";
+        const string ERROR_TXT = "ERROR: ";
+
+        // Intro messages
+        const string INTRO_ADDR_TXT = "Pinging {0} ";
+        const string INTRO_MSG = "(Packet message \"{0}\") [Type={1} Code={2}] [TTL={3}]";
+        const string INTRO_RNG_MSG = "(*Random packet messages*) [Type={0} Code={1}] [TTL={2}]";
+
+        // Flood messages
+        const string FLOOD_INTO_TXT = "Flooding {0}...";
+        const string FLOOD_SEND_TXT = "Sent: ";
+        const string FLOOD_PPS_TXT = "Pings per Second: ";
+        const string FLOOD_EXIT_TXT = "Press Control-C to stop...";
+
+        // Listen messages
+        const string LISTEN_INTRO_MSG = "Listening for ICMP Packets ...";
+        const string CAPTURED_PACKET_MSG = "{0}: ICMPv4: {1} bytes from {2} [type {3}] [code {4}]";
+
+        // Request messages
+        const string REQUEST_MSG = "Request to: {0}:0 seq={1} bytes={2} type=";
+        const string REQUEST_MSG_SHORT = "Request to: {0}:0 type=";
+        const string REQUEST_CODE_TXT = " code={0}";
+
+        // Reply messages
+        const string REPLY_MSG = "Reply from: {0} seq={1} bytes={2} type=";
+        const string REPLY_MSG_SHORT = "Reply from: {0} type=";
+        const string REPLY_MSG_TXT = " msg=\"{0}\"";
+        const string REPLY_TIME_TXT = " time=";
+
+        // Scan messages
+        const string SCAN_RANGE_TXT = "Scanning range [ {0} ]";
+        const string SCAN_HOSTS_TXT = "Sent: {0} Found Hosts: {1}";
+        const string SCAN_CUR_ADDR_TXT = "Pinging ";
+        const string SCAN_ELPS_TIME_TXT = "Ellapsed: ";
+        const string SCAN_PROG_TXT = "Progress: ";
+        const string SCAN_RESULT_MSG = "Scan complete. {0} addresses scanned. {1} hosts active:";
+        const string SCAN_RESULT_ENTRY = " -- {0} [{1:0.0}ms]";
+        const string SCAN_CONNECTOR_CHAR = "|";
+        const string SCAN_END_CHAR = @"\";
+
+        // End results messages
+        const string RESULTS_HEADER = "--- Stats for {0} ---";
+        const string RESULTS_GENERAL_TAG = "   General: ";
+        const string RESULTS_TIMES_TAG = "     Times: ";
+        const string RESULTS_TYPES_TAG = "     Types: ";
+        const string RESULTS_SENT_TXT = "Sent ";
+        const string RESULTS_RECV_TXT = ", Recieved ";
+        const string RESULTS_LOST_TXT = ", Lost ";
+        const string RESULTS_PERCENT_LOST_TXT = " ({0}% loss)";
+        const string RESULTS_MIN_TXT = "Min ";
+        const string RESULTS_MAX_TXT = ", Max ";
+        const string RESULTS_AVG_TXT = ", Avg ";
+        const string RESULTS_PKT_GOOD = " Good ";
+        const string RESULTS_PKT_ERR = ", Errors ";
+        const string RESULTS_PKT_UKN = ", Unknown ";
+        const string RESULTS_START_TIME_TXT = "Started at: {0} (local time)";
+        const string RESULTS_RUNTIME_TXT = "   Runtime: {0:hh\\:mm\\:ss\\.f}";
+        const string RESULTS_INFO_BOX = "[ {0} ]";
+        const string RESULTS_TIME_TXT = " Min [ {0:0.0}ms ], Max [ {1:0.0}ms ], Avg [ {2:0.0}ms ]";
+        const string RESULTS_OVERFLOW_MSG = 
+@"SIDENOTE: I don't know how you've done it but you have caused an overflow somewhere in these ping results.
+Just to put that into perspective you would have to be running a normal ping program with default settings for 584,942,417,355 YEARS to achieve this!
+Well done brave soul, I don't know your motive but I salute you =^-^=";
+
+        // Symbol characters
+        const string REPLY_SYMBOL = ".";
+        const string TIMEOUT_SYMBOL = "!";
+
+        const string HELP_MSG =
+@"__________                         __________.__                
+\______   \______  _  __ __________\______   \__| ____    ____  
+ |     ___/  _ \ \/ \/ // __ \_  __ \     ___/  |/    \  / ___\ 
+ |    |  (  <_> )     /\  ___/|  | \/    |   |  |   |  \/ /_/  >
+ |____|   \____/ \/\_/  \___  >__|  |____|   |__|___|  /\___  / 
+                            \/                       \//_____/  
+
+Description:
+        Advanced ping utility which provides geoip querying, ICMP packet
+        customization, graphs and result colourization.
+
+Usage: 
+    PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] |
+              [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--dm]
+              [--m ""text""] | [--rng]) [--l num] [--s] [--r] [--dp places]
+              [--i TTL] [--in interval] [--pt type] [--pc code] [--b level]
+              [--4] [--short] [--nocolor] [--ts] [--ti timing] [--nt] target_name
+
+Ping Options:
+    --help       [--?]            Displays this help message
+    --version    [--v]            Shows version and build information
+    --examples   [--ex]           Shows example usage
+    --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)
+    --displaymsg [--dm]           Display ICMP messages
+    --ipv4       [--4]            Force using IPv4
+    --random     [--rng]          Generates random ICMP message
+    --beep       [--b]   number   Beep on timeout(1) or on reply(2)
+    --count      [--c]   number   Number of pings to send
+    --timeout    [--w]   number   Time to wait for reply (in milliseconds)
+    --ttl        [--i]   number   Time To Live for packet
+    --interval   [--in]  number   Interval between each ping (in milliseconds)
+    --type       [--pt]  number   Use custom ICMP type
+    --code       [--pc]  number   Use custom ICMP code value
+    --message    [--m]   message  Ping packet message
+    --timing     [--ti]  timing   Timing levels:
+                                    0 - Paranoid    4 - Nimble
+                                    1 - Sneaky      5 - Speedy
+                                    2 - Quiet       6 - Insane
+                                    3 - Polite
+
+Display Options:
+    --shorthand  [--sh]           Show less detailed replies
+    --timestamp  [--ts]           Display timestamp
+    --nocolor    [--nc]           No colour
+    --noinput    [--ni]           Require no user input
+    --symbols    [--s]            Renders replies and timeouts as ASCII symbols
+    --request    [--r]            Show request packets
+    --notimeouts [--nt]           Don't display timeout messages
+    --quiet      [--q]            No output, only shows summary upon exit
+    --resolve    [--res]          Display hostname from DNS
+    --inputaddr  [--ia]           Show input address instead of revolved IP address
+    --limit      [--l]   number   Limits output to just replies(0) or requests(1)
+    --decimals   [--dp]  number   Num of decimal places to use(0 to 3)
+
+
+
+Features:
+    --scan       [--sc]  address  Network scanning, specify range ""127.0.0.1-55""
+    --listen     [--li]  address  Listen for ICMP packets
+    --flood      [--fl]  address  Send high volume of pings to address
+    --graph      [--g]   address  Graph view
+    --compact    [--cg]  address  Compact graph view
+    --location   [--loc] address  Location info for an address
+    --whoami                      Location info for current host
+
+type '--examples' for more
+
+(Location info provided by http://freegeoip.net)
+Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=
+Find the project here[https://github.com/Killeroo/PowerPing]";
+
+        const string EXAMPLE_MSG_PAGE_1 =
+@"
+PowerPing Examples(Page 1 of 3)
+--------------------------------------
+| powerping 8.8.8.8                  |
+--------------------------------------
+Send ping to google DNS with default values (3000ms)
+timeout, 5 pings)
+
+--------------------------------------
+| powerping github.com --w 500 --t   |
+--------------------------------------
+Send pings indefinitely to github.com with a 500ms 
+timeout (Ctrl-C to stop)
+
+--------------------------------------
+| powerping 127.0.0.1 --m Meow       |
+--------------------------------------
+Send ping with packet message ""Meow""
+to localhost.
+
+--------------------------------------
+| powerping 127.0.0.1 --pt 3 --pc 2  |
+--------------------------------------
+Send ping with ICMP type 3 (dest unreachable)
+and code 2.";
+
+        const string EXAMPLE_MSG_PAGE_2 =
+@"
+PowerPing Examples(Page 2 of 3)
+--------------------------------------
+| powerping 8.8.8.8 /c 5 -w 500 --sh |
+--------------------------------------
+Different argument switches (/, - or --) can
+be used in any combination.
+
+--------------------------------------
+| powerping google.com /ti paranoid  |
+--------------------------------------
+Sends using the 'Paranoid' timing option.
+
+--------------------------------------
+| powerping google.com /ti 1         |
+--------------------------------------
+Same as above
+
+--------------------------------------
+| powerping /sc 192.168.1.1-255      |
+--------------------------------------
+Scans for hosts on network range 192.168.1.1
+through to 192.168.1.255.";
+
+        const string EXAMPLE_MSG_PAGE_3 =
+@"
+PowerPing Examples(Page 3 of 3)
+--------------------------------------
+| powerping --flood 192.168.1.2      |
+--------------------------------------
+ICMP flood sends a high volume of ping
+packets to 192.168.1.2.
+
+--------------------------------------
+| powerping github.com /graph        |
+--------------------------------------
+Sends pings to github.com displays results
+in graph view. (also shows how address can be
+specified before or after arguments).
+
+--------------------------------------
+| powerping /loc 84.23.12.4          |
+--------------------------------------
+Get location information for 84.23.12.4";
+
+        #endregion
+
+        #region Packet type and code messages (and colour rules)
 
         // ICMP packet types
         private static string[] packetTypes = new [] {
@@ -279,6 +418,9 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
             "IP HEADER MISSING AN OPTION", 
             "BAD IP HEADER LENGTH" 
         };
+
+        #endregion
+
         private static StringBuilder sb = new StringBuilder();
 
         // Cursor position variables
@@ -325,7 +467,7 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
             sb.Clear();
 
             // Add message string
-            sb.AppendLine(HELP_MESSAGE);
+            sb.AppendLine(HELP_MSG);
 
             // Print string
             Console.WriteLine(sb.ToString());
@@ -344,81 +486,15 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
         public static void Examples()
         {
             sb.Clear();
-            sb.AppendLine();
-            sb.AppendLine("PowerPing Examples (Page 1 of 3");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("| powerping 8.8.8.8                  |");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("Send ping to google DNS with default values (3000ms");
-            sb.AppendLine("timeout, 5 pings)");
-            sb.AppendLine("");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("| powerping github.com --w 500 --t   |");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("Send pings indefinitely to github.com with a 500ms ");
-            sb.AppendLine("timeout (Ctrl-C to stop)");
-            sb.AppendLine("");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("| powerping 127.0.0.1 --m Meow       |");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("Send ping with packet message \"Meow\"");
-            sb.AppendLine("to localhost");
-            sb.AppendLine("");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("| powerping 127.0.0.1 --pt 3 --pc 2  |");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("Send ping with ICMP type 3 (dest unreachable)");
-            sb.AppendLine("and code 2");
+            sb.AppendLine(EXAMPLE_MSG_PAGE_1);
             Console.WriteLine(sb.ToString());
             sb.Clear();
             Helper.Pause();
-            sb.AppendLine("PowerPing Examples (Page 2 of 3");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("| powerping 127.0.0.1 --pt 3 --pc 2  |");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("| powerping 8.8.8.8 /c 5 -w 500 --sh |");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("Different argument switches (/, - or --) can");
-            sb.AppendLine("be used in any combination");
-            sb.AppendLine("");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("| powerping google.com /ti paranoid  |");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("Sends using the 'Paranoid' timing option");
-            sb.AppendLine("");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("| powerping google.com /ti 1         |");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("Same as above");
-            sb.AppendLine("");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("| powerping /sc 192.168.1.1-255      |");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("Scans for hosts on network range 192.168.1.1");
-            sb.AppendLine("through to 192.168.1.255");
+            sb.AppendLine(EXAMPLE_MSG_PAGE_2);
             Console.WriteLine(sb.ToString());
             sb.Clear();
             Helper.Pause();
-            sb.AppendLine("PowerPing Examples (Page 3 of 3");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("+ powerping --flood 192.168.1.2      +");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("'ICMP flood' sends a high volume of ping");
-            sb.AppendLine("packets to 192.168.1.2");
-            sb.AppendLine("");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("+ powerping github.com /graph        +");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("Sends pings to github.com displays results");
-            sb.AppendLine("in graph view. (also shows how address can be");
-            sb.AppendLine("specified before or after arguments)");
-            sb.AppendLine("");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("+ powerping /loc 84.23.12.4          +");
-            sb.AppendLine("--------------------------------------");
-            sb.AppendLine("Get location information for 84.23.12.4");
+            sb.AppendLine(EXAMPLE_MSG_PAGE_3);
             Console.WriteLine(sb.ToString());
             sb.Clear();
 
@@ -443,32 +519,29 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
 
             // Construct string
             sb.AppendLine();
-            sb.AppendFormat("Pinging {0} ", host);
+            sb.AppendFormat(INTRO_ADDR_TXT, host);
             if (!String.Equals(host, attrs.Address)) {
                 // Only show resolved address if inputted address and resolved address are different
                 sb.AppendFormat("[{0}] ", attrs.Address);
             }
 
-            if (!Short) {
+            if (!Short) { // Only show extra detail when not in Short mode
                 if (attrs.RandomMsg) {
-                    sb.AppendFormat("(*Random packet messages*) [Type={0} Code={1}] ", attrs.Type, attrs.Code);
+                    sb.AppendFormat(INTRO_RNG_MSG, attrs.Type, attrs.Code, attrs.Ttl);
                 } else {
-                    // Only show extra detail when not in Short mode
-                    sb.AppendFormat("(Packet message \"{0}\") [Type={1} Code={2}] ", attrs.Message, attrs.Type, attrs.Code);
+                    sb.AppendFormat(INTRO_MSG, attrs.Message, attrs.Type, attrs.Code, attrs.Ttl);
                 }
             }
 
-            sb.AppendFormat("[TTL={0}]:", attrs.Ttl);
-
             // Print string
-            Console.WriteLine(sb.ToString());
+            Console.WriteLine(sb.ToString() + ":");
         }
         /// <summary>
         /// Display initial listening message
         /// </summary>
         public static void ListenIntroMsg()
         {
-            Console.WriteLine("Listening for ICMP Packets . . .");
+            Console.WriteLine(LISTEN_INTRO_MSG);
         }
         /// <summary>
         /// Display ICMP packet that have been sent
@@ -481,18 +554,18 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
 
             // Show shortened info
             if (Short) {
-                Console.Write("Request to: {0}:0 type=", address);
+                Console.Write(REQUEST_MSG_SHORT, address);
             } else {
-                Console.Write("Request to: {0}:0 seq={1} bytes={2} type=", address, index, packet.GetBytes().Length);
+                Console.Write(REQUEST_MSG, address, index, packet.GetBytes().Length);
             }
 
             // Print coloured type
             PacketType(packet);
-            Console.Write(" code={0}", packet.code);
+            Console.Write(REQUEST_CODE_TXT, packet.code);
 
             // Display timestamp
             if (ShowTimeStamp) {
-                Console.Write(" @ {0}", DateTime.Now.ToString("HH:mm:ss"));
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
             }
 
             // End line
@@ -526,9 +599,9 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
 
             // Show shortened info
             if (Short) {
-                Console.Write("Reply from: {0} type=", address);
+                Console.Write(REPLY_MSG_SHORT, address);
             } else {
-                Console.Write("Reply from: {0} seq={1} bytes={2} type=", address, index, bytesRead);
+                Console.Write(REPLY_MSG, address, index, bytesRead);
             }
 
             // Print icmp packet type
@@ -536,11 +609,11 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
 
             // Display ICMP message (if specified)
             if (ShowMessages) {
-                Console.Write(" msg=\"{0}\"", new string(Encoding.ASCII.GetString(packet.message).Where(c => !char.IsControl(c)).ToArray()));
+                Console.Write(REPLY_MSG_TXT, new string(Encoding.ASCII.GetString(packet.message).Where(c => !char.IsControl(c)).ToArray()));
             }
 
             // Print coloured time segment
-            Console.Write(" time=");
+            Console.Write(REPLY_TIME_TXT);
             if (!NoColor) {
                 if (replyTime <= TimeSpan.FromMilliseconds(100)) {
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -555,7 +628,7 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
 
             // Display timestamp
             if (ShowTimeStamp) {
-                Console.Write("@ {0}", DateTime.Now.ToString("HH:mm:ss"));
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
             }
 
             // End line
@@ -570,7 +643,7 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
             // Display captured packet
             Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
             Console.ForegroundColor = ConsoleColor.Black;
-            Console.WriteLine("{0}: ICMPv4: {1} bytes from {2} [type {3}] [code {4}]", timeReceived, bytesRead, address, packet.type, packet.code);
+            Console.WriteLine(CAPTURED_PACKET_MSG, timeReceived, bytesRead, address, packet.type, packet.code);
 
             // Reset console colours
             ResetColor();
@@ -591,7 +664,7 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
                 curAddrPos.SetToPosition();
                 Console.WriteLine(new String(' ', 20));
                 scanInfoPos.SetToPosition();
-                Console.WriteLine("Sent: {0} Found Hosts: {1}", scanned, found);
+                Console.WriteLine(SCAN_HOSTS_TXT, scanned, found);
                 scanTimePos.SetToPosition();
                 Console.Write("{0:hh\\:mm\\:ss}", curTime);
                 curAddrPos.SetToPosition();
@@ -610,16 +683,17 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
             } else {
 
                 // Setup labels
-                Console.WriteLine("Scanning range [ {0} ]", range);
+                Console.WriteLine(SCAN_RANGE_TXT, range);
                 scanInfoPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-                Console.WriteLine("Sent: 0 Hosts: 0");
-                Console.Write("Pinging ");
+                Console.WriteLine(SCAN_HOSTS_TXT);
+                Console.Write(SCAN_CUR_ADDR_TXT);
                 curAddrPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.WriteLine(curAddr);
-                Console.Write("Ellapsed: ");
+                Console.Write(SCAN_ELPS_TIME_TXT);
                 scanTimePos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.WriteLine("12:00:00");
-                Console.Write("Progress: [ ");
+                Console.Write(SCAN_PROG_TXT);
+                Console.Write("[ ");
                 perComplPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.Write("     ][");
                 progBarPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
@@ -627,15 +701,15 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
             }
             
         }
-        public static void EndScanResults(int scanned, List<string> foundHosts, List<double> times)
+        public static void ScanResults(int scanned, List<string> foundHosts, List<double> times)
         {
             Console.CursorVisible = true;
 
             Console.WriteLine();
-            Console.WriteLine("Scan complete. {0} addresses scanned. {1} hosts active:", scanned, foundHosts.Count);
+            Console.WriteLine(SCAN_RESULT_MSG, scanned, foundHosts.Count);
             if (foundHosts.Count != 0) {
                 for (int i = 0; i < foundHosts.Count; i++) {
-                    Console.WriteLine((i == foundHosts.Count - 1 ? "\\" : "|") + " -- {0} [{1:0.0}ms]", foundHosts[i], times[i]);
+                    Console.WriteLine((i == foundHosts.Count - 1 ? SCAN_END_CHAR : SCAN_CONNECTOR_CHAR) + SCAN_RESULT_ENTRY, foundHosts[i], times[i]);
                 }
             }
             Console.WriteLine();
@@ -660,53 +734,74 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
             double percent = (double)results.Lost / results.Sent;
             percent = Math.Round(percent * 100, 2);
             Console.WriteLine();
-            Console.WriteLine("--- Stats for {0} ---", attrs.Address);
+            Console.WriteLine(RESULTS_HEADER, attrs.Address);
 
+            //   General: Sent [ 0 ], Recieved [ 0 ], Lost [ 0 ] (0% loss)
+            Console.Write(RESULTS_GENERAL_TAG + RESULTS_SENT_TXT);
             if (NoColor) {
-                Console.WriteLine("   General: Sent [ {0} ], Recieved [ {1} ], Lost [ {2} ] ({3}% loss)", results.Sent, results.Received, results.Lost, percent);
-                Console.WriteLine("     Times: Min [ {0:0.0}ms ] Max [ {1:0.0}ms ], Avg [ {2:0.0}ms ]", results.MinTime, results.MaxTime, results.AvgTime);
-                Console.WriteLine("     Types: Good [ {0} ], Errors [ {1} ], Unknown [ {2} ]", results.GoodPackets, results.ErrorPackets, results.OtherPackets);
-                Console.WriteLine("Started at: {0} (local time)", results.StartTime);
-                Console.WriteLine("   Runtime: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
-                Console.WriteLine();
+                Console.Write(RESULTS_INFO_BOX, results.Sent);
             } else {
-                Console.Write("   General: Sent ");
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write("[ " + results.Sent + " ]");
+                Console.Write(RESULTS_INFO_BOX, results.Sent);
                 ResetColor();
-                Console.Write(", Received ");
+            }
+            Console.Write(RESULTS_RECV_TXT);
+            if (NoColor) {
+                Console.Write(RESULTS_INFO_BOX, results.Received);
+            } else {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("[ " + results.Received + " ]");
+                Console.Write(RESULTS_INFO_BOX, results.Received);
                 ResetColor();
-                Console.Write(", Lost ");
+            }
+            Console.Write(RESULTS_LOST_TXT);
+            if (NoColor) {
+                Console.Write(RESULTS_INFO_BOX, results.Lost);
+            } else {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("[ " + results.Lost + " ]");
+                Console.Write(RESULTS_INFO_BOX, results.Lost);
                 ResetColor();
-                Console.WriteLine(" (" + percent + "% loss)");
-                Console.Write("     Times:");
-                Console.WriteLine(" Min [ {0:0.0}ms ], Max [ {1:0.0}ms ], Avg [ {2:0.0}ms ]", results.MinTime, results.MaxTime, results.AvgTime);
-                Console.Write("ICMP Types:");
-                Console.Write(" Good ");
+            }
+            Console.WriteLine(RESULTS_PERCENT_LOST_TXT, percent);
+
+            //     Times: Min [ 0ms ] Max [ 0ms ] Avg [ 0ms ]
+            Console.WriteLine(RESULTS_TIMES_TAG + RESULTS_TIME_TXT, results.MinTime, results.MaxTime, results.AvgTime);
+
+            //     Types: Good [ 0 ], Errors [ 0 ], Unknown [ 0 ]
+            Console.Write(RESULTS_TYPES_TAG);
+            Console.Write(RESULTS_PKT_GOOD);
+            if (NoColor) {
+                Console.Write(RESULTS_INFO_BOX, results.GoodPackets);
+            } else {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("[ {0} ]", results.GoodPackets);
+                Console.Write(RESULTS_INFO_BOX, results.GoodPackets);
                 ResetColor();
-                Console.Write(", Errors ");
+            }
+            Console.Write(RESULTS_PKT_ERR);
+            if (NoColor) {
+                Console.Write(RESULTS_INFO_BOX, results.GoodPackets);
+            } else {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("[ {0} ]", results.ErrorPackets);
+                Console.Write(RESULTS_INFO_BOX, results.ErrorPackets);
                 ResetColor();
-                Console.Write(", Unknown ");
+            }
+            Console.Write(RESULTS_PKT_UKN);
+            if (NoColor) {
+                Console.Write(RESULTS_INFO_BOX, results.GoodPackets);
+            } else {
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("[ {0} ]", results.OtherPackets);
+                Console.WriteLine(RESULTS_INFO_BOX, results.OtherPackets);
                 ResetColor();
-                Console.WriteLine("Started at: {0} (local time)", results.StartTime);
-                Console.WriteLine("   Runtime: {0:hh\\:mm\\:ss\\.f}", results.TotalRunTime);
-                Console.WriteLine();
             }
 
+            // Started at: 0:00:00 (local time)
+            Console.WriteLine(RESULTS_START_TIME_TXT, results.StartTime);
+
+            //Runtime: hh:mm:ss.f
+            Console.WriteLine(RESULTS_RUNTIME_TXT, results.TotalRunTime);
+            Console.WriteLine();
+
             if (results.HasOverflowed) {
-                Console.WriteLine("SIDENOTE: I don't know how you've done it but you have caused an overflow somewhere in these ping results.");
-                Console.WriteLine("Just to put that into perspective you would have to be running a normal ping program with default settings for 584,942,417,355 YEARS to achieve this!");
-                Console.WriteLine("Well done brave soul, I don't know your motive but I salute you =^-^=");
+                Console.WriteLine(RESULTS_OVERFLOW_MSG);
                 Console.WriteLine();
             }
 
@@ -721,7 +816,8 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
         /// <param name="results"></param>
         public static void FloodProgress(PingResults results, string target)
         {
-            if (sentPos.Left > 0) { // Check if labels have already been drawn
+            // Check if labels have already been drawn
+            if (sentPos.Left > 0) { 
 
                 // Store original cursor position
                 CursorPosition originalPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
@@ -742,45 +838,23 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
             } else {
 
                 // Draw labels
-                Console.WriteLine("Flooding {0}...", target);
-                Console.Write("Sent: ");
+                Console.WriteLine(FLOOD_INTO_TXT, target);
+                Console.Write(FLOOD_SEND_TXT);
                 sentPos.Left = Console.CursorLeft;
                 sentPos.Top = Console.CursorTop;
                 Console.WriteLine("0");
-                Console.Write("Pings per Second: ");
+                Console.Write(FLOOD_PPS_TXT);
                 ppsPos.Left = Console.CursorLeft;
                 ppsPos.Top = Console.CursorTop;
                 Console.WriteLine();
-                Console.WriteLine("Press Control-C to stop...");
+                Console.WriteLine(FLOOD_EXIT_TXT);
             }
 
             sentPings = results.Sent;
         }
         public static void ListenResults(PingResults results)
         {
-            Console.WriteLine("Captured Packets:");
-            Console.WriteLine("     Caught [ 0 ] Lost [ 0 ]");
-
-            Console.WriteLine("Packet types:");
-            Console.Write("     ");
-            Console.BackgroundColor = ConsoleColor.DarkGreen;
-            Console.Write("[ Good = {0} ]", results.GoodPackets);
-            ResetColor();
-            Console.Write(" ");
-            Console.BackgroundColor = ConsoleColor.DarkRed;
-            Console.Write("[ Errors = {0} ]", results.ErrorPackets);
-            ResetColor();
-            Console.Write(" ");
-            Console.BackgroundColor = ConsoleColor.DarkBlue;
-            Console.WriteLine("[ Unknown = {0} ]", results.OtherPackets);
-            ResetColor();
-
-            Console.WriteLine("Total elapsed time (HH:MM:SS.FFF): {0:hh\\:mm\\:ss\\.fff}", results.TotalRunTime);
-            Console.WriteLine();
-
-            if (!NoInput) {
-                Helper.Pause(true);
-            }
+            throw new NotImplementedException();
         }
         /// <summary>
         /// Display Timeout message
@@ -799,17 +873,19 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
                 return;
             }
 
-            Console.BackgroundColor = ConsoleColor.DarkRed;
-            Console.Write("Request timed out.");
+            if (!NoColor) {
+                Console.BackgroundColor = ConsoleColor.DarkRed;
+            }
+            Console.Write(TIMEOUT_TXT);
 
             // Short hand
             if (!Short) {
-                Console.Write(" seq={0} ", seq);
+                Console.Write(TIMEOT_SEQ_TXT, seq);
             }
 
             // Display timestamp
             if (ShowTimeStamp) {
-                Console.Write("@ {0}", DateTime.Now.ToString("HH:mm:ss"));
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
             }
 
             // Make double sure we dont get the red line bug
@@ -827,9 +903,9 @@ Find the project here[https://github.com/Killeroo/PowerPing]";
 
             // Write error message
             if (newline) {
-                Console.WriteLine("ERROR: " + errMsg);
+                Console.WriteLine(ERROR_TXT + errMsg);
             } else {
-                Console.Write("ERROR: " + errMsg);
+                Console.Write(ERROR_TXT + errMsg);
             }
 
             // Reset console colours
