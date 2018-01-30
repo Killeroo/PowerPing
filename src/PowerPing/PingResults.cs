@@ -82,6 +82,7 @@ namespace PowerPing
                 return;
             }
 
+            // BUG: Converting from long to double might be causing precisson loss
             // Check response time against current max and min
             if (time > MaxTime) {
                 MaxTime = time;

@@ -115,7 +115,7 @@ namespace PowerPing
                 UpdateLabels(graphPing.Results);
 
                 // Get results from ping and add to graph
-                AddColumnToGraph(CreateColumn((long) graphPing.Results.CurTime));
+                AddColumnToGraph(CreateColumn(graphPing.Results.CurTime));
 
                 Console.CursorTop = EndCursorPosY;
 
@@ -319,21 +319,22 @@ namespace PowerPing
         /// <summary>
         /// Generate bar for graph
         /// </summary>
-        /// <param name="replyTime">Reply time of packet to plot</param>
-        private String[] CreateColumn(long replyTime)
+        /// <param name="time">Reply time of packet to plot</param>
+        private String[] CreateColumn(double replyTime)
         {
             String[] bar;
             int count = 0;
+            int time = Convert.ToInt32(replyTime);
 
             // Work out bar length
-            for (int x = 0; x < replyTime; x = x + (CompactGraph ? 50 : 25)) {
+            for (int x = 0; x < time; x = x + (CompactGraph ? 50 : 25)) {
                 count++;
             }
 
-            if (replyTime > 1000) {
+            if (time > 1000) {
                 // If reply time over graph Y range draw max size column
                 count = CompactGraph ? 20 : 10;
-            } else if (replyTime == 0) {
+            } else if (time == 0) {
                 // If no reply dont draw column
                 return new String[] { "─" };
             }
@@ -355,8 +356,8 @@ namespace PowerPing
             if (CompactGraph) { // Work out for compact graph
                 if (count + 1 % 2 == 0) {
                     bar[count] = FULL_BAR_BLOCK_CHAR;
-                } else if (replyTime <= 100) {
-                    if (replyTime <= 50) {
+                } else if (time <= 100) {
+                    if (time <= 50) {
                         bar[count] = "▀";
                     } else {
                         bar[count] = HALF_BAR_BLOCK_CHAR;
@@ -367,12 +368,12 @@ namespace PowerPing
             } else { // Work out for full graph
                 if (count + 1 % 2 == 0) {
                     bar[count] = FULL_BAR_BLOCK_CHAR;
-                } else if (replyTime <= 100) {
-                    if (replyTime <= 25) {
+                } else if (time <= 100) {
+                    if (time <= 25) {
                         bar[count] = "▀";
-                    } else if (replyTime <= 50) {
+                    } else if (time <= 50) {
                         bar[count] = HALF_BAR_BLOCK_CHAR;
-                    } else if (replyTime <= 75) {
+                    } else if (time <= 75) {
                         bar[count] = FULL_BAR_BLOCK_CHAR;
                     } else {
                         bar[count] = HALF_BAR_BLOCK_CHAR;
@@ -444,6 +445,8 @@ namespace PowerPing
                         Task.Delay(25);
                     }
                 }
+
+                graphPing.Dispose();
 
                 Console.CursorVisible = true;
                 disposedValue = true;

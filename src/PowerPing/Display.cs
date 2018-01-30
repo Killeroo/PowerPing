@@ -72,7 +72,7 @@ namespace PowerPing
             }
         };
 
-        #region Messages
+        #region Strings
 
         // General messages
         const string TIMESTAMP_LAYOUT = " @ {0}";
@@ -113,7 +113,7 @@ namespace PowerPing
         const string SCAN_ELPS_TIME_TXT = "Ellapsed: ";
         const string SCAN_PROG_TXT = "Progress: ";
         const string SCAN_RESULT_MSG = "Scan complete. {0} addresses scanned. {1} hosts active:";
-        const string SCAN_RESULT_ENTRY = " -- {0} [{1:0.0}ms]";
+        const string SCAN_RESULT_ENTRY = "-- {0} [{1:0.0}ms]";
         const string SCAN_CONNECTOR_CHAR = "|";
         const string SCAN_END_CHAR = @"\";
 
@@ -126,16 +126,13 @@ namespace PowerPing
         const string RESULTS_RECV_TXT = ", Recieved ";
         const string RESULTS_LOST_TXT = ", Lost ";
         const string RESULTS_PERCENT_LOST_TXT = " ({0}% loss)";
-        const string RESULTS_MIN_TXT = "Min ";
-        const string RESULTS_MAX_TXT = ", Max ";
-        const string RESULTS_AVG_TXT = ", Avg ";
         const string RESULTS_PKT_GOOD = " Good ";
         const string RESULTS_PKT_ERR = ", Errors ";
         const string RESULTS_PKT_UKN = ", Unknown ";
+        const string RESULTS_TIME_TXT = " Min [ {0:0.0}ms ], Max [ {1:0.0}ms ], Avg [ {2:0.0}ms ]";
         const string RESULTS_START_TIME_TXT = "Started at: {0} (local time)";
         const string RESULTS_RUNTIME_TXT = "   Runtime: {0:hh\\:mm\\:ss\\.f}";
         const string RESULTS_INFO_BOX = "[ {0} ]";
-        const string RESULTS_TIME_TXT = " Min [ {0:0.0}ms ], Max [ {1:0.0}ms ], Avg [ {2:0.0}ms ]";
         const string RESULTS_OVERFLOW_MSG = 
 @"SIDENOTE: I don't know how you've done it but you have caused an overflow somewhere in these ping results.
 Just to put that into perspective you would have to be running a normal ping program with default settings for 584,942,417,355 YEARS to achieve this!
@@ -292,7 +289,7 @@ Get location information for 84.23.12.4";
 
         #endregion
 
-        #region Packet type and code messages (and colour rules)
+        #region ICMP type and code strings (and colour rules)
 
         // ICMP packet types
         private static string[] packetTypes = new [] {
@@ -421,16 +418,17 @@ Get location information for 84.23.12.4";
 
         #endregion
 
-        private static StringBuilder sb = new StringBuilder();
+        #region Cursor position variables
 
-        // Cursor position variables
-        private static CursorPosition sentPos = new CursorPosition(0, 0); 
-        private static CursorPosition ppsPos = new CursorPosition(0, 0); 
-        private static CursorPosition progBarPos = new CursorPosition(0, 0); 
+        private static CursorPosition sentPos = new CursorPosition(0, 0);
+        private static CursorPosition ppsPos = new CursorPosition(0, 0);
+        private static CursorPosition progBarPos = new CursorPosition(0, 0);
         private static CursorPosition scanInfoPos = new CursorPosition(0, 0);
         private static CursorPosition curAddrPos = new CursorPosition(0, 0);
         private static CursorPosition scanTimePos = new CursorPosition(0, 0);
         private static CursorPosition perComplPos = new CursorPosition(0, 0);
+
+        #endregion
 
         // Used to work out pings per second during ping flooding
         private static ulong sentPings = 0; 
@@ -445,58 +443,35 @@ Get location information for 84.23.12.4";
             string version = Assembly.GetExecutingAssembly().GetName().Name + " v" + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ")";
             string buildTime = buildInfo.Day + "/" + buildInfo.Month + "/" + buildInfo.Year + " " + buildInfo.TimeOfDay;
 
-            // Clear builder
-            sb.Clear();
-
-            // Construct string
-            if (date) {
-                sb.AppendFormat("[Built {0}]", buildTime);
-            } else {
-                sb.AppendFormat(version);
-            }
-
-            // Print string
-            Console.WriteLine(sb.ToString());
+            // Write version
+            Console.WriteLine(version + (date ? "[Built " + buildTime + "]" : ""));
         }
         /// <summary>
         /// Displays help message
         /// </summary>
         public static void Help()
         {
-            // Reset string builder
-            sb.Clear();
-
-            // Add message string
-            sb.AppendLine(HELP_MSG);
-
-            // Print string
-            Console.WriteLine(sb.ToString());
+            // Print help message
+            Console.WriteLine(HELP_MSG);
 
             if (!NoInput) {
                 // Wait for user input
                 PowerPing.Helper.Pause();
             }
-
-            // Flush string builder
-            sb.Clear();
         }
         /// <summary>
         /// Displays example powerping usage
         /// </summary>
         public static void Examples()
         {
-            sb.Clear();
-            sb.AppendLine(EXAMPLE_MSG_PAGE_1);
-            Console.WriteLine(sb.ToString());
-            sb.Clear();
+            Console.WriteLine(EXAMPLE_MSG_PAGE_1);
+
             Helper.Pause();
-            sb.AppendLine(EXAMPLE_MSG_PAGE_2);
-            Console.WriteLine(sb.ToString());
-            sb.Clear();
+            Console.WriteLine(EXAMPLE_MSG_PAGE_2);
+
             Helper.Pause();
-            sb.AppendLine(EXAMPLE_MSG_PAGE_3);
-            Console.WriteLine(sb.ToString());
-            sb.Clear();
+            Console.WriteLine(EXAMPLE_MSG_PAGE_3);
+
 
             if (!NoInput) {
                 // Wait for user input
@@ -514,27 +489,24 @@ Get location information for 84.23.12.4";
                 return;
             }
 
-            // Clear builder
-            sb.Clear();
-
             // Construct string
-            sb.AppendLine();
-            sb.AppendFormat(INTRO_ADDR_TXT, host);
+            Console.WriteLine();
+            Console.Write(INTRO_ADDR_TXT, host);
             if (!String.Equals(host, attrs.Address)) {
                 // Only show resolved address if inputted address and resolved address are different
-                sb.AppendFormat("[{0}] ", attrs.Address);
+                Console.Write("[{0}] ", attrs.Address);
             }
 
             if (!Short) { // Only show extra detail when not in Short mode
                 if (attrs.RandomMsg) {
-                    sb.AppendFormat(INTRO_RNG_MSG, attrs.Type, attrs.Code, attrs.Ttl);
+                    Console.Write(INTRO_RNG_MSG, attrs.Type, attrs.Code, attrs.Ttl);
                 } else {
-                    sb.AppendFormat(INTRO_MSG, attrs.Message, attrs.Type, attrs.Code, attrs.Ttl);
+                    Console.Write(INTRO_MSG, attrs.Message, attrs.Type, attrs.Code, attrs.Ttl);
                 }
             }
 
             // Print string
-            Console.WriteLine(sb.ToString() + ":");
+            Console.WriteLine(":");
         }
         /// <summary>
         /// Display initial listening message
@@ -668,7 +640,7 @@ Get location information for 84.23.12.4";
                 scanTimePos.SetToPosition();
                 Console.Write("{0:hh\\:mm\\:ss}", curTime);
                 curAddrPos.SetToPosition();
-                Console.Write("{0}...", curAddr);
+                Console.Write("{0} ...", curAddr);
                 progBarPos.SetToPosition();
                 double s = scanned;
                 double tot = total;
@@ -685,7 +657,7 @@ Get location information for 84.23.12.4";
                 // Setup labels
                 Console.WriteLine(SCAN_RANGE_TXT, range);
                 scanInfoPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-                Console.WriteLine(SCAN_HOSTS_TXT);
+                Console.WriteLine();
                 Console.Write(SCAN_CUR_ADDR_TXT);
                 curAddrPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.WriteLine(curAddr);
@@ -875,6 +847,7 @@ Get location information for 84.23.12.4";
 
             if (!NoColor) {
                 Console.BackgroundColor = ConsoleColor.DarkRed;
+                Console.ForegroundColor = ConsoleColor.Black;
             }
             Console.Write(TIMEOUT_TXT);
 

@@ -168,7 +168,7 @@ namespace PowerPing
 
             try {
                 IPAddress hostAddr = IPAddress.Parse(address);
-                IPHostEntry hostInfo = Dns.GetHostByAddress(hostAddr);
+                IPHostEntry hostInfo = Dns.GetHostEntry(hostAddr);
                 alias = hostInfo.HostName;
             } catch (Exception) { } // Silently continue on lookup error
 

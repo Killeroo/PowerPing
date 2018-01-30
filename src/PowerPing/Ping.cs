@@ -48,8 +48,6 @@ namespace PowerPing
         public PingAttributes Attributes { get; private set; } = new PingAttributes(); // Stores the current operation's attributes
         public bool IsRunning { get; private set; } = false;
 
-        const int MAX_BUFFER_SIZE = 65000;
-
         private ManualResetEvent cancelEvent = new ManualResetEvent(false);
 
         public Ping() { }
@@ -482,8 +480,9 @@ namespace PowerPing
                     }
                 }
 
-                // Reset cancel event
-                cancelEvent.Reset();
+                if (cancelEvent != null) {
+                    cancelEvent.Dispose();
+                }
 
                 // Call GC to cleanup
                 System.GC.Collect();
