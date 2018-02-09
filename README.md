@@ -6,7 +6,7 @@ Small improved command line ICMP ping program lovingly inspired by windows and l
 
 Download it here: [[Stable Release]](https://github.com/Killeroo/PowerPing/releases)
 
-Nightly Builds: [[Master Build]](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx64%2FPowerPing.exe?job=Platform%3A%20x64&branch=master) [[Development Build]](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx64%2FPowerPing.exe?job=Platform%3A%20x64&branch=dev) [x86 versions for [master](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx86%2FPowerPing.exe?job=Platform%3A%20x86&branch=master) & [dev](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx86%2FPowerPing.exe?job=Platform%3A%20x86&branch=dev)]
+Nightly Builds: [[Master]](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx64%2FPowerPing.exe?job=Platform%3A%20x64&branch=master) [[Development]](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx64%2FPowerPing.exe?job=Platform%3A%20x64&branch=dev) (x86 versions for [master](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx86%2FPowerPing.exe?job=Platform%3A%20x86&branch=master) & [dev](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx86%2FPowerPing.exe?job=Platform%3A%20x86&branch=dev))
 ***
 ![alt text](docs/screenshots/screenshot.png "PowerPing in action")
 
@@ -26,9 +26,9 @@ PowerPing contains the following features:
 
 The following features are planned for a future release:
 
-- [Traceroute (v1.2.5)](https://en.wikipedia.org/wiki/Traceroute)
-- [Tunnelling (v1.3.0)](https://en.wikipedia.org/wiki/ICMP_tunnel)
-- [IPv6/ICMPv6 (v1.3.0)](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_version_6)
+- [Traceroute (target: v1.2.5)](https://en.wikipedia.org/wiki/Traceroute)
+- [Tunnelling (target: v1.3.0)](https://en.wikipedia.org/wiki/ICMP_tunnel)
+- [IPv6/ICMPv6 (target: v1.3.0)](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_version_6)
 
 ## Usage: 
      PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] | 
