@@ -451,6 +451,8 @@ namespace PowerPing
                 } finally {
                     // Increment seq and wait for interval
                     index++;
+
+                    //DEBUG: Breakpoint here
                     cancelEvent.WaitOne(attrs.Interval);
 
                     // Reset timer
@@ -480,9 +482,9 @@ namespace PowerPing
                     }
                 }
 
-                if (cancelEvent != null) {
-                    cancelEvent.Dispose();
-                }
+                // if (cancelEvent != null) {
+                //     cancelEvent.Dispose();
+                // }
 
                 // Call GC to cleanup
                 System.GC.Collect();
