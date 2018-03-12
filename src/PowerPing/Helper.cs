@@ -38,6 +38,9 @@ namespace PowerPing
     /// </summary>
     public static class Helper
     {
+        // Whois server to query addresses against
+        private const string WHOIS_SERVER = "whois.iana.org";
+
         /// <summary>
         /// Gets location information about IP Address
         /// IP location info by freegeoip.net
@@ -177,6 +180,37 @@ namespace PowerPing
             }
             
             return alias;
+        }
+
+        /// <summary>
+        /// Queries site information using a up a website on a whois server
+        /// (https://en.wikipedia.org/wiki/WHOIS)
+        /// </summary>
+        /// <param name="server">Address of whois server to use</param>
+        /// <param name="query">Query string to send to server</param>
+        /// <source>http://nathanenglert.com/2015/05/25/creating-an-app-to-find-that-domain-youve-always-wanted/</source>
+        /// <returns></returns>
+        public static string WhoisLookup(string server, string query)
+        {
+            StringBuilder result = new StringBuilder();
+
+            // Connect to whois server
+            using (TcpClient whoisClient = new TcpClient(server, 43))
+            using (NetworkStream netStream = whoisClient.GetStream())
+            using (BufferedStream bufferStream = new BufferedStream(netStream)) {
+
+                // Write request to server
+                StreamWriter sw = new StreamWriter(bufferStream);
+                sw.WriteLine(query);
+                sw.Flush();
+
+                // Read response from server
+                StreamReader sr = new StreamReader(bufferStream);
+                while (!sr.EndOfStream)
+                    result.AppendLine(sr.ReadLine());
+            }
+
+            return result.ToString();
         }
 
         /// <summary>
