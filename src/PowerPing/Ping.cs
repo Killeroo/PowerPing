@@ -346,6 +346,7 @@ namespace PowerPing
             sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, attrs.Timeout); // Socket timeout
             sock.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.IpTimeToLive, attrs.Ttl);
             // TODO: FIX: sock.Ttl = (short)attributes.ttl;
+            sock.DontFragment = attrs.DontFragment;
 
             // Construct our ICMP packet
             packet.type = attrs.Type;

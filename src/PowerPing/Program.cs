@@ -397,6 +397,14 @@ namespace PowerPing
                                     throw new ArgumentFormatException();
                                 }
                                 break;
+                            case "/dontfragment":
+                            case "-dontfragment":
+                            case "--dontfragment":
+                            case "/df":
+                            case "-df":
+                            case "--df":
+                                attributes.DontFragment = true;
+                                break;
                             case "/whoami":
                             case "-whoami":
                             case "--whoami": // Current computer location
