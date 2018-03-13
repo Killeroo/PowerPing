@@ -30,6 +30,7 @@ using System.Net.Sockets;
 using System.IO;
 using System.Reflection;
 using System.Linq;
+using System.Text;
 
 namespace PowerPing
 {
@@ -39,7 +40,7 @@ namespace PowerPing
     public static class Helper
     {
         // Whois server to query addresses against
-        private const string WHOIS_SERVER = "whois.iana.org";
+        public const string WHOIS_SERVER = "whois.iana.org";
 
         /// <summary>
         /// Gets location information about IP Address
@@ -67,6 +68,7 @@ namespace PowerPing
                         foreach (XmlElement element in elements) {
                             Console.WriteLine(element.Name + ": " + (element.InnerText == "" ? "NA" : element.InnerText));
                         }
+                        Console.WriteLine(WhoisLookup("whois.verisign-grs.com", addr));
                     } else {
                         if (elements[2].InnerText != "") {
                             loc = "[" + elements[2].InnerText;
