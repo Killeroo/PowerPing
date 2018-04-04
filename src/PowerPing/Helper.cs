@@ -39,8 +39,8 @@ namespace PowerPing
     /// </summary>
     public static class Helper
     {
-        // Whois server to query addresses against
-        public const string WHOIS_SERVER = "whois.iana.org";
+        // Root Whois server to query addresses against
+        public const string ROOT_WHOIS_SERVER = "whois.iana.org";
 
         /// <summary>
         /// Gets location information about IP Address
@@ -68,7 +68,7 @@ namespace PowerPing
                         foreach (XmlElement element in elements) {
                             Console.WriteLine(element.Name + ": " + (element.InnerText == "" ? "NA" : element.InnerText));
                         }
-                        Console.WriteLine(WhoisLookup("whois.verisign-grs.com", addr));
+                        Console.WriteLine(PerformWhoIsLookup("whois.verisign-grs.com", addr));
                     } else {
                         if (elements[2].InnerText != "") {
                             loc = "[" + elements[2].InnerText;
@@ -185,14 +185,24 @@ namespace PowerPing
         }
 
         /// <summary>
-        /// Queries site information using a up a website on a whois server
+        /// 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
+        public static string WhoIs(string address)
+        {
+
+        }
+
+        /// <summary>
+        /// Queries a whois server for information on a server
         /// (https://en.wikipedia.org/wiki/WHOIS)
         /// </summary>
         /// <param name="server">Address of whois server to use</param>
         /// <param name="query">Query string to send to server</param>
         /// <source>http://nathanenglert.com/2015/05/25/creating-an-app-to-find-that-domain-youve-always-wanted/</source>
         /// <returns></returns>
-        public static string WhoisLookup(string server, string query)
+        private static string PerformWhoIsLookup(string server, string query)
         {
             StringBuilder result = new StringBuilder();
 
