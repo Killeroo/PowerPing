@@ -384,9 +384,9 @@ namespace PowerPing
                             case "--co":
                                 attributes.UsePingCookies = true;
                                 break;
-                            case "/recvbuff":
-                            case "-recvbuff":
-                            case "--recvbuff":
+                            case "/buffer":
+                            case "-buffer":
+                            case "--buffer":
                             case "/rb":
                             case "-rb":
                             case "--rb":
@@ -397,9 +397,9 @@ namespace PowerPing
                                     throw new ArgumentFormatException();
                                 }
                                 break;
-                            case "/dontfragment":
-                            case "-dontfragment":
-                            case "--dontfragment":
+                            case "/dontfrag":
+                            case "-dontfrag":
+                            case "--dontfrag":
                             case "/df":
                             case "-df":
                             case "--df":

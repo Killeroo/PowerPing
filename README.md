@@ -4,7 +4,7 @@
 
 Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
 
-Download it here: [[Stable Release]](https://github.com/Killeroo/PowerPing/releases)
+Download it here: [[Stable Releases]](https://github.com/Killeroo/PowerPing/releases)
 
 Nightly Builds: [[Master]](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx64%2FPowerPing.exe?job=Platform%3A%20x64&branch=master) [[Development]](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx64%2FPowerPing.exe?job=Platform%3A%20x64&branch=dev) (x86 versions for [master](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx86%2FPowerPing.exe?job=Platform%3A%20x86&branch=master) & [dev](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx86%2FPowerPing.exe?job=Platform%3A%20x86&branch=dev))
 ***
@@ -31,20 +31,19 @@ The following features are planned for a future release:
 - [IPv6/ICMPv6 (target: v1.3.0)](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_version_6)
 
 ## Usage: 
-     PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] | 
-               [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--dm]
-               [--i TTL] [--in interval] [--pt type] [--pc code] [--b level]
-	           [--4] [--short] [--nocolor] [--ts] [--ti timing] [--nt] target_name
+     PowerPing [--?] | [--ex] | [--li] | [--whoami] | [--loc] | [--fl] | [--sc] |
+               [--g] | [--cg] | [--t] [--4] [--rng] [--df] [--rb number] [--b number] 
+               [--c number] [--w number] [-i number] [--in number] [--pt number] [--pc number]
+               [--m "message"] [--ti timing] [--sh] [--dm] [--ts] [--nc] [--ni] [--s] [--r]
+               [--nt] [--q] [--res] [--ia] [--l number] [dp number] target_name | target_address
                
 ## Arguments:
     Ping Options:
-        --help       [--?]            Displays this help message"
-        --version    [--v]            Shows version and build information
-        --examples   [--ex]           Shows example usage
         --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)
-        --displaymsg [--dm]           Display ICMP messages
         --ipv4       [--4]            Force using IPv4
         --random     [--rng]          Generates random ICMP message
+        --dontfrag   [--df]           Set 'Don't Fragment' flag
+        --buffer     [--rb]  number   Sets recieve buffer size (default is 5096)
         --beep       [--b]   number   Beep on timeout (1) or on reply (2)
         --count      [--c]   number   Number of pings to send
         --timeout    [--w]   number   Time to wait for reply (in milliseconds)
@@ -61,6 +60,7 @@ The following features are planned for a future release:
     
     Display Options:
         --shorthand  [--sh]           Show less detailed replies
+        --displaymsg [--dm]           Display ICMP message contents
         --timestamp  [--ts]           Display timestamp
         --nocolor    [--nc]           No colour
         --noinput    [--ni]           Require no user input
@@ -81,6 +81,11 @@ The following features are planned for a future release:
         --compact    [--cg]  address  Compact graph view
         --location   [--loc] address  Location info for an address
         --whoami                      Location info for current host
+
+    Others:
+        --help       [--?]            Displays this help message
+        --version    [--v]            Shows version and build information
+        --examples   [--ex]           Shows example usage
 
 ## Examples:
      powerping 8.8.8.8                    -     Send ping to google DNS with default values (3000ms timeout, 5 pings)

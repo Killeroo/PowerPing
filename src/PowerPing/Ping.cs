@@ -452,8 +452,8 @@ namespace PowerPing
                 } finally {
                     // Increment seq and wait for interval
                     index++;
-
-                    //DEBUG: Breakpoint here
+                    
+                    // Wait for set interval before sending again
                     cancelEvent.WaitOne(attrs.Interval);
 
                     // Reset timer

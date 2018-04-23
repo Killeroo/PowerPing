@@ -155,20 +155,19 @@ Description:
         customization, graphs and result colourization.
 
 Usage: 
-    PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] |
-              [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--dm]
-              [--m ""text""] | [--rng]) [--l num] [--s] [--r] [--dp places]
-              [--i TTL] [--in interval] [--pt type] [--pc code] [--b level]
-              [--4] [--short] [--nocolor] [--ts] [--ti timing] [--nt] target_name
+    PowerPing [--?] | [--ex] | [--li] | [--whoami] | [--loc] | [--fl] | [--sc] |
+              [--g] | [--cg] | [--t] [--4] [--rng] [--df] [--rb number] 
+              [--b number] [--c number] [--w number] [-i number] [--in number]
+              [--pt number] [--pc number] [--m message] [--ti timing] [--sh] 
+              [--dm] [--ts] [--nc] [--ni] [--s] [--r] [--nt] [--q] [--res]
+              [--ia] [--l number] [dp number] target_name | target_address
 
 Ping Options:
-    --help       [--?]            Displays this help message
-    --version    [--v]            Shows version and build information
-    --examples   [--ex]           Shows example usage
     --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)
-    --displaymsg [--dm]           Display ICMP messages
     --ipv4       [--4]            Force using IPv4
     --random     [--rng]          Generates random ICMP message
+    --dontfrag   [--df]           Set 'Don't Fragment' flag
+    --buffer     [--rb]  number   Sets recieve buffer size (default is 5096)
     --beep       [--b]   number   Beep on timeout(1) or on reply(2)
     --count      [--c]   number   Number of pings to send
     --timeout    [--w]   number   Time to wait for reply (in milliseconds)
@@ -185,6 +184,7 @@ Ping Options:
 
 Display Options:
     --shorthand  [--sh]           Show less detailed replies
+    --displaymsg [--dm]           Display ICMP message field contents
     --timestamp  [--ts]           Display timestamp
     --nocolor    [--nc]           No colour
     --noinput    [--ni]           Require no user input
@@ -207,6 +207,11 @@ Features:
     --compact    [--cg]  address  Compact graph view
     --location   [--loc] address  Location info for an address
     --whoami                      Location info for current host
+
+Other:
+    --help       [--?]            Displays this help message
+    --version    [--v]            Shows version and build information
+    --examples   [--ex]           Displays some example usage
 
 type '--examples' for more
 
