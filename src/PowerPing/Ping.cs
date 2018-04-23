@@ -458,7 +458,11 @@ namespace PowerPing
 
                     // Reset timer
                     responseTimer.Reset();
-                }  
+                }
+
+                // Stop sending if flag is set
+                if (!IsRunning)
+                    break;
             }
 
             // Clean up
@@ -476,16 +480,13 @@ namespace PowerPing
             if (!disposedValue) {
                 if (IsRunning) {
                     cancelEvent.Set();
+                    IsRunning = false;
 
                     // wait till ping stops running
                     while (IsRunning) {
                         Task.Delay(25);
                     }
                 }
-
-                // if (cancelEvent != null) {
-                //     cancelEvent.Dispose();
-                // }
 
                 // Call GC to cleanup
                 System.GC.Collect();
