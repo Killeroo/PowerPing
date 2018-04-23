@@ -473,7 +473,11 @@ namespace PowerPing
 
                     // Reset timer
                     responseTimer.Reset();
-                }  
+                }
+
+                // Stop sending if flag is set
+                if (!IsRunning)
+                    break;
             }
 
             // Clean up
@@ -493,14 +497,12 @@ namespace PowerPing
                 if (IsRunning)
                 {
                     cancelEvent.Set();
+                    IsRunning = false;
 
                     // wait till ping stops running
                     while (IsRunning)
                         Task.Delay(25);
                 }
-
-                // Reset cancel event
-                cancelEvent.Reset();
 
                 // Call GC to cleanup
                 System.GC.Collect();
