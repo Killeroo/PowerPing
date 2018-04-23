@@ -1,6 +1,8 @@
 Debug
 Release
 
+build/
+
 .DS_Store
 
 # Created by https://www.gitignore.io/api/visualstudio
@@ -31,11 +33,6 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
-
-build/PowerPing.exe.config
-build/PowerPing.vshost.exe
-build/PowerPing.vshost.exe.config
-build/PowerPing.vshost.exe.manifest
 
 # Visual Studio 2015 cache/options directory
 .vs/

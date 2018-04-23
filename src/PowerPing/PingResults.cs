@@ -46,10 +46,10 @@ namespace PowerPing
         public ulong ErrorPackets { get; private set; } // Number of Error packet received
         public ulong GoodPackets { get; private set; } // Number of good replies received
         public ulong OtherPackets { get; private set; } // Number of other packet types received
-        public bool HasOverflowed { get; set; } = false; // Specifies if any of the results have overflowed
+        public bool HasOverflowed { get; set; } // Specifies if any of the results have overflowed
 
         // Local variables
-        private Stopwatch operationTimer = new Stopwatch();
+        private readonly Stopwatch operationTimer = new Stopwatch();
         private ulong sum  = 0; // Sum off all reply times
 
         public PingResults()
@@ -66,6 +66,8 @@ namespace PowerPing
             GoodPackets = 0;
             OtherPackets = 0;
 
+            HasOverflowed = false;
+
             // Get local start time
             StartTime = DateTime.Now;
 
@@ -73,53 +75,45 @@ namespace PowerPing
             operationTimer.Start();
         }
 
-        public void SetCurResponseTime(double time)
+        public void SaveResponseTime(double time)
         {
-            if (time == -1)
-            {
+            if (time == -1f) {
                 CurTime = 0;
                 return;
             }
 
+            // BUG: Converting from long to double might be causing precisson loss
             // Check response time against current max and min
-            if (time > MaxTime)
+            if (time > MaxTime) {
                 MaxTime = time;
-
-            if (time < MinTime || MinTime == 0)
-                MinTime = time;
-
-            try
-            {
-                checked
-                {
-                    // Work out average
-                    sum += (ulong)time;
-                    AvgTime = (double)sum / Received; // Avg = Total / Count
-                }
             }
-            catch (OverflowException)
-            {
+
+            if (time < MinTime || MinTime == 0) {
+                MinTime = time;
+            }
+
+            try {
+                // Work out average
+                sum += (ulong)time;
+                AvgTime = (double)sum / Received; // Avg = Total / Count
+            } catch (OverflowException) {
                 HasOverflowed = true;
             }
 
             CurTime = time;
         }
-        public void SetPacketType(int type)
+        public void CountPacketType(int type)
         {
             try
             {
-                checked
-                {
-                    if (type == 0)
-                        GoodPackets++;
-                    else if (type == 3 || type == 4 || type == 5 || type == 11)
-                        ErrorPackets++;
-                    else
-                        OtherPackets++;
+                if (type == 0) {
+                    GoodPackets++;
+                } else if (type == 3 || type == 4 || type == 5 || type == 11) {
+                    ErrorPackets++;
+                } else {
+                    OtherPackets++;
                 }
-            }
-            catch (OverflowException)
-            {
+            } catch (OverflowException) {
                 HasOverflowed = true;
             }
         }
