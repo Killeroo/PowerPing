@@ -191,7 +191,7 @@ namespace PowerPing
         /// <returns></returns>
         public static string WhoIs(string address)
         {
-
+            return "";
         }
 
         /// <summary>
