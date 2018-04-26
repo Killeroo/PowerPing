@@ -189,8 +189,36 @@ namespace PowerPing
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>
-        public static string WhoIs(string address)
+        public static string WhoIs(string address, bool full = true)
         {
+            // Trim the inputted address
+            address = address.Split('/')[0];
+            string keyword = address.Split('.')[0];
+            string tld = address.Split('.').Last();
+
+            // Quick sanity check before we proceed
+            if (keyword == "" || tld == "") {
+                PowerPing.Display.Error("Incorrectly formatted address, please check format and try again (web addresses only)", true);
+            }
+            PowerPing.Display.Message("WHOIS [" + address + "]:", ConsoleColor.Yellow);
+
+            // Find appropriate whois for the tld
+            PowerPing.Display.Message("QUERYING [" + ROOT_WHOIS_SERVER + "] FOR TLD [" + tld + "]:", ConsoleColor.Yellow, false);
+            string whoisRoot = PerformWhoIsLookup(ROOT_WHOIS_SERVER, tld);
+            PowerPing.Display.Message(" DONE", ConsoleColor.Yellow);
+            if (full) {
+                Console.WriteLine(whoisRoot);
+            }
+            whoisRoot = whoisRoot.Remove(0, whoisRoot.IndexOf("whois:", StringComparison.Ordinal) + 6).TrimStart();
+            whoisRoot = whoisRoot.Substring(0, whoisRoot.IndexOf('\r'));
+            PowerPing.Display.Message("QUERYING [" + whoisRoot + "]:", ConsoleColor.Yellow, false);
+
+            // Next query resulting whois for the domain
+            string result = PerformWhoIsLookup(whoisRoot, address);
+            PowerPing.Display.Message(" DONE", ConsoleColor.Yellow);
+            Console.WriteLine(result);
+            PowerPing.Display.Message("WHOIS LOOKUP COMPLETE.", ConsoleColor.Yellow);
+
             return "";
         }
 
@@ -198,16 +226,16 @@ namespace PowerPing
         /// Queries a whois server for information on a server
         /// (https://en.wikipedia.org/wiki/WHOIS)
         /// </summary>
-        /// <param name="server">Address of whois server to use</param>
+        /// <param name="whoisServer">Address of whois server to use</param>
         /// <param name="query">Query string to send to server</param>
         /// <source>http://nathanenglert.com/2015/05/25/creating-an-app-to-find-that-domain-youve-always-wanted/</source>
         /// <returns></returns>
-        private static string PerformWhoIsLookup(string server, string query)
+        private static string PerformWhoIsLookup(string whoisServer, string query)
         {
             StringBuilder result = new StringBuilder();
 
             // Connect to whois server
-            using (TcpClient whoisClient = new TcpClient(server, 43))
+            using (TcpClient whoisClient = new TcpClient(whoisServer, 43))
             using (NetworkStream netStream = whoisClient.GetStream())
             using (BufferedStream bufferStream = new BufferedStream(netStream)) {
 
