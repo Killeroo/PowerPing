@@ -405,6 +405,11 @@ namespace PowerPing
                             case "--df":
                                 attributes.DontFragment = true;
                                 break;
+                            case "/whois":
+                            case "-whois":
+                            case "--whois":
+                                opMode = "whois";
+                                break;
                             case "/whoami":
                             case "-whoami":
                             case "--whoami": // Current computer location
@@ -497,11 +502,11 @@ namespace PowerPing
 
             // Find address
             if (opMode.Equals("") || opMode.Equals("flooding") || opMode.Equals("graphing") 
-                || opMode.Equals("compactGraph") || opMode.Equals("location")) {
+                || opMode.Equals("compactGraph") || opMode.Equals("location") || opMode.Equals("whois")) {
 
                 if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown 
                     && Uri.CheckHostName(args.Last()) == UriHostNameType.Unknown) {
-                    PowerPing.Display.Error("Unknown host", true, true);
+                    PowerPing.Display.Error("Unknown address format. \nIf address is a url do not include any trailing '/'s, for example use: google.com NOT google.com/test.html", true, true);
                 }
 
                 if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown) {
@@ -528,6 +533,9 @@ namespace PowerPing
                     break;
                 case "whoami":
                     Helper.GetAddressLocation("", true);
+                    break;
+                case "whois":
+                    Helper.WhoIs(attributes.Host);
                     break;
                 case "graphing":
                     g = new Graph(attributes.Host);

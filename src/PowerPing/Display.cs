@@ -155,8 +155,8 @@ Description:
         customization, graphs and result colourization.
 
 Usage: 
-    PowerPing [--?] | [--ex] | [--li] | [--whoami] | [--loc] | [--fl] | [--sc] |
-              [--g] | [--cg] | [--t] [--4] [--rng] [--df] [--rb number] 
+    PowerPing [--?] | [--ex] | [--li] | [--whoami] | [--whois] [--loc] | [--fl] |
+              [--sc] | [--g] | [--cg] | [--t] [--4] [--rng] [--df] [--rb number] 
               [--b number] [--c number] [--w number] [-i number] [--in number]
               [--pt number] [--pc number] [--m message] [--ti timing] [--sh] 
               [--dm] [--ts] [--nc] [--ni] [--s] [--r] [--nt] [--q] [--res]
@@ -192,7 +192,7 @@ Display Options:
     --request    [--r]            Show request packets
     --notimeouts [--nt]           Don't display timeout messages
     --quiet      [--q]            No output, only shows summary upon exit
-    --resolve    [--res]          Display hostname from DNS
+    --resolve    [--res]          Resolve hostname of address from DNS
     --inputaddr  [--ia]           Show input address instead of revolved IP address
     --limit      [--l]   number   Limits output to just replies(0) or requests(1)
     --decimals   [--dp]  number   Num of decimal places to use(0 to 3)
@@ -206,6 +206,7 @@ Features:
     --graph      [--g]   address  Graph view
     --compact    [--cg]  address  Compact graph view
     --location   [--loc] address  Location info for an address
+    --whois              address  Whois lookup for an address
     --whoami                      Location info for current host
 
 Other:

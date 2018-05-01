@@ -40,7 +40,7 @@ namespace PowerPing
     public static class Helper
     {
         // Root Whois server to query addresses against
-        public const string ROOT_WHOIS_SERVER = "whois.iana.org";
+        private const string ROOT_WHOIS_SERVER = "whois.iana.org";
 
         /// <summary>
         /// Gets location information about IP Address
@@ -189,7 +189,7 @@ namespace PowerPing
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>
-        public static string WhoIs(string address, bool full = true)
+        public static void WhoIs(string address, bool full = true)
         {
             // Trim the inputted address
             address = address.Split('/')[0];
@@ -211,15 +211,17 @@ namespace PowerPing
             }
             whoisRoot = whoisRoot.Remove(0, whoisRoot.IndexOf("whois:", StringComparison.Ordinal) + 6).TrimStart();
             whoisRoot = whoisRoot.Substring(0, whoisRoot.IndexOf('\r'));
-            PowerPing.Display.Message("QUERYING [" + whoisRoot + "]:", ConsoleColor.Yellow, false);
+            PowerPing.Display.Message("QUERYING [" + whoisRoot + "] FOR DOMAIN [" + address + "]:", ConsoleColor.Yellow, false);
 
             // Next query resulting whois for the domain
             string result = PerformWhoIsLookup(whoisRoot, address);
             PowerPing.Display.Message(" DONE", ConsoleColor.Yellow);
             Console.WriteLine(result);
-            PowerPing.Display.Message("WHOIS LOOKUP COMPLETE.", ConsoleColor.Yellow);
+            PowerPing.Display.Message("WHOIS LOOKUP FOR [" + address + "] COMPLETE.", ConsoleColor.Yellow);
 
-            return "";
+            if (!Display.NoInput) {
+                Helper.Pause();
+            }
         }
 
         /// <summary>
