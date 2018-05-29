@@ -1,7 +1,7 @@
 ﻿/*
 MIT License - PowerPing 
 
-Copyright (c) 2017 Matthew Carney
+Copyright (c) 2018 Matthew Carney
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -34,17 +34,21 @@ namespace PowerPing
         public string Host { get; set; } // Name of host being pinged
         public string Address { get; set; } // Address to send the ping to
         public string Message { get; set; } // Message to store with in ICMP message field
+        public string Source { get; set; }
         public int Interval { get; set; } // Time interval between sending each ping
         public int Timeout { get; set; } // Recieve timeout (milliseconds)
         public int Count { get; set; } // Number of pings to send
-        public int Ttl { get; set; } // Time to live
+        public int Ttl { get; set; } // Time to live                                
+        public int BeepLevel { get; set; } // Beep level - 1 to beep on timeout, 2 for beep on reply, 0 for no beep
+        public int RecieveBufferSize { get; set; }
         public byte Type { get; set; } // ICMP type field value
         public byte Code { get; set; } // ICMP code field value
         public bool Continous { get; set; } // Continously send pings
         public bool ForceV4 { get; set; } // Force use of IPv4
         public bool ForceV6 { get; set; } // Force use of IPv6 
-        public bool RandomMsg { get; set; } // Fills ICMP message field with random characters                                      
-	    public int BeepLevel { get; set; } // Beep level - 1 to beep on timeout, 2 for beep on reply, 0 for no beep
+        public bool RandomMsg { get; set; } // Fills ICMP message field with random characters    
+        public bool UsePingCookies { get; set; } // Stores timestamp and seq num in ICMP data for more accurate readings
+        public bool DontFragment { get; set; } // Sets the Don't Fragment flag in an IPv4 header
         public string[] AddressList { get; set; } // Optional attribute: Used when scanning, stores addresses to ping
 
         public PingAttributes()
@@ -63,8 +67,11 @@ namespace PowerPing
             ForceV4 = true;
             ForceV6 = false;
             RandomMsg = false;
+            UsePingCookies = false;
 	        BeepLevel = 0;
             AddressList = null;
+            RecieveBufferSize = 5096;
+            DontFragment = false;
         }
     }
 

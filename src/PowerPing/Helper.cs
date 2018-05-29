@@ -1,7 +1,7 @@
 ﻿/*
 MIT License - PowerPing 
 
-Copyright (c) 2017 Matthew Carney
+Copyright (c) 2018 Matthew Carney
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@ using System.Net.Sockets;
 using System.IO;
 using System.Reflection;
 using System.Linq;
+using System.Text;
 
 namespace PowerPing
 {
@@ -38,6 +39,9 @@ namespace PowerPing
     /// </summary>
     public static class Helper
     {
+        // Root Whois server to query addresses against
+        private const string ROOT_WHOIS_SERVER = "whois.iana.org";
+
         /// <summary>
         /// Gets location information about IP Address
         /// IP location info by freegeoip.net
@@ -49,45 +53,45 @@ namespace PowerPing
         {
             string loc = null;
 
-            try
-            {
-                using (var objClient = new System.Net.WebClient())
-                {
+            try {
+
+                using (var objClient = new System.Net.WebClient()) {
+
                     var strFile = objClient.DownloadString("http://freegeoip.net/xml/" + addr);
 
                     XmlDocument xmlDoc = new XmlDocument();
                     xmlDoc.LoadXml(strFile);
                     XmlNodeList elements = (xmlDoc.DocumentElement).ChildNodes;
 
-                    if (detailed)
-                    {
+                    if (detailed) {
                         Console.WriteLine("Queried address: --{0}--", addr);
-                        foreach (XmlElement element in elements)
+                        foreach (XmlElement element in elements) {
                             Console.WriteLine(element.Name + ": " + (element.InnerText == "" ? "NA" : element.InnerText));
-                        //Console.WriteLine("DNS Lookup: --{0}--", Helper.VerifyAddress(addr, AddressFamily.InterNetwork));
-                    }
-                    else
-                    {
-                        if (elements[2].InnerText != "")
+                        }
+                        Console.WriteLine(PerformWhoIsLookup("whois.verisign-grs.com", addr));
+                    } else {
+                        if (elements[2].InnerText != "") {
                             loc = "[" + elements[2].InnerText;
-                        if (elements[3].InnerText != "")
+                        }
+                        if (elements[3].InnerText != "") {
                             loc = loc + ", " + elements[3].InnerText;
-                        if (elements[5].InnerText != "")
+                        }
+                        if (elements[5].InnerText != "") {
                             loc = loc + ", " + elements[5].InnerText;
+                        }
                         loc += "]";
                     }
                 }
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 loc = "[Location unavaliable]";
                 Console.WriteLine("[Location unavaliable]");
             }
             
             Console.WriteLine(loc);
 
-            if (!Display.NoInput)
+            if (!Display.NoInput) {
                 Helper.Pause();
+            }
 
             return loc;
         }
@@ -99,18 +103,20 @@ namespace PowerPing
         public static string GetLocalIPAddress()
         {
             // If not connected to a network return null
-            if (!NetworkInterface.GetIsNetworkAvailable())
+            if (!NetworkInterface.GetIsNetworkAvailable()) {
                 return null;
+            }
 
             // Get all addresses assocatied with this computer
             var hostAddress = Dns.GetHostEntry(Dns.GetHostName());
 
             // Loop through each associated address
-            foreach (var address in hostAddress.AddressList)
+            foreach (var address in hostAddress.AddressList) {
                 // If address is IPv4
-                if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                    // Return the address
+                if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) {
                     return address.ToString();
+                }
+            }
 
             return null;
         }
@@ -121,37 +127,35 @@ namespace PowerPing
         /// <param name="address"></param>
         /// <param name="af"></param>
         /// <returns></returns>
-        /// CHANGE NAME -> AddressLookup
         public static string AddressLookup(string address, AddressFamily af)
         {
             IPAddress ipAddr = null;
 
             // Check address format
-            if (Uri.CheckHostName(address) == UriHostNameType.Unknown)
+            if (Uri.CheckHostName(address) == UriHostNameType.Unknown) {
                 PowerPing.Display.Error("PowerPing could not resolve host [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
+            }
 
             // Only resolve address if not already in IP address format
-            if (IPAddress.TryParse(address, out ipAddr))
+            if (IPAddress.TryParse(address, out ipAddr)) {
                 return ipAddr.ToString();
+            }
 
-            try
-            {
+            try {
                 // Query DNS for host address
-                foreach (IPAddress a in Dns.GetHostEntry(address).AddressList)
-                {
+                foreach (IPAddress a in Dns.GetHostEntry(address).AddressList) {
                     // Run through addresses until we find one that matches the family we are forcing
-                    if (a.AddressFamily == af)
-                    {
+                    if (a.AddressFamily == af) {
                         ipAddr = a;
                         break;
                     }
                 }
-            }
-            catch (Exception) { }
+            } catch (Exception) { } // Silently continue on lookup error
 
             // If no address resolved then exit
-            if (ipAddr == null)
+            if (ipAddr == null) {
                 PowerPing.Display.Error("PowerPing could not find host [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
+            }
 
             return ipAddr.ToString();
         }
@@ -166,18 +170,93 @@ namespace PowerPing
         public static string ReverseLookup(string address)
         {
             string alias = "";
-            try 
-            {
+
+            try {
                 IPAddress hostAddr = IPAddress.Parse(address);
-                IPHostEntry hostInfo = Dns.GetHostByAddress(hostAddr);
+                IPHostEntry hostInfo = Dns.GetHostEntry(hostAddr);
                 alias = hostInfo.HostName;
-            }
-            catch (Exception) { }
+            } catch (Exception) { } // Silently continue on lookup error
 
-            if (alias == "")
+            if (alias == "") {
                 PowerPing.Display.Error("PowerPing could not find host [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
-
+            }
+            
             return alias;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
+        public static void WhoIs(string address, bool full = true)
+        {
+            // Trim the inputted address
+            address = address.Split('/')[0];
+            string keyword = address.Split('.')[0];
+            string tld = address.Split('.').Last();
+
+            // Quick sanity check before we proceed
+            if (keyword == "" || tld == "") {
+                PowerPing.Display.Error("Incorrectly formatted address, please check format and try again (web addresses only)", true);
+            }
+            PowerPing.Display.Message("WHOIS [" + address + "]:", ConsoleColor.Yellow);
+
+            // Find appropriate whois for the tld
+            PowerPing.Display.Message("QUERYING [" + ROOT_WHOIS_SERVER + "] FOR TLD [" + tld + "]:", ConsoleColor.Yellow, false);
+            string whoisRoot = PerformWhoIsLookup(ROOT_WHOIS_SERVER, tld);
+            PowerPing.Display.Message(" DONE", ConsoleColor.Yellow);
+            if (full) {
+                Console.WriteLine(whoisRoot);
+            }
+            whoisRoot = whoisRoot.Remove(0, whoisRoot.IndexOf("whois:", StringComparison.Ordinal) + 6).TrimStart();
+            whoisRoot = whoisRoot.Substring(0, whoisRoot.IndexOf('\r'));
+            PowerPing.Display.Message("QUERYING [" + whoisRoot + "] FOR DOMAIN [" + address + "]:", ConsoleColor.Yellow, false);
+
+            // Next query resulting whois for the domain
+            string result = PerformWhoIsLookup(whoisRoot, address);
+            PowerPing.Display.Message(" DONE", ConsoleColor.Yellow);
+            Console.WriteLine(result);
+            PowerPing.Display.Message("WHOIS LOOKUP FOR [" + address + "] COMPLETE.", ConsoleColor.Yellow);
+
+            if (!Display.NoInput) {
+                Helper.Pause();
+            }
+        }
+
+        /// <summary>
+        /// Queries a whois server for information on a server
+        /// (https://en.wikipedia.org/wiki/WHOIS)
+        /// </summary>
+        /// <param name="whoisServer">Address of whois server to use</param>
+        /// <param name="query">Query string to send to server</param>
+        /// <source>http://nathanenglert.com/2015/05/25/creating-an-app-to-find-that-domain-youve-always-wanted/</source>
+        /// <returns></returns>
+        private static string PerformWhoIsLookup(string whoisServer, string query)
+        {
+            StringBuilder result = new StringBuilder();
+
+            // Connect to whois server
+            try {
+                using (TcpClient whoisClient = new TcpClient(whoisServer, 43))
+                using (NetworkStream netStream = whoisClient.GetStream())
+                using (BufferedStream bufferStream = new BufferedStream(netStream)) {
+
+                    // Write request to server
+                    StreamWriter sw = new StreamWriter(bufferStream);
+                    sw.WriteLine(query);
+                    sw.Flush();
+
+                    // Read response from server
+                    StreamReader sr = new StreamReader(bufferStream);
+                    while (!sr.EndOfStream)
+                        result.AppendLine(sr.ReadLine());
+                }
+            } catch (SocketException) {
+                result.AppendLine("SocketException: Connection to host failed");
+            }
+
+            return result.ToString();
         }
 
         /// <summary>
@@ -193,9 +272,9 @@ namespace PowerPing
             try { Console.ReadKey(); }
             catch (InvalidOperationException) { Console.Read(); }
             
-
-            if (exit)
+            if (exit) {
                 Environment.Exit(0);
+            }
         }
 
         /// <summary>
@@ -240,8 +319,9 @@ namespace PowerPing
 
             var buffer = new byte[2048];
 
-            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read)) {
                 stream.Read(buffer, 0, 2048);
+            }
 
             var offset = BitConverter.ToInt32(buffer, c_PeHeaderOffset);
             var secondsSince1970 = BitConverter.ToInt32(buffer, offset + c_LinkerTimestampOffset);

@@ -1,7 +1,7 @@
 ﻿/*
 MIT License - PowerPing 
 
-Copyright (c) 2017 Matthew Carney
+Copyright (c) 2018 Matthew Carney
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,7 @@ namespace PowerPing
         {
             type = data[20];
             code = data[21];
+            // TODO: ICMP_COOKIES: Debug here to check ensure whole message field is saved
             checksum = BitConverter.ToUInt16(data, 22);
             messageSize = size - 24;
             Buffer.BlockCopy(data, 24, message, 0, messageSize);
@@ -75,8 +76,7 @@ namespace PowerPing
             int packetSize = messageSize + 8;
             int index = 0;
 
-            while (index < packetSize)
-            {
+            while (index < packetSize) {
                 chksm += Convert.ToUInt32(BitConverter.ToUInt16(data, index));
                 index += 2;
             }
