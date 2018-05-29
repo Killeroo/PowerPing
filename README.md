@@ -35,7 +35,7 @@ The following features are planned for a future release:
      PowerPing [--?] | [--ex] | [--li] | [--whoami] | [--whois] | [--loc] | [--fl] | [--sc] |
                [--g] | [--cg] | [--t] [--4] [--rng] [--df] [--rb number] [--b number] 
                [--c number] [--w number] [-i number] [--in number] [--pt number] [--pc number]
-               [--m "message"] [--ti timing] [--sh] [--dm] [--ts] [--nc] [--ni] [--s] [--r]
+               [--m "message"] [--ti timing] [--sh] [--dm] [--ts] [--nc] [--input] [--s] [--r]
                [--nt] [--q] [--res] [--ia] [--l number] [dp number] target_name | target_address
                
 ## Arguments:
@@ -64,7 +64,7 @@ The following features are planned for a future release:
         --displaymsg [--dm]           Display ICMP message contents
         --timestamp  [--ts]           Display timestamp
         --nocolor    [--nc]           No colour
-        --noinput    [--ni]           Require no user input
+        --input                       Require user input
         --symbols    [--s]            Renders replies and timeouts as ASCII symbols
         --request    [--r]            Show request packets
         --notimeouts [--nt]           Don't display timeout messages

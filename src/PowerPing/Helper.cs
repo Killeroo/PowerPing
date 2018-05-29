@@ -237,19 +237,23 @@ namespace PowerPing
             StringBuilder result = new StringBuilder();
 
             // Connect to whois server
-            using (TcpClient whoisClient = new TcpClient(whoisServer, 43))
-            using (NetworkStream netStream = whoisClient.GetStream())
-            using (BufferedStream bufferStream = new BufferedStream(netStream)) {
+            try {
+                using (TcpClient whoisClient = new TcpClient(whoisServer, 43))
+                using (NetworkStream netStream = whoisClient.GetStream())
+                using (BufferedStream bufferStream = new BufferedStream(netStream)) {
 
-                // Write request to server
-                StreamWriter sw = new StreamWriter(bufferStream);
-                sw.WriteLine(query);
-                sw.Flush();
+                    // Write request to server
+                    StreamWriter sw = new StreamWriter(bufferStream);
+                    sw.WriteLine(query);
+                    sw.Flush();
 
-                // Read response from server
-                StreamReader sr = new StreamReader(bufferStream);
-                while (!sr.EndOfStream)
-                    result.AppendLine(sr.ReadLine());
+                    // Read response from server
+                    StreamReader sr = new StreamReader(bufferStream);
+                    while (!sr.EndOfStream)
+                        result.AppendLine(sr.ReadLine());
+                }
+            } catch (SocketException) {
+                result.AppendLine("SocketException: Connection to host failed");
             }
 
             return result.ToString();

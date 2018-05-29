@@ -39,7 +39,7 @@ namespace PowerPing
         // Properties
         public static bool Short { get; set; } = false;
         public static bool NoColor { get; set; } = false;
-        public static bool NoInput { get; set; } = false;
+        public static bool NoInput { get; set; } = true;
         public static bool UseSymbols { get; set; } = false;
         public static bool ShowOutput { get; set; } = true;
         public static bool ShowMessages { get; set; } = false;
@@ -159,7 +159,7 @@ Usage:
               [--sc] | [--g] | [--cg] | [--t] [--4] [--rng] [--df] [--rb number] 
               [--b number] [--c number] [--w number] [-i number] [--in number]
               [--pt number] [--pc number] [--m message] [--ti timing] [--sh] 
-              [--dm] [--ts] [--nc] [--ni] [--s] [--r] [--nt] [--q] [--res]
+              [--dm] [--ts] [--nc] [--input] [--s] [--r] [--nt] [--q] [--res]
               [--ia] [--l number] [dp number] target_name | target_address
 
 Ping Options:
@@ -187,7 +187,7 @@ Display Options:
     --displaymsg [--dm]           Display ICMP message field contents
     --timestamp  [--ts]           Display timestamp
     --nocolor    [--nc]           No colour
-    --noinput    [--ni]           Require no user input
+    --input                       Require user input
     --symbols    [--s]            Renders replies and timeouts as ASCII symbols
     --request    [--r]            Show request packets
     --notimeouts [--nt]           Don't display timeout messages

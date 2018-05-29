@@ -55,7 +55,7 @@ namespace PowerPing
             Display.DefaultBackgroundColor = Console.BackgroundColor;
 
             // Show current version info
-            Display.Version();
+            //Display.Version();
 
             // Check if no arguments
             if (args.Length == 0) {
@@ -231,13 +231,10 @@ namespace PowerPing
                             case "--nc": // No color mode
                                 Display.NoColor = true;
                                 break;
-                            case "/noinput":
-                            case "-noinput":
-                            case "--noinput":
-                            case "/ni":
-                            case "-ni":
-                            case "--ni": // No input mode
-                                Display.NoInput = true;
+                            case "/input":
+                            case "-input":
+                            case "--input":// No input mode
+                                Display.NoInput = false;
                                 break;
                             case "/decimals":
                             case "-decimals":
