@@ -1,7 +1,7 @@
 ﻿/*
 MIT License - PowerPing 
 
-Copyright (c) 2017 Matthew Carney
+Copyright (c) 2018 Matthew Carney
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ namespace PowerPing
         // Properties
         public static bool Short { get; set; } = false;
         public static bool NoColor { get; set; } = false;
-        public static bool NoInput { get; set; } = false;
+        public static bool NoInput { get; set; } = true;
         public static bool UseSymbols { get; set; } = false;
         public static bool ShowOutput { get; set; } = true;
         public static bool ShowMessages { get; set; } = false;
@@ -155,20 +155,19 @@ Description:
         customization, graphs and result colourization.
 
 Usage: 
-    PowerPing [--?] | [--li] | [--whoami] | [--loc] | [--g] | [--cg] |
-              [--fl] | [--sc] | [--t] [--c count] [--w timeout] [--dm]
-              [--m ""text""] | [--rng]) [--l num] [--s] [--r] [--dp places]
-              [--i TTL] [--in interval] [--pt type] [--pc code] [--b level]
-              [--4] [--short] [--nocolor] [--ts] [--ti timing] [--nt] target_name
+    PowerPing [--?] | [--ex] | [--li] | [--whoami] | [--whois] [--loc] | [--fl] |
+              [--sc] | [--g] | [--cg] | [--t] [--4] [--rng] [--df] [--rb number] 
+              [--b number] [--c number] [--w number] [-i number] [--in number]
+              [--pt number] [--pc number] [--m message] [--ti timing] [--sh] 
+              [--dm] [--ts] [--nc] [--input] [--s] [--r] [--nt] [--q] [--res]
+              [--ia] [--l number] [dp number] target_name | target_address
 
 Ping Options:
-    --help       [--?]            Displays this help message
-    --version    [--v]            Shows version and build information
-    --examples   [--ex]           Shows example usage
     --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)
-    --displaymsg [--dm]           Display ICMP messages
     --ipv4       [--4]            Force using IPv4
     --random     [--rng]          Generates random ICMP message
+    --dontfrag   [--df]           Set 'Don't Fragment' flag
+    --buffer     [--rb]  number   Sets recieve buffer size (default is 5096)
     --beep       [--b]   number   Beep on timeout(1) or on reply(2)
     --count      [--c]   number   Number of pings to send
     --timeout    [--w]   number   Time to wait for reply (in milliseconds)
@@ -185,14 +184,15 @@ Ping Options:
 
 Display Options:
     --shorthand  [--sh]           Show less detailed replies
+    --displaymsg [--dm]           Display ICMP message field contents
     --timestamp  [--ts]           Display timestamp
     --nocolor    [--nc]           No colour
-    --noinput    [--ni]           Require no user input
+    --input                       Require user input
     --symbols    [--s]            Renders replies and timeouts as ASCII symbols
     --request    [--r]            Show request packets
     --notimeouts [--nt]           Don't display timeout messages
     --quiet      [--q]            No output, only shows summary upon exit
-    --resolve    [--res]          Display hostname from DNS
+    --resolve    [--res]          Resolve hostname of address from DNS
     --inputaddr  [--ia]           Show input address instead of revolved IP address
     --limit      [--l]   number   Limits output to just replies(0) or requests(1)
     --decimals   [--dp]  number   Num of decimal places to use(0 to 3)
@@ -206,7 +206,13 @@ Features:
     --graph      [--g]   address  Graph view
     --compact    [--cg]  address  Compact graph view
     --location   [--loc] address  Location info for an address
+    --whois              address  Whois lookup for an address
     --whoami                      Location info for current host
+
+Other:
+    --help       [--?]            Displays this help message
+    --version    [--v]            Shows version and build information
+    --examples   [--ex]           Displays some example usage
 
 type '--examples' for more
 

@@ -5,7 +5,7 @@
 /*
 MIT License - PowerPing 
 
-Copyright (c) 2017 Matthew Carney
+Copyright (c) 2018 Matthew Carney
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -55,7 +55,7 @@ namespace PowerPing
             Display.DefaultBackgroundColor = Console.BackgroundColor;
 
             // Show current version info
-            Display.Version();
+            //Display.Version();
 
             // Check if no arguments
             if (args.Length == 0) {
@@ -231,13 +231,10 @@ namespace PowerPing
                             case "--nc": // No color mode
                                 Display.NoColor = true;
                                 break;
-                            case "/noinput":
-                            case "-noinput":
-                            case "--noinput":
-                            case "/ni":
-                            case "-ni":
-                            case "--ni": // No input mode
-                                Display.NoInput = true;
+                            case "/input":
+                            case "-input":
+                            case "--input":// No input mode
+                                Display.NoInput = false;
                                 break;
                             case "/decimals":
                             case "-decimals":
@@ -384,9 +381,9 @@ namespace PowerPing
                             case "--co":
                                 attributes.UsePingCookies = true;
                                 break;
-                            case "/recvbuff":
-                            case "-recvbuff":
-                            case "--recvbuff":
+                            case "/buffer":
+                            case "-buffer":
+                            case "--buffer":
                             case "/rb":
                             case "-rb":
                             case "--rb":
@@ -397,13 +394,18 @@ namespace PowerPing
                                     throw new ArgumentFormatException();
                                 }
                                 break;
-                            case "/dontfragment":
-                            case "-dontfragment":
-                            case "--dontfragment":
+                            case "/dontfrag":
+                            case "-dontfrag":
+                            case "--dontfrag":
                             case "/df":
                             case "-df":
                             case "--df":
                                 attributes.DontFragment = true;
+                                break;
+                            case "/whois":
+                            case "-whois":
+                            case "--whois":
+                                opMode = "whois";
                                 break;
                             case "/whoami":
                             case "-whoami":
@@ -497,11 +499,11 @@ namespace PowerPing
 
             // Find address
             if (opMode.Equals("") || opMode.Equals("flooding") || opMode.Equals("graphing") 
-                || opMode.Equals("compactGraph") || opMode.Equals("location")) {
+                || opMode.Equals("compactGraph") || opMode.Equals("location") || opMode.Equals("whois")) {
 
                 if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown 
                     && Uri.CheckHostName(args.Last()) == UriHostNameType.Unknown) {
-                    PowerPing.Display.Error("Unknown host", true, true);
+                    PowerPing.Display.Error("Unknown address format. \nIf address is a url do not include any trailing '/'s, for example use: google.com NOT google.com/test.html", true, true);
                 }
 
                 if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown) {
@@ -528,6 +530,9 @@ namespace PowerPing
                     break;
                 case "whoami":
                     Helper.GetAddressLocation("", true);
+                    break;
+                case "whois":
+                    Helper.WhoIs(attributes.Host);
                     break;
                 case "graphing":
                     g = new Graph(attributes.Host);

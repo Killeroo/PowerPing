@@ -1,7 +1,7 @@
 ﻿/*
 MIT License - PowerPing 
 
-Copyright (c) 2017 Matthew Carney
+Copyright (c) 2018 Matthew Carney
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -452,8 +452,8 @@ namespace PowerPing
                 } finally {
                     // Increment seq and wait for interval
                     index++;
-
-                    //DEBUG: Breakpoint here
+                    
+                    // Wait for set interval before sending again
                     cancelEvent.WaitOne(attrs.Interval);
 
                     // Reset timer
