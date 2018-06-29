@@ -185,7 +185,7 @@ namespace PowerPing
         }
 
         /// <summary>
-        /// 
+        /// Internal whois function for recursive lookup
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>

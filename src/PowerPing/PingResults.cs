@@ -99,7 +99,7 @@ namespace PowerPing
             } catch (OverflowException) {
                 HasOverflowed = true;
             }
-
+            Console.WriteLine(time + "@S@S@S");
             CurTime = time;
         }
         public void CountPacketType(int type)

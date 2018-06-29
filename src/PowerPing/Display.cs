@@ -557,7 +557,7 @@ Get location information for 84.23.12.4";
         /// <param name="address">Reply address</param>
         /// <param name="index">Sequence number</param>
         /// <param name="replyTime">Time taken before reply received in milliseconds</param>
-        public static void ReplyPacket(ICMP packet, String address, int index, TimeSpan replyTime, int bytesRead)
+        public static void ReplyPacket(ICMP packet, String address, int index, int replyTime, int bytesRead)//TimeSpan replyTime, int bytesRead)
         {
             if (!Display.ShowOutput) {
                 return;
@@ -593,15 +593,15 @@ Get location information for 84.23.12.4";
             // Print coloured time segment
             Console.Write(REPLY_TIME_TXT);
             if (!NoColor) {
-                if (replyTime <= TimeSpan.FromMilliseconds(100)) {
+                if (replyTime <= 100) {//TimeSpan.FromMilliseconds(100)) {
                     Console.ForegroundColor = ConsoleColor.Green;
-                } else if (replyTime <= TimeSpan.FromMilliseconds(500)) {
+                } else if (replyTime <= 500) {//TimeSpan.FromMilliseconds(500)) {
                     Console.ForegroundColor = ConsoleColor.Yellow;
                 } else {
                     Console.ForegroundColor = ConsoleColor.Red;
                 }
             }
-            Console.Write("{0:0." + new String('0', DecimalPlaces) + "}ms ", replyTime.TotalMilliseconds);
+            Console.Write(replyTime + "ms ");//"{0:0." + new String('0', DecimalPlaces) + "}ms ", replyTime.TotalMilliseconds);
             ResetColor();
 
             // Display timestamp

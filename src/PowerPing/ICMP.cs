@@ -56,7 +56,7 @@ namespace PowerPing
         /// <returns>Packet in byte array</returns>
         public byte[] GetBytes()
         {
-            byte[] data = new byte[messageSize + 9];
+            byte[] data = new byte[messageSize + 9]; // TODO: here we assume packet size, this is probably causing message clip
             Buffer.BlockCopy(BitConverter.GetBytes(type), 0, data, 0, 1);
             Buffer.BlockCopy(BitConverter.GetBytes(code), 0, data, 1, 1);
             Buffer.BlockCopy(BitConverter.GetBytes(checksum), 0, data, 2, 2);

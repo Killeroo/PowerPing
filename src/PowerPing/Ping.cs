@@ -34,6 +34,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 
+using System.Linq;
+
 namespace PowerPing
 {
     /// <summary>
@@ -65,6 +67,7 @@ namespace PowerPing
             this.Attributes = attrs;
 
             // Lookup address
+            //TODO: Address is getting overwritten by the host name!!!
             Attributes.Address = PowerPing.Helper.AddressLookup(Attributes.Host, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
             PowerPing.Display.PingIntroMsg(Attributes.Host, attrs);
@@ -394,20 +397,29 @@ namespace PowerPing
                     // Send ping request
                     sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
                     responseTimer.Start();
+                    int rt = DateTime.Now.Millisecond;
                     try { Results.Sent++; }
                     catch (OverflowException) { Results.HasOverflowed = true; }
+
+                    // TODO: Switch to using seq num and timestamps from packet itself
+                    // packets seem to be backing up
+                    // CORRECTION: Pings in graph mode arent even sending
 
                     // Wait for response
                     byte[] buffer = new byte[attrs.RecieveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
                     bytesRead = sock.ReceiveFrom(buffer, ref ep);
+                    rt -= DateTime.Now.Millisecond;
+                    Console.WriteLine(rt + "new");
                     responseTimer.Stop();
 
                     // Store reply packet
                     ICMP response = new ICMP(buffer, bytesRead);
+                    Console.WriteLine("in:" + new string(Encoding.ASCII.GetString(packet.message).Where(c => !char.IsControl(c)).ToArray()));
+                    Console.WriteLine("out:" + new string(Encoding.ASCII.GetString(response.message).Where(c => !char.IsControl(c)).ToArray()));
 
                     // Display reply packet
                     if (Display.ShowReplies) {
-                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress? attrs.Host : ep.ToString(), index, responseTimer.Elapsed, bytesRead);
+                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : ep.ToString(), index, rt, bytesRead);//responseTimer.Elapsed, bytesRead);
                     }
 
                     // Store response info
@@ -415,6 +427,7 @@ namespace PowerPing
                     catch (OverflowException) { Results.HasOverflowed = true; }
                     Results.CountPacketType(response.type);
                     Results.SaveResponseTime(responseTimer.Elapsed.TotalMilliseconds);
+                    Console.WriteLine(Results.CurTime+"normal");
                     
 		            if (attrs.BeepLevel == 2) {
                         try { Console.Beep(); }

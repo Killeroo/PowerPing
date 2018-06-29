@@ -66,9 +66,9 @@ namespace PowerPing
         public Graph(string address)
         {
             // Setup ping attributes
-            graphPingAttrs.Address = Helper.AddressLookup(address, System.Net.Sockets.AddressFamily.InterNetwork);
+            graphPingAttrs.Host = Helper.AddressLookup(address, System.Net.Sockets.AddressFamily.InterNetwork);
             graphPingAttrs.Continous = true;
-            Display.ShowOutput = false;
+            Display.ShowOutput = true;
         }
 
         public void Start()
@@ -104,6 +104,7 @@ namespace PowerPing
                     break; 
                 }
 
+                /*
                 // Reset position
                 Console.CursorTop = plotStartY;
                 Console.CursorLeft = plotStartX;
@@ -121,6 +122,8 @@ namespace PowerPing
 
                 // Wait one second
                 Thread.Sleep(1000);
+
+    */
             }
 
             // Clean up
