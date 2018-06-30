@@ -399,9 +399,9 @@ namespace PowerPing
                     try { Results.Sent++; }
                     catch (OverflowException) { Results.HasOverflowed = true; }
 
-                    // TODO: Switch to using seq num and timestamps from packet itself
-                    // packets seem to be backing up
-                    // CORRECTION: Pings in graph mode arent even sending
+                    // Update random message randomness
+                    Random rnd = new Random();
+                    Thread.Sleep(rnd.Next(700));
 
                     // Wait for response
                     byte[] buffer = new byte[attrs.RecieveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
