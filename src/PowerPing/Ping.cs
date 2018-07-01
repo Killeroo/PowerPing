@@ -27,10 +27,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
-using System.Net.NetworkInformation;
 using System.Threading;
 using System.Diagnostics;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 
@@ -49,6 +47,7 @@ namespace PowerPing
         public bool IsRunning { get; private set; } = false;
 
         private ManualResetEvent cancelEvent = new ManualResetEvent(false);
+        private bool debug = false;
 
         public Ping() { }
 
@@ -110,7 +109,7 @@ namespace PowerPing
 
                 // Listening loop
                 while (true) {
-                    byte[] buffer = new byte[4096];
+                    byte[] buffer = new byte[4096]; // TODO: could cause overflow?
                     
                     // Recieve any incoming ICMPv4 packets
                     EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
@@ -396,6 +395,12 @@ namespace PowerPing
                     responseTimer.Start();
                     try { Results.Sent++; }
                     catch (OverflowException) { Results.HasOverflowed = true; }
+                    
+                    if (debug) {
+                        // Induce random wait for debugging 
+                        Random rnd = new Random();
+                        Thread.Sleep(rnd.Next(700));
+                    }
 
                     // Wait for response
                     byte[] buffer = new byte[attrs.RecieveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
@@ -407,7 +412,7 @@ namespace PowerPing
 
                     // Display reply packet
                     if (Display.ShowReplies) {
-                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress? attrs.Host : ep.ToString(), index, responseTimer.Elapsed, bytesRead);
+                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : ep.ToString(), index, responseTimer.Elapsed, bytesRead);
                     }
 
                     // Store response info

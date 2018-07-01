@@ -151,7 +151,7 @@ Well done brave soul, I don't know your motive but I salute you =^-^=";
                             \/                       \//_____/  
 
 Description:
-        Advanced ping utility which provides geoip querying, ICMP packet
+        Advanced ping utility - Provides geoip querying, ICMP packet
         customization, graphs and result colourization.
 
 Usage: 
@@ -446,7 +446,7 @@ Get location information for 84.23.12.4";
         {
             Version v = Assembly.GetExecutingAssembly().GetName().Version;
             DateTime buildInfo = Assembly.GetExecutingAssembly().GetLinkerTime();
-            string version = Assembly.GetExecutingAssembly().GetName().Name + " v" + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ")";
+            string version = Assembly.GetExecutingAssembly().GetName().Name + " v" + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ") ";
             string buildTime = buildInfo.Day + "/" + buildInfo.Month + "/" + buildInfo.Year + " " + buildInfo.TimeOfDay;
 
             // Write version
@@ -566,8 +566,16 @@ Get location information for 84.23.12.4";
             // If drawing symbols
             if (UseSymbols) {
                 if (packet.type == 0x00) {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write(REPLY_SYMBOL);
+                    if (replyTime <= TimeSpan.FromMilliseconds(100)) {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write("_");
+                    } else if (replyTime <= TimeSpan.FromMilliseconds(500)) {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.Write("▄");
+                    } else {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.Write("█");
+                    }
                     ResetColor();
                 } else {
                     Timeout(0);
