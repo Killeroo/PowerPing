@@ -27,14 +27,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
-using System.Net.NetworkInformation;
 using System.Threading;
 using System.Diagnostics;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-
-using System.Linq;
 
 namespace PowerPing
 {
@@ -51,6 +47,7 @@ namespace PowerPing
         public bool IsRunning { get; private set; } = false;
 
         private ManualResetEvent cancelEvent = new ManualResetEvent(false);
+        private bool debug = false;
 
         public Ping() { }
 
@@ -398,10 +395,12 @@ namespace PowerPing
                     responseTimer.Start();
                     try { Results.Sent++; }
                     catch (OverflowException) { Results.HasOverflowed = true; }
-
-                    // Update random message randomness
-                    Random rnd = new Random();
-                    Thread.Sleep(rnd.Next(700));
+                    
+                    if (debug) {
+                        // Induce random wait for debugging 
+                        Random rnd = new Random();
+                        Thread.Sleep(rnd.Next(700));
+                    }
 
                     // Wait for response
                     byte[] buffer = new byte[attrs.RecieveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
@@ -410,8 +409,6 @@ namespace PowerPing
 
                     // Store reply packet
                     ICMP response = new ICMP(buffer, bytesRead);
-                    //Console.WriteLine("in:" + new string(Encoding.ASCII.GetString(packet.message).Where(c => !char.IsControl(c)).ToArray()));
-                    //Console.WriteLine("out:" + new string(Encoding.ASCII.GetString(response.message).Where(c => !char.IsControl(c)).ToArray()));
 
                     // Display reply packet
                     if (Display.ShowReplies) {

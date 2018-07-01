@@ -568,16 +568,14 @@ Get location information for 84.23.12.4";
                 if (packet.type == 0x00) {
                     if (replyTime <= TimeSpan.FromMilliseconds(100)) {
                         Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Write("░");
+                        Console.Write("_");
                     } else if (replyTime <= TimeSpan.FromMilliseconds(500)) {
                         Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.Write("▒");
+                        Console.Write("▄");
                     } else {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write("▓");
+                        Console.Write("█");
                     }
-                    //Console.ForegroundColor = ConsoleColor.Green;
-                    //Console.Write("░▒▓█▄_■");//REPLY_SYMBOL);
                     ResetColor();
                 } else {
                     Timeout(0);

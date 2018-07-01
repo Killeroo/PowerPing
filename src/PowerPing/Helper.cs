@@ -31,6 +31,7 @@ using System.IO;
 using System.Reflection;
 using System.Linq;
 using System.Text;
+using System.Security.Cryptography;
 
 namespace PowerPing
 {
@@ -57,12 +58,15 @@ namespace PowerPing
 
                 using (var objClient = new System.Net.WebClient()) {
 
-                    var strFile = objClient.DownloadString("http://freegeoip.net/xml/" + addr);
+                    // Download xml data for address
+                    var file = objClient.DownloadString("http://freegeoip.net/xml/" + addr);
 
+                    // Load xml file into object
                     XmlDocument xmlDoc = new XmlDocument();
-                    xmlDoc.LoadXml(strFile);
+                    xmlDoc.LoadXml(file);
                     XmlNodeList elements = (xmlDoc.DocumentElement).ChildNodes;
 
+                    // Print it out
                     if (detailed) {
                         Console.WriteLine("Queried address: --{0}--", addr);
                         foreach (XmlElement element in elements) {
@@ -290,18 +294,25 @@ namespace PowerPing
         }
 
         /// <summary>
-        /// Source: https://stackoverflow.com/a/1344242
+        /// Produces cryprographically secure string of specified length
         /// </summary>
-        /// <param name="attrs"></param>
+        /// <param name="len"></param>
+        /// <source>https://stackoverflow.com/a/1668371</source>
         /// <returns></returns>
-        // Ref attrs?
         public static String RandomString(int len = 11)
         {
-            Random rand = new Random();
-            string chars = "./,-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            string rndString;
 
-            return new string(Enumerable.Repeat(chars, len)
-                .Select(s => s[rand.Next(s.Length)]).ToArray());
+            using (RandomNumberGenerator rng = new RNGCryptoServiceProvider()) {
+                byte[] rndToken = new byte[len + 1];
+                rng.GetBytes(rndToken);
+
+                rndString = Convert.ToBase64String(rndToken);
+                
+            }
+
+            // Remove '=' from end of string
+            return rndString.Remove(rndString.Length - 1);
         }
 
         /// <summary>
