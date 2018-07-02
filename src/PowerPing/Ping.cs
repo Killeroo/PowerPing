@@ -70,6 +70,10 @@ namespace PowerPing
 
             if (Display.UseResolvedAddress) {
                 Attributes.Host = Helper.ReverseLookup(Attributes.Address);
+                if (Attributes.Host == "") {
+                    // If reverse lookup fails just display whatever is in the address field
+                    Attributes.Host = Attributes.Address; 
+                }
             }
 
             // Perform ping operation and store results
@@ -400,6 +404,7 @@ namespace PowerPing
                         // Induce random wait for debugging 
                         Random rnd = new Random();
                         Thread.Sleep(rnd.Next(700));
+                        if (rnd.Next(20) == 1) { throw new SocketException(); }
                     }
 
                     // Wait for response
@@ -461,13 +466,19 @@ namespace PowerPing
                     // Wait for set interval before sending again
                     cancelEvent.WaitOne(attrs.Interval);
 
+                    // Generate random interval when RandomTimings flag is set
+                    if (attrs.RandomTiming) {
+                        attrs.Interval = Helper.RandomInt(5000, 100000);
+                    }
+
                     // Reset timer
                     responseTimer.Reset();
                 }
 
                 // Stop sending if flag is set
-                if (!IsRunning)
+                if (!IsRunning) {
                     break;
+                }
             }
 
             // Clean up

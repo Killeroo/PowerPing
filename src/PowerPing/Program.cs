@@ -337,6 +337,13 @@ namespace PowerPing
                                         attributes.Timeout = 750;
                                         attributes.Interval = 100;
                                         break;
+                                    case "7":
+                                    case "random":
+                                        attributes.RandomTiming = true;
+                                        attributes.RandomMsg = true;
+                                        attributes.Interval = Helper.RandomInt(5000, 100000);
+                                        attributes.Timeout = 15000;
+                                        break;
                                     default: // Unknown timing type
                                         throw new ArgumentFormatException();
                                 }

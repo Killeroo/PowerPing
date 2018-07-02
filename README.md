@@ -27,9 +27,9 @@ PowerPing contains the following features:
 
 The following features are planned for a future release:
 
-- [Traceroute (target: v1.2.5)](https://en.wikipedia.org/wiki/Traceroute)
-- [Tunnelling (target: v1.3.0)](https://en.wikipedia.org/wiki/ICMP_tunnel)
-- [IPv6/ICMPv6 (target: v1.3.0)](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_version_6)
+- [Traceroute (target: v1.3.5)](https://en.wikipedia.org/wiki/Traceroute)
+- [Tunnelling (target: v1.4.0)](https://en.wikipedia.org/wiki/ICMP_tunnel)
+- [IPv6/ICMPv6 (target: v1.4.0)](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_version_6)
 
 ## Usage: 
      PowerPing [--?] | [--ex] | [--li] | [--whoami] | [--whois] | [--loc] | [--fl] | [--sc] |
@@ -57,7 +57,7 @@ The following features are planned for a future release:
                                             0 - Paranoid    4 - Nimble
                                             1 - Sneaky      5 - Speedy
                                             2 - Quiet       6 - Insane
-                                            3 - Polite
+                                            3 - Polite      7 - Random
     
     Display Options:
         --shorthand  [--sh]           Show less detailed replies
@@ -107,8 +107,6 @@ The following features are planned for a future release:
 ![alt text](docs/screenshots/screenshot3.png "Powerping looking up the location of an ip, flooding an address with pings AND scanning!")
 ![alt text](docs/screenshots/screenshot4.png "Powerping showing request packets and sending random ICMP data")
 ![alt text](docs/screenshots/screenshot5.png "Using the timestamp feature!")
-![alt text](docs/screenshots/screenshot6.png "Powerping displaying the results of a ping as coloured symbols!") 
-![alt text](docs/screenshots/screenshot7.png "Powerping can even run using no color if you prefer (I won't judge)")
 
 [More screenshots](docs/screenshots/)
 

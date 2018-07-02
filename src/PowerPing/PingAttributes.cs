@@ -31,7 +31,7 @@ namespace PowerPing
     public class PingAttributes
     {
         // Properties
-        public string Host { get; set; } // Name of host being pinged
+        public string Host { get; set; } // Name of host being pinged // TODO: Rename to display/inputted name
         public string Address { get; set; } // Address to send the ping to
         public string Message { get; set; } // Message to store with in ICMP message field
         public string Source { get; set; }
@@ -49,6 +49,7 @@ namespace PowerPing
         public bool RandomMsg { get; set; } // Fills ICMP message field with random characters    
         public bool UsePingCookies { get; set; } // Stores timestamp and seq num in ICMP data for more accurate readings
         public bool DontFragment { get; set; } // Sets the Don't Fragment flag in an IPv4 header
+        public bool RandomTiming { get; set; } // Generate random wait time each time ping is sent
         public string[] AddressList { get; set; } // Optional attribute: Used when scanning, stores addresses to ping
 
         public PingAttributes()
@@ -72,6 +73,7 @@ namespace PowerPing
             AddressList = null;
             RecieveBufferSize = 5096;
             DontFragment = false;
+            RandomTiming = false;
         }
     }
 
