@@ -113,7 +113,7 @@ namespace PowerPing
         const string SCAN_ELPS_TIME_TXT = "Ellapsed: ";
         const string SCAN_PROG_TXT = "Progress: ";
         const string SCAN_RESULT_MSG = "Scan complete. {0} addresses scanned. {1} hosts active:";
-        const string SCAN_RESULT_ENTRY = "-- {0} [{1:0.0}ms]";
+        const string SCAN_RESULT_ENTRY = "-- {0} [{1:0.0}ms] [{2}]";
         const string SCAN_CONNECTOR_CHAR = "|";
         const string SCAN_END_CHAR = @"\";
 
@@ -180,7 +180,7 @@ Ping Options:
                                     0 - Paranoid    4 - Nimble
                                     1 - Sneaky      5 - Speedy
                                     2 - Quiet       6 - Insane
-                                    3 - Polite
+                                    3 - Polite      7 - Random
 
 Display Options:
     --shorthand  [--sh]           Show less detailed replies
@@ -609,7 +609,7 @@ Get location information for 84.23.12.4";
                     Console.ForegroundColor = ConsoleColor.Red;
                 }
             }
-            Console.Write("{0:0." + new String('0', DecimalPlaces) + "}ms ", replyTime.TotalMilliseconds);
+            Console.Write("{0:0." + new String('0', DecimalPlaces) + "}ms", replyTime.TotalMilliseconds);
             ResetColor();
 
             // Display timestamp
@@ -695,7 +695,8 @@ Get location information for 84.23.12.4";
             Console.WriteLine(SCAN_RESULT_MSG, scanned, foundHosts.Count);
             if (foundHosts.Count != 0) {
                 for (int i = 0; i < foundHosts.Count; i++) {
-                    Console.WriteLine((i == foundHosts.Count - 1 ? SCAN_END_CHAR : SCAN_CONNECTOR_CHAR) + SCAN_RESULT_ENTRY, foundHosts[i], times[i]);
+                    string hostName = Helper.ReverseLookup(foundHosts[i]);
+                    Console.WriteLine((i == foundHosts.Count - 1 ? SCAN_END_CHAR : SCAN_CONNECTOR_CHAR) + SCAN_RESULT_ENTRY, foundHosts[i], times[i], hostName != "" ? hostName : "UNAVAILABLE");
                 }
             }
             Console.WriteLine();
@@ -853,7 +854,7 @@ Get location information for 84.23.12.4";
 
             // If drawing symbols
             if (UseSymbols) {
-                Console.ForegroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.Magenta;
                 Console.Write(TIMEOUT_SYMBOL);
                 ResetColor();
                 return;

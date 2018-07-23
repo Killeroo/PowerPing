@@ -180,10 +180,6 @@ namespace PowerPing
                 IPHostEntry hostInfo = Dns.GetHostEntry(hostAddr);
                 alias = hostInfo.HostName;
             } catch (Exception) { } // Silently continue on lookup error
-
-            if (alias == "") {
-                PowerPing.Display.Error("PowerPing could not find host [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
-            }
             
             return alias;
         }
@@ -301,18 +297,38 @@ namespace PowerPing
         /// <returns></returns>
         public static String RandomString(int len = 11)
         {
-            string rndString;
+            string result;
 
             using (RandomNumberGenerator rng = new RNGCryptoServiceProvider()) {
-                byte[] rndToken = new byte[len + 1];
-                rng.GetBytes(rndToken);
-
-                rndString = Convert.ToBase64String(rndToken);
+                byte[] rngToken = new byte[len + 1];
+                rng.GetBytes(rngToken);
+               
+                result = Convert.ToBase64String(rngToken);
                 
             }
 
             // Remove '=' from end of string
-            return rndString.Remove(rndString.Length - 1);
+            return result.Remove(result.Length - 1);
+        }
+
+        /// <summary>
+        /// Produces cryprographically secure int of specified length
+        /// </summary>
+        /// <param name="len"></param>
+        /// <source>http://www.vcskicks.com/code-snippet/rng-int.php</source>
+        /// <returns></returns>
+        public static int RandomInt(int min, int max)
+        {
+            int result;
+
+            using (RandomNumberGenerator rng = new RNGCryptoServiceProvider()) {
+                byte[] rngToken = new byte[4];
+                rng.GetBytes(rngToken);
+
+                result = BitConverter.ToInt32(rngToken, 0);
+            }
+
+            return new Random(result).Next(min, max);
         }
 
         /// <summary>
