@@ -4,15 +4,16 @@
 
 Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
 
-Download it here: [[Stable Releases]](https://github.com/Killeroo/PowerPing/releases)
-
-Nightly Builds: [[Master]](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx64%2FPowerPing.exe?job=Platform%3A%20x64&branch=master) [[Development]](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx64%2FPowerPing.exe?job=Platform%3A%20x64&branch=dev) (x86 versions for [master](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx86%2FPowerPing.exe?job=Platform%3A%20x86&branch=master) & [dev](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx86%2FPowerPing.exe?job=Platform%3A%20x86&branch=dev))
-***
 ![alt text](docs/screenshots/screenshot.png "PowerPing in action")
 
-## Features
+# Downloads
+Stable versions can be downloaded [[here]](https://github.com/Killeroo/PowerPing/releases)
 
-PowerPing contains the following features:
+Nightly dev builds can be found [[here]](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx64%2FPowerPing.exe?job=Platform%3A%20x64&branch=dev) ([x86](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx86%2FPowerPing.exe?job=Platform%3A%20x86&branch=dev))
+
+
+
+## Features
 
 - Basic ping functionality
 - Coloured output
@@ -25,11 +26,11 @@ PowerPing contains the following features:
 - [Whois lookup](https://en.wikipedia.org/wiki/WHOIS)
 - [Graphing](docs/screenshots/screenshot2.png)
 
-The following features are planned for a future release:
+_Future features:_
 
-- [Traceroute (target: v1.3.5)](https://en.wikipedia.org/wiki/Traceroute)
-- [Tunnelling (target: v1.4.0)](https://en.wikipedia.org/wiki/ICMP_tunnel)
-- [IPv6/ICMPv6 (target: v1.4.0)](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_version_6)
+- [Traceroute](https://en.wikipedia.org/wiki/Traceroute)
+- [Tunnelling](https://en.wikipedia.org/wiki/ICMP_tunnel)
+- [IPv6/ICMPv6](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_version_6)
 
 ## Usage: 
      PowerPing [--?] | [--ex] | [--li] | [--whoami] | [--whois] | [--loc] | [--fl] | [--sc] |
@@ -104,21 +105,33 @@ The following features are planned for a future release:
 
 ![alt text](docs/screenshots/screenshot1.png "Powerping's Graph view")
 ![alt text](docs/screenshots/screenshot2.png "Powerping Listening for ICMP activity")
-![alt text](docs/screenshots/screenshot3.png "Powerping looking up the location of an ip, flooding an address with pings AND scanning!")
 ![alt text](docs/screenshots/screenshot4.png "Powerping showing request packets and sending random ICMP data")
-![alt text](docs/screenshots/screenshot5.png "Using the timestamp feature!")
 
 [More screenshots](docs/screenshots/)
 
-## Contribution
-
-Feel free to [file issues or request features](https://github.com/Killeroo/PowerPing/issues) and submit [pull requests](https://github.com/Killeroo/PowerPing/pulls) – contributions are welcome.
-
 ## License
 
-PowerPing is licensed under the [MIT license](LICENSE).
+MIT License
+
+Copyright (c) 2018 Matthew Carney <matthewcarney64@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 ### Note: 
 **Requires _Elevated Rights (Admininstrator)_ to Run**
-
-*Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=*
