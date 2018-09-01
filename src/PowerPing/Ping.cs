@@ -325,6 +325,7 @@ namespace PowerPing
         /// </summary>
         /// <param name="attrs">Properties of pings to be sent</param>
         /// <returns>Set of ping results</returns>
+        //TODO: Move to send methods
         private Results SendICMP(Attributes attrs)
         {
             IPEndPoint iep = null;
@@ -352,6 +353,7 @@ namespace PowerPing
             sock.DontFragment = attrs.DontFragment;
 
             // Construct our ICMP packet
+            // TODO: Test if we are setting sequence properly in icmp packet
             packet.type = attrs.Type;
             packet.code = attrs.Code;
             Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2); // Add seq num to ICMP message
