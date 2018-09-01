@@ -72,6 +72,7 @@ _Future features:_
         --quiet      [--q]            No output, only shows summary upon completion or exit
         --resolve    [--res]          Resolve hostname of address from DNS
         --inputaddr  [--ia]           Show input address instead of revolved one
+        --checksum   [--ch]           Display checksum of packet
         --limit      [--l]   number   Limits output to just replies (0) or requests (1)
         --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
 
