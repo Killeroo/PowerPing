@@ -47,7 +47,7 @@ namespace PowerPing
             // Local variables 
             int curArg = 0;
             string opMode = ""; 
-            PingAttributes attributes = new PingAttributes();
+            Attributes attributes = new Attributes();
             attributes.Address = "";
 
             // Setup console

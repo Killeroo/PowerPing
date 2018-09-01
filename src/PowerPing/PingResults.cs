@@ -31,7 +31,7 @@ namespace PowerPing
     /// <summary>
     /// Stores the results of a ping operation
     /// </summary>
-    public class PingResults
+    public class Results
     {
         // Properties
         public DateTime StartTime { get; private set; } // Time operation started at 
@@ -52,7 +52,7 @@ namespace PowerPing
         private readonly Stopwatch operationTimer = new Stopwatch();
         private ulong sum  = 0; // Sum off all reply times
 
-        public PingResults()
+        public Results()
         {
             // Default properties
             Sent = 0;

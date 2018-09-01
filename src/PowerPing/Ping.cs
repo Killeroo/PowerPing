@@ -42,8 +42,8 @@ namespace PowerPing
     class Ping : IDisposable
     {
         // Properties
-        public PingResults Results { get; private set; } = new PingResults(); // Store current ping results
-        public PingAttributes Attributes { get; private set; } = new PingAttributes(); // Stores the current operation's attributes
+        public Results Results { get; private set; } = new Results(); // Store current ping results
+        public Attributes Attributes { get; private set; } = new Attributes(); // Stores the current operation's attributes
         public bool IsRunning { get; private set; } = false;
 
         private ManualResetEvent cancelEvent = new ManualResetEvent(false);
@@ -58,7 +58,7 @@ namespace PowerPing
         /// Acts as a basic wrapper to SendICMP and feeds it a specific
         /// set of PingAttributes 
         /// </summary>
-        public void Send(PingAttributes attrs)
+        public void Send(Attributes attrs)
         {
             // Load user inputted attributes
             this.Attributes = attrs;
@@ -93,7 +93,7 @@ namespace PowerPing
         {
             IPAddress localAddress = null;
             Socket listeningSocket = null;
-            PingResults results = new PingResults();
+            Results results = new Results();
 
             // Find local address
             foreach (var ip in Dns.GetHostEntry(Dns.GetHostName()).AddressList) {
@@ -163,14 +163,14 @@ namespace PowerPing
         {
             List<string> scanList = new List<string>(); // List of addresses to scan
             String[] ipSegments = range.Split('.');
-            PingResults results = new PingResults();
+            Results results = new Results();
             List<string> activeHosts = new List<string>();
             List<double> activeHostTimes = new List<double>();
             Stopwatch scanTimer = new Stopwatch();
             int scanned = 0;
             
             // Setup scan ping attributes
-            PingAttributes attrs = new PingAttributes();
+            Attributes attrs = new Attributes();
             attrs.Timeout = 500;
             attrs.Interval = 0;
             attrs.Count = 1;
@@ -218,7 +218,7 @@ namespace PowerPing
                 // Reset global results for accurate results 
                 // (results need to be set globally while running for graph but need to be semi local for scan 
                 // or results bleed through so active hosts can't be determined)
-                this.Results = new PingResults();
+                this.Results = new Results();
 
                 // Send ping
                 results = SendICMP(attrs);
@@ -240,7 +240,7 @@ namespace PowerPing
         /// </summary>
         public void Flood(string address)
         {
-            PingAttributes attrs = new PingAttributes();
+            Attributes attrs = new Attributes();
             Ping p = new Ping();
 
             // Verify address
@@ -325,7 +325,7 @@ namespace PowerPing
         /// </summary>
         /// <param name="attrs">Properties of pings to be sent</param>
         /// <returns>Set of ping results</returns>
-        private PingResults SendICMP(PingAttributes attrs)
+        private Results SendICMP(Attributes attrs)
         {
             IPEndPoint iep = null;
             EndPoint ep = null;

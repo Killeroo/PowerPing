@@ -45,7 +45,7 @@ namespace PowerPing
 
         // Local variable declaration
         private readonly Ping graphPing = new Ping();
-        private readonly PingAttributes graphPingAttrs = new PingAttributes();
+        private readonly Attributes graphPingAttrs = new Attributes();
         private readonly List<String[]> graphColumns = new List<string[]>();
         private bool isGraphSetup = false;
         private bool cancelFlag = false;
@@ -272,7 +272,7 @@ namespace PowerPing
         /// Update graph text labels
         /// </summary>
         /// <param name="results"></param>
-        private void UpdateLabels(PingResults results)
+        private void UpdateLabels(Results results)
         {
             // save cursor location
             int cursorPositionX = Console.CursorLeft;

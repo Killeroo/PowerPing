@@ -492,7 +492,7 @@ Get location information for 84.23.12.4";
         /// </summary>
         /// <param name="host">Resolved host address</param>
         /// <param name="ping">Ping object</param>
-        public static void PingIntroMsg(String host, PingAttributes attrs)
+        public static void PingIntroMsg(String host, Attributes attrs)
         {
             if (!Display.ShowOutput) {
                 return;
@@ -720,8 +720,8 @@ Get location information for 84.23.12.4";
         public static void PingResults(Ping ping)
         {
             // Load attributes
-            PingAttributes attrs = ping.Attributes;
-            PingResults results = ping.Results;
+            Attributes attrs = ping.Attributes;
+            Results results = ping.Results;
 
             ResetColor();
 
@@ -809,7 +809,7 @@ Get location information for 84.23.12.4";
         /// Displays and updates results of an ICMP flood
         /// </summary>
         /// <param name="results"></param>
-        public static void FloodProgress(PingResults results, string target)
+        public static void FloodProgress(Results results, string target)
         {
             // Check if labels have already been drawn
             if (sentPos.Left > 0) { 
@@ -847,7 +847,7 @@ Get location information for 84.23.12.4";
 
             sentPings = results.Sent;
         }
-        public static void ListenResults(PingResults results)
+        public static void ListenResults(Results results)
         {
             throw new NotImplementedException();
         }

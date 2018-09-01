@@ -28,7 +28,7 @@ namespace PowerPing
     /// <summary>
     /// Stores attributes of a ping operation
     /// </summary>
-    public class PingAttributes
+    public class Attributes
     {
         // Properties
         public string Host { get; set; } // Name of host being pinged // TODO: Rename to display/inputted name
@@ -52,7 +52,7 @@ namespace PowerPing
         public bool RandomTiming { get; set; } // Generate random wait time each time ping is sent
         public string[] AddressList { get; set; } // Optional attribute: Used when scanning, stores addresses to ping
 
-        public PingAttributes()
+        public Attributes()
         {
             // Default attributes
             Host = "localhost";
