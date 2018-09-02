@@ -404,9 +404,9 @@ namespace PowerPing
                             case "/checksum":
                             case "-checksum":
                             case "--checksum":
-                            case "/ch":
-                            case "-ch":
-                            case "--ch":
+                            case "/chk":
+                            case "-chk":
+                            case "--chk":
                                 Display.ShowChecksum = true;
                                 break;
                             case "/dontfrag":

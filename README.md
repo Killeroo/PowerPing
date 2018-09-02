@@ -37,7 +37,7 @@ _Future features:_
                [--g] | [--cg] | [--t] [--4] [--rng] [--df] [--rb number] [--b number] 
                [--c number] [--w number] [-i number] [--in number] [--pt number] [--pc number]
                [--m "message"] [--ti timing] [--sh] [--dm] [--ts] [--nc] [--input] [--s] [--r]
-               [--nt] [--q] [--res] [--ia] [--l number] [dp number] target_name | target_address
+               [--nt] [--q] [--res] [--ia] [--l number] [dp number] [--chk] target_name | target_address
                
 ## Arguments:
     Ping Options:
@@ -72,7 +72,7 @@ _Future features:_
         --quiet      [--q]            No output, only shows summary upon completion or exit
         --resolve    [--res]          Resolve hostname of address from DNS
         --inputaddr  [--ia]           Show input address instead of revolved one
-        --checksum   [--ch]           Display checksum of packet
+        --checksum   [--chk]           Display checksum of packet
         --limit      [--l]   number   Limits output to just replies (0) or requests (1)
         --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
 
