@@ -35,6 +35,7 @@ namespace PowerPing
         public string Address { get; set; } // Address to send the ping to
         public string Message { get; set; } // Message to store with in ICMP message field
         public string Source { get; set; }
+        public string OpType { get; set; } // Operation type (flood, normal, listen etc)
         public int Interval { get; set; } // Time interval between sending each ping
         public int Timeout { get; set; } // Recieve timeout (milliseconds)
         public int Count { get; set; } // Number of pings to send
@@ -68,6 +69,7 @@ namespace PowerPing
             ForceV4 = true;
             ForceV6 = false;
             RandomMsg = false;
+            OpType = "normal";
             UsePingCookies = false;
 	        BeepLevel = 0;
             AddressList = null;

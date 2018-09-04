@@ -9,7 +9,7 @@ namespace PowerPing
     /// <summary>
     /// Contains async methods for sending and recieving
     /// </summary>
-    class SendTasks
+    class Comms
     {
     }
 }
