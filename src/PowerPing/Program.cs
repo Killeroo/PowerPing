@@ -401,6 +401,14 @@ namespace PowerPing
                                     throw new ArgumentFormatException();
                                 }
                                 break;
+                            case "/checksum":
+                            case "-checksum":
+                            case "--checksum":
+                            case "/chk":
+                            case "-chk":
+                            case "--chk":
+                                Display.ShowChecksum = true;
+                                break;
                             case "/dontfrag":
                             case "-dontfrag":
                             case "--dontfrag":

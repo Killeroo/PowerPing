@@ -47,6 +47,7 @@ namespace PowerPing
         public static bool ShowTimeouts { get; set; } = true;
         public static bool ShowRequests { get; set; } = false;
 	    public static bool ShowReplies { get; set; } = true;
+        public static bool ShowChecksum { get; set; } = false;
         public static bool UseInputtedAddress { get; set; } = false;
         public static bool UseResolvedAddress { get; set; } = false;
         public static int DecimalPlaces { get; set; } = 1;
@@ -104,6 +105,7 @@ namespace PowerPing
         const string REPLY_MSG = "Reply from: {0} seq={1} bytes={2} type=";
         const string REPLY_MSG_SHORT = "Reply from: {0} type=";
         const string REPLY_MSG_TXT = " msg=\"{0}\"";
+        const string REPLY_CHKSM_TXT = " chksm={0}";
         const string REPLY_TIME_TXT = " time=";
 
         // Scan messages
@@ -160,7 +162,7 @@ Usage:
               [--b number] [--c number] [--w number] [-i number] [--in number]
               [--pt number] [--pc number] [--m message] [--ti timing] [--sh] 
               [--dm] [--ts] [--nc] [--input] [--s] [--r] [--nt] [--q] [--res]
-              [--ia] [--l number] [dp number] target_name | target_address
+              [--ia] [--chk] [--l number] [dp number] target_name | target_address
 
 Ping Options:
     --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)
@@ -194,6 +196,7 @@ Display Options:
     --quiet      [--q]            No output, only shows summary upon exit
     --resolve    [--res]          Resolve hostname of address from DNS
     --inputaddr  [--ia]           Show input address instead of revolved IP address
+    --checksum   [--chk]           Display checksum of packet
     --limit      [--l]   number   Limits output to just replies(0) or requests(1)
     --decimals   [--dp]  number   Num of decimal places to use(0 to 3)
 
@@ -611,6 +614,11 @@ Get location information for 84.23.12.4";
             }
             Console.Write("{0:0." + new String('0', DecimalPlaces) + "}ms", replyTime.TotalMilliseconds);
             ResetColor();
+
+            // Display checksum
+            if (ShowChecksum) {
+                Console.Write(REPLY_CHKSM_TXT, packet.checksum);
+            }
 
             // Display timestamp
             if (ShowTimeStamp) {
