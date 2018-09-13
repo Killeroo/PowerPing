@@ -667,7 +667,7 @@ Get location information for 84.23.12.4";
                 double s = scanned;
                 double tot = total;
                 double blockPercent = (s / tot) * 30;
-                Console.WriteLine(new String('#', Convert.ToInt32(blockPercent)));
+                Console.WriteLine(new String('=', Convert.ToInt32(blockPercent)) + ">");
                 perComplPos.SetToPosition();
                 Console.WriteLine("{0}%", Math.Round((s / tot) * 100, 0));
 
@@ -687,11 +687,11 @@ Get location information for 84.23.12.4";
                 scanTimePos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.WriteLine("12:00:00");
                 Console.Write(SCAN_PROG_TXT);
-                Console.Write("[ ");
-                perComplPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-                Console.Write("     ][");
+				Console.Write("[");
                 progBarPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-                Console.WriteLine("..............................]");
+				Console.Write("                              ] ");
+                perComplPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                Console.WriteLine();
             }
             
         }
