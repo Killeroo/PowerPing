@@ -109,11 +109,9 @@ namespace PowerPing
         const string REPLY_TIME_TXT = " time=";
 
         // Scan messages
-        const string SCAN_RANGE_TXT = "Scanning range [ {0} ]";
-        const string SCAN_HOSTS_TXT = "Sent: {0} Found Hosts: {1}";
-        const string SCAN_CUR_ADDR_TXT = "Pinging ";
-        const string SCAN_ELPS_TIME_TXT = "Ellapsed: ";
-        const string SCAN_PROG_TXT = "Progress: ";
+        const string SCAN_RANGE_TXT = "Scanning range [ {0} ] . . . ";
+        const string SCAN_HOSTS_TXT = " Sent: {0} Found Hosts: {1}";
+        const string SCAN_CUR_ADDR_TXT = " Pinging ";
         const string SCAN_RESULT_MSG = "Scan complete. {0} addresses scanned. {1} hosts active:";
         const string SCAN_RESULT_ENTRY = "-- {0} [{1:0.0}ms] [{2}]";
         const string SCAN_CONNECTOR_CHAR = "|";
@@ -662,7 +660,7 @@ Get location information for 84.23.12.4";
                 scanTimePos.SetToPosition();
                 Console.Write("{0:hh\\:mm\\:ss}", curTime);
                 curAddrPos.SetToPosition();
-                Console.Write("{0} ...", curAddr);
+                Console.Write(curAddr);
                 progBarPos.SetToPosition();
                 double s = scanned;
                 double tot = total;
@@ -678,18 +676,16 @@ Get location information for 84.23.12.4";
 
                 // Setup labels
                 Console.WriteLine(SCAN_RANGE_TXT, range);
-                scanInfoPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-                Console.WriteLine();
                 Console.Write(SCAN_CUR_ADDR_TXT);
                 curAddrPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.WriteLine(curAddr);
-                Console.Write(SCAN_ELPS_TIME_TXT);
+                scanInfoPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                Console.WriteLine();
+                Console.Write(" ");
                 scanTimePos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-                Console.WriteLine("12:00:00");
-                Console.Write(SCAN_PROG_TXT);
-				Console.Write("[");
+                Console.Write("00:00:00 [");
                 progBarPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-				Console.Write("                              ] ");
+				Console.Write("                               ] ");
                 perComplPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.WriteLine();
             }
@@ -700,7 +696,15 @@ Get location information for 84.23.12.4";
             Console.CursorVisible = true;
 
             Console.WriteLine();
-            Console.WriteLine(SCAN_RESULT_MSG, scanned, foundHosts.Count);
+            Console.Write("Scan complete. ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write(scanned);
+            Console.ForegroundColor = DefaultForegroundColor;
+            Console.Write(" addresses scanned. ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write(foundHosts.Count);
+            Console.ForegroundColor = DefaultForegroundColor;
+            Console.WriteLine(" hosts found.");
             if (foundHosts.Count != 0) {
                 for (int i = 0; i < foundHosts.Count; i++) {
                     string hostName = Helper.ReverseLookup(foundHosts[i]);
