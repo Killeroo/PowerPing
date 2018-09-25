@@ -126,10 +126,10 @@ namespace PowerPing
         const string RESULTS_RECV_TXT = ", Recieved ";
         const string RESULTS_LOST_TXT = ", Lost ";
         const string RESULTS_PERCENT_LOST_TXT = " ({0}% loss)";
-        const string RESULTS_PKT_GOOD = " Good ";
+        const string RESULTS_PKT_GOOD = "Good ";
         const string RESULTS_PKT_ERR = ", Errors ";
         const string RESULTS_PKT_UKN = ", Unknown ";
-        const string RESULTS_TIME_TXT = " Min [ {0:0.0}ms ], Max [ {1:0.0}ms ], Avg [ {2:0.0}ms ]";
+        const string RESULTS_TIME_TXT = "Min [ {0:0.0}ms ], Max [ {1:0.0}ms ], Avg [ {2:0.0}ms ]";
         const string RESULTS_START_TIME_TXT = "Started at: {0} (local time)";
         const string RESULTS_RUNTIME_TXT = "   Runtime: {0:hh\\:mm\\:ss\\.f}";
         const string RESULTS_INFO_BOX = "[ {0} ]";
@@ -459,6 +459,7 @@ Get location information for 84.23.12.4";
         public static void Help()
         {
             // Print help message
+            Version();
             Console.WriteLine(HELP_MSG);
 
             if (!NoInput) {
