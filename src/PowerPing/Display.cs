@@ -708,7 +708,7 @@ Get location information for 84.23.12.4";
             Console.WriteLine(" hosts found.");
             if (foundHosts.Count != 0) {
                 for (int i = 0; i < foundHosts.Count; i++) {
-                    string hostName = Helper.ReverseLookup(foundHosts[i]);
+                    string hostName = PowerPing.Lookup.QueryHost(foundHosts[i]);
                     Console.WriteLine((i == foundHosts.Count - 1 ? SCAN_END_CHAR : SCAN_CONNECTOR_CHAR) + SCAN_RESULT_ENTRY, foundHosts[i], times[i], hostName != "" ? hostName : "UNAVAILABLE");
                 }
             }

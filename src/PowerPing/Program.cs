@@ -541,13 +541,13 @@ namespace PowerPing
                     p.Listen();
                     break;
                 case "location":
-                    Helper.GetAddressLocation(attributes.Host, true);
+                    PowerPing.Lookup.AddressLocation(attributes.Host, true);
                     break;
                 case "whoami":
-                    Helper.GetAddressLocation("", true);
+                    PowerPing.Lookup.AddressLocation("", true);
                     break;
                 case "whois":
-                    Helper.WhoIs(attributes.Host);
+                    PowerPing.Lookup.QueryWhoIs(attributes.Host);
                     break;
                 case "graphing":
                     g = new Graph(attributes.Host);

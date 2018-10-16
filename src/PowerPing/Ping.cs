@@ -64,12 +64,12 @@ namespace PowerPing
             this.Attributes = attrs;
 
             // Lookup address
-            Attributes.Address = PowerPing.Helper.AddressLookup(Attributes.Host, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+            Attributes.Address = PowerPing.Lookup.QueryDNS(Attributes.Host, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
             PowerPing.Display.PingIntroMsg(Attributes.Host, attrs);
 
             if (Display.UseResolvedAddress) {
-                Attributes.Host = Helper.ReverseLookup(Attributes.Address);
+                Attributes.Host = PowerPing.Lookup.QueryHost(Attributes.Address);
                 if (Attributes.Host == "") {
                     // If reverse lookup fails just display whatever is in the address field
                     Attributes.Host = Attributes.Address; 
@@ -97,7 +97,7 @@ namespace PowerPing
             PingResults results = new PingResults();
 
             // Find local address
-            localAddress = IPAddress.Parse(Helper.GetLocalAddress());
+            localAddress = IPAddress.Parse(PowerPing.Lookup.LocalAddress());
 
             IsRunning = true;
             try {
@@ -241,7 +241,7 @@ namespace PowerPing
             Ping p = new Ping();
 
             // Verify address
-            attrs.Address = Helper.AddressLookup(address, AddressFamily.InterNetwork);
+            attrs.Address = PowerPing.Lookup.QueryDNS(address, AddressFamily.InterNetwork);
 
             // Setup ping attributes
             attrs.Interval = 0;
