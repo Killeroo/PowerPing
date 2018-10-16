@@ -41,6 +41,7 @@ namespace PowerPing
         public int Ttl { get; set; } // Time to live                                
         public int BeepLevel { get; set; } // Beep level - 1 to beep on timeout, 2 for beep on reply, 0 for no beep
         public int RecieveBufferSize { get; set; }
+        public int Size { get; set; } // Size of packet to send
         public byte Type { get; set; } // ICMP type field value
         public byte Code { get; set; } // ICMP code field value
         public bool Continous { get; set; } // Continously send pings
@@ -64,6 +65,7 @@ namespace PowerPing
             Ttl = 255;
             Type = 0x08;
             Code = 0x00;
+            Size = -1;
             Continous = false;
             ForceV4 = true;
             ForceV6 = false;

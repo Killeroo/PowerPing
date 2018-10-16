@@ -250,9 +250,9 @@ namespace PowerPing
                             case "/symbols":
                             case "-symbols":
                             case "--symbols":
-                            case "/s":
-                            case "-s":
-                            case "--s":
+                            case "/sym":
+                            case "-sym":
+                            case "--sym":
                                 Display.UseSymbols = true;
                                 break;
                             case "/random":
@@ -417,6 +417,19 @@ namespace PowerPing
                             case "--df":
                                 attributes.DontFragment = true;
                                 break;
+                            case "/size":
+                            case "-size":
+                            case "--size":
+                            case "/s":
+                            case "-s":
+                            case "--s":
+                                int size = Convert.ToInt32(args[count + 1]);
+                                if (size < 100000) {
+                                    attributes.Size = size;
+                                } else {
+                                    throw new ArgumentFormatException();
+                                }
+                                break;
                             case "/whois":
                             case "-whois":
                             case "--whois":
@@ -541,13 +554,13 @@ namespace PowerPing
                     p.Listen();
                     break;
                 case "location":
-                    Helper.GetAddressLocation(attributes.Host, true);
+                    PowerPing.Lookup.AddressLocation(attributes.Host, true);
                     break;
                 case "whoami":
-                    Helper.GetAddressLocation("", true);
+                    PowerPing.Lookup.AddressLocation("", true);
                     break;
                 case "whois":
-                    Helper.WhoIs(attributes.Host);
+                    PowerPing.Lookup.QueryWhoIs(attributes.Host);
                     break;
                 case "graphing":
                     g = new Graph(attributes.Host);

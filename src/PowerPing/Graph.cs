@@ -66,7 +66,7 @@ namespace PowerPing
         public Graph(string address)
         {
             // Setup ping attributes
-            graphPingAttrs.Host = Helper.AddressLookup(address, System.Net.Sockets.AddressFamily.InterNetwork);
+            graphPingAttrs.Host = PowerPing.Lookup.QueryDNS(address, System.Net.Sockets.AddressFamily.InterNetwork);
             graphPingAttrs.Continous = true;
             Display.ShowOutput = false;
         }

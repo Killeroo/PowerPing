@@ -158,8 +158,8 @@ Usage:
     PowerPing [--?] | [--ex] | [--li] | [--whoami] | [--whois] [--loc] | [--fl] |
               [--sc] | [--g] | [--cg] | [--t] [--4] [--rng] [--df] [--rb number] 
               [--b number] [--c number] [--w number] [-i number] [--in number]
-              [--pt number] [--pc number] [--m message] [--ti timing] [--sh] 
-              [--dm] [--ts] [--nc] [--input] [--s] [--r] [--nt] [--q] [--res]
+              [--pt number] [--pc number] [--s number] [--m message] [--ti timing] 
+              [--sh] [--dm] [--ts] [--nc] [--input] [--sym] [--r] [--nt] [--q] [--res]
               [--ia] [--chk] [--l number] [dp number] target_name | target_address
 
 Ping Options:
@@ -175,6 +175,7 @@ Ping Options:
     --interval   [--in]  number   Interval between each ping (in milliseconds)
     --type       [--pt]  number   Use custom ICMP type
     --code       [--pc]  number   Use custom ICMP code value
+    --size       [--s]   number   Set size of packet (overwrites packet message)
     --message    [--m]   message  Ping packet message
     --timing     [--ti]  timing   Timing levels:
                                     0 - Paranoid    4 - Nimble
@@ -188,7 +189,7 @@ Display Options:
     --timestamp  [--ts]           Display timestamp
     --nocolor    [--nc]           No colour
     --input                       Require user input
-    --symbols    [--s]            Renders replies and timeouts as ASCII symbols
+    --symbols    [--sym]          Renders replies and timeouts as ASCII symbols
     --request    [--r]            Show request packets
     --notimeouts [--nt]           Don't display timeout messages
     --quiet      [--q]            No output, only shows summary upon exit
@@ -708,7 +709,7 @@ Get location information for 84.23.12.4";
             Console.WriteLine(" hosts found.");
             if (foundHosts.Count != 0) {
                 for (int i = 0; i < foundHosts.Count; i++) {
-                    string hostName = Helper.ReverseLookup(foundHosts[i]);
+                    string hostName = PowerPing.Lookup.QueryHost(foundHosts[i]);
                     Console.WriteLine((i == foundHosts.Count - 1 ? SCAN_END_CHAR : SCAN_CONNECTOR_CHAR) + SCAN_RESULT_ENTRY, foundHosts[i], times[i], hostName != "" ? hostName : "UNAVAILABLE");
                 }
             }

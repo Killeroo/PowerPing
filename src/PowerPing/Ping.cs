@@ -64,12 +64,12 @@ namespace PowerPing
             this.Attributes = attrs;
 
             // Lookup address
-            Attributes.Address = PowerPing.Helper.AddressLookup(Attributes.Host, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+            Attributes.Address = PowerPing.Lookup.QueryDNS(Attributes.Host, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
             PowerPing.Display.PingIntroMsg(Attributes.Host, attrs);
 
             if (Display.UseResolvedAddress) {
-                Attributes.Host = Helper.ReverseLookup(Attributes.Address);
+                Attributes.Host = PowerPing.Lookup.QueryHost(Attributes.Address);
                 if (Attributes.Host == "") {
                     // If reverse lookup fails just display whatever is in the address field
                     Attributes.Host = Attributes.Address; 
@@ -89,6 +89,7 @@ namespace PowerPing
         /// will recieve all packets and filters to just show
         /// ICMP packets. Runs until ctrl-c or exit
         /// </summary>
+        /// <source>https://stackoverflow.com/a/9174392</source>
         public void Listen()
         {
             IPAddress localAddress = null;
@@ -96,11 +97,7 @@ namespace PowerPing
             PingResults results = new PingResults();
 
             // Find local address
-            foreach (var ip in Dns.GetHostEntry(Dns.GetHostName()).AddressList) {
-                if (ip.AddressFamily == AddressFamily.InterNetwork) {
-                    localAddress = ip;
-                }
-            }
+            localAddress = IPAddress.Parse(PowerPing.Lookup.LocalAddress());
 
             IsRunning = true;
             try {
@@ -148,7 +145,7 @@ namespace PowerPing
         /// ICMP Traceroute
         /// Not implemented yet
         /// </summary>
-        public void Trace() { throw new NotImplementedException(); }
+        public void Trace() { throw new NotSupportedException(); }
         /// <summary>
         /// Network scanning method.
         ///
@@ -244,7 +241,7 @@ namespace PowerPing
             Ping p = new Ping();
 
             // Verify address
-            attrs.Address = Helper.AddressLookup(address, AddressFamily.InterNetwork);
+            attrs.Address = PowerPing.Lookup.QueryDNS(address, AddressFamily.InterNetwork);
 
             // Setup ping attributes
             attrs.Interval = 0;
@@ -348,14 +345,20 @@ namespace PowerPing
             // Set socket options
             sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, attrs.Timeout); // Socket timeout
             sock.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.IpTimeToLive, attrs.Ttl);
-            // TODO: FIX: sock.Ttl = (short)attributes.ttl;
             sock.DontFragment = attrs.DontFragment;
+
+            // Create packet message payload
+            byte[] payload;
+            if (attrs.Size != -1) {
+                payload = Helper.GenerateByteArray(attrs.Size);
+            } else {
+                payload = Encoding.ASCII.GetBytes(attrs.Message);
+            }
 
             // Construct our ICMP packet
             packet.type = attrs.Type;
             packet.code = attrs.Code;
             Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2); // Add seq num to ICMP message
-            byte[] payload = Encoding.ASCII.GetBytes(attrs.Message);
             Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length); // Add text into ICMP message
             packet.messageSize = payload.Length + 4;
             packetSize = packet.messageSize + 4;
