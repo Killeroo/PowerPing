@@ -345,14 +345,20 @@ namespace PowerPing
             // Set socket options
             sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, attrs.Timeout); // Socket timeout
             sock.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.IpTimeToLive, attrs.Ttl);
-            // TODO: FIX: sock.Ttl = (short)attributes.ttl;
             sock.DontFragment = attrs.DontFragment;
+
+            // Create packet message payload
+            byte[] payload;
+            if (attrs.Size != -1) {
+                payload = Helper.GenerateByteArray(size);
+            } else {
+                payload = Encoding.ASCII.GetBytes(attrs.Message);
+            }
 
             // Construct our ICMP packet
             packet.type = attrs.Type;
             packet.code = attrs.Code;
             Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2); // Add seq num to ICMP message
-            byte[] payload = Encoding.ASCII.GetBytes(attrs.Message);
             Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length); // Add text into ICMP message
             packet.messageSize = payload.Length + 4;
             packetSize = packet.messageSize + 4;

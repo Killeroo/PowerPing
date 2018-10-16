@@ -250,9 +250,9 @@ namespace PowerPing
                             case "/symbols":
                             case "-symbols":
                             case "--symbols":
-                            case "/s":
-                            case "-s":
-                            case "--s":
+                            case "/sym":
+                            case "-sym":
+                            case "--sym":
                                 Display.UseSymbols = true;
                                 break;
                             case "/random":
@@ -416,6 +416,19 @@ namespace PowerPing
                             case "-df":
                             case "--df":
                                 attributes.DontFragment = true;
+                                break;
+                            case "/size":
+                            case "-size":
+                            case "--size":
+                            case "/s":
+                            case "-s":
+                            case "--s":
+                                int size = Convert.ToInt32(args[count + 1]);
+                                if (size < 100000) {
+                                    attributes.Size = size;
+                                } else {
+                                    throw new ArgumentFormatException();
+                                }
                                 break;
                             case "/whois":
                             case "-whois":

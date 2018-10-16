@@ -107,6 +107,22 @@ namespace PowerPing
         }
 
         /// <summary>
+        /// Generates a byte array of a given size, used for adding size
+        /// to icmp packet
+        /// </summary>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public static byte[] GenerateByteArray(int size)
+        {
+            byte[] array = new byte[size];
+            for (int i = 0; i < size; i++) {
+                array[i] = 0x00;
+            }
+
+            return array;
+        }
+
+        /// <summary>
         /// Extension method for determining build time
         /// </summary>
         /// <param name="assembly"></param>

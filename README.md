@@ -36,7 +36,7 @@ _Future features:_
      PowerPing [--?] | [--ex] | [--li] | [--whoami] | [--whois] | [--loc] | [--fl] | [--sc] |
                [--g] | [--cg] | [--t] [--4] [--rng] [--df] [--rb number] [--b number] 
                [--c number] [--w number] [-i number] [--in number] [--pt number] [--pc number]
-               [--m "message"] [--ti timing] [--sh] [--dm] [--ts] [--nc] [--input] [--s] [--r]
+               [--m "message"] [--s number] [--ti timing] [--sh] [--dm] [--ts] [--nc] [--input] [--sym] [--r]
                [--nt] [--q] [--res] [--ia] [--l number] [dp number] [--chk] target_name | target_address
                
 ## Arguments:
@@ -53,6 +53,7 @@ _Future features:_
         --interval   [--in]  number   Interval between each ping (in milliseconds)
         --type       [--pt]  number   Use custom ICMP type
         --code       [--pc]  number   Use custom ICMP code value
+        --size       [--s]   number   Set size of packet (overwrites packet message)
         --message    [--m]   message  Ping packet message
         --timing     [--ti]  timing   Timing levels:
                                             0 - Paranoid    4 - Nimble
@@ -66,7 +67,7 @@ _Future features:_
         --timestamp  [--ts]           Display timestamp
         --nocolor    [--nc]           No colour
         --input                       Require user input
-        --symbols    [--s]            Renders replies and timeouts as ASCII symbols
+        --symbols    [--sym]          Renders replies and timeouts as ASCII symbols
         --request    [--r]            Show request packets
         --notimeouts [--nt]           Don't display timeout messages
         --quiet      [--q]            No output, only shows summary upon completion or exit
