@@ -145,7 +145,7 @@ namespace PowerPing
         /// ICMP Traceroute
         /// Not implemented yet
         /// </summary>
-        public void Trace() { throw new NotImplementedException(); }
+        public void Trace() { throw new NotSupportedException(); }
         /// <summary>
         /// Network scanning method.
         ///
@@ -350,7 +350,7 @@ namespace PowerPing
             // Create packet message payload
             byte[] payload;
             if (attrs.Size != -1) {
-                payload = Helper.GenerateByteArray(size);
+                payload = Helper.GenerateByteArray(attrs.Size);
             } else {
                 payload = Encoding.ASCII.GetBytes(attrs.Message);
             }
