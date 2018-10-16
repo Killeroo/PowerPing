@@ -101,10 +101,12 @@ namespace PowerPing
         }
 
         /// <summary>
-        /// Returns the local hosts IPv4 address
+        /// Returns the local IP address
         /// </summary>
+        /// <bug>There is a currently a bug where the address of a VM interface can be used 
+        /// instead of the actual local address</bug>
         /// <returns>IP address string, if no address found then returns a null</returns>
-        public static string GetLocalIPAddress()
+        public static string GetLocalAddress()
         {
             // If not connected to a network return null
             if (!NetworkInterface.GetIsNetworkAvailable()) {

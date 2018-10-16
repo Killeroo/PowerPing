@@ -97,11 +97,7 @@ namespace PowerPing
             PingResults results = new PingResults();
 
             // Find local address
-            foreach (var ip in Dns.GetHostEntry(Dns.GetHostName()).AddressList) {
-                if (ip.AddressFamily == AddressFamily.InterNetwork) {
-                    localAddress = ip;
-                }
-            }
+            localAddress = IPAddress.Parse(Helper.GetLocalAddress());
 
             IsRunning = true;
             try {
