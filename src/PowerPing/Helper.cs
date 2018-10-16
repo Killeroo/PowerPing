@@ -333,10 +333,10 @@ namespace PowerPing
 
         /// <summary>
         /// Extension method for determining build time
-        /// Source: http://stackoverflow.com/a/1600990
         /// </summary>
         /// <param name="assembly"></param>
         /// <param name="target"></param>
+        /// <source>http://stackoverflow.com/a/1600990</source>
         /// <returns></returns>
         public static DateTime GetLinkerTime(this Assembly assembly, TimeZoneInfo target = null)
         {
