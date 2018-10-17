@@ -1,17 +1,15 @@
 # PowerPing - Advanced Windows Ping 
 
-[![](https://img.shields.io/badge/version-1.3.0-brightgreen.svg)]() [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8017007ba00645b390013970e5b6df43)](https://www.codacy.com/app/Killeroo/PowerPing?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Killeroo/PowerPing&amp;utm_campaign=Badge_Grade) [![Build status](https://ci.appveyor.com/api/projects/status/fq7jnpmlejm7jych?svg=true)](https://ci.appveyor.com/project/Killeroo/powerping) 
-
-Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
+**About PowerPing**
+- A small improved CLI ping program in C#, lovingly inspired by windows and linux.
+- It's a fork of the [Killeroo/PowerPing](https://github.com/Killeroo/PowerPing) and I recommend you the original to use.
+- Requires **Elevated Rights (Admininstrator)** to Run.
+- A new function added: display motherboard temperature in the ping output. Looks weird, but I needed a tool to find what temperature causes internal failure in the computer.
 
 ![alt text](docs/screenshots/screenshot.png "PowerPing in action")
 
 # Downloads
-Stable versions can be downloaded [[here]](https://github.com/Killeroo/PowerPing/releases)
-
-Nightly dev builds can be found [[here]](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx64%2FPowerPing.exe?job=Platform%3A%20x64&branch=dev) ([x86](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx86%2FPowerPing.exe?job=Platform%3A%20x86&branch=dev))
-
-
+Stable versions will be available for download [[here]](https://github.com/reclaimed/PowerPing/releases)
 
 ## Features
 
@@ -26,11 +24,6 @@ Nightly dev builds can be found [[here]](https://ci.appveyor.com/api/projects/ki
 - [Whois lookup](https://en.wikipedia.org/wiki/WHOIS)
 - [Graphing](docs/screenshots/screenshot2.png)
 
-_Future features:_
-
-- [Traceroute](https://en.wikipedia.org/wiki/Traceroute)
-- [Tunnelling](https://en.wikipedia.org/wiki/ICMP_tunnel)
-- [IPv6/ICMPv6](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_version_6)
 
 ## Usage: 
      PowerPing [--?] | [--ex] | [--li] | [--whoami] | [--whois] | [--loc] | [--fl] | [--sc] |
@@ -65,6 +58,8 @@ _Future features:_
         --shorthand  [--sh]           Show less detailed replies
         --displaymsg [--dm]           Display ICMP message contents
         --timestamp  [--ts]           Display timestamp
+**		--celsius	 [--tcel]	      Display motherboard temperature in Celsius**		
+**		--fahrenheit [--tfahr]	      Display motherboard temperature in Fahrenheit**		
         --nocolor    [--nc]           No colour
         --input                       Require user input
         --symbols    [--sym]          Renders replies and timeouts as ASCII symbols
@@ -116,6 +111,7 @@ _Future features:_
 MIT License
 
 Copyright (c) 2018 Matthew Carney <matthewcarney64@gmail.com>
+Copyright (c) 2018 evgeny likov <evg@likov.me>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
