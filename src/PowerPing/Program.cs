@@ -57,6 +57,11 @@ namespace PowerPing
             // Show current version info
             //Display.Version();
 
+            // temp: attempt to enable firewall
+            // Replace with: https://stackoverflow.com/a/114484
+            Console.WriteLine("exit code: " + Helper.ExecuteShellCommand("netsh advfirewall firewall add rule name=\"All ICMP v4\" dir=in action=allow protocol=icmpv4:any,any", true));
+            //Helper.RunShellCommand("netsh firewall add allowedprogram C:\MyApp\MyApp.exe MyApp ENABLE")
+
             // Check if no arguments
             if (args.Length == 0) {
                 PowerPing.Display.Help();

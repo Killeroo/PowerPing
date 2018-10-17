@@ -25,6 +25,7 @@ SOFTWARE.
 using System;
 using System.IO;
 using System.Reflection;
+using System.Diagnostics;
 using System.Security.Cryptography;
 
 namespace PowerPing
@@ -151,6 +152,31 @@ namespace PowerPing
             var localTime = TimeZoneInfo.ConvertTimeFromUtc(linkTimeUtc, tz);
 
             return localTime;
+        }
+
+        /// <summary>
+        /// Runs a command in the systems a hidden shell/command prompt and returns error code
+        /// </summary>
+        /// <param name="command">Command string to run in shell</param>
+        /// <param name="waitForExit">Block till shell exits</param>
+        /// <source>https://stackoverflow.com/a/1469790</source>
+        /// <returns>Exit code</returns>
+        public static int ExecuteShellCommand(string command, bool waitForExit = true)
+        {
+            Process process = new Process();
+            ProcessStartInfo startInfo = new ProcessStartInfo {
+                WindowStyle = ProcessWindowStyle.Hidden,
+                FileName = "cmd.exe",
+                Arguments = $"/C {command}"
+            };
+
+            if (waitForExit)
+                process.WaitForExit();
+
+            process.StartInfo = startInfo;
+            process.Start();
+
+            return process.ExitCode;
         }
 
     }
