@@ -413,30 +413,30 @@ namespace PowerPing
 
                     byte[] buffer = new byte[attrs.RecieveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
                     ICMP response;
-                    long responseTimestamp;
+                    TimeSpan replyTime;
                     do {
                         // Wait for response
                         bytesRead = sock.ReceiveFrom(buffer, ref ep);
-                        responseTimestamp = Stopwatch.GetTimestamp();
+                        long responseTimestamp = Stopwatch.GetTimestamp();
 
                         // Store reply packet
                         response = new ICMP(buffer, bytesRead);
 
+                        // Calculate reply time
+                        replyTime = new TimeSpan((long)((double)(responseTimestamp - requestTimestamp) / Stopwatch.Frequency * TimeSpan.TicksPerSecond));
+
+                        // Display reply packet
+                        if (Display.ShowReplies) {
+                            PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : ep.ToString(), index, replyTime, bytesRead);
+                        }
+
                         // Make sure we received the expected packet, if not, discard it
                         ushort responseSessionId = BitConverter.ToUInt16(response.message, 0);
                         ushort responseSequenceNum = BitConverter.ToUInt16(response.message, 2);
-                        if (responseSessionId != sessionId || responseSequenceNum != sequenceNum) {
+                        if (attrs.Type == 8 && (response.type != 0 || responseSessionId != sessionId || responseSequenceNum != sequenceNum)) {
                             response = null;
                         }
                     } while (response == null);
-
-                    // Calculate reply time
-                    TimeSpan replyTime = new TimeSpan((long)((double)(responseTimestamp - requestTimestamp) / Stopwatch.Frequency * TimeSpan.TicksPerSecond));
-
-                    // Display reply packet
-                    if (Display.ShowReplies) {
-                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : ep.ToString(), index, replyTime, bytesRead);
-                    }
 
                     // Store response info
                     try { Results.Received++; }
