@@ -598,7 +598,8 @@ Get location information for 84.23.12.4";
 
             // Display ICMP message (if specified)
             if (ShowMessages) {
-                Console.Write(REPLY_MSG_TXT, new string(Encoding.ASCII.GetString(packet.message).Where(c => !char.IsControl(c)).ToArray()));
+                string messageWithoutHeader = Encoding.ASCII.GetString(packet.message, 4, packet.message.Length - 4);
+                Console.Write(REPLY_MSG_TXT, new string(messageWithoutHeader.Where(c => !char.IsControl(c)).ToArray()));
             }
 
             // Print coloured time segment
