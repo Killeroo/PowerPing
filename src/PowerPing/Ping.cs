@@ -330,6 +330,7 @@ namespace PowerPing
             IPAddress ipAddr = null;
             ICMP packet = new ICMP();
             Socket sock = null;
+            byte[] receiveBuffer = new byte[attrs.RecieveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
             int bytesRead, packetSize, index = 1;
 
             // Convert to IPAddress
@@ -398,6 +399,11 @@ namespace PowerPing
                         Display.RequestPacket(packet, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : attrs.Address, index);
                     }
 
+                    // If there were extra responses from a prior request, ignore them
+                    while (sock.Available != 0) {
+                        bytesRead = sock.ReceiveFrom(receiveBuffer, ref ep);
+                    }
+
                     // Send ping request
                     sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
                     long requestTimestamp = Stopwatch.GetTimestamp();
@@ -411,32 +417,33 @@ namespace PowerPing
                         if (rnd.Next(20) == 1) { throw new SocketException(); }
                     }
 
-                    byte[] buffer = new byte[attrs.RecieveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
                     ICMP response;
-                    TimeSpan replyTime;
+                    long responseTimestamp;
                     do {
                         // Wait for response
-                        bytesRead = sock.ReceiveFrom(buffer, ref ep);
-                        long responseTimestamp = Stopwatch.GetTimestamp();
+                        bytesRead = sock.ReceiveFrom(receiveBuffer, ref ep);
+                        responseTimestamp = Stopwatch.GetTimestamp();
 
                         // Store reply packet
-                        response = new ICMP(buffer, bytesRead);
+                        response = new ICMP(receiveBuffer, bytesRead);
 
-                        // Calculate reply time
-                        replyTime = new TimeSpan((long)((double)(responseTimestamp - requestTimestamp) / Stopwatch.Frequency * TimeSpan.TicksPerSecond));
-
-                        // Display reply packet
-                        if (Display.ShowReplies) {
-                            PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : ep.ToString(), index, replyTime, bytesRead);
-                        }
-
-                        // Make sure we received the expected packet, if not, discard it
-                        ushort responseSessionId = BitConverter.ToUInt16(response.message, 0);
-                        ushort responseSequenceNum = BitConverter.ToUInt16(response.message, 2);
-                        if (attrs.Type == 8 && (response.type != 0 || responseSessionId != sessionId || responseSequenceNum != sequenceNum)) {
-                            response = null;
+                        // Ignore unexpected echo responses
+                        if (packet.type == 8 && response.type == 0) {
+                            ushort responseSessionId = BitConverter.ToUInt16(response.message, 0);
+                            ushort responseSequenceNum = BitConverter.ToUInt16(response.message, 2);
+                            if (responseSessionId != sessionId || responseSequenceNum != sequenceNum) {
+                                response = null;
+                            }
                         }
                     } while (response == null);
+
+                    // Calculate reply time
+                    TimeSpan replyTime = new TimeSpan((long)((double)(responseTimestamp - requestTimestamp) / Stopwatch.Frequency * TimeSpan.TicksPerSecond));
+
+                    // Display reply packet
+                    if (Display.ShowReplies) {
+                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : ep.ToString(), index, replyTime, bytesRead);
+                    }
 
                     // Store response info
                     try { Results.Received++; }
