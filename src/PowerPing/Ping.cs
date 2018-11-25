@@ -46,7 +46,7 @@ namespace PowerPing
         public PingAttributes Attributes { get; private set; } = new PingAttributes(); // Stores the current operation's attributes
         public bool IsRunning { get; private set; } = false;
 
-        private static readonly ushort sessionId = GenerateSessionId();
+        private static readonly ushort sessionId = Helper.GenerateSessionId();
         private readonly ManualResetEvent cancelEvent = new ManualResetEvent(false);
         private bool debug = false;
 
@@ -382,9 +382,6 @@ namespace PowerPing
                 if (attrs.RandomMsg) {
                     payload = Encoding.ASCII.GetBytes(Helper.RandomString());
                     Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
-                } else if (attrs.UsePingCookies) {
-                    payload = Encoding.ASCII.GetBytes(DateTime.Now.ToString("HHmmssff") + "#" + index); //fffff
-                    Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
                 }
 
                 // Update packet checksum
@@ -508,12 +505,6 @@ namespace PowerPing
             sock.Close();
 
             return Results;
-        }
-
-        private static ushort GenerateSessionId()
-        {
-            uint n = (uint)Process.GetCurrentProcess().Id;
-            return (ushort)(n ^ (n >> 16));
         }
 
         #region IDisposable Support

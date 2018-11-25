@@ -380,14 +380,6 @@ namespace PowerPing
                             case "--ia":
                                 Display.UseInputtedAddress = true;
                                 break;
-                            case "/cookies":
-                            case "-cookies":
-                            case "--cookies":
-                            case "/co":
-                            case "-co":
-                            case "--co":
-                                attributes.UsePingCookies = true;
-                                break;
                             case "/buffer":
                             case "-buffer":
                             case "--buffer":
