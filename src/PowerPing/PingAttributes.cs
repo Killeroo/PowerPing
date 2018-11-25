@@ -48,7 +48,6 @@ namespace PowerPing
         public bool ForceV4 { get; set; } // Force use of IPv4
         public bool ForceV6 { get; set; } // Force use of IPv6 
         public bool RandomMsg { get; set; } // Fills ICMP message field with random characters    
-        public bool UsePingCookies { get; set; } // Stores timestamp and seq num in ICMP data for more accurate readings
         public bool DontFragment { get; set; } // Sets the Don't Fragment flag in an IPv4 header
         public bool RandomTiming { get; set; } // Generate random wait time each time ping is sent
         public string[] AddressList { get; set; } // Optional attribute: Used when scanning, stores addresses to ping
@@ -70,7 +69,6 @@ namespace PowerPing
             ForceV4 = true;
             ForceV6 = false;
             RandomMsg = false;
-            UsePingCookies = false;
 	        BeepLevel = 0;
             AddressList = null;
             RecieveBufferSize = 5096;

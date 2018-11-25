@@ -46,7 +46,8 @@ namespace PowerPing
         public PingAttributes Attributes { get; private set; } = new PingAttributes(); // Stores the current operation's attributes
         public bool IsRunning { get; private set; } = false;
 
-        private ManualResetEvent cancelEvent = new ManualResetEvent(false);
+        private static readonly ushort sessionId = Helper.GenerateSessionId();
+        private readonly ManualResetEvent cancelEvent = new ManualResetEvent(false);
         private bool debug = false;
 
         public Ping() { }
@@ -329,7 +330,7 @@ namespace PowerPing
             IPAddress ipAddr = null;
             ICMP packet = new ICMP();
             Socket sock = null;
-            Stopwatch responseTimer = new Stopwatch();
+            byte[] receiveBuffer = new byte[attrs.RecieveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
             int bytesRead, packetSize, index = 1;
 
             // Convert to IPAddress
@@ -358,7 +359,7 @@ namespace PowerPing
             // Construct our ICMP packet
             packet.type = attrs.Type;
             packet.code = attrs.Code;
-            Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2); // Add seq num to ICMP message
+            Buffer.BlockCopy(BitConverter.GetBytes(sessionId), 0, packet.message, 0, 2); // Add identifier to ICMP message
             Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length); // Add text into ICMP message
             packet.messageSize = payload.Length + 4;
             packetSize = packet.messageSize + 4;
@@ -373,16 +374,14 @@ namespace PowerPing
                     IsRunning = true;
                 }
 
+                // Include sequence number in ping message
+                ushort sequenceNum = (ushort)index;
+                Buffer.BlockCopy(BitConverter.GetBytes(sequenceNum), 0, packet.message, 2, 2);
+
                 // Fill ICMP message field
                 if (attrs.RandomMsg) {
                     payload = Encoding.ASCII.GetBytes(Helper.RandomString());
                     Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
-                } else if (attrs.UsePingCookies) {
-                    payload = Encoding.ASCII.GetBytes(DateTime.Now.ToString("HHmmssff") + "#" + index); //fffff
-                    Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
-                } else {
-                    // Include sequence number in ping message
-                    Buffer.BlockCopy(BitConverter.GetBytes(index), 0, packet.message, 2, 2); 
                 }
 
                 // Update packet checksum
@@ -397,9 +396,14 @@ namespace PowerPing
                         Display.RequestPacket(packet, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : attrs.Address, index);
                     }
 
+                    // If there were extra responses from a prior request, ignore them
+                    while (sock.Available != 0) {
+                        bytesRead = sock.ReceiveFrom(receiveBuffer, ref ep);
+                    }
+
                     // Send ping request
                     sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
-                    responseTimer.Start();
+                    long requestTimestamp = Stopwatch.GetTimestamp();
                     try { Results.Sent++; }
                     catch (OverflowException) { Results.HasOverflowed = true; }
                     
@@ -410,24 +414,39 @@ namespace PowerPing
                         if (rnd.Next(20) == 1) { throw new SocketException(); }
                     }
 
-                    // Wait for response
-                    byte[] buffer = new byte[attrs.RecieveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
-                    bytesRead = sock.ReceiveFrom(buffer, ref ep);
-                    responseTimer.Stop();
+                    ICMP response;
+                    TimeSpan replyTime;
+                    do {
+                        // Wait for response
+                        bytesRead = sock.ReceiveFrom(receiveBuffer, ref ep);
+                        replyTime = new TimeSpan(Helper.StopwatchToTimeSpanTicks(Stopwatch.GetTimestamp() - requestTimestamp));
 
-                    // Store reply packet
-                    ICMP response = new ICMP(buffer, bytesRead);
+                        // Store reply packet
+                        response = new ICMP(receiveBuffer, bytesRead);
+
+                        // Ignore unexpected echo responses
+                        if (packet.type == 8 && response.type == 0) {
+                            ushort responseSessionId = BitConverter.ToUInt16(response.message, 0);
+                            ushort responseSequenceNum = BitConverter.ToUInt16(response.message, 2);
+                            if (responseSessionId != sessionId || responseSequenceNum != sequenceNum) {
+                                if (replyTime.TotalMilliseconds >= attrs.Timeout) {
+                                    throw new SocketException();
+                                }
+                                response = null;
+                            }
+                        }
+                    } while (response == null);
 
                     // Display reply packet
                     if (Display.ShowReplies) {
-                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : ep.ToString(), index, responseTimer.Elapsed, bytesRead);
+                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : ep.ToString(), index, replyTime, bytesRead);
                     }
 
                     // Store response info
                     try { Results.Received++; }
                     catch (OverflowException) { Results.HasOverflowed = true; }
                     Results.CountPacketType(response.type);
-                    Results.SaveResponseTime(responseTimer.Elapsed.TotalMilliseconds);
+                    Results.SaveResponseTime(replyTime.TotalMilliseconds);
                     
 		            if (attrs.BeepLevel == 2) {
                         try { Console.Beep(); }
@@ -473,9 +492,6 @@ namespace PowerPing
                     if (attrs.RandomTiming) {
                         attrs.Interval = Helper.RandomInt(5000, 100000);
                     }
-
-                    // Reset timer
-                    responseTimer.Reset();
                 }
 
                 // Stop sending if flag is set
