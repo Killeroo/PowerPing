@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -153,5 +154,10 @@ namespace PowerPing
             return localTime;
         }
 
+        public static long StopwatchToTimeSpanTicks(long stopwatchTicks)
+        {
+            double scale = (double)TimeSpan.TicksPerSecond / Stopwatch.Frequency;
+            return (long)(stopwatchTicks * scale);
+        }
     }
 }

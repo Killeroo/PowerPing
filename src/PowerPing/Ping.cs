@@ -418,11 +418,11 @@ namespace PowerPing
                     }
 
                     ICMP response;
-                    long responseTimestamp;
+                    TimeSpan replyTime;
                     do {
                         // Wait for response
                         bytesRead = sock.ReceiveFrom(receiveBuffer, ref ep);
-                        responseTimestamp = Stopwatch.GetTimestamp();
+                        replyTime = new TimeSpan(Helper.StopwatchToTimeSpanTicks(Stopwatch.GetTimestamp() - requestTimestamp));
 
                         // Store reply packet
                         response = new ICMP(receiveBuffer, bytesRead);
@@ -432,13 +432,13 @@ namespace PowerPing
                             ushort responseSessionId = BitConverter.ToUInt16(response.message, 0);
                             ushort responseSequenceNum = BitConverter.ToUInt16(response.message, 2);
                             if (responseSessionId != sessionId || responseSequenceNum != sequenceNum) {
+                                if (replyTime.TotalMilliseconds >= attrs.Timeout) {
+                                    throw new SocketException();
+                                }
                                 response = null;
                             }
                         }
                     } while (response == null);
-
-                    // Calculate reply time
-                    TimeSpan replyTime = new TimeSpan((long)((double)(responseTimestamp - requestTimestamp) / Stopwatch.Frequency * TimeSpan.TicksPerSecond));
 
                     // Display reply packet
                     if (Display.ShowReplies) {
