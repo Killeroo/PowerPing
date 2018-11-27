@@ -25,7 +25,6 @@ SOFTWARE.
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace PowerPing
 {
@@ -33,7 +32,7 @@ namespace PowerPing
     /// Graph class, sends pings using Ping.cs and displays on
     /// console based graph.
     /// </summary>
-    class Graph : IDisposable
+    class Graph
     {
         // Constants
         const string FULL_BAR_BLOCK_CHAR = "█";
@@ -44,12 +43,11 @@ namespace PowerPing
         public int EndCursorPosY = 0; // Position to move cursor to when graph exits
 
         // Local variable declaration
-        private readonly Ping graphPing = new Ping();
+        private readonly CancellationToken cancellationToken;
+        private readonly Ping graphPing;
         private readonly PingAttributes graphPingAttrs = new PingAttributes();
         private readonly List<String[]> graphColumns = new List<string[]>();
         private bool isGraphSetup = false;
-        private bool cancelFlag = false;
-        private bool running = false;
         private int xAxisLength = 40;
 
         // Location of graph plotting space
@@ -63,16 +61,21 @@ namespace PowerPing
         private int rttLabelX, rttLabelY;
         private int timeLabelX, timeLabelY;
         
-        public Graph(string address)
+        public Graph(string address, CancellationToken cancellationTkn)
         {
+            cancellationToken = cancellationTkn;
+            graphPing = new Ping(cancellationTkn);
+
             // Setup ping attributes
             graphPingAttrs.Host = PowerPing.Lookup.QueryDNS(address, System.Net.Sockets.AddressFamily.InterNetwork);
             graphPingAttrs.Continous = true;
-            Display.ShowOutput = false;
         }
 
         public void Start()
         {
+            // Disable output
+            Display.ShowOutput = false;
+
             // Hide cursor
             Console.CursorVisible = false;
 
@@ -83,6 +86,9 @@ namespace PowerPing
 
             // Start drawing graph
             Draw();
+
+            // Show cursor
+            Console.CursorVisible = true;
         }
 
         /// <summary>
@@ -90,20 +96,14 @@ namespace PowerPing
         /// </summary>
         private void Draw()
         {
-            // Start ping in background thread
-            Thread pinger = new Thread(() => graphPing.Send(graphPingAttrs));
-            pinger.IsBackground = true;
-            pinger.Start();
-            running = true;
-
-            // Drawing loop
-            while (true) {
-
-                // Stop look if we get a cancel flag
-                if (cancelFlag) {
-                    break; 
+            // The actual display update rate may be limited by the ping interval
+            var limiter = new DisplayUpdateLimiter(TimeSpan.FromMilliseconds(500));
+            void OnResultsUpdate(PingResults r) {
+                // Make sure we're not updating the display too frequently
+                if (!limiter.RequestUpdate()) {
+                    return;
                 }
-                
+
                 // Reset position
                 Console.CursorTop = plotStartY;
                 Console.CursorLeft = plotStartX;
@@ -112,21 +112,16 @@ namespace PowerPing
                 DrawGraphColumns();
 
                 // Update labels
-                UpdateLabels(graphPing.Results);
+                UpdateLabels(r);
 
                 // Get results from ping and add to graph
-                AddColumnToGraph(CreateColumn(graphPing.Results.CurTime));
+                AddColumnToGraph(CreateColumn(r.CurTime));
 
                 Console.CursorTop = EndCursorPosY;
-
-                // Wait one second
-                Thread.Sleep(1000);
             }
 
-            // Clean up
-            running = false;
-            graphPing.Dispose();
-            pinger.Abort();
+            // Start pinging
+            PingResults results = graphPing.Send(graphPingAttrs, OnResultsUpdate);
         }
         ///<summary>
         /// Setup graph
@@ -428,36 +423,5 @@ namespace PowerPing
             // Reset cursor to starting position
             Console.SetCursorPosition(cursorPositionX, cursorPositionY);
         }
-
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-
-                cancelFlag = true;
-
-                if (running) {
-                    // wait till ping stops running
-                    while (running) {
-                        Task.Delay(25);
-                    }
-                }
-
-                graphPing.Dispose();
-
-                Console.CursorVisible = true;
-                disposedValue = true;
-            }
-        }
-
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-        #endregion
     }
 }

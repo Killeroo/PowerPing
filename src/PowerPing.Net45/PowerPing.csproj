@@ -99,6 +99,8 @@
     <Compile Include="..\PowerPing\Program.cs" />
     <Compile Include="..\PowerPing\Properties\AssemblyInfo.cs" />
     <Compile Include="..\PowerPing\Lookup.cs" />
+    <Compile Include="..\PowerPing\DisplayUpdateLimiter.cs" />
+    <Compile Include="..\PowerPing\ExtensionMethods.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\PowerPing\Properties\App.config">

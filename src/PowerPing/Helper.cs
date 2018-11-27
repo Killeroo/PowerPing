@@ -36,6 +36,7 @@ namespace PowerPing
     public static class Helper
     {
         private static readonly double stopwatchToTimeSpanTicksScale = (double)TimeSpan.TicksPerSecond / Stopwatch.Frequency;
+        private static readonly double timeSpanToStopwatchTicksScale = (double)Stopwatch.Frequency / TimeSpan.TicksPerSecond;
 
         /// <summary>
         /// Pause program and wait for user input
@@ -165,6 +166,11 @@ namespace PowerPing
         public static long StopwatchToTimeSpanTicks(long stopwatchTicks)
         {
             return (long)(stopwatchTicks * stopwatchToTimeSpanTicksScale);
+        }
+
+        public static long TimeSpanToStopwatchTicks(long timeSpanTicks)
+        {
+            return (long)(timeSpanTicks * timeSpanToStopwatchTicksScale);
         }
     }
 }

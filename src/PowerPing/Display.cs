@@ -438,9 +438,6 @@ Get location information for 84.23.12.4";
 
         #endregion
 
-        // Used to work out pings per second during ping flooding
-        private static ulong sentPings = 0; 
-
         /// <summary>
         /// Displays current version number and build date
         /// </summary>
@@ -492,7 +489,7 @@ Get location information for 84.23.12.4";
         /// </summary>
         /// <param name="host">Resolved host address</param>
         /// <param name="ping">Ping object</param>
-        public static void PingIntroMsg(String host, PingAttributes attrs)
+        public static void PingIntroMsg(PingAttributes attrs)
         {
             if (!Display.ShowOutput) {
                 return;
@@ -500,8 +497,8 @@ Get location information for 84.23.12.4";
 
             // Construct string
             Console.WriteLine();
-            Console.Write(INTRO_ADDR_TXT, host);
-            if (!String.Equals(host, attrs.Address)) {
+            Console.Write(INTRO_ADDR_TXT, attrs.Host);
+            if (!String.Equals(attrs.Host, attrs.Address)) {
                 // Only show resolved address if inputted address and resolved address are different
                 Console.Write("[{0}] ", attrs.Address);
             }
@@ -694,12 +691,12 @@ Get location information for 84.23.12.4";
             }
             
         }
-        public static void ScanResults(int scanned, List<string> foundHosts, List<double> times)
+        public static void ScanResults(int scanned, bool ranToEnd, List<Ping.ActiveHost> foundHosts)
         {
             Console.CursorVisible = true;
 
             Console.WriteLine();
-            Console.Write("Scan complete. ");
+            Console.Write("Scan " + (ranToEnd ? "complete" : "aborted") + ". ");
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.Write(scanned);
             Console.ForegroundColor = DefaultForegroundColor;
@@ -710,8 +707,8 @@ Get location information for 84.23.12.4";
             Console.WriteLine(" hosts found.");
             if (foundHosts.Count != 0) {
                 for (int i = 0; i < foundHosts.Count; i++) {
-                    string hostName = PowerPing.Lookup.QueryHost(foundHosts[i]);
-                    Console.WriteLine((i == foundHosts.Count - 1 ? SCAN_END_CHAR : SCAN_CONNECTOR_CHAR) + SCAN_RESULT_ENTRY, foundHosts[i], times[i], hostName != "" ? hostName : "UNAVAILABLE");
+                    Ping.ActiveHost entry = foundHosts[i];
+                    Console.WriteLine((i == foundHosts.Count - 1 ? SCAN_END_CHAR : SCAN_CONNECTOR_CHAR) + SCAN_RESULT_ENTRY, entry.Address, entry.ResponseTime, entry.HostName != "" ? entry.HostName : "UNAVAILABLE");
                 }
             }
             Console.WriteLine();
@@ -724,12 +721,8 @@ Get location information for 84.23.12.4";
         /// Displays statistics for a ping object
         /// </summary>
         /// <param name="ping"> </param>
-        public static void PingResults(Ping ping)
+        public static void PingResults(PingAttributes attrs, PingResults results)
         {
-            // Load attributes
-            PingAttributes attrs = ping.Attributes;
-            PingResults results = ping.Results;
-
             ResetColor();
 
             // Display stats
@@ -816,7 +809,7 @@ Get location information for 84.23.12.4";
         /// Displays and updates results of an ICMP flood
         /// </summary>
         /// <param name="results"></param>
-        public static void FloodProgress(PingResults results, string target)
+        public static void FloodProgress(ulong totalPings, ulong pingsPerSecond, string target)
         {
             // Check if labels have already been drawn
             if (sentPos.Left > 0) { 
@@ -827,12 +820,11 @@ Get location information for 84.23.12.4";
 
                 // Update labels
                 Console.SetCursorPosition(sentPos.Left, sentPos.Top);
-                Console.Write(results.Sent);
+                Console.Write(totalPings);
                 Console.SetCursorPosition(ppsPos.Left, ppsPos.Top);
                 Console.Write("          "); // Blank first
                 Console.SetCursorPosition(ppsPos.Left, ppsPos.Top);
-                Console.Write(results.Sent - sentPings);
-
+                Console.Write(pingsPerSecond);
                 // Reset to original cursor position
                 Console.SetCursorPosition(originalPos.Left, originalPos.Top);
                 Console.CursorVisible = true;
@@ -851,8 +843,6 @@ Get location information for 84.23.12.4";
                 Console.WriteLine();
                 Console.WriteLine(FLOOD_EXIT_TXT);
             }
-
-            sentPings = results.Sent;
         }
         public static void ListenResults(PingResults results)
         {
