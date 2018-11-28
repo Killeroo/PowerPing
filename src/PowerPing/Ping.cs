@@ -324,7 +324,6 @@ namespace PowerPing
             Socket sock = CreateRawSocket(ipAddr.AddressFamily);
 
             // Set socket options
-            sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, attrs.Timeout); // Socket timeout
             sock.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.IpTimeToLive, attrs.Ttl);
             sock.DontFragment = attrs.DontFragment;
 
@@ -403,32 +402,37 @@ namespace PowerPing
                     EndPoint responseEP = iep;
                     TimeSpan replyTime = TimeSpan.Zero;
                     do {
+                        // Cancel if requested
+                        cancellationToken.ThrowIfCancellationRequested();
+
+                        // Set receive timeout
+                        int remainingTimeout = (int)Math.Ceiling(attrs.Timeout - replyTime.TotalMilliseconds);
+                        if (remainingTimeout <= 0) {
+                            throw new SocketException();
+                        }
+                        sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, Math.Min(remainingTimeout, 250));
+
                         // Wait for response
-                        int DoReceive() {
-                            int len = sock.ReceiveFrom(receiveBuffer, ref responseEP);
-                            replyTime = new TimeSpan(Helper.StopwatchToTimeSpanTicks(Stopwatch.GetTimestamp() - requestTimestamp));
-                            return len;
+                        try {
+                            bytesRead = sock.ReceiveFrom(receiveBuffer, ref responseEP);
+                        } catch (SocketException) {
+                            bytesRead = 0;
                         }
-                        if (attrs.Timeout <= 250) {
-                            // With small timeouts (e.g. flood mode), run directly for best performance
-                            bytesRead = DoReceive();
+                        replyTime = new TimeSpan(Helper.StopwatchToTimeSpanTicks(Stopwatch.GetTimestamp() - requestTimestamp));
+
+                        if (bytesRead == 0) {
+                            response = null;
                         } else {
-                            // Otherwise, run via task so it can be canceled
-                            bytesRead = Task.Run((Func<int>)DoReceive).WaitForResult(cancellationToken);
-                        }
+                            // Store reply packet
+                            response = new ICMP(receiveBuffer, bytesRead);
 
-                        // Store reply packet
-                        response = new ICMP(receiveBuffer, bytesRead);
-
-                        // Ignore unexpected echo responses
-                        if (packet.type == 8 && response.type == 0) {
-                            ushort responseSessionId = BitConverter.ToUInt16(response.message, 0);
-                            ushort responseSequenceNum = BitConverter.ToUInt16(response.message, 2);
-                            if (responseSessionId != sessionId || responseSequenceNum != sequenceNum) {
-                                if (replyTime.TotalMilliseconds >= attrs.Timeout) {
-                                    throw new SocketException();
+                            // Ignore unexpected echo responses
+                            if (packet.type == 8 && response.type == 0) {
+                                ushort responseSessionId = BitConverter.ToUInt16(response.message, 0);
+                                ushort responseSequenceNum = BitConverter.ToUInt16(response.message, 2);
+                                if (responseSessionId != sessionId || responseSequenceNum != sequenceNum) {
+                                    response = null;
                                 }
-                                response = null;
                             }
                         }
                     } while (response == null);
