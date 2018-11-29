@@ -466,7 +466,7 @@ namespace PowerPing
                     results.CountPacketType(response.type);
                     results.SaveResponseTime(replyTime.TotalMilliseconds);
                     
-		            if (attrs.BeepLevel == 2) {
+                    if (attrs.BeepLevel == 2) {
                         try { Console.Beep(); }
                         catch (Exception) { } // Silently continue if Console.Beep errors
                     }
@@ -482,7 +482,7 @@ namespace PowerPing
                 } catch (SocketException) {
 
                     PowerPing.Display.Timeout(index);
-		            if (attrs.BeepLevel == 1) {
+                    if (attrs.BeepLevel == 1) {
                         try { Console.Beep(); }
                         catch (Exception) { results.HasOverflowed = true; }
                     }

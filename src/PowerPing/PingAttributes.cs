@@ -69,7 +69,7 @@ namespace PowerPing
             ForceV4 = true;
             ForceV6 = false;
             RandomMsg = false;
-	        BeepLevel = 0;
+            BeepLevel = 0;
             AddressList = null;
             RecieveBufferSize = 5096;
             DontFragment = false;

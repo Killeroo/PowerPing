@@ -46,7 +46,7 @@ namespace PowerPing
         public static bool ShowTimeStamp { get; set; } = false;
         public static bool ShowTimeouts { get; set; } = true;
         public static bool ShowRequests { get; set; } = false;
-	    public static bool ShowReplies { get; set; } = true;
+        public static bool ShowReplies { get; set; } = true;
         public static bool ShowChecksum { get; set; } = false;
         public static bool UseInputtedAddress { get; set; } = false;
         public static bool UseResolvedAddress { get; set; } = false;
@@ -685,7 +685,7 @@ Get location information for 84.23.12.4";
                 scanTimePos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.Write("00:00:00 [");
                 progBarPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-				Console.Write("                               ] ");
+                Console.Write("                               ] ");
                 perComplPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.WriteLine();
             }
