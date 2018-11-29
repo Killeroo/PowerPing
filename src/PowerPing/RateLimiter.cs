@@ -27,26 +27,30 @@ using System.Diagnostics;
 
 namespace PowerPing
 {
-    public class DisplayUpdateLimiter
+    /// <summary>
+    /// Ensures that a job can't run more often than a specified interval. For example,
+    /// in a tight loop that needs to write status updates to the console periodically,
+    /// this can be used to limit the rate at which the status updates happen.
+    /// </summary>
+    public class RateLimiter
     {
-        private readonly long minimumUpdateIntervalTicks;
-        private long? lastUpdateTimestamp;
+        private readonly long minimumRunIntervalTicks;
+        private long lastRunTimestamp;
 
-        public DisplayUpdateLimiter(TimeSpan minimumUpdateInterval)
+        public TimeSpan ElapsedSinceLastRun { get; private set; }
+
+        public RateLimiter(TimeSpan minimumRunInterval)
         {
-            minimumUpdateIntervalTicks = Helper.TimeSpanToStopwatchTicks(minimumUpdateInterval.Ticks);
+            minimumRunIntervalTicks = Helper.TimeSpanToStopwatchTicks(minimumRunInterval.Ticks);
         }
 
-        public TimeSpan? ElapsedSinceLastUpdate { get; private set; }
-
-        public bool RequestUpdate()
+        public bool RequestRun()
         {
             long currentTimestamp = Stopwatch.GetTimestamp();
-            long? elapsed = currentTimestamp - lastUpdateTimestamp;
-            if (elapsed == null || elapsed >= minimumUpdateIntervalTicks) {
-                ElapsedSinceLastUpdate = elapsed == null ? (TimeSpan?)null :
-                    new TimeSpan(Helper.StopwatchToTimeSpanTicks(elapsed.Value));
-                lastUpdateTimestamp = currentTimestamp;
+            long elapsed = lastRunTimestamp == 0 ? 0 : (currentTimestamp - lastRunTimestamp); // Will be 0 on first call to this method
+            if (elapsed == 0 || elapsed >= minimumRunIntervalTicks) {
+                ElapsedSinceLastRun = new TimeSpan(Helper.StopwatchToTimeSpanTicks(elapsed));
+                lastRunTimestamp = currentTimestamp;
                 return true;
             }
             return false;

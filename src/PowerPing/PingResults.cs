@@ -47,6 +47,7 @@ namespace PowerPing
         public ulong GoodPackets { get; private set; } // Number of good replies received
         public ulong OtherPackets { get; private set; } // Number of other packet types received
         public bool HasOverflowed { get; set; } // Specifies if any of the results have overflowed
+        public bool ScanWasCanceled { get; set; } // Whether the scan was canceled early
 
         // Local variables
         private readonly Stopwatch operationTimer = new Stopwatch();

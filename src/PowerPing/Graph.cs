@@ -97,10 +97,12 @@ namespace PowerPing
         private void Draw()
         {
             // The actual display update rate may be limited by the ping interval
-            var limiter = new DisplayUpdateLimiter(TimeSpan.FromMilliseconds(500));
-            void OnResultsUpdate(PingResults r) {
+            RateLimiter displayUpdateLimiter = new RateLimiter(TimeSpan.FromMilliseconds(500));
+
+            // This callback will run after each ping iteration
+            void ResultsUpdateCallback(PingResults r) {
                 // Make sure we're not updating the display too frequently
-                if (!limiter.RequestUpdate()) {
+                if (!displayUpdateLimiter.RequestRun()) {
                     return;
                 }
 
@@ -121,7 +123,7 @@ namespace PowerPing
             }
 
             // Start pinging
-            PingResults results = graphPing.Send(graphPingAttrs, OnResultsUpdate);
+            PingResults results = graphPing.Send(graphPingAttrs, ResultsUpdateCallback);
         }
         ///<summary>
         /// Setup graph

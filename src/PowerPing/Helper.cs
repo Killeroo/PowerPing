@@ -27,6 +27,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace PowerPing
 {
@@ -155,6 +157,18 @@ namespace PowerPing
             var localTime = TimeZoneInfo.ConvertTimeFromUtc(linkTimeUtc, tz);
 
             return localTime;
+        }
+
+        /// <summary>
+        /// Runs a function inside a Task instead of on the current thread. This allows for use of a cancellation
+        /// token to resume the current thread (by throwing OperationCanceledException) before the function finishes.
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public static T RunWithCancellationToken<T>(Func<T> func, CancellationToken cancellationToken)
+        {
+            return Task.Run<T>(func, cancellationToken).WaitForResult(cancellationToken);
         }
 
         public static ushort GenerateSessionId()

@@ -24,7 +24,6 @@ SOFTWARE.
 
 using System;
 using System.Text;
-using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -66,7 +65,7 @@ namespace PowerPing
 
             if (Display.UseResolvedAddress) {
                 try {
-                    attrs.Host = Task.Run(() => Lookup.QueryHost(attrs.Address)).WaitForResult(cancellationToken);
+                    attrs.Host = Helper.RunWithCancellationToken(() => Lookup.QueryHost(attrs.Address), cancellationToken);
                 } catch (OperationCanceledException) {
                     return new PingResults();
                 }
@@ -116,7 +115,7 @@ namespace PowerPing
                     
                     // Recieve any incoming ICMPv4 packets
                     EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                    int bytesRead = Task.Run(() => listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint)).WaitForResult(cancellationToken);
+                    int bytesRead = Helper.RunWithCancellationToken(() => listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint), cancellationToken);
                     ICMP response = new ICMP(buffer, bytesRead);
 
                     // Display captured packet
@@ -211,13 +210,16 @@ namespace PowerPing
 
                     // Send ping
                     PingResults results = SendICMP(attrs);
-                    cancellationToken.ThrowIfCancellationRequested();
+                    if (results.ScanWasCanceled) {
+                        // Cancel was requested during scan
+                        throw new OperationCanceledException();
+                    }
                     scanned++;
                     Display.ScanProgress(scanned, activeHosts.Count, scanList.Count, scanTimer.Elapsed, range, attrs.Address);
 
                     if (results.Lost == 0 && results.ErrorPackets != 1) {
                         // If host is active, add to list
-                        string hostName = Task.Run(() => Lookup.QueryHost(host)).WaitForResult(cancellationToken);
+                        string hostName = Helper.RunWithCancellationToken(() => Lookup.QueryHost(host), cancellationToken);
                         activeHosts.Add(new ActiveHost {
                             Address = host,
                             HostName = hostName,
@@ -235,6 +237,8 @@ namespace PowerPing
         public void Flood(string address)
         {
             PingAttributes attrs = new PingAttributes();
+            RateLimiter displayUpdateLimiter = new RateLimiter(TimeSpan.FromMilliseconds(500));
+            ulong previousPingsSent = 0;
 
             // Verify address
             attrs.Address = PowerPing.Lookup.QueryDNS(address, AddressFamily.InterNetwork);
@@ -248,24 +252,26 @@ namespace PowerPing
             // Disable output for faster speeds
             Display.ShowOutput = false;
 
-            var limiter = new DisplayUpdateLimiter(TimeSpan.FromMilliseconds(500));
-            ulong previousPingsSent = 0;
-            void OnResultsUpdate(PingResults r) {
+            // This callback will run after each ping iteration
+            void ResultsUpdateCallback(PingResults r) {
                 // Make sure we're not updating the display too frequently
-                if (!limiter.RequestUpdate()) {
+                if (!displayUpdateLimiter.RequestRun()) {
                     return;
                 }
 
                 // Calculate pings per second
-                double? pingsPerSecond = (r.Sent - previousPingsSent) / limiter.ElapsedSinceLastUpdate?.TotalSeconds;
+                double pingsPerSecond = 0;
+                if (displayUpdateLimiter.ElapsedSinceLastRun != TimeSpan.Zero) {
+                    pingsPerSecond = (r.Sent - previousPingsSent) / displayUpdateLimiter.ElapsedSinceLastRun.TotalSeconds;
+                }
                 previousPingsSent = r.Sent;
 
                 // Update results text
-                Display.FloodProgress(r.Sent, (ulong)Math.Round(pingsPerSecond ?? 0), address);
+                Display.FloodProgress(r.Sent, (ulong)Math.Round(pingsPerSecond), address);
             }
 
             // Start flooding
-            PingResults results = Send(attrs, OnResultsUpdate);
+            PingResults results = Send(attrs, ResultsUpdateCallback);
 
             // Display results
             Display.PingResults(attrs, results);
@@ -305,9 +311,9 @@ namespace PowerPing
         ///
         /// </summary>
         /// <param name="attrs">Properties of pings to be sent</param>
-        /// <param name="onResultsUpdate">Method to call after each iteration</param>
+        /// <param name="resultsUpdateCallback">Method to call after each iteration</param>
         /// <returns>Set of ping results</returns>
-        private PingResults SendICMP(PingAttributes attrs, Action<PingResults> onResultsUpdate = null)
+        private PingResults SendICMP(PingAttributes attrs, Action<PingResults> resultsUpdateCallback = null)
         {
             PingResults results = new PingResults();
             ICMP packet = new ICMP();
@@ -322,6 +328,15 @@ namespace PowerPing
 
             // Setup raw socket 
             Socket sock = CreateRawSocket(ipAddr.AddressFamily);
+
+            // Helper function to set receive timeout (only if it's changing)
+            int appliedReceiveTimeout = 0;
+            void SetReceiveTimeout(int receiveTimeout) {
+                if (receiveTimeout != appliedReceiveTimeout) {
+                    sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, receiveTimeout);
+                    appliedReceiveTimeout = receiveTimeout;
+                }
+            }
 
             // Set socket options
             sock.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.IpTimeToLive, attrs.Ttl);
@@ -405,12 +420,14 @@ namespace PowerPing
                         // Cancel if requested
                         cancellationToken.ThrowIfCancellationRequested();
 
-                        // Set receive timeout
+                        // Set receive timeout, limited to 250ms so we don't block very long without checking for
+                        // cancellation. If the requested ping timeout is longer, we will wait some more in subsequent
+                        // loop iterations until the requested ping timeout is reached.
                         int remainingTimeout = (int)Math.Ceiling(attrs.Timeout - replyTime.TotalMilliseconds);
                         if (remainingTimeout <= 0) {
                             throw new SocketException();
                         }
-                        sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, Math.Min(remainingTimeout, 250));
+                        SetReceiveTimeout(Math.Min(remainingTimeout, 250));
 
                         // Wait for response
                         try {
@@ -426,7 +443,8 @@ namespace PowerPing
                             // Store reply packet
                             response = new ICMP(receiveBuffer, bytesRead);
 
-                            // Ignore unexpected echo responses
+                            // If we sent an echo and receive a response with a different identifier or sequence
+                            // number, ignore it (it could correspond to an older request that timed out)
                             if (packet.type == 8 && response.type == 0) {
                                 ushort responseSessionId = BitConverter.ToUInt16(response.message, 0);
                                 ushort responseSequenceNum = BitConverter.ToUInt16(response.message, 2);
@@ -474,6 +492,7 @@ namespace PowerPing
 
                 } catch (OperationCanceledException) {
 
+                    results.ScanWasCanceled = true;
                     break;
 
                 } catch (Exception) {
@@ -487,7 +506,8 @@ namespace PowerPing
 
                 }
 
-                onResultsUpdate?.Invoke(results);
+                // Run callback (if provided) to notify of updated results
+                resultsUpdateCallback?.Invoke(results);
             }
 
             // Clean up
