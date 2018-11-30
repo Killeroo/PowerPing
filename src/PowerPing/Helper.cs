@@ -27,6 +27,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace PowerPing
 {
@@ -36,6 +38,7 @@ namespace PowerPing
     public static class Helper
     {
         private static readonly double stopwatchToTimeSpanTicksScale = (double)TimeSpan.TicksPerSecond / Stopwatch.Frequency;
+        private static readonly double timeSpanToStopwatchTicksScale = (double)Stopwatch.Frequency / TimeSpan.TicksPerSecond;
 
         /// <summary>
         /// Pause program and wait for user input
@@ -156,6 +159,18 @@ namespace PowerPing
             return localTime;
         }
 
+        /// <summary>
+        /// Runs a function inside a Task instead of on the current thread. This allows for use of a cancellation
+        /// token to resume the current thread (by throwing OperationCanceledException) before the function finishes.
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public static T RunWithCancellationToken<T>(Func<T> func, CancellationToken cancellationToken)
+        {
+            return Task.Run<T>(func, cancellationToken).WaitForResult(cancellationToken);
+        }
+
         public static ushort GenerateSessionId()
         {
             uint n = (uint)Process.GetCurrentProcess().Id;
@@ -165,6 +180,11 @@ namespace PowerPing
         public static long StopwatchToTimeSpanTicks(long stopwatchTicks)
         {
             return (long)(stopwatchTicks * stopwatchToTimeSpanTicksScale);
+        }
+
+        public static long TimeSpanToStopwatchTicks(long timeSpanTicks)
+        {
+            return (long)(timeSpanTicks * timeSpanToStopwatchTicksScale);
         }
     }
 }

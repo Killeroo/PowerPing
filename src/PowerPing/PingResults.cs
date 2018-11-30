@@ -47,10 +47,11 @@ namespace PowerPing
         public ulong GoodPackets { get; private set; } // Number of good replies received
         public ulong OtherPackets { get; private set; } // Number of other packet types received
         public bool HasOverflowed { get; set; } // Specifies if any of the results have overflowed
+        public bool ScanWasCanceled { get; set; } // Whether the scan was canceled early
 
         // Local variables
         private readonly Stopwatch operationTimer = new Stopwatch();
-        private ulong sum  = 0; // Sum off all reply times
+        private double sum = 0; // Sum of all reply times
 
         public PingResults()
         {
@@ -94,8 +95,8 @@ namespace PowerPing
 
             try {
                 // Work out average
-                sum += (ulong)time;
-                AvgTime = (double)sum / Received; // Avg = Total / Count
+                sum += time;
+                AvgTime = sum / Received; // Avg = Total / Count
             } catch (OverflowException) {
                 HasOverflowed = true;
             }
