@@ -34,8 +34,7 @@ namespace PowerPing
 {
     static class Program
     {
-        private static Ping p = new Ping();
-        private static Graph g;
+        private static readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
         /// <summary>
         /// Main entry point of PowerPing
@@ -56,11 +55,6 @@ namespace PowerPing
 
             // Show current version info
             //Display.Version();
-
-            // temp: attempt to enable firewall
-            // Replace with: https://stackoverflow.com/a/114484
-            Console.WriteLine("exit code: " + Helper.ExecuteShellCommand("netsh advfirewall firewall add rule name=\"All ICMP v4\" dir=in action=allow protocol=icmpv4:any,any", true));
-            //Helper.RunShellCommand("netsh firewall add allowedprogram C:\MyApp\MyApp.exe MyApp ENABLE")
 
             // Check if no arguments
             if (args.Length == 0) {
@@ -385,14 +379,6 @@ namespace PowerPing
                             case "--ia":
                                 Display.UseInputtedAddress = true;
                                 break;
-                            case "/cookies":
-                            case "-cookies":
-                            case "--cookies":
-                            case "/co":
-                            case "-co":
-                            case "--co":
-                                attributes.UsePingCookies = true;
-                                break;
                             case "/buffer":
                             case "-buffer":
                             case "--buffer":
@@ -548,12 +534,13 @@ namespace PowerPing
 
             // Add Control C event handler 
             if (opMode.Equals("") || opMode.Equals("flooding") || opMode.Equals("graphing") 
-                || opMode.Equals("compactgraph")) {
+                || opMode.Equals("compactgraph") || opMode.Equals("scanning") || opMode.Equals("listening")) {
                 Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
             }
 
             // Select correct function using opMode 
-            Thread thread;
+            Ping p = new Ping(cancellationTokenSource.Token);
+            Graph g;
             switch (opMode) {
                 case "listening":
                     p.Listen();
@@ -568,34 +555,29 @@ namespace PowerPing
                     PowerPing.Lookup.QueryWhoIs(attributes.Host);
                     break;
                 case "graphing":
-                    g = new Graph(attributes.Host);
+                    g = new Graph(attributes.Host, cancellationTokenSource.Token);
                     g.Start();
                     break;
                 case "compactgraph":
-                    g = new Graph(attributes.Host);
+                    g = new Graph(attributes.Host, cancellationTokenSource.Token);
                     g.CompactGraph = true;
                     g.Start();
                     break;
                 case "flooding":
-                    thread = new Thread(() =>
-                    {
-                        p.Flood(attributes.Host);
-                    });
-                    thread.Start();
+                    p.Flood(attributes.Host);
                     break;
                 case "scanning":
                     p.Scan(args.Last());
                     break;
                 default:
                     // Send ping normally
-                    thread = new Thread(() =>
-                    {
-                        p.Send(attributes);
-                    });
-                    thread.Start();
+                    p.Send(attributes);
                     break;
             }
-           
+
+            // Reset console colour
+            Display.ResetColor();
+            Console.CursorVisible = true;
         }
 
         /// <summary>
@@ -609,17 +591,8 @@ namespace PowerPing
             // Cancel termination
             args.Cancel = true;
 
-            // Stop ping
-            p.Dispose();
-
-            // Stop graph if it is running
-            if (g != null) {
-                g.Dispose();
-            }
-
-            // Reset console colour
-            Display.ResetColor();
-            Console.CursorVisible = true;
+            // Request currently running job to finish up
+            cancellationTokenSource.Cancel();
         }
     }
 }

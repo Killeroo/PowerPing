@@ -24,7 +24,6 @@ SOFTWARE.
 
 using System;
 using System.Text;
-using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -39,17 +38,16 @@ namespace PowerPing
     /// Also contains other ping-like functions such as flooding, listening
     /// scanning and others.
     /// </summary>
-    class Ping : IDisposable
+    class Ping
     {
-        // Properties
-        public PingResults Results { get; private set; } = new PingResults(); // Store current ping results
-        public PingAttributes Attributes { get; private set; } = new PingAttributes(); // Stores the current operation's attributes
-        public bool IsRunning { get; private set; } = false;
-
-        private ManualResetEvent cancelEvent = new ManualResetEvent(false);
+        private static readonly ushort sessionId = Helper.GenerateSessionId();
+        private readonly CancellationToken cancellationToken;
         private bool debug = false;
 
-        public Ping() { }
+        public Ping(CancellationToken cancellationTkn)
+        {
+            cancellationToken = cancellationTkn;
+        }
 
         /// <summary>
         /// Sends a set of ping packets, results are stores within
@@ -58,29 +56,33 @@ namespace PowerPing
         /// Acts as a basic wrapper to SendICMP and feeds it a specific
         /// set of PingAttributes 
         /// </summary>
-        public void Send(PingAttributes attrs)
+        public PingResults Send(PingAttributes attrs, Action<PingResults> onResultsUpdate = null)
         {
-            // Load user inputted attributes
-            this.Attributes = attrs;
-
             // Lookup address
-            Attributes.Address = PowerPing.Lookup.QueryDNS(Attributes.Host, Attributes.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+            attrs.Address = PowerPing.Lookup.QueryDNS(attrs.Host, attrs.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
-            PowerPing.Display.PingIntroMsg(Attributes.Host, attrs);
+            PowerPing.Display.PingIntroMsg(attrs);
 
             if (Display.UseResolvedAddress) {
-                Attributes.Host = PowerPing.Lookup.QueryHost(Attributes.Address);
-                if (Attributes.Host == "") {
+                try {
+                    attrs.Host = Helper.RunWithCancellationToken(() => Lookup.QueryHost(attrs.Address), cancellationToken);
+                } catch (OperationCanceledException) {
+                    return new PingResults();
+                }
+                if (attrs.Host == "") {
                     // If reverse lookup fails just display whatever is in the address field
-                    Attributes.Host = Attributes.Address; 
+                    attrs.Host = attrs.Address; 
                 }
             }
 
             // Perform ping operation and store results
-            this.SendICMP(Attributes);
+            PingResults results = SendICMP(attrs, onResultsUpdate);
 
-            PowerPing.Display.PingResults(this);
+            if (Display.ShowOutput) {
+                PowerPing.Display.PingResults(attrs, results);
+            }
 
+            return results;
         }
         /// <summary>
         /// Listens for all ICMPv4 activity on localhost.
@@ -99,7 +101,6 @@ namespace PowerPing
             // Find local address
             localAddress = IPAddress.Parse(PowerPing.Lookup.LocalAddress());
 
-            IsRunning = true;
             try {
                 // Create listener socket
                 listeningSocket = CreateRawSocket(AddressFamily.InterNetwork);
@@ -109,12 +110,12 @@ namespace PowerPing
                 PowerPing.Display.ListenIntroMsg();
 
                 // Listening loop
-                while (true) {
+                while (!cancellationToken.IsCancellationRequested) {
                     byte[] buffer = new byte[4096]; // TODO: could cause overflow?
                     
                     // Recieve any incoming ICMPv4 packets
                     EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                    int bytesRead = listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint);
+                    int bytesRead = Helper.RunWithCancellationToken(() => listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint), cancellationToken);
                     ICMP response = new ICMP(buffer, bytesRead);
 
                     // Display captured packet
@@ -123,11 +124,8 @@ namespace PowerPing
                     // Store results
                     results.CountPacketType(response.type);
                     results.Received++;
-
-                    if (cancelEvent.WaitOne(0)) {
-                        break;
-                    }
                 }
+            } catch (OperationCanceledException) {
             } catch (SocketException) {
                 PowerPing.Display.Error("Could not read packet from socket");
                 results.Lost++;
@@ -136,35 +134,16 @@ namespace PowerPing
             }
 
             // Clean up
-            IsRunning = false;
             listeningSocket.Close();
 
-            Display.ListenResults(results);
+            // TODO: Implement ListenResults method
+            //Display.ListenResults(results);
         }
         /// <summary>
         /// ICMP Traceroute
         /// Not implemented yet
         /// </summary>
-        public void Trace()
-        {
-            throw new NotSupportedException();
-            // Source: https://archive.codeplex.com/?p=winmtrnet
-
-            // Get max hops
-            // Create Ping options with ttl
-
-            // While ttl < max hops
-                // Send ping .net style
-                // look at PingReply
-                // Check status
-                // store address data
-                // reduce ttl
-                    // If timeout
-                        // store data
-                        // reduce ttl
-                    // If replying address == final address
-                        // done
-        }
+        public void Trace() { throw new NotSupportedException(); }
         /// <summary>
         /// Network scanning method.
         ///
@@ -179,9 +158,7 @@ namespace PowerPing
         {
             List<string> scanList = new List<string>(); // List of addresses to scan
             String[] ipSegments = range.Split('.');
-            PingResults results = new PingResults();
-            List<string> activeHosts = new List<string>();
-            List<double> activeHostTimes = new List<double>();
+            List<ActiveHost> activeHosts = new List<ActiveHost>();
             Stopwatch scanTimer = new Stopwatch();
             int scanned = 0;
             
@@ -225,31 +202,34 @@ namespace PowerPing
 
             scanTimer.Start();
 
-            // Scan loop
-            foreach (string host in scanList) {
-                // Update host
-                attrs.Address = host;
-                scanned++;
+            try {
+                // Scan loop
+                foreach (string host in scanList) {
+                    // Update host
+                    attrs.Address = host;
 
-                // Reset global results for accurate results 
-                // (results need to be set globally while running for graph but need to be semi local for scan 
-                // or results bleed through so active hosts can't be determined)
-                this.Results = new PingResults();
+                    // Send ping
+                    PingResults results = SendICMP(attrs);
+                    if (results.ScanWasCanceled) {
+                        // Cancel was requested during scan
+                        throw new OperationCanceledException();
+                    }
+                    scanned++;
+                    Display.ScanProgress(scanned, activeHosts.Count, scanList.Count, scanTimer.Elapsed, range, attrs.Address);
 
-                // Send ping
-                results = SendICMP(attrs);
-                Display.ScanProgress(scanned, activeHosts.Count, scanList.Count, scanTimer.Elapsed, range, attrs.Address);
-
-                if (results.Lost == 0 && results.ErrorPackets != 1) {
-                    // If host is active, add to list
-                    activeHosts.Add(host);
-                    activeHostTimes.Add(results.CurTime);
+                    if (results.Lost == 0 && results.ErrorPackets != 1) {
+                        // If host is active, add to list
+                        string hostName = Helper.RunWithCancellationToken(() => Lookup.QueryHost(host), cancellationToken);
+                        activeHosts.Add(new ActiveHost {
+                            Address = host,
+                            HostName = hostName,
+                            ResponseTime = results.CurTime
+                        });
+                    }
                 }
+            } catch (OperationCanceledException) { }
 
-            }
-
-            scanTimer.Stop();
-            PowerPing.Display.ScanResults(scanList.Count, activeHosts, activeHostTimes);
+            PowerPing.Display.ScanResults(scanned, !cancellationToken.IsCancellationRequested, activeHosts);
         }
         /// <summary>
         /// Sends high volume of ping packets
@@ -257,7 +237,8 @@ namespace PowerPing
         public void Flood(string address)
         {
             PingAttributes attrs = new PingAttributes();
-            Ping p = new Ping();
+            RateLimiter displayUpdateLimiter = new RateLimiter(TimeSpan.FromMilliseconds(500));
+            ulong previousPingsSent = 0;
 
             // Verify address
             attrs.Address = PowerPing.Lookup.QueryDNS(address, AddressFamily.InterNetwork);
@@ -271,33 +252,29 @@ namespace PowerPing
             // Disable output for faster speeds
             Display.ShowOutput = false;
 
-            // Start flood thread
-            var thread = new Thread(() => {
-                p.Send(attrs);
-            });
-            thread.IsBackground = true;
-            thread.Start();
-            IsRunning = true;
-
-            // Results loop 
-            while (IsRunning) {
-                // Update results text
-                Display.FloodProgress(p.Results, address);
-
-                // Wait before updating (save our CPU load) and check for cancel event
-                if (cancelEvent.WaitOne(1000)) {
-                    break;
+            // This callback will run after each ping iteration
+            void ResultsUpdateCallback(PingResults r) {
+                // Make sure we're not updating the display too frequently
+                if (!displayUpdateLimiter.RequestRun()) {
+                    return;
                 }
+
+                // Calculate pings per second
+                double pingsPerSecond = 0;
+                if (displayUpdateLimiter.ElapsedSinceLastRun != TimeSpan.Zero) {
+                    pingsPerSecond = (r.Sent - previousPingsSent) / displayUpdateLimiter.ElapsedSinceLastRun.TotalSeconds;
+                }
+                previousPingsSent = r.Sent;
+
+                // Update results text
+                Display.FloodProgress(r.Sent, (ulong)Math.Round(pingsPerSecond), address);
             }
 
-            // Cleanup
-            IsRunning = false;
-            p.Dispose();
-            thread.Abort();
+            // Start flooding
+            PingResults results = Send(attrs, ResultsUpdateCallback);
 
             // Display results
-            Display.PingResults(p);
-            
+            Display.PingResults(attrs, results);
         }
 
         /// <summary>
@@ -332,37 +309,36 @@ namespace PowerPing
         /// inputted properties (attrs), then performs ICMP operation 
         /// before cleaning up and returning results.
         ///
-        /// NOTE: There is a weird hack here, The set of PingAttributes used are 
-        /// those provided in the parameter as opposed to the ones stored
-        /// in this class (Ping.Attributes) (similar case with PingResults).
-        /// This is due to some functions (flood, scan) requiring to be run on seperate threads
-        /// and needing us to pass specific attributes directly to the object
-        /// trust me it works (I think..)
         /// </summary>
         /// <param name="attrs">Properties of pings to be sent</param>
+        /// <param name="resultsUpdateCallback">Method to call after each iteration</param>
         /// <returns>Set of ping results</returns>
-        private PingResults SendICMP(PingAttributes attrs)
+        private PingResults SendICMP(PingAttributes attrs, Action<PingResults> resultsUpdateCallback = null)
         {
-            IPEndPoint iep = null;
-            EndPoint ep = null;
-            IPAddress ipAddr = null;
+            PingResults results = new PingResults();
             ICMP packet = new ICMP();
-            Socket sock = null;
-            Stopwatch responseTimer = new Stopwatch();
-            int bytesRead, packetSize, index = 1;
+            byte[] receiveBuffer = new byte[attrs.RecieveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
+            int bytesRead, packetSize;
 
             // Convert to IPAddress
-            ipAddr = IPAddress.Parse(attrs.Address);
+            IPAddress ipAddr = IPAddress.Parse(attrs.Address);
 
             // Setup endpoint
-            iep = new IPEndPoint(ipAddr, 0);
-            ep = (EndPoint)iep;
+            IPEndPoint iep = new IPEndPoint(ipAddr, 0);
 
             // Setup raw socket 
-            sock = CreateRawSocket(ipAddr.AddressFamily);
+            Socket sock = CreateRawSocket(ipAddr.AddressFamily);
+
+            // Helper function to set receive timeout (only if it's changing)
+            int appliedReceiveTimeout = 0;
+            void SetReceiveTimeout(int receiveTimeout) {
+                if (receiveTimeout != appliedReceiveTimeout) {
+                    sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, receiveTimeout);
+                    appliedReceiveTimeout = receiveTimeout;
+                }
+            }
 
             // Set socket options
-            sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, attrs.Timeout); // Socket timeout
             sock.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.IpTimeToLive, attrs.Ttl);
             sock.DontFragment = attrs.DontFragment;
 
@@ -377,31 +353,34 @@ namespace PowerPing
             // Construct our ICMP packet
             packet.type = attrs.Type;
             packet.code = attrs.Code;
-            Buffer.BlockCopy(BitConverter.GetBytes(1), 0, packet.message, 0, 2); // Add seq num to ICMP message
+            Buffer.BlockCopy(BitConverter.GetBytes(sessionId), 0, packet.message, 0, 2); // Add identifier to ICMP message
             Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length); // Add text into ICMP message
             packet.messageSize = payload.Length + 4;
             packetSize = packet.messageSize + 4;
 
             // Sending loop
-            while (attrs.Continous ? true : index <= attrs.Count) {
+            for (int index = 1; attrs.Continous || index <= attrs.Count; index++) {
 
-                // Exit loop if cancel event is set
-                if (cancelEvent.WaitOne(0)) {
-                    break;
-                } else {
-                    IsRunning = true;
+                if (index != 1) {
+                    // Wait for set interval before sending again or cancel if requested
+                    if (cancellationToken.WaitHandle.WaitOne(attrs.Interval)) {
+                        break;
+                    }
+
+                    // Generate random interval when RandomTimings flag is set
+                    if (attrs.RandomTiming) {
+                        attrs.Interval = Helper.RandomInt(5000, 100000);
+                    }
                 }
+
+                // Include sequence number in ping message
+                ushort sequenceNum = (ushort)index;
+                Buffer.BlockCopy(BitConverter.GetBytes(sequenceNum), 0, packet.message, 2, 2);
 
                 // Fill ICMP message field
                 if (attrs.RandomMsg) {
                     payload = Encoding.ASCII.GetBytes(Helper.RandomString());
                     Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
-                } else if (attrs.UsePingCookies) {
-                    payload = Encoding.ASCII.GetBytes(DateTime.Now.ToString("HHmmssff") + "#" + index); //fffff
-                    Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
-                } else {
-                    // Include sequence number in ping message
-                    Buffer.BlockCopy(BitConverter.GetBytes(index), 0, packet.message, 2, 2); 
                 }
 
                 // Update packet checksum
@@ -416,11 +395,16 @@ namespace PowerPing
                         Display.RequestPacket(packet, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : attrs.Address, index);
                     }
 
+                    // If there were extra responses from a prior request, ignore them
+                    while (sock.Available != 0) {
+                        bytesRead = sock.Receive(receiveBuffer);
+                    }
+
                     // Send ping request
                     sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
-                    responseTimer.Start();
-                    try { Results.Sent++; }
-                    catch (OverflowException) { Results.HasOverflowed = true; }
+                    long requestTimestamp = Stopwatch.GetTimestamp();
+                    try { results.Sent++; }
+                    catch (OverflowException) { results.HasOverflowed = true; }
                     
                     if (debug) {
                         // Induce random wait for debugging 
@@ -429,26 +413,60 @@ namespace PowerPing
                         if (rnd.Next(20) == 1) { throw new SocketException(); }
                     }
 
-                    // Wait for response
-                    byte[] buffer = new byte[attrs.RecieveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
-                    bytesRead = sock.ReceiveFrom(buffer, ref ep);
-                    responseTimer.Stop();
+                    ICMP response;
+                    EndPoint responseEP = iep;
+                    TimeSpan replyTime = TimeSpan.Zero;
+                    do {
+                        // Cancel if requested
+                        cancellationToken.ThrowIfCancellationRequested();
 
-                    // Store reply packet
-                    ICMP response = new ICMP(buffer, bytesRead);
+                        // Set receive timeout, limited to 250ms so we don't block very long without checking for
+                        // cancellation. If the requested ping timeout is longer, we will wait some more in subsequent
+                        // loop iterations until the requested ping timeout is reached.
+                        int remainingTimeout = (int)Math.Ceiling(attrs.Timeout - replyTime.TotalMilliseconds);
+                        if (remainingTimeout <= 0) {
+                            throw new SocketException();
+                        }
+                        SetReceiveTimeout(Math.Min(remainingTimeout, 250));
+
+                        // Wait for response
+                        try {
+                            bytesRead = sock.ReceiveFrom(receiveBuffer, ref responseEP);
+                        } catch (SocketException) {
+                            bytesRead = 0;
+                        }
+                        replyTime = new TimeSpan(Helper.StopwatchToTimeSpanTicks(Stopwatch.GetTimestamp() - requestTimestamp));
+
+                        if (bytesRead == 0) {
+                            response = null;
+                        } else {
+                            // Store reply packet
+                            response = new ICMP(receiveBuffer, bytesRead);
+
+                            // If we sent an echo and receive a response with a different identifier or sequence
+                            // number, ignore it (it could correspond to an older request that timed out)
+                            if (packet.type == 8 && response.type == 0) {
+                                ushort responseSessionId = BitConverter.ToUInt16(response.message, 0);
+                                ushort responseSequenceNum = BitConverter.ToUInt16(response.message, 2);
+                                if (responseSessionId != sessionId || responseSequenceNum != sequenceNum) {
+                                    response = null;
+                                }
+                            }
+                        }
+                    } while (response == null);
 
                     // Display reply packet
                     if (Display.ShowReplies) {
-                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : ep.ToString(), index, responseTimer.Elapsed, bytesRead);
+                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : responseEP.ToString(), index, replyTime, bytesRead);
                     }
 
                     // Store response info
-                    try { Results.Received++; }
-                    catch (OverflowException) { Results.HasOverflowed = true; }
-                    Results.CountPacketType(response.type);
-                    Results.SaveResponseTime(responseTimer.Elapsed.TotalMilliseconds);
+                    try { results.Received++; }
+                    catch (OverflowException) { results.HasOverflowed = true; }
+                    results.CountPacketType(response.type);
+                    results.SaveResponseTime(replyTime.TotalMilliseconds);
                     
-		            if (attrs.BeepLevel == 2) {
+                    if (attrs.BeepLevel == 2) {
                         try { Console.Beep(); }
                         catch (Exception) { } // Silently continue if Console.Beep errors
                     }
@@ -457,88 +475,52 @@ namespace PowerPing
                     if (Display.ShowOutput) {
                         PowerPing.Display.Error("General transmit error");
                     }
-                    Results.SaveResponseTime(-1);
-                    try { Results.Lost++; }
-                    catch (OverflowException) { Results.HasOverflowed = true; }
+                    results.SaveResponseTime(-1);
+                    try { results.Lost++; }
+                    catch (OverflowException) { results.HasOverflowed = true; }
 
                 } catch (SocketException) {
 
                     PowerPing.Display.Timeout(index);
-		            if (attrs.BeepLevel == 1) {
+                    if (attrs.BeepLevel == 1) {
                         try { Console.Beep(); }
-                        catch (Exception) { Results.HasOverflowed = true; }
+                        catch (Exception) { results.HasOverflowed = true; }
                     }
-                    Results.SaveResponseTime(-1);
-                    try { Results.Lost++; }
-                    catch (OverflowException) { Results.HasOverflowed = true; }
+                    results.SaveResponseTime(-1);
+                    try { results.Lost++; }
+                    catch (OverflowException) { results.HasOverflowed = true; }
+
+                } catch (OperationCanceledException) {
+
+                    results.ScanWasCanceled = true;
+                    break;
 
                 } catch (Exception) {
 
                     if (Display.ShowOutput) {
                         PowerPing.Display.Error("General error occured");
                     }
-                    Results.SaveResponseTime(-1);
-                    try { Results.Lost++; }
-                    catch (OverflowException) { Results.HasOverflowed = true; }
+                    results.SaveResponseTime(-1);
+                    try { results.Lost++; }
+                    catch (OverflowException) { results.HasOverflowed = true; }
 
-                } finally {
-                    // Increment seq and wait for interval
-                    index++;
-                    
-                    // Wait for set interval before sending again
-                    cancelEvent.WaitOne(attrs.Interval);
-
-                    // Generate random interval when RandomTimings flag is set
-                    if (attrs.RandomTiming) {
-                        attrs.Interval = Helper.RandomInt(5000, 100000);
-                    }
-
-                    // Reset timer
-                    responseTimer.Reset();
                 }
 
-                // Stop sending if flag is set
-                if (!IsRunning) {
-                    break;
-                }
+                // Run callback (if provided) to notify of updated results
+                resultsUpdateCallback?.Invoke(results);
             }
 
             // Clean up
-            IsRunning = false;
             sock.Close();
 
-            return Results;
+            return results;
         }
 
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
-
-        protected virtual void Dispose(bool disposing)
+        public class ActiveHost
         {
-            if (!disposedValue) {
-                if (IsRunning) {
-                    cancelEvent.Set();
-                    IsRunning = false;
-
-                    // wait till ping stops running
-                    while (IsRunning) {
-                        Task.Delay(25);
-                    }
-                }
-
-                // Call GC to cleanup
-                System.GC.Collect();
-
-                disposedValue = true;
-            }
+            public string Address { get; set; }
+            public string HostName { get; set; }
+            public double ResponseTime { get; set; }
         }
-
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-        #endregion
     }
-
 }

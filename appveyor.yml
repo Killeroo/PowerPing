@@ -1,7 +1,7 @@
 version: 1.2.1.{build}-{branch}
 
 # Environment setup
-image: Visual Studio 2015
+image: Visual Studio 2017
 clone_folder: c:\projects\powerping
 
 # Update assembly info

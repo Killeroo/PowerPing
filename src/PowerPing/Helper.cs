@@ -23,10 +23,12 @@ SOFTWARE.
 */
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Diagnostics;
 using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace PowerPing
 {
@@ -35,6 +37,9 @@ namespace PowerPing
     /// </summary>
     public static class Helper
     {
+        private static readonly double stopwatchToTimeSpanTicksScale = (double)TimeSpan.TicksPerSecond / Stopwatch.Frequency;
+        private static readonly double timeSpanToStopwatchTicksScale = (double)Stopwatch.Frequency / TimeSpan.TicksPerSecond;
+
         /// <summary>
         /// Pause program and wait for user input
         /// </summary>
@@ -155,29 +160,31 @@ namespace PowerPing
         }
 
         /// <summary>
-        /// Runs a command in the systems a hidden shell/command prompt and returns error code
+        /// Runs a function inside a Task instead of on the current thread. This allows for use of a cancellation
+        /// token to resume the current thread (by throwing OperationCanceledException) before the function finishes.
         /// </summary>
-        /// <param name="command">Command string to run in shell</param>
-        /// <param name="waitForExit">Block till shell exits</param>
-        /// <source>https://stackoverflow.com/a/1469790</source>
-        /// <returns>Exit code</returns>
-        public static int ExecuteShellCommand(string command, bool waitForExit = true)
+        /// <param name="func"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public static T RunWithCancellationToken<T>(Func<T> func, CancellationToken cancellationToken)
         {
-            Process process = new Process();
-            ProcessStartInfo startInfo = new ProcessStartInfo {
-                WindowStyle = ProcessWindowStyle.Hidden,
-                FileName = "cmd.exe",
-                Arguments = $"/C {command}"
-            };
-
-            if (waitForExit)
-                process.WaitForExit();
-
-            process.StartInfo = startInfo;
-            process.Start();
-
-            return process.ExitCode;
+            return Task.Run<T>(func, cancellationToken).WaitForResult(cancellationToken);
         }
 
+        public static ushort GenerateSessionId()
+        {
+            uint n = (uint)Process.GetCurrentProcess().Id;
+            return (ushort)(n ^ (n >> 16));
+        }
+
+        public static long StopwatchToTimeSpanTicks(long stopwatchTicks)
+        {
+            return (long)(stopwatchTicks * stopwatchToTimeSpanTicksScale);
+        }
+
+        public static long TimeSpanToStopwatchTicks(long timeSpanTicks)
+        {
+            return (long)(timeSpanTicks * timeSpanToStopwatchTicksScale);
+        }
     }
 }
