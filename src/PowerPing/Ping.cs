@@ -143,26 +143,7 @@ namespace PowerPing
         /// ICMP Traceroute
         /// Not implemented yet
         /// </summary>
-        public void Trace()
-        {
-            throw new NotSupportedException();
-            // Source: https://archive.codeplex.com/?p=winmtrnet
-
-            // Get max hops
-            // Create Ping options with ttl
-
-            // While ttl < max hops
-                // Send ping .net style
-                // look at PingReply
-                // Check status
-                // store address data
-                // reduce ttl
-                    // If timeout
-                        // store data
-                        // reduce ttl
-                    // If replying address == final address
-                        // done
-        }
+        public void Trace() { throw new NotSupportedException(); }
         /// <summary>
         /// Network scanning method.
         ///
