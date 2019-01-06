@@ -218,7 +218,6 @@ Other:
 
 type '--examples' for more
 
-(Location info provided by http://freegeoip.net)
 Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=
 Find the project here[https://github.com/Killeroo/PowerPing]";
 

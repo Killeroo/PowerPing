@@ -4,7 +4,7 @@
 
 Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
 
-![alt text](docs/screenshots/screenshot.png "PowerPing in action")
+![alt text](https://user-images.githubusercontent.com/9999745/50736454-c6964380-11b5-11e9-80c4-adb6a2850a20.png "PowerPing in action")
 
 # Downloads
 Stable versions can be downloaded [[here]](https://github.com/Killeroo/PowerPing/releases)
@@ -105,35 +105,17 @@ _Future features:_
 
 ## Screenshots
 
-![alt text](docs/screenshots/screenshot1.png "Powerping's Graph view")
-![alt text](docs/screenshots/screenshot2.png "Powerping Listening for ICMP activity")
-![alt text](docs/screenshots/screenshot4.png "Powerping showing request packets and sending random ICMP data")
-
-[More screenshots](docs/screenshots/)
+![alt text](https://user-images.githubusercontent.com/9999745/50736455-c6964380-11b5-11e9-9ac4-4042fcbe450e.png "Powerping's Graph view")
+![alt text](https://user-images.githubusercontent.com/9999745/50736456-c6964380-11b5-11e9-95e8-0357e8cd3d27.png "Powerping Listening for ICMP activity")
+![alt text](https://user-images.githubusercontent.com/9999745/50736458-c6964380-11b5-11e9-9b5c-b4bbcf49f238.png "Powerping showing request packets and sending random ICMP data")
+![alt text](https://user-images.githubusercontent.com/9999745/50736461-c72eda00-11b5-11e9-836c-4beb7dd55f00.png "Showing ping results as ascii symbols")
+![alt text](https://user-images.githubusercontent.com/9999745/50736459-c72eda00-11b5-11e9-87c3-4030033f9fab.png "Powerping using timestamp")
 
 ## License
 
-MIT License
+License under the MIT License:
 
 Copyright (c) 2018 Matthew Carney <matthewcarney64@gmail.com>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
 
 ### Note: 
 **Requires _Elevated Rights (Admininstrator)_ to Run**
