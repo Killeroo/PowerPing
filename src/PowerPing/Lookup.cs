@@ -80,7 +80,8 @@ namespace PowerPing
                 using (var objClient = new System.Net.WebClient()) {
 
                     // Download xml data for address
-                    var file = objClient.DownloadString("http://freegeoip.net/xml/" + addr);
+                    var file = objClient.DownloadString(
+                        $"http://api.ipstack.com/{addr}?access_key=INSERT_KEY_HERE&output=xml");
 
                     // Load xml file into object
                     XmlDocument xmlDoc = new XmlDocument();
@@ -93,10 +94,8 @@ namespace PowerPing
                     // Print it out
                     if (detailed) {
                         Console.WriteLine("Queried address: --{0}--", addr);
-                        foreach (XmlElement element in elements) {
+                        foreach (XmlElement element in elements)
                             Console.WriteLine(element.Name + ": " + (element.InnerText == "" ? "NA" : element.InnerText));
-                        }
-                        Console.WriteLine(PerformWhoIsLookup("whois.verisign-grs.com", addr));
                     } else {
                         string loc = null;
                         if (elements[2].InnerText != "") {
@@ -110,14 +109,12 @@ namespace PowerPing
                         }
                         loc += "]";
 
-                        Console.WriteLine($"{elements[2].InnerText != "" ? elements[2].InnerText}");
+                        Console.WriteLine(loc);
                     }
                 }
             } catch (Exception) {
                 Console.WriteLine("[Location unavaliable]");
             }
-
-            Console.WriteLine(loc);
 
             if (!Display.NoInput) {
                 Helper.Pause();
