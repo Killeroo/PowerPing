@@ -1,4 +1,4 @@
-version: 1.2.1.{build}-{branch}
+version: 1.3.0.{build}-{branch}
 
 # Environment setup
 image: Visual Studio 2017
@@ -30,3 +30,15 @@ artifacts:
     name: PowerPing(x86)
   - path: \build\x64\PowerPing.exe
     name: PowerPing(x64)
+    
+
+deploy:
+  - provider: GitHub
+    tag: v1.3.0.$(appveyor_build_version)
+    release: Nightly build
+    description: Most recent development build, may contain bugs (geolocation might not work)
+    auth_token:
+        secure: wjZlrP/YZtBhNOjhhCNdr83E7CkgdjTwg0GVq1sOJDaLQVlJ0XKJNTSkawTCigA/
+    repository: Killeroo/PowerPing
+    artifact: PowerPing(x64)
+    prerelease: true
