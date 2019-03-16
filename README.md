@@ -7,7 +7,7 @@ Small improved command line ICMP ping program lovingly inspired by windows and l
 ![alt text](https://user-images.githubusercontent.com/9999745/50736454-c6964380-11b5-11e9-80c4-adb6a2850a20.png "PowerPing in action")
 
 # Downloads
-Stable and nightly builds can be downloaded [[here]](https://github.com/Killeroo/PowerPing/releases)
+Stable releases can be downloaded [[here]](https://github.com/Killeroo/PowerPing/releases)
 
 ## Features
 
