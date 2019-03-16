@@ -7,11 +7,7 @@ Small improved command line ICMP ping program lovingly inspired by windows and l
 ![alt text](https://user-images.githubusercontent.com/9999745/50736454-c6964380-11b5-11e9-80c4-adb6a2850a20.png "PowerPing in action")
 
 # Downloads
-Stable versions can be downloaded [[here]](https://github.com/Killeroo/PowerPing/releases)
-
-Nightly dev builds can be found [[here]](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx64%2FPowerPing.exe?job=Platform%3A%20x64&branch=dev) ([x86](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx86%2FPowerPing.exe?job=Platform%3A%20x86&branch=dev))
-
-
+Stable and nightly builds can be downloaded [[here]](https://github.com/Killeroo/PowerPing/releases)
 
 ## Features
 
@@ -62,11 +58,11 @@ _Future features:_
                                             3 - Polite      7 - Random
     
     Display Options:
+        --noinput                     Don't ask for user input upon completion
         --shorthand  [--sh]           Show less detailed replies
         --displaymsg [--dm]           Display ICMP message contents
         --timestamp  [--ts]           Display timestamp
         --nocolor    [--nc]           No colour
-        --input                       Require user input
         --symbols    [--sym]          Renders replies and timeouts as ASCII symbols
         --request    [--r]            Show request packets
         --notimeouts [--nt]           Don't display timeout messages

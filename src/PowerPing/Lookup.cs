@@ -95,7 +95,8 @@ namespace PowerPing
                     if (detailed) {
                         Console.WriteLine("Queried address: --{0}--", addr);
                         foreach (XmlElement element in elements)
-                            Console.WriteLine(element.Name + ": " + (element.InnerText == "" ? "NA" : element.InnerText));
+                            if (element.Name != "location")
+                                Console.WriteLine(element.Name + ": " + (element.InnerText == "" ? "NA" : element.InnerText));
                     } else {
                         string loc = null;
                         if (elements[2].InnerText != "") {

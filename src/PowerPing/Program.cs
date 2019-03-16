@@ -230,10 +230,10 @@ namespace PowerPing
                             case "--nc": // No color mode
                                 Display.NoColor = true;
                                 break;
-                            case "/input":
-                            case "-input":
-                            case "--input":// No input mode
-                                Display.NoInput = false;
+                            case "/noinput":
+                            case "-noinput":
+                            case "--noinput":// No input mode
+                                Display.NoInput = true;
                                 break;
                             case "/decimals":
                             case "-decimals":

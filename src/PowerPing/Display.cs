@@ -39,7 +39,7 @@ namespace PowerPing
         // Properties
         public static bool Short { get; set; } = false;
         public static bool NoColor { get; set; } = false;
-        public static bool NoInput { get; set; } = true;
+        public static bool NoInput { get; set; } = false;
         public static bool UseSymbols { get; set; } = false;
         public static bool ShowOutput { get; set; } = true;
         public static bool ShowMessages { get; set; } = false;
@@ -184,11 +184,11 @@ Ping Options:
                                     3 - Polite      7 - Random
 
 Display Options:
+    --noinput                     Don't ask for user input upon completion
     --shorthand  [--sh]           Show less detailed replies
     --displaymsg [--dm]           Display ICMP message field contents
     --timestamp  [--ts]           Display timestamp
     --nocolor    [--nc]           No colour
-    --input                       Require user input
     --symbols    [--sym]          Renders replies and timeouts as ASCII symbols
     --request    [--r]            Show request packets
     --notimeouts [--nt]           Don't display timeout messages
