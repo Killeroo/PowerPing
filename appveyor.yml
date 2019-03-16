@@ -42,3 +42,4 @@ deploy:
     repository: Killeroo/PowerPing
     artifact: PowerPing(x64)
     prerelease: true
+    force_update: true
