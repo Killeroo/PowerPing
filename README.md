@@ -33,7 +33,7 @@ _Future features:_
                [--g] | [--cg] | [--t] [--4] [--rng] [--df] [--rb number] [--b number] 
                [--c number] [--w number] [-i number] [--in number] [--pt number] [--pc number]
                [--m "message"] [--s number] [--ti timing] [--sh] [--dm] [--ts] [--nc] [--input] [--sym] [--r]
-               [--nt] [--q] [--res] [--ia] [--l number] [dp number] [--chk] target_name | target_address
+               [--nt] [--q] [--res] [--ia] [--l number] [--dp number] [--chk] target_name | target_address
                
 ## Arguments:
     Ping Options:
@@ -66,11 +66,11 @@ _Future features:_
         --symbols    [--sym]          Renders replies and timeouts as ASCII symbols
         --request    [--r]            Show request packets
         --notimeouts [--nt]           Don't display timeout messages
-        --quiet      [--q]            No output, only shows summary upon completion or exit
+        --quiet      [--q]            No output (only affects normal ping and flood commands)
         --resolve    [--res]          Resolve hostname of address from DNS
         --inputaddr  [--ia]           Show input address instead of revolved one
-        --checksum   [--chk]           Display checksum of packet
-        --limit      [--l]   number   Limits output to just replies (0) or requests (1)
+        --checksum   [--chk]          Display checksum of packet
+        --limit      [--l]   number   Limits output to just replies (0), requests (1) or summary(2)
         --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
 
     Features:

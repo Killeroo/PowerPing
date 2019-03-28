@@ -1,0 +1,9 @@
+# top-most EditorConfig file
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+
+[*.cs]
+csharp_new_line_before_open_brace = methods

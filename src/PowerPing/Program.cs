@@ -274,6 +274,9 @@ namespace PowerPing
                                 } else if (Convert.ToInt32(args[count + 1]) == 1) {
                                     Display.ShowReplies = false;
                                     Display.ShowRequests = true;
+                                } else if (Convert.ToInt32(args[count + 1]) == 2) {
+                                    Display.ShowReplies = false;
+                                    Display.ShowRequest = false;
                                 } else {
                                     throw new ArgumentFormatException();
                                 }

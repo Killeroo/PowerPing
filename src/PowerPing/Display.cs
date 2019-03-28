@@ -160,7 +160,7 @@ Usage:
               [--b number] [--c number] [--w number] [-i number] [--in number]
               [--pt number] [--pc number] [--s number] [--m message] [--ti timing] 
               [--sh] [--dm] [--ts] [--nc] [--input] [--sym] [--r] [--nt] [--q] [--res]
-              [--ia] [--chk] [--l number] [dp number] target_name | target_address
+              [--ia] [--chk] [--l number] [--dp number] target_name | target_address
 
 Ping Options:
     --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)
@@ -192,14 +192,12 @@ Display Options:
     --symbols    [--sym]          Renders replies and timeouts as ASCII symbols
     --request    [--r]            Show request packets
     --notimeouts [--nt]           Don't display timeout messages
-    --quiet      [--q]            No output, only shows summary upon exit
+    --quiet      [--q]            No output (only affects normal ping and flood commands)
     --resolve    [--res]          Resolve hostname of address from DNS
     --inputaddr  [--ia]           Show input address instead of revolved IP address
     --checksum   [--chk]           Display checksum of packet
-    --limit      [--l]   number   Limits output to just replies(0) or requests(1)
+    --limit      [--l]   number   Limits output to just replies(0), requests(1) or summary(2)
     --decimals   [--dp]  number   Num of decimal places to use(0 to 3)
-
-
 
 Features:
     --scan       [--sc]  address  Network scanning, specify range ""127.0.0.1-55""
@@ -216,7 +214,7 @@ Other:
     --version    [--v]            Shows version and build information
     --examples   [--ex]           Displays some example usage
 
-type '--examples' for more
+Type '--examples' for more
 
 Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=
 Find the project here[https://github.com/Killeroo/PowerPing]";
@@ -722,6 +720,10 @@ Get location information for 84.23.12.4";
         /// <param name="ping"> </param>
         public static void PingResults(PingAttributes attrs, PingResults results)
         {
+            if (!Display.ShowOutput) {
+                return;
+            }
+
             ResetColor();
 
             // Display stats
@@ -810,6 +812,10 @@ Get location information for 84.23.12.4";
         /// <param name="results"></param>
         public static void FloodProgress(ulong totalPings, ulong pingsPerSecond, string target)
         {
+            if (!Display.ShowOutput) {
+                return;
+            }
+
             // Check if labels have already been drawn
             if (sentPos.Left > 0) { 
 
@@ -891,6 +897,10 @@ Get location information for 84.23.12.4";
         /// <param name="exit">Whether to exit program after displaying error</param>
         public static void Error(String errMsg, bool exit = false, bool pause = false, bool newline = true)
         {
+            if (!Display.ShowOutput) {
+                return;
+            }
+
             Console.ForegroundColor = ConsoleColor.Yellow;
 
             // Write error message
@@ -916,6 +926,10 @@ Get location information for 84.23.12.4";
         /// </summary>
         public static void Message(String msg, ConsoleColor color = ConsoleColor.DarkGray, bool newline = true)
         {
+            if (!Display.ShowOutput) {
+                return;
+            }
+
             if (color == ConsoleColor.DarkGray) {
                 color = DefaultForegroundColor; // Use default foreground color if gray is being used
             }
