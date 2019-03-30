@@ -274,6 +274,7 @@ namespace PowerPing
             PingResults results = Send(attrs, ResultsUpdateCallback);
 
             // Display results
+            Display.ShowOutput = true;
             Display.PingResults(attrs, results);
         }
 

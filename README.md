@@ -66,11 +66,11 @@ _Future features:_
         --symbols    [--sym]          Renders replies and timeouts as ASCII symbols
         --request    [--r]            Show request packets
         --notimeouts [--nt]           Don't display timeout messages
-        --quiet      [--q]            No output (only affects normal ping and flood commands)
+        --quiet      [--q]            No output (only affects normal ping)
         --resolve    [--res]          Resolve hostname of address from DNS
         --inputaddr  [--ia]           Show input address instead of revolved one
         --checksum   [--chk]          Display checksum of packet
-        --limit      [--l]   number   Limits output to just replies (0), requests (1) or summary(2)
+        --limit      [--l]   number   Limits output to just replies (1), requests (2) or summary(3)
         --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
 
     Features:

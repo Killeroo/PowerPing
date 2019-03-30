@@ -192,11 +192,11 @@ Display Options:
     --symbols    [--sym]          Renders replies and timeouts as ASCII symbols
     --request    [--r]            Show request packets
     --notimeouts [--nt]           Don't display timeout messages
-    --quiet      [--q]            No output (only affects normal ping and flood commands)
+    --quiet      [--q]            No output (only affects normal ping)
     --resolve    [--res]          Resolve hostname of address from DNS
     --inputaddr  [--ia]           Show input address instead of revolved IP address
     --checksum   [--chk]           Display checksum of packet
-    --limit      [--l]   number   Limits output to just replies(0), requests(1) or summary(2)
+    --limit      [--l]   number   Limits output to just replies(1), requests(2) or summary(3)
     --decimals   [--dp]  number   Num of decimal places to use(0 to 3)
 
 Features:
@@ -812,10 +812,6 @@ Get location information for 84.23.12.4";
         /// <param name="results"></param>
         public static void FloodProgress(ulong totalPings, ulong pingsPerSecond, string target)
         {
-            if (!Display.ShowOutput) {
-                return;
-            }
-
             // Check if labels have already been drawn
             if (sentPos.Left > 0) { 
 
@@ -897,10 +893,6 @@ Get location information for 84.23.12.4";
         /// <param name="exit">Whether to exit program after displaying error</param>
         public static void Error(String errMsg, bool exit = false, bool pause = false, bool newline = true)
         {
-            if (!Display.ShowOutput) {
-                return;
-            }
-
             Console.ForegroundColor = ConsoleColor.Yellow;
 
             // Write error message
@@ -926,10 +918,6 @@ Get location information for 84.23.12.4";
         /// </summary>
         public static void Message(String msg, ConsoleColor color = ConsoleColor.DarkGray, bool newline = true)
         {
-            if (!Display.ShowOutput) {
-                return;
-            }
-
             if (color == ConsoleColor.DarkGray) {
                 color = DefaultForegroundColor; // Use default foreground color if gray is being used
             }

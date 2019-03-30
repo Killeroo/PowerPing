@@ -268,15 +268,15 @@ namespace PowerPing
                             case "/l":
                             case "-l":
                             case "--l":
-                                if (Convert.ToInt32(args[count + 1]) == 0) {
+                                if (Convert.ToInt32(args[count + 1]) == 1) {
                                     Display.ShowReplies = true;
                                     Display.ShowRequests = false;
-                                } else if (Convert.ToInt32(args[count + 1]) == 1) {
-                                    Display.ShowReplies = false;
-                                    Display.ShowRequests = true;
                                 } else if (Convert.ToInt32(args[count + 1]) == 2) {
                                     Display.ShowReplies = false;
-                                    Display.ShowRequest = false;
+                                    Display.ShowRequests = true;
+                                } else if (Convert.ToInt32(args[count + 1]) == 3) {
+                                    Display.ShowReplies = false;
+                                    Display.ShowRequests = false;
                                 } else {
                                     throw new ArgumentFormatException();
                                 }
@@ -501,13 +501,13 @@ namespace PowerPing
                 return;
             } catch (OverflowException) {
                 PowerPing.Display.Error("Overflow while converting", false, false, false);
-                PowerPing.Display.Message(" @ \"PowerPing " + args[curArg] + ">>>" + args[curArg + 1] + "<<<\"", ConsoleColor.Red);
+                PowerPing.Display.Message(" @ \"PowerPing " + args[curArg] + " >>>" + args[curArg + 1] + "<<<\"", ConsoleColor.Red);
                 PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for help.");
                 Helper.Pause();
                 return;
             } catch (ArgumentFormatException) {
-                PowerPing.Display.Error("Invalid argument or incorrect parameter", false, false, false);
-                PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
+                PowerPing.Display.Error("Invalid argument or incorrect parameter for [" + args[curArg] + "]", false, false, false);
+                PowerPing.Display.Message(" @ \"PowerPing " + args[curArg] + " >>>" + args[curArg+1] + "<<<\"", ConsoleColor.Red);
                 PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for help.");
                 Helper.Pause();
                 return;
@@ -525,9 +525,10 @@ namespace PowerPing
 
                 if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown 
                     && Uri.CheckHostName(args.Last()) == UriHostNameType.Unknown) {
-                    PowerPing.Display.Error("Unknown address format. \nIf address is a url do not include any trailing '/'s, for example use: google.com NOT google.com/test.html", true, true);
+                    PowerPing.Display.Error("Could not find address/Unknown address format. \n(If address is a url do not include any trailing '/'s, for example use: Change 'http://example.com/test.html' to 'example.com')", true, true);
                 }
-
+                
+                // TODO: Properly check that an address has been specified
                 if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown) {
                     attributes.Host = args.Last();
                 } else {
