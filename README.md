@@ -49,7 +49,7 @@ _Future features:_
         --interval   [--in]  number   Interval between each ping (in milliseconds)
         --type       [--pt]  number   Use custom ICMP type
         --code       [--pc]  number   Use custom ICMP code value
-        --size       [--s]   number   Set size of packet (overwrites packet message)
+        --size       [--s]   number   Set size (in bytes) of packet (overwrites packet message)
         --message    [--m]   message  Ping packet message
         --timing     [--ti]  timing   Timing levels:
                                             0 - Paranoid    4 - Nimble
@@ -64,7 +64,7 @@ _Future features:_
         --timestamp  [--ts]           Display timestamp
         --nocolor    [--nc]           No colour
         --symbols    [--sym]          Renders replies and timeouts as ASCII symbols
-        --request    [--r]            Show request packets
+        --requests   [--r]            Show request packets
         --notimeouts [--nt]           Don't display timeout messages
         --quiet      [--q]            No output (only affects normal ping)
         --resolve    [--res]          Resolve hostname of address from DNS

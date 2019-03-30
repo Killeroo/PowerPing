@@ -45,7 +45,7 @@ namespace PowerPing
         {
             // Local variables 
             int curArg = 0;
-            string opMode = ""; 
+            string opMode = "";
             PingAttributes attributes = new PingAttributes();
             attributes.Address = "";
 
@@ -269,9 +269,11 @@ namespace PowerPing
                             case "-l":
                             case "--l":
                                 if (Convert.ToInt32(args[count + 1]) == 1) {
-                                    Display.ShowReplies = true;
-                                    Display.ShowRequests = false;
+                                    Display.ShowSummary = false;
+                                    Display.ShowIntro = false;
                                 } else if (Convert.ToInt32(args[count + 1]) == 2) {
+                                    Display.ShowSummary = false;
+                                    Display.ShowIntro = false;
                                     Display.ShowReplies = false;
                                     Display.ShowRequests = true;
                                 } else if (Convert.ToInt32(args[count + 1]) == 3) {
@@ -353,6 +355,9 @@ namespace PowerPing
                             case "/request":
                             case "-request":
                             case "--request":
+                            case "/requests":
+                            case "-requests":
+                            case "--requests":
                             case "/r":
                             case "-r":
                             case "--r":
@@ -487,7 +492,7 @@ namespace PowerPing
                                 if ((args[count].Contains("--") || args[count].Contains("/") || args[count].Contains("-"))
                                     && !opMode.Equals("scanning") // (ignore if scanning)
                                     && args[count].Length < 7) { // Ignore args under 7 chars (assume they are an address)
-                                    throw new ArgumentFormatException();
+                                    throw new InvalidArgumentException();
                                 }
                                 break;
                         }
@@ -505,9 +510,15 @@ namespace PowerPing
                 PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for help.");
                 Helper.Pause();
                 return;
+            } catch (InvalidArgumentException) {
+                PowerPing.Display.Error("Invalid argument", false, false, false);
+                PowerPing.Display.Message(" @ \"PowerPing >>>" + args[curArg] + "<<<\"", ConsoleColor.Red);
+                PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for help.");
+                Helper.Pause();
+                return;
             } catch (ArgumentFormatException) {
-                PowerPing.Display.Error("Invalid argument or incorrect parameter for [" + args[curArg] + "]", false, false, false);
-                PowerPing.Display.Message(" @ \"PowerPing " + args[curArg] + " >>>" + args[curArg+1] + "<<<\"", ConsoleColor.Red);
+                PowerPing.Display.Error("Incorrect parameter for [" + args[curArg] + "]", false, false, false);
+                PowerPing.Display.Message(" @ \"PowerPing " + args[curArg] + " >>>" + args[curArg + 1] + "<<<\"", ConsoleColor.Red);
                 PowerPing.Display.Message("Use \"PowerPing /help\" or \"PowerPing /?\" for help.");
                 Helper.Pause();
                 return;
@@ -521,7 +532,7 @@ namespace PowerPing
 
             // Find address
             if (opMode.Equals("") || opMode.Equals("flooding") || opMode.Equals("graphing") 
-                || opMode.Equals("compactGraph") || opMode.Equals("location") || opMode.Equals("whois")) {
+                || opMode.Equals("compactgraph") || opMode.Equals("location") || opMode.Equals("whois")) {
 
                 if (Uri.CheckHostName(args.First()) == UriHostNameType.Unknown 
                     && Uri.CheckHostName(args.Last()) == UriHostNameType.Unknown) {

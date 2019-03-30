@@ -47,6 +47,8 @@ namespace PowerPing
         public static bool ShowTimeouts { get; set; } = true;
         public static bool ShowRequests { get; set; } = false;
         public static bool ShowReplies { get; set; } = true;
+        public static bool ShowIntro { get; set; } = true;
+        public static bool ShowSummary { get; set; } = true;
         public static bool ShowChecksum { get; set; } = false;
         public static bool UseInputtedAddress { get; set; } = false;
         public static bool UseResolvedAddress { get; set; } = false;
@@ -175,7 +177,7 @@ Ping Options:
     --interval   [--in]  number   Interval between each ping (in milliseconds)
     --type       [--pt]  number   Use custom ICMP type
     --code       [--pc]  number   Use custom ICMP code value
-    --size       [--s]   number   Set size of packet (overwrites packet message)
+    --size       [--s]   number   Set size (in bytes) of packet (overwrites packet message)
     --message    [--m]   message  Ping packet message
     --timing     [--ti]  timing   Timing levels:
                                     0 - Paranoid    4 - Nimble
@@ -190,14 +192,14 @@ Display Options:
     --timestamp  [--ts]           Display timestamp
     --nocolor    [--nc]           No colour
     --symbols    [--sym]          Renders replies and timeouts as ASCII symbols
-    --request    [--r]            Show request packets
+    --requests   [--r]            Show request packets
     --notimeouts [--nt]           Don't display timeout messages
     --quiet      [--q]            No output (only affects normal ping)
     --resolve    [--res]          Resolve hostname of address from DNS
     --inputaddr  [--ia]           Show input address instead of revolved IP address
-    --checksum   [--chk]           Display checksum of packet
+    --checksum   [--chk]          Display checksum of packet
     --limit      [--l]   number   Limits output to just replies(1), requests(2) or summary(3)
-    --decimals   [--dp]  number   Num of decimal places to use(0 to 3)
+    --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
 
 Features:
     --scan       [--sc]  address  Network scanning, specify range ""127.0.0.1-55""
@@ -447,6 +449,10 @@ Get location information for 84.23.12.4";
 
             // Write version
             Console.WriteLine(version + (date ? "[Built " + buildTime + "]" : ""));
+
+            if (!Display.NoInput) {
+                Helper.Pause();
+            }
         }
         /// <summary>
         /// Displays help message
@@ -454,7 +460,10 @@ Get location information for 84.23.12.4";
         public static void Help()
         {
             // Print help message
-            Version();
+            Version v = Assembly.GetExecutingAssembly().GetName().Version;
+            DateTime buildInfo = Assembly.GetExecutingAssembly().GetLinkerTime();
+            string version = Assembly.GetExecutingAssembly().GetName().Name + " v" + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ") ";
+            Console.WriteLine(version);
             Console.WriteLine(HELP_MSG);
 
             if (!NoInput) {
@@ -488,7 +497,7 @@ Get location information for 84.23.12.4";
         /// <param name="ping">Ping object</param>
         public static void PingIntroMsg(PingAttributes attrs)
         {
-            if (!Display.ShowOutput) {
+            if (!Display.ShowOutput || !Display.ShowIntro) {
                 return;
             }
 
@@ -720,7 +729,7 @@ Get location information for 84.23.12.4";
         /// <param name="ping"> </param>
         public static void PingResults(PingAttributes attrs, PingResults results)
         {
-            if (!Display.ShowOutput) {
+            if (!Display.ShowOutput || !Display.ShowSummary) {
                 return;
             }
 
