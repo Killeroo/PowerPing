@@ -101,6 +101,7 @@
     <Compile Include="..\PowerPing\Lookup.cs" />
     <Compile Include="..\PowerPing\RateLimiter.cs" />
     <Compile Include="..\PowerPing\ExtensionMethods.cs" />
+    <Compile Include="CommandLine.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\PowerPing\Properties\App.config">

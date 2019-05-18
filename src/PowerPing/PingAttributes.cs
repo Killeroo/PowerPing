@@ -24,6 +24,18 @@ SOFTWARE.
 
 namespace PowerPing
 {
+    public enum PingOperation
+    {
+        Normal,
+        Flood,
+        Listen,
+        Scan,
+        Graph,
+        CompactGraph,
+        Location,
+        Whoami,
+        Whois
+    }
 
     /// <summary>
     /// Stores attributes of a ping operation
@@ -51,6 +63,7 @@ namespace PowerPing
         public bool DontFragment { get; set; } // Sets the Don't Fragment flag in an IPv4 header
         public bool RandomTiming { get; set; } // Generate random wait time each time ping is sent
         public string[] AddressList { get; set; } // Optional attribute: Used when scanning, stores addresses to ping
+        public PingOperation Operation { get; set; } // Current ping operation we are performing
 
         public PingAttributes()
         {
@@ -74,6 +87,7 @@ namespace PowerPing
             RecieveBufferSize = 5096;
             DontFragment = false;
             RandomTiming = false;
+            Operation = PingOperation.Normal;
         }
     }
 
