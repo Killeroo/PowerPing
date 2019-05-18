@@ -43,19 +43,18 @@ namespace PowerPing
         /// <summary>
         /// Pause program and wait for user input
         /// </summary>
-        /// <param name="exit">switch to use word "exit" instead of "continue"</param>
-        public static void Pause(bool exit = false)
+        public static void WaitForUserInput()
         {
-            Console.Write("Press any key to " + (exit ? "exit" : "continue") + " . . .");
+            // Only ask for user input if NoInput hasn't been set
+            if (Display.NoInput)
+                return;
+
+            Console.Write("Press any key to continue...");
             Console.WriteLine();
 
             // Work around if readkey isnt supported
             try { Console.ReadKey(); }
             catch (InvalidOperationException) { Console.Read(); }
-            
-            if (exit) {
-                Environment.Exit(0);
-            }
         }
 
         /// <summary>
@@ -66,9 +65,7 @@ namespace PowerPing
         public static void ErrorAndExit(string msg)
         {
             Display.Error(msg);
-
-            if (!Display.NoInput)
-                Pause();
+            WaitForUserInput();
 
             Environment.Exit(1);
         }

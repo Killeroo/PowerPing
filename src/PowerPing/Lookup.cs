@@ -116,10 +116,8 @@ namespace PowerPing
             } catch (Exception) {
                 Console.WriteLine("[Location unavaliable]");
             }
-
-            if (!Display.NoInput) {
-                Helper.Pause();
-            }
+            
+            Helper.WaitForUserInput();
         }
 
         /// <summary>
@@ -216,9 +214,7 @@ namespace PowerPing
             Console.WriteLine(result);
             PowerPing.Display.Message("WHOIS LOOKUP FOR [" + address + "] COMPLETE.", ConsoleColor.Yellow);
 
-            if (!Display.NoInput) {
-                Helper.Pause();
-            }
+            Helper.WaitForUserInput();
         }
 
         /// <summary>

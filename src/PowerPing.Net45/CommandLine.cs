@@ -174,6 +174,7 @@ namespace PowerPing
                             case "-ex":
                             case "--ex": // Displays examples
                                 PowerPing.Display.Examples();
+                                Environment.Exit(0); // Exit after displaying examples _
                                 break;
                             case "/shorthand":
                             case "-shorthand":

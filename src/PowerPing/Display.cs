@@ -111,7 +111,7 @@ namespace PowerPing
         const string REPLY_TIME_TXT = " time=";
 
         // Scan messages
-        const string SCAN_RANGE_TXT = "Scanning range [ {0} ] . . . ";
+        const string SCAN_RANGE_TXT = "Scanning range [ {0} ] ";
         const string SCAN_HOSTS_TXT = " Sent: {0} Found Hosts: {1}";
         const string SCAN_CUR_ADDR_TXT = " Pinging ";
         const string SCAN_RESULT_MSG = "Scan complete. {0} addresses scanned. {1} hosts active:";
@@ -449,10 +449,8 @@ Get location information for 84.23.12.4";
 
             // Write version
             Console.WriteLine(version + (date ? "[Built " + buildTime + "]" : ""));
-
-            if (!Display.NoInput) {
-                Helper.Pause();
-            }
+            
+            Helper.WaitForUserInput();
         }
         /// <summary>
         /// Displays help message
@@ -466,10 +464,7 @@ Get location information for 84.23.12.4";
             Console.WriteLine(version);
             Console.WriteLine(HELP_MSG);
 
-            if (!NoInput) {
-                // Wait for user input
-                PowerPing.Helper.Pause();
-            }
+            Helper.WaitForUserInput();
         }
         /// <summary>
         /// Displays example powerping usage
@@ -477,18 +472,16 @@ Get location information for 84.23.12.4";
         public static void Examples()
         {
             Console.WriteLine(EXAMPLE_MSG_PAGE_1);
+            Console.WriteLine("Press enter to continue...");
+            Console.ReadLine();
 
-            Helper.Pause();
             Console.WriteLine(EXAMPLE_MSG_PAGE_2);
+            Console.WriteLine("Press enter to continue...");
+            Console.ReadLine();
 
-            Helper.Pause();
             Console.WriteLine(EXAMPLE_MSG_PAGE_3);
 
-
-            if (!NoInput) {
-                // Wait for user input
-                PowerPing.Helper.Pause(true);
-            }
+            Helper.WaitForUserInput();
         }
         /// <summary>
         /// Display Initial ping message to screen, declaring simple info about the ping
@@ -719,9 +712,7 @@ Get location information for 84.23.12.4";
             }
             Console.WriteLine();
 
-            if (!NoInput) {
-                PowerPing.Helper.Pause();
-            }
+            Helper.WaitForUserInput();
         }
         /// <summary>
         /// Displays statistics for a ping object
@@ -810,10 +801,8 @@ Get location information for 84.23.12.4";
                 Console.WriteLine();
             }
 
-            if (!NoInput) {
-                // Confirm to exit
-                PowerPing.Helper.Pause(true);
-            }
+
+            Helper.WaitForUserInput();
         }
         /// <summary>
         /// Displays and updates results of an ICMP flood
