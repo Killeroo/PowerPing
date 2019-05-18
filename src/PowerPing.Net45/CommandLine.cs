@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Text.RegularExpressions;
 
 namespace PowerPing 
 {
@@ -174,7 +170,7 @@ namespace PowerPing
                             case "-ex":
                             case "--ex": // Displays examples
                                 PowerPing.Display.Examples();
-                                Environment.Exit(0); // Exit after displaying examples _
+                                Environment.Exit(0); // Exit after displaying examples
                                 break;
                             case "/shorthand":
                             case "-shorthand":
@@ -361,8 +357,7 @@ namespace PowerPing
                                 int recvbuff = Convert.ToInt32(args[count + 1]);
                                 if (recvbuff < 65000) {
                                     attributes.RecieveBufferSize = recvbuff;
-                                }
-                                else {
+                                } else {
                                     throw new ArgumentFormatException();
                                 }
                                 break;
@@ -391,8 +386,7 @@ namespace PowerPing
                                 int size = Convert.ToInt32(args[count + 1]);
                                 if (size < 100000) {
                                     attributes.Size = size;
-                                }
-                                else {
+                                } else {
                                     throw new ArgumentFormatException();
                                 }
                                 break;
@@ -458,7 +452,7 @@ namespace PowerPing
                                 // Check for invalid argument 
                                 if ((args[count].Contains("--") || args[count].Contains("/") || args[count].Contains("-"))
                                     && attributes.Operation != PingOperation.Scan // (ignore if scanning) // TODO: Change this
-                                    && args[count].Length < 7) { // Ignore args under 7 chars (assume they are an address)
+                                    && (!Helper.IsURL(args[count]) && !Helper.IsIPv4Address(args[count]))) { 
                                     throw new InvalidArgumentException();
                                 }
                                 break;
@@ -497,26 +491,22 @@ namespace PowerPing
         /// <returns>Returns if the address was found or not</returns>
         public static bool FindAddress(string[] args, ref PingAttributes attributes)
         {
-            // Regex search strings
-            string ipv4Regex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}";
-            string urlRegex = @"[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?";
-
             // First check first and last arguments for IPv4 address
-            if (Regex.Match(args.Last(), ipv4Regex).Success) {
+            if (Helper.IsIPv4Address(args.Last())) {
                 attributes.Host = args.Last();
                 return true;
             }
-            if (Regex.Match(args.First(), ipv4Regex).Success) {
+            if (Helper.IsIPv4Address(args.First())) {
                 attributes.Host = args.First();
                 return true;
             }
 
             // Then check for URLs
-            if (Regex.Match(args.Last(), urlRegex).Success) {
+            if (Helper.IsURL(args.Last())) {
                 attributes.Host = args.Last();
                 return true;
             }
-            if (Regex.Match(args.First(), urlRegex).Success) {
+            if (Helper.IsURL(args.First())) {
                 attributes.Host = args.First();
                 return true;
             }

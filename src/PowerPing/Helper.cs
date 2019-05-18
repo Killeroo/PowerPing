@@ -26,6 +26,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,6 +38,9 @@ namespace PowerPing
     /// </summary>
     public static class Helper
     {
+        private static readonly string ipv4Regex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}";
+        private static readonly string urlRegex = @"[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?";
+
         private static readonly double stopwatchToTimeSpanTicksScale = (double)TimeSpan.TicksPerSecond / Stopwatch.Frequency;
         private static readonly double timeSpanToStopwatchTicksScale = (double)Stopwatch.Frequency / TimeSpan.TicksPerSecond;
 
@@ -172,6 +176,26 @@ namespace PowerPing
         }
 
         /// <summary>
+        /// Checks if a string is a valid IPv4 address
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
+        public static bool IsIPv4Address(string address)
+        {
+            return Regex.Match(address, ipv4Regex).Success;
+        }
+
+        /// <summary>
+        /// Checks if a string is a valid url
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static bool IsURL(string url)
+        {
+            return Regex.Match(url, urlRegex).Success;
+        }
+
+        /// <summary>
         /// Runs a function inside a Task instead of on the current thread. This allows for use of a cancellation
         /// token to resume the current thread (by throwing OperationCanceledException) before the function finishes.
         /// </summary>
@@ -183,12 +207,16 @@ namespace PowerPing
             return Task.Run<T>(func, cancellationToken).WaitForResult(cancellationToken);
         }
 
+        /// <summary>
+        /// Generates session id to store in packet using underlying process id
+        /// </summary>
+        /// <returns></returns>
         public static ushort GenerateSessionId()
         {
             uint n = (uint)Process.GetCurrentProcess().Id;
             return (ushort)(n ^ (n >> 16));
         }
-
+        
         public static long StopwatchToTimeSpanTicks(long stopwatchTicks)
         {
             return (long)(stopwatchTicks * stopwatchToTimeSpanTicksScale);
