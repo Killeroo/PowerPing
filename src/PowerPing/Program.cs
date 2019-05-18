@@ -62,8 +62,7 @@ namespace PowerPing
 
             // Parse command line arguments
             if (!CommandLine.Parse(args, ref attributes)) {
-                Helper.Pause();
-                Environment.Exit(1);
+                Helper.ErrorAndExit("Problem parsing arguments, use \"PowerPing /help\" or \"PowerPing /?\" for help.");
             }
 
             // Find address/host in arguments
@@ -71,7 +70,7 @@ namespace PowerPing
                 attributes.Operation != PingOperation.Listen &&
                 attributes.Operation != PingOperation.Scan) {
                 if (!CommandLine.FindAddress(args, ref attributes)) {
-                    Display.Error("Could not find correctly formatted address, please check and try again", true, true);
+                    Helper.ErrorAndExit("Could not find correctly formatted address, please check and try again");
                 }
             }
 
@@ -118,7 +117,7 @@ namespace PowerPing
                     p.Send(attributes);
                     break;
                 default:
-                    Display.Error("Could not determine ping operation", true, true);
+                    Helper.ErrorAndExit("Could not determine ping operation");
                     break;
             }
 

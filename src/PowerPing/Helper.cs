@@ -59,6 +59,21 @@ namespace PowerPing
         }
 
         /// <summary>
+        /// Prints and error message and then exits with exit code 1
+        /// </summary>
+        /// <param name="msg">Error message to print</param>
+        /// <param name="pause">Wait for user input before exitingt</param>
+        public static void ErrorAndExit(string msg)
+        {
+            Display.Error(msg);
+
+            if (!Display.NoInput)
+                Pause();
+
+            Environment.Exit(1);
+        }
+
+        /// <summary>
         /// Check if long value is between a range
         /// </summary>
         /// <param name="value"></param>

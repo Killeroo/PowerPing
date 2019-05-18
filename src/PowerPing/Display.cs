@@ -899,28 +899,15 @@ Get location information for 84.23.12.4";
         /// Display error message
         /// </summary>
         /// <param name="errMsg">Error message to display</param>
-        /// <param name="exit">Whether to exit program after displaying error</param>
-        public static void Error(String errMsg, bool exit = false, bool pause = false, bool newline = true)
+        public static void Error(string errMsg)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
 
             // Write error message
-            if (newline) {
-                Console.WriteLine(ERROR_TXT + errMsg);
-            } else {
-                Console.Write(ERROR_TXT + errMsg);
-            }
+            Console.WriteLine(ERROR_TXT + errMsg);
 
             // Reset console colours
             ResetColor();
-
-            if (pause && !NoInput) {
-                PowerPing.Helper.Pause();
-            }
-
-            if (exit) {
-                Environment.Exit(1);
-            }
         }
         /// <summary>
         /// Display a general message

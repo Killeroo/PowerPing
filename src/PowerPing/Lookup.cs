@@ -134,7 +134,7 @@ namespace PowerPing
 
             // Check address format
             if (Uri.CheckHostName(address) == UriHostNameType.Unknown) {
-                PowerPing.Display.Error("PowerPing could not resolve host [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
+                Helper.ErrorAndExit("PowerPing could not resolve host [" + address + "] " + Environment.NewLine + "Check address and try again.");
             }
 
             // Only resolve address if not already in IP address format
@@ -155,7 +155,7 @@ namespace PowerPing
 
             // If no address resolved then exit
             if (ipAddr == null) {
-                PowerPing.Display.Error("PowerPing could not find host [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
+                Helper.ErrorAndExit("PowerPing could not find host [" + address + "] " + Environment.NewLine + "Check address and try again.");
             }
 
             return ipAddr.ToString();
@@ -195,7 +195,7 @@ namespace PowerPing
 
             // Quick sanity check before we proceed
             if (keyword == "" || tld == "") {
-                PowerPing.Display.Error("Incorrectly formatted address, please check format and try again (web addresses only)", true);
+                Helper.ErrorAndExit("Incorrectly formatted address, please check format and try again");
             }
             PowerPing.Display.Message("WHOIS [" + address + "]:", ConsoleColor.Yellow);
 

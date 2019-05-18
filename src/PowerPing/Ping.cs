@@ -30,6 +30,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace PowerPing
 {
@@ -128,9 +129,8 @@ namespace PowerPing
             } catch (OperationCanceledException) {
             } catch (SocketException) {
                 PowerPing.Display.Error("Could not read packet from socket");
-                results.Lost++;
-            } catch (Exception) {
-                PowerPing.Display.Error("General exception occured", true);
+            } catch (Exception e) {
+                PowerPing.Display.Error($"General exception occured while trying to create listening socket (Exception: {e.GetType().ToString().Split('.').Last()}");
             }
 
             // Clean up
@@ -171,7 +171,7 @@ namespace PowerPing
 
             // Check format of address (for '-'s and disallow multipl '-'s in one segment)
             if (!range.Contains("-")) {
-                Display.Error("Scan - No range specified, must be specified in format: 192.168.1.1-254", true, true);
+                Helper.ErrorAndExit("Scan - No range specified, must be specified in format: 192.168.1.1-254");
             }
 
             // Holds the ranges for each ip segment
@@ -186,7 +186,7 @@ namespace PowerPing
                     segUpper[y] = (ranges.Length == 1) ? segLower[y] : Convert.ToInt16(ranges[1]);
                 }
             } catch (FormatException) {
-                Display.Error("Scan - Incorrect format [" + range + "], must be specified in format: 192.168.1.1-254", true, true);
+                Helper.ErrorAndExit("Scan - Incorrect format [" + range + "], must be specified in format: 192.168.1.1-254");
             }
 
             // Build list of addresses from ranges
@@ -297,7 +297,7 @@ namespace PowerPing
             try {
                 s = new Socket(family, SocketType.Raw, family == AddressFamily.InterNetwork ? ProtocolType.Icmp : ProtocolType.IcmpV6);
             } catch (SocketException) {
-                PowerPing.Display.Error("Socket cannot be created " + Environment.NewLine + "Please run as Administrator and try again.", true);
+                PowerPing.Helper.ErrorAndExit("Socket cannot be created " + Environment.NewLine + "Please run as Administrator and try again.");
             }
             return s;
         }
