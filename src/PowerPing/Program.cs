@@ -109,7 +109,7 @@ namespace PowerPing
                     p.Flood(attributes.Host);
                     break;
                 case PingOperation.Scan:
-                    p.Scan(attributes.Host);
+                    Scan.Start(attributes.Host, cancellationTokenSource.Token);
                     break;
                 case PingOperation.Normal:
                     // Send ping normally

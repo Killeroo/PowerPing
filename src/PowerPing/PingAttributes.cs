@@ -68,8 +68,8 @@ namespace PowerPing
         public PingAttributes()
         {
             // Default attributes
-            Host = "localhost";
-            Address = "127.0.0.1";
+            Host = "";
+            Address = "";
             Message = "R U Alive?";
             Interval = 1000;
             Timeout = 3000;

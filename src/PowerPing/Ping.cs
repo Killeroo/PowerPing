@@ -59,8 +59,10 @@ namespace PowerPing
         /// </summary>
         public PingResults Send(PingAttributes attrs, Action<PingResults> onResultsUpdate = null)
         {
-            // Lookup address
-            attrs.Address = PowerPing.Lookup.QueryDNS(attrs.Host, attrs.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+            // Lookup host if specified
+            if (attrs.Host != "") {
+                attrs.Address = PowerPing.Lookup.QueryDNS(attrs.Host, attrs.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+            }
 
             PowerPing.Display.PingIntroMsg(attrs);
 
@@ -144,93 +146,6 @@ namespace PowerPing
         /// Not implemented yet
         /// </summary>
         public void Trace() { throw new NotSupportedException(); }
-        /// <summary>
-        /// Network scanning method.
-        ///
-        /// Uses pings to scan a IP address range and identify hosts
-        /// that are active.
-        ///
-        /// range should be in format 192.0.0.1-255, where - denotes the range
-        /// This can be specified at any octlet of the address (192.0.1-100.1.255)
-        /// </summary>
-        /// <param name="range">Range of addresses to scan</param>
-        public void Scan(string range, bool recursing = false)
-        {
-            List<string> scanList = new List<string>(); // List of addresses to scan
-            String[] ipSegments = range.Split('.');
-            List<ActiveHost> activeHosts = new List<ActiveHost>();
-            Stopwatch scanTimer = new Stopwatch();
-            int scanned = 0;
-            
-            // Setup scan ping attributes
-            PingAttributes attrs = new PingAttributes();
-            attrs.Timeout = 500;
-            attrs.Interval = 0;
-            attrs.Count = 1;
-            Display.ShowOutput = false;
-
-            // Check format of address (for '-'s and disallow multipl '-'s in one segment)
-            if (!range.Contains("-")) {
-                Helper.ErrorAndExit("Scan - No range specified, must be specified in format: 192.168.1.1-254");
-            }
-
-            // Holds the ranges for each ip segment
-            int[] segLower = new int[4];
-            int[] segUpper = new int[4];
-
-            // Work out upper and lower ranges for each segment
-            try{
-                for (int y = 0; y < 4; y++) {
-                    string[] ranges = ipSegments[y].Split('-');
-                    segLower[y] = Convert.ToInt16(ranges[0]);
-                    segUpper[y] = (ranges.Length == 1) ? segLower[y] : Convert.ToInt16(ranges[1]);
-                }
-            } catch (FormatException) {
-                Helper.ErrorAndExit("Scan - Incorrect format [" + range + "], must be specified in format: 192.168.1.1-254");
-            }
-
-            // Build list of addresses from ranges
-            for (int seg1 = segLower[0]; seg1 <= segUpper[0]; seg1++) {
-                for (int seg2 = segLower[1]; seg2 <= segUpper[1]; seg2++) {
-                    for (int seg3 = segLower[2]; seg3 <= segUpper[2]; seg3++) {
-                        for (int seg4 = segLower[3]; seg4 <= segUpper[3]; seg4++) {
-                            scanList.Add(new IPAddress(new byte[] { (byte)seg1, (byte)seg2, (byte)seg3, (byte)seg4 }).ToString());
-                        }
-                    }
-                }
-            }
-
-            scanTimer.Start();
-
-            try {
-                // Scan loop
-                foreach (string host in scanList) {
-                    // Update host
-                    attrs.Address = host;
-
-                    // Send ping
-                    PingResults results = SendICMP(attrs);
-                    if (results.ScanWasCanceled) {
-                        // Cancel was requested during scan
-                        throw new OperationCanceledException();
-                    }
-                    scanned++;
-                    Display.ScanProgress(scanned, activeHosts.Count, scanList.Count, scanTimer.Elapsed, range, attrs.Address);
-
-                    if (results.Lost == 0 && results.ErrorPackets != 1) {
-                        // If host is active, add to list
-                        string hostName = Helper.RunWithCancellationToken(() => Lookup.QueryHost(host), cancellationToken);
-                        activeHosts.Add(new ActiveHost {
-                            Address = host,
-                            HostName = hostName,
-                            ResponseTime = results.CurTime
-                        });
-                    }
-                }
-            } catch (OperationCanceledException) { }
-
-            PowerPing.Display.ScanResults(scanned, !cancellationToken.IsCancellationRequested, activeHosts);
-        }
         /// <summary>
         /// Sends high volume of ping packets
         /// </summary>

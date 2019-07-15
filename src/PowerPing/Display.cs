@@ -690,7 +690,7 @@ Get location information for 84.23.12.4";
             }
             
         }
-        public static void ScanResults(int scanned, bool ranToEnd, List<Ping.ActiveHost> foundHosts)
+        public static void ScanResults(int scanned, bool ranToEnd, List<Scan.HostInformation> hosts)
         {
             Console.CursorVisible = true;
 
@@ -701,13 +701,13 @@ Get location information for 84.23.12.4";
             Console.ForegroundColor = DefaultForegroundColor;
             Console.Write(" addresses scanned. ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(foundHosts.Count);
+            Console.Write(hosts.Count);
             Console.ForegroundColor = DefaultForegroundColor;
             Console.WriteLine(" hosts found.");
-            if (foundHosts.Count != 0) {
-                for (int i = 0; i < foundHosts.Count; i++) {
-                    Ping.ActiveHost entry = foundHosts[i];
-                    Console.WriteLine((i == foundHosts.Count - 1 ? SCAN_END_CHAR : SCAN_CONNECTOR_CHAR) + SCAN_RESULT_ENTRY, entry.Address, entry.ResponseTime, entry.HostName != "" ? entry.HostName : "UNAVAILABLE");
+            if (hosts.Count != 0) {
+                for (int i = 0; i < hosts.Count; i++) {
+                    Scan.HostInformation entry = hosts[i];
+                    Console.WriteLine((i == hosts.Count - 1 ? SCAN_END_CHAR : SCAN_CONNECTOR_CHAR) + SCAN_RESULT_ENTRY, entry.Address, entry.ResponseTime, entry.HostName != "" ? entry.HostName : "UNAVAILABLE");
                 }
             }
             Console.WriteLine();
