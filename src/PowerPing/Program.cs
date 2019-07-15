@@ -67,8 +67,7 @@ namespace PowerPing
 
             // Find address/host in arguments
             if (attributes.Operation != PingOperation.Whoami &&
-                attributes.Operation != PingOperation.Listen &&
-                attributes.Operation != PingOperation.Scan) {
+                attributes.Operation != PingOperation.Listen) {
                 if (!CommandLine.FindAddress(args, ref attributes)) {
                     Helper.ErrorAndExit("Could not find correctly formatted address, please check and try again");
                 }
@@ -110,7 +109,7 @@ namespace PowerPing
                     p.Flood(attributes.Host);
                     break;
                 case PingOperation.Scan:
-                    p.Scan(args.Last());
+                    p.Scan(attributes.Host);
                     break;
                 case PingOperation.Normal:
                     // Send ping normally

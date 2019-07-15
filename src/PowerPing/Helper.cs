@@ -40,6 +40,7 @@ namespace PowerPing
     {
         private static readonly string ipv4Regex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}";
         private static readonly string urlRegex = @"[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?";
+        private static readonly string validScanRangeRegex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\-|$)){5}";
 
         private static readonly double stopwatchToTimeSpanTicksScale = (double)TimeSpan.TicksPerSecond / Stopwatch.Frequency;
         private static readonly double timeSpanToStopwatchTicksScale = (double)Stopwatch.Frequency / TimeSpan.TicksPerSecond;
@@ -193,6 +194,19 @@ namespace PowerPing
         public static bool IsURL(string url)
         {
             return Regex.Match(url, urlRegex).Success;
+        }
+
+        /// <summary>
+        /// Checks if a string is a valid range.
+        /// Range looks like with normal IP address with dash to specify range to scan:
+        /// EG 192.168.1.1-255 to scan every address between 192.168.1.1-192.168.1.255
+        /// </summary>
+        /// <param name="range"></param>
+        /// <returns></returns>
+        /// TODO: Allow for scan range to specified in any segment
+        public static bool IsValidScanRange(string range)
+        {
+            return Regex.Match(range, validScanRangeRegex).Success;
         }
 
         /// <summary>
