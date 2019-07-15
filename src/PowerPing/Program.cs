@@ -88,28 +88,28 @@ namespace PowerPing
                     p.Listen();
                     break;
                 case PingOperation.Location:
-                    PowerPing.Lookup.AddressLocation(attributes.Host, true);
+                    PowerPing.Lookup.AddressLocation(attributes.InputtedAddress, true);
                     break;
                 case PingOperation.Whoami:
                     PowerPing.Lookup.AddressLocation("", true);
                     break;
                 case PingOperation.Whois:
-                    PowerPing.Lookup.QueryWhoIs(attributes.Host);
+                    PowerPing.Lookup.QueryWhoIs(attributes.InputtedAddress);
                     break;
                 case PingOperation.Graph:
-                    g = new Graph(attributes.Host, cancellationTokenSource.Token);
+                    g = new Graph(attributes.InputtedAddress, cancellationTokenSource.Token);
                     g.Start();
                     break;
                 case PingOperation.CompactGraph:
-                    g = new Graph(attributes.Host, cancellationTokenSource.Token);
+                    g = new Graph(attributes.InputtedAddress, cancellationTokenSource.Token);
                     g.CompactGraph = true;
                     g.Start();
                     break;
                 case PingOperation.Flood:
-                    p.Flood(attributes.Host);
+                    p.Flood(attributes.InputtedAddress);
                     break;
                 case PingOperation.Scan:
-                    Scan.Start(attributes.Host, cancellationTokenSource.Token);
+                    Scan.Start(attributes.InputtedAddress, cancellationTokenSource.Token);
                     break;
                 case PingOperation.Normal:
                     // Send ping normally

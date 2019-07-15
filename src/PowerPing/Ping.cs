@@ -60,21 +60,21 @@ namespace PowerPing
         public PingResults Send(PingAttributes attrs, Action<PingResults> onResultsUpdate = null)
         {
             // Lookup host if specified
-            if (attrs.Host != "") {
-                attrs.Address = PowerPing.Lookup.QueryDNS(attrs.Host, attrs.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+            if (attrs.InputtedAddress != "") {
+                attrs.Address = PowerPing.Lookup.QueryDNS(attrs.InputtedAddress, attrs.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
             }
 
             PowerPing.Display.PingIntroMsg(attrs);
 
             if (Display.UseResolvedAddress) {
                 try {
-                    attrs.Host = Helper.RunWithCancellationToken(() => Lookup.QueryHost(attrs.Address), cancellationToken);
+                    attrs.InputtedAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(attrs.Address), cancellationToken);
                 } catch (OperationCanceledException) {
                     return new PingResults();
                 }
-                if (attrs.Host == "") {
+                if (attrs.InputtedAddress == "") {
                     // If reverse lookup fails just display whatever is in the address field
-                    attrs.Host = attrs.Address; 
+                    attrs.InputtedAddress = attrs.Address; 
                 }
             }
 
@@ -308,7 +308,7 @@ namespace PowerPing
 
                     // Show request packet
                     if (Display.ShowRequests) {
-                        Display.RequestPacket(packet, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : attrs.Address, index);
+                        Display.RequestPacket(packet, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.InputtedAddress : attrs.Address, index);
                     }
 
                     // If there were extra responses from a prior request, ignore them
@@ -373,7 +373,7 @@ namespace PowerPing
 
                     // Display reply packet
                     if (Display.ShowReplies) {
-                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : responseEP.ToString(), index, replyTime, bytesRead);
+                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.InputtedAddress : responseEP.ToString(), index, replyTime, bytesRead);
                     }
 
                     // Store response info

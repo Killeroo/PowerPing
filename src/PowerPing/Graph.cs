@@ -67,7 +67,7 @@ namespace PowerPing
             graphPing = new Ping(cancellationTkn);
 
             // Setup ping attributes
-            graphPingAttrs.Host = PowerPing.Lookup.QueryDNS(address, System.Net.Sockets.AddressFamily.InterNetwork);
+            graphPingAttrs.InputtedAddress = PowerPing.Lookup.QueryDNS(address, System.Net.Sockets.AddressFamily.InterNetwork);
             graphPingAttrs.Continous = true;
         }
 
@@ -214,7 +214,7 @@ namespace PowerPing
             // Draw info (and get location info for each label)
             Console.WriteLine("                 Ping Statistics:");
             Console.WriteLine("                -----------------------------------");
-            Console.WriteLine("                 Destination [ {0} ]", graphPingAttrs.Host);
+            Console.WriteLine("                 Destination [ {0} ]", graphPingAttrs.InputtedAddress);
 
             Console.Write("                     Sent: ");
             sentLabelX = Console.CursorLeft;

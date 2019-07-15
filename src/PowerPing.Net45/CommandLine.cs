@@ -494,11 +494,11 @@ namespace PowerPing
             // Look for valid scan address (slightly different format than normal address)
             if (attributes.Operation == PingOperation.Scan) {
                 if (Helper.IsValidScanRange(args.First())) {
-                    attributes.Host = args.First();
+                    attributes.InputtedAddress = args.First();
                     return true;
                 }
                 if (Helper.IsValidScanRange(args.Last())) {
-                    attributes.Host = args.Last();
+                    attributes.InputtedAddress = args.Last();
                     return true;
                 }
 
@@ -508,21 +508,21 @@ namespace PowerPing
 
             // First check first and last arguments for IPv4 address
             if (Helper.IsIPv4Address(args.Last())) {
-                attributes.Host = args.Last();
+                attributes.InputtedAddress = args.Last();
                 return true;
             }
             if (Helper.IsIPv4Address(args.First())) {
-                attributes.Host = args.First();
+                attributes.InputtedAddress = args.First();
                 return true;
             }
 
             // Then check for URLs
             if (Helper.IsURL(args.Last())) {
-                attributes.Host = args.Last();
+                attributes.InputtedAddress = args.Last();
                 return true;
             }
             if (Helper.IsURL(args.First())) {
-                attributes.Host = args.First();
+                attributes.InputtedAddress = args.First();
                 return true;
             }
 

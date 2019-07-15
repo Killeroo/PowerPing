@@ -496,8 +496,8 @@ Get location information for 84.23.12.4";
 
             // Construct string
             Console.WriteLine();
-            Console.Write(INTRO_ADDR_TXT, attrs.Host);
-            if (!String.Equals(attrs.Host, attrs.Address)) {
+            Console.Write(INTRO_ADDR_TXT, attrs.InputtedAddress);
+            if (!String.Equals(attrs.InputtedAddress, attrs.Address)) {
                 // Only show resolved address if inputted address and resolved address are different
                 Console.Write("[{0}] ", attrs.Address);
             }
