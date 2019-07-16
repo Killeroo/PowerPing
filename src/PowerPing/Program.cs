@@ -34,7 +34,7 @@ namespace PowerPing
 {
     static class Program
     {
-        private static readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        private static readonly CancellationTokenSource m_CancellationTokenSource = new CancellationTokenSource();
 
         /// <summary>
         /// Main entry point of PowerPing
@@ -81,7 +81,7 @@ namespace PowerPing
             }
 
             // Select correct function using opMode 
-            Ping p = new Ping(cancellationTokenSource.Token);
+            Ping p = new Ping(m_CancellationTokenSource.Token);
             Graph g;
             switch (attributes.Operation) {
                 case PingOperation.Listen:
@@ -97,19 +97,19 @@ namespace PowerPing
                     PowerPing.Lookup.QueryWhoIs(attributes.InputtedAddress);
                     break;
                 case PingOperation.Graph:
-                    g = new Graph(attributes.InputtedAddress, cancellationTokenSource.Token);
+                    g = new Graph(attributes.InputtedAddress, m_CancellationTokenSource.Token);
                     g.Start();
                     break;
                 case PingOperation.CompactGraph:
-                    g = new Graph(attributes.InputtedAddress, cancellationTokenSource.Token);
+                    g = new Graph(attributes.InputtedAddress, m_CancellationTokenSource.Token);
                     g.CompactGraph = true;
                     g.Start();
                     break;
                 case PingOperation.Flood:
-                    PowerPing.Flood.Start(attributes.InputtedAddress, cancellationTokenSource.Token);
+                    PowerPing.Flood.Start(attributes.InputtedAddress, m_CancellationTokenSource.Token);
                     break;
                 case PingOperation.Scan:
-                    PowerPing.Scan.Start(attributes.InputtedAddress, cancellationTokenSource.Token);
+                    PowerPing.Scan.Start(attributes.InputtedAddress, m_CancellationTokenSource.Token);
                     break;
                 case PingOperation.Normal:
                     // Send ping normally
@@ -137,7 +137,7 @@ namespace PowerPing
             args.Cancel = true;
 
             // Request currently running job to finish up
-            cancellationTokenSource.Cancel();
+            m_CancellationTokenSource.Cancel();
         }
     }
 }

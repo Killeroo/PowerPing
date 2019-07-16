@@ -538,7 +538,7 @@ Get location information for 84.23.12.4";
 
             // Print coloured type
             PacketType(packet);
-            Console.Write(REQUEST_CODE_TXT, packet.code);
+            Console.Write(REQUEST_CODE_TXT, packet.Code);
 
             // Display timestamp
             if (ShowTimeStamp) {
@@ -564,7 +564,7 @@ Get location information for 84.23.12.4";
 
             // If drawing symbols
             if (UseSymbols) {
-                if (packet.type == 0x00) {
+                if (packet.Type == 0x00) {
                     if (replyTime <= TimeSpan.FromMilliseconds(100)) {
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.Write("_");
@@ -594,7 +594,7 @@ Get location information for 84.23.12.4";
 
             // Display ICMP message (if specified)
             if (ShowMessages) {
-                string messageWithoutHeader = Encoding.ASCII.GetString(packet.message, 4, packet.message.Length - 4);
+                string messageWithoutHeader = Encoding.ASCII.GetString(packet.Message, 4, packet.Message.Length - 4);
                 Console.Write(REPLY_MSG_TXT, new string(messageWithoutHeader.Where(c => !char.IsControl(c)).ToArray()));
             }
 
@@ -614,7 +614,7 @@ Get location information for 84.23.12.4";
 
             // Display checksum
             if (ShowChecksum) {
-                Console.Write(REPLY_CHKSM_TXT, packet.checksum);
+                Console.Write(REPLY_CHKSM_TXT, packet.Checksum);
             }
 
             // Display timestamp
@@ -632,9 +632,9 @@ Get location information for 84.23.12.4";
         public static void CapturedPacket(ICMP packet, String address, String timeReceived, int bytesRead)
         {
             // Display captured packet
-            Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
+            Console.BackgroundColor = packet.Type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.Type];
             Console.ForegroundColor = ConsoleColor.Black;
-            Console.WriteLine(CAPTURED_PACKET_MSG, timeReceived, bytesRead, address, packet.type, packet.code);
+            Console.WriteLine(CAPTURED_PACKET_MSG, timeReceived, bytesRead, address, packet.Type, packet.Code);
 
             // Reset console colours
             ResetColor();
@@ -921,26 +921,26 @@ Get location information for 84.23.12.4";
         {
             // Apply colour rules
             if (!NoColor) {
-                Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.White : typeColors[packet.type];
+                Console.BackgroundColor = packet.Type > typeColors.Length ? ConsoleColor.White : typeColors[packet.Type];
                 Console.ForegroundColor = ConsoleColor.Black;
             }
 
             // Print packet type
-            switch (packet.type) {
+            switch (packet.Type) {
                 case 3:
-                    Console.Write(packet.code > destUnreachableCodeValues.Length ? packetTypes[packet.type] : destUnreachableCodeValues[packet.code]);
+                    Console.Write(packet.Code > destUnreachableCodeValues.Length ? packetTypes[packet.Type] : destUnreachableCodeValues[packet.Code]);
                     break;
                 case 5:
-                    Console.Write(packet.code > redirectCodeValues.Length ? packetTypes[packet.type] : redirectCodeValues[packet.code]);
+                    Console.Write(packet.Code > redirectCodeValues.Length ? packetTypes[packet.Type] : redirectCodeValues[packet.Code]);
                     break;
                 case 11:
-                    Console.Write(packet.code > timeExceedCodeValues.Length ? packetTypes[packet.type] : timeExceedCodeValues[packet.code]);
+                    Console.Write(packet.Code > timeExceedCodeValues.Length ? packetTypes[packet.Type] : timeExceedCodeValues[packet.Code]);
                     break;
                 case 12:
-                    Console.Write(packet.code > badParameterCodeValues.Length ? packetTypes[packet.type] : badParameterCodeValues[packet.code]);
+                    Console.Write(packet.Code > badParameterCodeValues.Length ? packetTypes[packet.Type] : badParameterCodeValues[packet.Code]);
                     break;
                 default:
-                    Console.Write(packet.type > packetTypes.Length ? "[" + packet.type + "] UNASSIGNED " : packetTypes[packet.type]);
+                    Console.Write(packet.Type > packetTypes.Length ? "[" + packet.Type + "] UNASSIGNED " : packetTypes[packet.Type]);
                     break;
             }
 

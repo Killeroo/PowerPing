@@ -32,22 +32,21 @@ namespace PowerPing
     class ICMP
     {
         // Packet attributes
-        public byte type;
-        public byte code;
-        public UInt16 checksum;
-        public int messageSize;
-        public byte[] message = new byte[1024];
+        public byte Type;
+        public byte Code;
+        public UInt16 Checksum;
+        public int MessageSize;
+        public byte[] Message = new byte[1024];
 
         // Constructors
         public ICMP() { }
         public ICMP(byte[] data, int size)
         {
-            type = data[20];
-            code = data[21];
-            // TODO: ICMP_COOKIES: Debug here to check ensure whole message field is saved
-            checksum = BitConverter.ToUInt16(data, 22);
-            messageSize = size - 24;
-            Buffer.BlockCopy(data, 24, message, 0, messageSize);
+            Type = data[20];
+            Code = data[21];
+            Checksum = BitConverter.ToUInt16(data, 22);
+            MessageSize = size - 24;
+            Buffer.BlockCopy(data, 24, Message, 0, MessageSize);
         }
 
         /// <summary>
@@ -56,11 +55,11 @@ namespace PowerPing
         /// <returns>Packet in byte array</returns>
         public byte[] GetBytes()
         {
-            byte[] data = new byte[messageSize + 9]; // TODO: here we assume packet size, this is probably causing message clip
-            Buffer.BlockCopy(BitConverter.GetBytes(type), 0, data, 0, 1);
-            Buffer.BlockCopy(BitConverter.GetBytes(code), 0, data, 1, 1);
-            Buffer.BlockCopy(BitConverter.GetBytes(checksum), 0, data, 2, 2);
-            Buffer.BlockCopy(message, 0, data, 4, messageSize);
+            byte[] data = new byte[MessageSize + 9]; // TODO: here we assume packet size, this is probably causing message clip
+            Buffer.BlockCopy(BitConverter.GetBytes(Type), 0, data, 0, 1);
+            Buffer.BlockCopy(BitConverter.GetBytes(Code), 0, data, 1, 1);
+            Buffer.BlockCopy(BitConverter.GetBytes(Checksum), 0, data, 2, 2);
+            Buffer.BlockCopy(Message, 0, data, 4, MessageSize);
             return data;
         }
 
@@ -73,7 +72,7 @@ namespace PowerPing
             UInt32 chksm = 0;
 
             byte[] data = GetBytes();
-            int packetSize = messageSize + 8;
+            int packetSize = MessageSize + 8;
             int index = 0;
 
             while (index < packetSize) {

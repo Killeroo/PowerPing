@@ -39,13 +39,13 @@ namespace PowerPing
     /// </summary>
     class Ping
     {
-        private static readonly ushort sessionId = Helper.GenerateSessionId();
-        private readonly CancellationToken cancellationToken;
-        private bool debug = false;
+        private static readonly ushort m_SessionId = Helper.GenerateSessionId();
+        private readonly CancellationToken m_CancellationToken;
+        private bool m_Debug = false;
 
         public Ping(CancellationToken cancellationTkn)
         {
-            cancellationToken = cancellationTkn;
+            m_CancellationToken = cancellationTkn;
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace PowerPing
 
             if (Display.UseResolvedAddress) {
                 try {
-                    attrs.InputtedAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(attrs.Address), cancellationToken);
+                    attrs.InputtedAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(attrs.Address), m_CancellationToken);
                 } catch (OperationCanceledException) {
                     return new PingResults();
                 }
@@ -111,19 +111,19 @@ namespace PowerPing
                 PowerPing.Display.ListenIntroMsg();
 
                 // Listening loop
-                while (!cancellationToken.IsCancellationRequested) {
+                while (!m_CancellationToken.IsCancellationRequested) {
                     byte[] buffer = new byte[4096]; // TODO: could cause overflow?
                     
                     // Recieve any incoming ICMPv4 packets
                     EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                    int bytesRead = Helper.RunWithCancellationToken(() => listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint), cancellationToken);
+                    int bytesRead = Helper.RunWithCancellationToken(() => listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint), m_CancellationToken);
                     ICMP response = new ICMP(buffer, bytesRead);
 
                     // Display captured packet
                     PowerPing.Display.CapturedPacket(response, remoteEndPoint.ToString(), DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead);
 
                     // Store results
-                    results.CountPacketType(response.type);
+                    results.CountPacketType(response.Type);
                     results.Received++;
                 }
             } catch (OperationCanceledException) {
@@ -218,19 +218,19 @@ namespace PowerPing
             }
 
             // Construct our ICMP packet
-            packet.type = attrs.Type;
-            packet.code = attrs.Code;
-            Buffer.BlockCopy(BitConverter.GetBytes(sessionId), 0, packet.message, 0, 2); // Add identifier to ICMP message
-            Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length); // Add text into ICMP message
-            packet.messageSize = payload.Length + 4;
-            packetSize = packet.messageSize + 4;
+            packet.Type = attrs.Type;
+            packet.Code = attrs.Code;
+            Buffer.BlockCopy(BitConverter.GetBytes(m_SessionId), 0, packet.Message, 0, 2); // Add identifier to ICMP message
+            Buffer.BlockCopy(payload, 0, packet.Message, 4, payload.Length); // Add text into ICMP message
+            packet.MessageSize = payload.Length + 4;
+            packetSize = packet.MessageSize + 4;
 
             // Sending loop
             for (int index = 1; attrs.Continous || index <= attrs.Count; index++) {
 
                 if (index != 1) {
                     // Wait for set interval before sending again or cancel if requested
-                    if (cancellationToken.WaitHandle.WaitOne(attrs.Interval)) {
+                    if (m_CancellationToken.WaitHandle.WaitOne(attrs.Interval)) {
                         break;
                     }
 
@@ -242,18 +242,18 @@ namespace PowerPing
 
                 // Include sequence number in ping message
                 ushort sequenceNum = (ushort)index;
-                Buffer.BlockCopy(BitConverter.GetBytes(sequenceNum), 0, packet.message, 2, 2);
+                Buffer.BlockCopy(BitConverter.GetBytes(sequenceNum), 0, packet.Message, 2, 2);
 
                 // Fill ICMP message field
                 if (attrs.RandomMsg) {
                     payload = Encoding.ASCII.GetBytes(Helper.RandomString());
-                    Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
+                    Buffer.BlockCopy(payload, 0, packet.Message, 4, payload.Length);
                 }
 
                 // Update packet checksum
-                packet.checksum = 0;
+                packet.Checksum = 0;
                 UInt16 chksm = packet.GetChecksum();
-                packet.checksum = chksm;
+                packet.Checksum = chksm;
 
                 try {
 
@@ -273,7 +273,7 @@ namespace PowerPing
                     try { results.Sent++; }
                     catch (OverflowException) { results.HasOverflowed = true; }
                     
-                    if (debug) {
+                    if (m_Debug) {
                         // Induce random wait for debugging 
                         Random rnd = new Random();
                         Thread.Sleep(rnd.Next(700));
@@ -285,7 +285,7 @@ namespace PowerPing
                     TimeSpan replyTime = TimeSpan.Zero;
                     do {
                         // Cancel if requested
-                        cancellationToken.ThrowIfCancellationRequested();
+                        m_CancellationToken.ThrowIfCancellationRequested();
 
                         // Set receive timeout, limited to 250ms so we don't block very long without checking for
                         // cancellation. If the requested ping timeout is longer, we will wait some more in subsequent
@@ -312,10 +312,10 @@ namespace PowerPing
 
                             // If we sent an echo and receive a response with a different identifier or sequence
                             // number, ignore it (it could correspond to an older request that timed out)
-                            if (packet.type == 8 && response.type == 0) {
-                                ushort responseSessionId = BitConverter.ToUInt16(response.message, 0);
-                                ushort responseSequenceNum = BitConverter.ToUInt16(response.message, 2);
-                                if (responseSessionId != sessionId || responseSequenceNum != sequenceNum) {
+                            if (packet.Type == 8 && response.Type == 0) {
+                                ushort responseSessionId = BitConverter.ToUInt16(response.Message, 0);
+                                ushort responseSequenceNum = BitConverter.ToUInt16(response.Message, 2);
+                                if (responseSessionId != m_SessionId || responseSequenceNum != sequenceNum) {
                                     response = null;
                                 }
                             }
@@ -330,7 +330,7 @@ namespace PowerPing
                     // Store response info
                     try { results.Received++; }
                     catch (OverflowException) { results.HasOverflowed = true; }
-                    results.CountPacketType(response.type);
+                    results.CountPacketType(response.Type);
                     results.SaveResponseTime(replyTime.TotalMilliseconds);
                     
                     if (attrs.BeepLevel == 2) {

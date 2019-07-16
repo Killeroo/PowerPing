@@ -38,12 +38,12 @@ namespace PowerPing
     /// </summary>
     public static class Helper
     {
-        private static readonly string ipv4Regex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}";
-        private static readonly string urlRegex = @"[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?";
-        private static readonly string validScanRangeRegex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\-|$)){5}";
+        private static readonly string m_IPv4Regex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}";
+        private static readonly string m_UrlRegex = @"[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?";
+        private static readonly string m_ValidScanRangeRegex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\-|$)){5}";
 
-        private static readonly double stopwatchToTimeSpanTicksScale = (double)TimeSpan.TicksPerSecond / Stopwatch.Frequency;
-        private static readonly double timeSpanToStopwatchTicksScale = (double)Stopwatch.Frequency / TimeSpan.TicksPerSecond;
+        private static readonly double m_StopwatchToTimeSpanTicksScale = (double)TimeSpan.TicksPerSecond / Stopwatch.Frequency;
+        private static readonly double m_TimeSpanToStopwatchTicksScale = (double)Stopwatch.Frequency / TimeSpan.TicksPerSecond;
 
         /// <summary>
         /// Pause program and wait for user input
@@ -183,7 +183,7 @@ namespace PowerPing
         /// <returns></returns>
         public static bool IsIPv4Address(string address)
         {
-            return Regex.Match(address, ipv4Regex).Success;
+            return Regex.Match(address, m_IPv4Regex).Success;
         }
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace PowerPing
         /// <returns></returns>
         public static bool IsURL(string url)
         {
-            return Regex.Match(url, urlRegex).Success;
+            return Regex.Match(url, m_UrlRegex).Success;
         }
 
         /// <summary>
@@ -206,7 +206,7 @@ namespace PowerPing
         /// TODO: Allow for scan range to specified in any segment
         public static bool IsValidScanRange(string range)
         {
-            return Regex.Match(range, validScanRangeRegex).Success;
+            return Regex.Match(range, m_ValidScanRangeRegex).Success;
         }
 
         /// <summary>
@@ -233,12 +233,12 @@ namespace PowerPing
         
         public static long StopwatchToTimeSpanTicks(long stopwatchTicks)
         {
-            return (long)(stopwatchTicks * stopwatchToTimeSpanTicksScale);
+            return (long)(stopwatchTicks * m_StopwatchToTimeSpanTicksScale);
         }
 
         public static long TimeSpanToStopwatchTicks(long timeSpanTicks)
         {
-            return (long)(timeSpanTicks * timeSpanToStopwatchTicksScale);
+            return (long)(timeSpanTicks * m_TimeSpanToStopwatchTicksScale);
         }
     }
 }

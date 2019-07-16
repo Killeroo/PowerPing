@@ -34,23 +34,23 @@ namespace PowerPing
     /// </summary>
     public class RateLimiter
     {
-        private readonly long minimumRunIntervalTicks;
-        private long lastRunTimestamp;
+        private readonly long m_MinimumRunIntervalTicks;
+        private long m_LastRunTimestamp;
 
         public TimeSpan ElapsedSinceLastRun { get; private set; }
 
         public RateLimiter(TimeSpan minimumRunInterval)
         {
-            minimumRunIntervalTicks = Helper.TimeSpanToStopwatchTicks(minimumRunInterval.Ticks);
+            m_MinimumRunIntervalTicks = Helper.TimeSpanToStopwatchTicks(minimumRunInterval.Ticks);
         }
 
         public bool RequestRun()
         {
             long currentTimestamp = Stopwatch.GetTimestamp();
-            long elapsed = lastRunTimestamp == 0 ? 0 : (currentTimestamp - lastRunTimestamp); // Will be 0 on first call to this method
-            if (elapsed == 0 || elapsed >= minimumRunIntervalTicks) {
+            long elapsed = m_LastRunTimestamp == 0 ? 0 : (currentTimestamp - m_LastRunTimestamp); // Will be 0 on first call to this method
+            if (elapsed == 0 || elapsed >= m_MinimumRunIntervalTicks) {
                 ElapsedSinceLastRun = new TimeSpan(Helper.StopwatchToTimeSpanTicks(elapsed));
-                lastRunTimestamp = currentTimestamp;
+                m_LastRunTimestamp = currentTimestamp;
                 return true;
             }
             return false;
