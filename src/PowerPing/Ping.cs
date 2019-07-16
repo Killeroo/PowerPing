@@ -36,8 +36,6 @@ namespace PowerPing
 {
     /// <summary>
     /// Ping Class, used for constructing and sending ICMP packets.
-    /// Also contains other ping-like functions such as flooding, listening
-    /// scanning and others.
     /// </summary>
     class Ping
     {
@@ -146,53 +144,6 @@ namespace PowerPing
         /// Not implemented yet
         /// </summary>
         public void Trace() { throw new NotSupportedException(); }
-        /// <summary>
-        /// Sends high volume of ping packets
-        /// </summary>
-        public void Flood(string address)
-        {
-            PingAttributes attrs = new PingAttributes();
-            RateLimiter displayUpdateLimiter = new RateLimiter(TimeSpan.FromMilliseconds(500));
-            ulong previousPingsSent = 0;
-
-            // Verify address
-            attrs.Address = PowerPing.Lookup.QueryDNS(address, AddressFamily.InterNetwork);
-
-            // Setup ping attributes
-            attrs.Interval = 0;
-            attrs.Timeout = 100;
-            attrs.Message = "R U Dead Yet?";
-            attrs.Continous = true;
-
-            // Disable output for faster speeds
-            Display.ShowOutput = false;
-
-            // This callback will run after each ping iteration
-            void ResultsUpdateCallback(PingResults r) {
-                // Make sure we're not updating the display too frequently
-                if (!displayUpdateLimiter.RequestRun()) {
-                    return;
-                }
-
-                // Calculate pings per second
-                double pingsPerSecond = 0;
-                if (displayUpdateLimiter.ElapsedSinceLastRun != TimeSpan.Zero) {
-                    pingsPerSecond = (r.Sent - previousPingsSent) / displayUpdateLimiter.ElapsedSinceLastRun.TotalSeconds;
-                }
-                previousPingsSent = r.Sent;
-
-                // Update results text
-                Display.FloodProgress(r.Sent, (ulong)Math.Round(pingsPerSecond), address);
-            }
-
-            // Start flooding
-            PingResults results = Send(attrs, ResultsUpdateCallback);
-
-            // Display results
-            Display.ShowOutput = true;
-            Display.PingResults(attrs, results);
-        }
-
         /// <summary>
         /// Creates a raw socket for ping operations.
         ///

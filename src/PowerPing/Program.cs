@@ -106,10 +106,10 @@ namespace PowerPing
                     g.Start();
                     break;
                 case PingOperation.Flood:
-                    p.Flood(attributes.InputtedAddress);
+                    PowerPing.Flood.Start(attributes.InputtedAddress, cancellationTokenSource.Token);
                     break;
                 case PingOperation.Scan:
-                    Scan.Start(attributes.InputtedAddress, cancellationTokenSource.Token);
+                    PowerPing.Scan.Start(attributes.InputtedAddress, cancellationTokenSource.Token);
                     break;
                 case PingOperation.Normal:
                     // Send ping normally

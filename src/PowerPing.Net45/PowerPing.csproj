@@ -103,6 +103,7 @@
     <Compile Include="..\PowerPing\ExtensionMethods.cs" />
     <Compile Include="..\PowerPing\CommandLine.cs" />
     <Compile Include="..\PowerPing\Scan.cs" />
+    <Compile Include="..\PowerPing\Flood.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\PowerPing\Properties\App.config">
