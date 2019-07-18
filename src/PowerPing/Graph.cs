@@ -49,6 +49,7 @@ namespace PowerPing
         private readonly List<String[]> m_Columns = new List<string[]>();
         private bool m_IsGraphSetup = false;
         private int m_xAxisLength = 40;
+        private int m_Scale = 1;
 
         // Location of graph plotting space
         private int m_PlotStartX;
@@ -60,6 +61,7 @@ namespace PowerPing
         private int m_FailLabelX, m_FailLabelY;
         private int m_RttLabelX, m_RttLabelY;
         private int m_TimeLabelX, m_TimeLabelY;
+        private int m_YAxisStart;
         
         public Graph(string address, CancellationToken cancellationTkn)
         {
@@ -324,7 +326,7 @@ namespace PowerPing
             int time = Convert.ToInt32(replyTime);
 
             // Work out bar length
-            for (int x = 0; x < time; x = x + (CompactGraph ? 50 : 25)) {
+            for (int x = 0; x < time; x = x + (CompactGraph ? 50 : m_Scale)) {
                 count++;
             }
 
