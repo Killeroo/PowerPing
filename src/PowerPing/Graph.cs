@@ -48,6 +48,7 @@ namespace PowerPing
         private readonly PingAttributes m_PingAttributes = new PingAttributes();
         private readonly List<String[]> m_Columns = new List<string[]>();
         private bool m_IsGraphSetup = false;
+        private int m_yAxisLength = 20;
         private int m_xAxisLength = 40;
         private int m_Scale = 1;
 
@@ -61,7 +62,7 @@ namespace PowerPing
         private int m_FailLabelX, m_FailLabelY;
         private int m_RttLabelX, m_RttLabelY;
         private int m_TimeLabelX, m_TimeLabelY;
-        private int m_YAxisStart;
+        private int m_yAxisStart;
         
         public Graph(string address, CancellationToken cancellationTkn)
         {
@@ -160,6 +161,7 @@ namespace PowerPing
 
             // Reset colour after
             Console.ForegroundColor = ConsoleColor.Gray;
+            // TODO: Stripped colour instead of gray
         }
         /// <summary>
         /// Draw graph background
@@ -168,6 +170,9 @@ namespace PowerPing
         {
             // Draw title
             Console.WriteLine();
+
+            // Save position for later
+            m_yAxisStart = Console.CursorTop;
 
             // Draw Y axis of graph
             if (CompactGraph) {
@@ -257,6 +262,7 @@ namespace PowerPing
             int cursorPositionX = Console.CursorLeft;
             int cursorPositionY = Console.CursorTop;
 
+            // TODO: draw bars along instead of down
             foreach(String segment in bar)
             {
                 Console.Write(segment);
@@ -266,6 +272,43 @@ namespace PowerPing
 
             // Reset cursor to starting position
             Console.SetCursorPosition(cursorPositionX, cursorPositionY);
+        }
+        public void DrawYAxisLabels()
+        {
+            m_Scale = 1;
+            CompactGraph = true;
+
+            int factor = CompactGraph ? 1 : 2;
+            int maxLines = CompactGraph ? 10 : 20;
+            int maxYValue = maxLines * m_Scale;
+
+            Console.CursorTop = m_yAxisStart;
+
+            int currValue = maxYValue;
+            for (int x = maxLines; x != 0; x--)
+            {
+                // write current value with padding
+                if (CompactGraph || x % 2 == 0)
+                    Console.Write(currValue.ToString().PadLeft(14) + " ");
+                else {
+                    Console.Write(new string(' ', 15));
+                }
+
+                // Add indentation every 2 lines if we aren't making a compact graph
+                if (!CompactGraph && x % 2 == 0)
+                    Console.Write("─");
+                else {
+                    Console.Write(" ");
+                }
+                
+                if (x == maxLines)
+                    Console.WriteLine("┐");
+                else 
+                    Console.WriteLine("┤");
+
+                currValue -= m_Scale;
+            }
+            
         }
         /// <summary>
         /// Update graph text labels
@@ -330,15 +373,27 @@ namespace PowerPing
                 count++;
             }
 
-            if (time > 1000) {
+            if (time > m_Scale * (CompactGraph ? 10 : 20)) {
                 // If reply time over graph Y range draw max size column
+                m_Scale *= 2;
+
                 count = CompactGraph ? 20 : 10;
             } else if (time == 0) {
                 // If no reply dont draw column
                 return new String[] { "─" };
             }
 
-            count = count / 2;
+            int maxLength = CompactGraph ? 10 : 20;
+            int maxValue = maxLength * m_Scale;
+            bar = new String[maxLength];
+            int value = System.Math.Abs(maxValue / time);
+            for (int x = 0; x < bar.Length; x++) {
+                
+            }
+
+            // Add special character at top and below
+
+            // Remove all the stuff below
 
             // Create array to store bar
             bar = new String[count + 1];
