@@ -101,6 +101,9 @@
     <Compile Include="..\PowerPing\Lookup.cs" />
     <Compile Include="..\PowerPing\RateLimiter.cs" />
     <Compile Include="..\PowerPing\ExtensionMethods.cs" />
+    <Compile Include="..\PowerPing\CommandLine.cs" />
+    <Compile Include="..\PowerPing\Scan.cs" />
+    <Compile Include="..\PowerPing\Flood.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\PowerPing\Properties\App.config">
@@ -109,16 +112,9 @@
     <None Include="..\PowerPing\Properties\app.manifest">
       <SubType>Designer</SubType>
     </None>
-    <None Include="packages.config" />
+    <None Include=".editorconfig" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\..\packages\Microsoft.DotNet.Analyzers.Compatibility.0.1.2-alpha\build\Microsoft.DotNet.Analyzers.Compatibility.targets" Condition="Exists('..\..\packages\Microsoft.DotNet.Analyzers.Compatibility.0.1.2-alpha\build\Microsoft.DotNet.Analyzers.Compatibility.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\Microsoft.DotNet.Analyzers.Compatibility.0.1.2-alpha\build\Microsoft.DotNet.Analyzers.Compatibility.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.DotNet.Analyzers.Compatibility.0.1.2-alpha\build\Microsoft.DotNet.Analyzers.Compatibility.targets'))" />
-  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

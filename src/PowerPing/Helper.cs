@@ -1,7 +1,7 @@
 ﻿/*
 MIT License - PowerPing 
 
-Copyright (c) 2018 Matthew Carney
+Copyright (c) 2019 Matthew Carney
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,25 +38,41 @@ namespace PowerPing
     /// </summary>
     public static class Helper
     {
-        private static readonly double stopwatchToTimeSpanTicksScale = (double)TimeSpan.TicksPerSecond / Stopwatch.Frequency;
-        private static readonly double timeSpanToStopwatchTicksScale = (double)Stopwatch.Frequency / TimeSpan.TicksPerSecond;
+        private static readonly string m_IPv4Regex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}";
+        private static readonly string m_UrlRegex = @"[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?";
+        private static readonly string m_ValidScanRangeRegex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\-|$)){5}";
+
+        private static readonly double m_StopwatchToTimeSpanTicksScale = (double)TimeSpan.TicksPerSecond / Stopwatch.Frequency;
+        private static readonly double m_TimeSpanToStopwatchTicksScale = (double)Stopwatch.Frequency / TimeSpan.TicksPerSecond;
 
         /// <summary>
         /// Pause program and wait for user input
         /// </summary>
-        /// <param name="exit">switch to use word "exit" instead of "continue"</param>
-        public static void Pause(bool exit = false)
+        public static void WaitForUserInput()
         {
-            Console.Write("Press any key to " + (exit ? "exit" : "continue") + " . . .");
+            // Only ask for user input if NoInput hasn't been set
+            if (Display.NoInput)
+                return;
+
+            Console.Write("Press any key to continue...");
             Console.WriteLine();
 
             // Work around if readkey isnt supported
             try { Console.ReadKey(); }
             catch (InvalidOperationException) { Console.Read(); }
-            
-            if (exit) {
-                Environment.Exit(0);
-            }
+        }
+
+        /// <summary>
+        /// Prints and error message and then exits with exit code 1
+        /// </summary>
+        /// <param name="msg">Error message to print</param>
+        /// <param name="pause">Wait for user input before exitingt</param>
+        public static void ErrorAndExit(string msg)
+        {
+            Display.Error(msg);
+            WaitForUserInput();
+
+            Environment.Exit(1);
         }
 
         /// <summary>
@@ -160,6 +177,39 @@ namespace PowerPing
         }
 
         /// <summary>
+        /// Checks if a string is a valid IPv4 address
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
+        public static bool IsIPv4Address(string address)
+        {
+            return Regex.Match(address, m_IPv4Regex).Success;
+        }
+
+        /// <summary>
+        /// Checks if a string is a valid url
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static bool IsURL(string url)
+        {
+            return Regex.Match(url, m_UrlRegex).Success;
+        }
+
+        /// <summary>
+        /// Checks if a string is a valid range.
+        /// Range looks like with normal IP address with dash to specify range to scan:
+        /// EG 192.168.1.1-255 to scan every address between 192.168.1.1-192.168.1.255
+        /// </summary>
+        /// <param name="range"></param>
+        /// <returns></returns>
+        /// TODO: Allow for scan range to specified in any segment
+        public static bool IsValidScanRange(string range)
+        {
+            return Regex.Match(range, m_ValidScanRangeRegex).Success;
+        }
+
+        /// <summary>
         /// Runs a function inside a Task instead of on the current thread. This allows for use of a cancellation
         /// token to resume the current thread (by throwing OperationCanceledException) before the function finishes.
         /// </summary>
@@ -171,20 +221,24 @@ namespace PowerPing
             return Task.Run<T>(func, cancellationToken).WaitForResult(cancellationToken);
         }
 
+        /// <summary>
+        /// Generates session id to store in packet using underlying process id
+        /// </summary>
+        /// <returns></returns>
         public static ushort GenerateSessionId()
         {
             uint n = (uint)Process.GetCurrentProcess().Id;
             return (ushort)(n ^ (n >> 16));
         }
-
+        
         public static long StopwatchToTimeSpanTicks(long stopwatchTicks)
         {
-            return (long)(stopwatchTicks * stopwatchToTimeSpanTicksScale);
+            return (long)(stopwatchTicks * m_StopwatchToTimeSpanTicksScale);
         }
 
         public static long TimeSpanToStopwatchTicks(long timeSpanTicks)
         {
-            return (long)(timeSpanTicks * timeSpanToStopwatchTicksScale);
+            return (long)(timeSpanTicks * m_TimeSpanToStopwatchTicksScale);
         }
     }
 }

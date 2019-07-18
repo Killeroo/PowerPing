@@ -1,17 +1,13 @@
 # PowerPing - Advanced Windows Ping 
 
-[![](https://img.shields.io/badge/version-1.3.0-brightgreen.svg)]() [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8017007ba00645b390013970e5b6df43)](https://www.codacy.com/app/Killeroo/PowerPing?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Killeroo/PowerPing&amp;utm_campaign=Badge_Grade) [![Build status](https://ci.appveyor.com/api/projects/status/fq7jnpmlejm7jych?svg=true)](https://ci.appveyor.com/project/Killeroo/powerping) 
+[![](https://img.shields.io/badge/stable%20version-1.3.0-brightgreen.svg)](https://github.com/Killeroo/PowerPing/releases) 
 
 Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
 
-![alt text](docs/screenshots/screenshot.png "PowerPing in action")
+![alt text](https://user-images.githubusercontent.com/9999745/50736454-c6964380-11b5-11e9-80c4-adb6a2850a20.png "PowerPing in action")
 
 # Downloads
-Stable versions can be downloaded [[here]](https://github.com/Killeroo/PowerPing/releases)
-
-Nightly dev builds can be found [[here]](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx64%2FPowerPing.exe?job=Platform%3A%20x64&branch=dev) ([x86](https://ci.appveyor.com/api/projects/killeroo/powerping/artifacts/build%2Fx86%2FPowerPing.exe?job=Platform%3A%20x86&branch=dev))
-
-
+Stable releases can be downloaded [[here]](https://github.com/Killeroo/PowerPing/releases)
 
 ## Features
 
@@ -37,7 +33,7 @@ _Future features:_
                [--g] | [--cg] | [--t] [--4] [--rng] [--df] [--rb number] [--b number] 
                [--c number] [--w number] [-i number] [--in number] [--pt number] [--pc number]
                [--m "message"] [--s number] [--ti timing] [--sh] [--dm] [--ts] [--nc] [--input] [--sym] [--r]
-               [--nt] [--q] [--res] [--ia] [--l number] [dp number] [--chk] target_name | target_address
+               [--nt] [--q] [--res] [--ia] [--l number] [--dp number] [--chk] target_name | target_address
                
 ## Arguments:
     Ping Options:
@@ -53,7 +49,7 @@ _Future features:_
         --interval   [--in]  number   Interval between each ping (in milliseconds)
         --type       [--pt]  number   Use custom ICMP type
         --code       [--pc]  number   Use custom ICMP code value
-        --size       [--s]   number   Set size of packet (overwrites packet message)
+        --size       [--s]   number   Set size (in bytes) of packet (overwrites packet message)
         --message    [--m]   message  Ping packet message
         --timing     [--ti]  timing   Timing levels:
                                             0 - Paranoid    4 - Nimble
@@ -62,19 +58,19 @@ _Future features:_
                                             3 - Polite      7 - Random
     
     Display Options:
+        --noinput                     Don't ask for user input upon completion
         --shorthand  [--sh]           Show less detailed replies
         --displaymsg [--dm]           Display ICMP message contents
         --timestamp  [--ts]           Display timestamp
         --nocolor    [--nc]           No colour
-        --input                       Require user input
         --symbols    [--sym]          Renders replies and timeouts as ASCII symbols
-        --request    [--r]            Show request packets
+        --requests   [--r]            Show request packets
         --notimeouts [--nt]           Don't display timeout messages
-        --quiet      [--q]            No output, only shows summary upon completion or exit
+        --quiet      [--q]            No output (only affects normal ping)
         --resolve    [--res]          Resolve hostname of address from DNS
         --inputaddr  [--ia]           Show input address instead of revolved one
-        --checksum   [--chk]           Display checksum of packet
-        --limit      [--l]   number   Limits output to just replies (0) or requests (1)
+        --checksum   [--chk]          Display checksum of packet
+        --limit      [--l]   number   Limits output to just replies (1), requests (2) or summary(3)
         --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
 
     Features:
@@ -105,35 +101,17 @@ _Future features:_
 
 ## Screenshots
 
-![alt text](docs/screenshots/screenshot1.png "Powerping's Graph view")
-![alt text](docs/screenshots/screenshot2.png "Powerping Listening for ICMP activity")
-![alt text](docs/screenshots/screenshot4.png "Powerping showing request packets and sending random ICMP data")
-
-[More screenshots](docs/screenshots/)
+![alt text](https://user-images.githubusercontent.com/9999745/50736455-c6964380-11b5-11e9-9ac4-4042fcbe450e.png "Powerping's Graph view")
+![alt text](https://user-images.githubusercontent.com/9999745/50736456-c6964380-11b5-11e9-95e8-0357e8cd3d27.png "Powerping Listening for ICMP activity")
+![alt text](https://user-images.githubusercontent.com/9999745/50736458-c6964380-11b5-11e9-9b5c-b4bbcf49f238.png "Powerping showing request packets and sending random ICMP data")
+![alt text](https://user-images.githubusercontent.com/9999745/50736461-c72eda00-11b5-11e9-836c-4beb7dd55f00.png "Showing ping results as ascii symbols")
+![alt text](https://user-images.githubusercontent.com/9999745/50736459-c72eda00-11b5-11e9-87c3-4030033f9fab.png "Powerping using timestamp")
 
 ## License
 
-MIT License
+License under the MIT License:
 
 Copyright (c) 2018 Matthew Carney <matthewcarney64@gmail.com>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
 
 ### Note: 
 **Requires _Elevated Rights (Admininstrator)_ to Run**

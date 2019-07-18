@@ -1,7 +1,7 @@
 ﻿/*
 MIT License - PowerPing 
 
-Copyright (c) 2018 Matthew Carney
+Copyright (c) 2019 Matthew Carney
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -43,32 +43,32 @@ namespace PowerPing
         public int EndCursorPosY = 0; // Position to move cursor to when graph exits
 
         // Local variable declaration
-        private readonly CancellationToken cancellationToken;
-        private readonly Ping graphPing;
-        private readonly PingAttributes graphPingAttrs = new PingAttributes();
-        private readonly List<String[]> graphColumns = new List<string[]>();
-        private bool isGraphSetup = false;
-        private int xAxisLength = 40;
+        private readonly CancellationToken m_CancellationToken;
+        private readonly Ping m_Ping;
+        private readonly PingAttributes m_PingAttributes = new PingAttributes();
+        private readonly List<String[]> m_Columns = new List<string[]>();
+        private bool m_IsGraphSetup = false;
+        private int m_xAxisLength = 40;
 
         // Location of graph plotting space
-        private int plotStartX;
-        private int plotStartY;
+        private int m_PlotStartX;
+        private int m_PlotStartY;
 
         // Label locations
-        private int sentLabelX, sentLabelY;
-        private int recLabelX, recLabelY;
-        private int failLabelX, failLabelY;
-        private int rttLabelX, rttLabelY;
-        private int timeLabelX, timeLabelY;
+        private int m_SentLabelX, m_SentLabelY;
+        private int m_RecvLabelX, m_RecvLabelY;
+        private int m_FailLabelX, m_FailLabelY;
+        private int m_RttLabelX, m_RttLabelY;
+        private int m_TimeLabelX, m_TimeLabelY;
         
         public Graph(string address, CancellationToken cancellationTkn)
         {
-            cancellationToken = cancellationTkn;
-            graphPing = new Ping(cancellationTkn);
+            m_CancellationToken = cancellationTkn;
+            m_Ping = new Ping(cancellationTkn);
 
             // Setup ping attributes
-            graphPingAttrs.Host = PowerPing.Lookup.QueryDNS(address, System.Net.Sockets.AddressFamily.InterNetwork);
-            graphPingAttrs.Continous = true;
+            m_PingAttributes.InputtedAddress = PowerPing.Lookup.QueryDNS(address, System.Net.Sockets.AddressFamily.InterNetwork);
+            m_PingAttributes.Continous = true;
         }
 
         public void Start()
@@ -80,7 +80,7 @@ namespace PowerPing
             Console.CursorVisible = false;
 
             // Check graph is setup
-            if (!isGraphSetup) {
+            if (!m_IsGraphSetup) {
                 Setup();
             }
 
@@ -107,8 +107,8 @@ namespace PowerPing
                 }
 
                 // Reset position
-                Console.CursorTop = plotStartY;
-                Console.CursorLeft = plotStartX;
+                Console.CursorTop = m_PlotStartY;
+                Console.CursorLeft = m_PlotStartX;
 
                 // Draw graph columns
                 DrawGraphColumns();
@@ -123,7 +123,7 @@ namespace PowerPing
             }
 
             // Start pinging
-            PingResults results = graphPing.Send(graphPingAttrs, ResultsUpdateCallback);
+            PingResults results = m_Ping.Send(m_PingAttributes, ResultsUpdateCallback);
         }
         ///<summary>
         /// Setup graph
@@ -132,12 +132,12 @@ namespace PowerPing
         {
             // Determine Xaxis size
             if (!CompactGraph) {
-                xAxisLength = Console.WindowWidth - 30;
+                m_xAxisLength = Console.WindowWidth - 30;
             }
 
             DrawBackground();
 
-            isGraphSetup = true;
+            m_IsGraphSetup = true;
         }
         /// <summary>
         /// Draw all graph coloums/bars
@@ -147,12 +147,12 @@ namespace PowerPing
             // Clear columns space before drawing
             Clear();
 
-            for (int x = 0; x < graphColumns.Count; x++) {
+            for (int x = 0; x < m_Columns.Count; x++) {
                 // Change colour for most recent column 
-                if (x == graphColumns.Count - 1) {
+                if (x == m_Columns.Count - 1) {
                     Console.ForegroundColor = ConsoleColor.Green;
                 }
-                DrawBar(graphColumns[x]);
+                DrawBar(m_Columns[x]);
                 Console.CursorLeft++;
             }
 
@@ -206,41 +206,41 @@ namespace PowerPing
             // Draw X axis of graph
             Console.Write(CompactGraph ? "             0 └" : "              0 └");
             // Save start of graph plotting area
-            plotStartX = Console.CursorLeft;
-            plotStartY = Console.CursorTop;
-            Console.WriteLine(new String('─', xAxisLength));
+            m_PlotStartX = Console.CursorLeft;
+            m_PlotStartY = Console.CursorTop;
+            Console.WriteLine(new String('─', m_xAxisLength));
             Console.WriteLine();
 
             // Draw info (and get location info for each label)
             Console.WriteLine("                 Ping Statistics:");
             Console.WriteLine("                -----------------------------------");
-            Console.WriteLine("                 Destination [ {0} ]", graphPingAttrs.Host);
+            Console.WriteLine("                 Destination [ {0} ]", m_PingAttributes.InputtedAddress);
 
             Console.Write("                     Sent: ");
-            sentLabelX = Console.CursorLeft;
-            sentLabelY = Console.CursorTop;
+            m_SentLabelX = Console.CursorLeft;
+            m_SentLabelY = Console.CursorTop;
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("           Received: ");
-            recLabelX = Console.CursorLeft;
-            recLabelY = Console.CursorTop;
+            m_RecvLabelX = Console.CursorLeft;
+            m_RecvLabelY = Console.CursorTop;
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Gray;
 
             Console.Write("                      RTT: ");
-            rttLabelX = Console.CursorLeft;
-            rttLabelY = Console.CursorTop;
+            m_RttLabelX = Console.CursorLeft;
+            m_RttLabelY = Console.CursorTop;
 
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write("               Lost: ");
-            failLabelX = Console.CursorLeft;
-            failLabelY = Console.CursorTop;
+            m_FailLabelX = Console.CursorLeft;
+            m_FailLabelY = Console.CursorTop;
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Gray;
             
             Console.Write("                 Time Elapsed: ");
-            timeLabelX = Console.CursorLeft;
-            timeLabelY = Console.CursorTop;
+            m_TimeLabelX = Console.CursorLeft;
+            m_TimeLabelY = Console.CursorTop;
             Console.WriteLine();
 
             EndCursorPosY = Console.CursorTop;
@@ -278,7 +278,7 @@ namespace PowerPing
             String blankLabel = new String(' ', 6);
 
             // Update sent label
-            Console.SetCursorPosition(sentLabelX, sentLabelY);
+            Console.SetCursorPosition(m_SentLabelX, m_SentLabelY);
             // Clear label first
             Console.Write(blankLabel);
             // Move cursor back
@@ -287,25 +287,25 @@ namespace PowerPing
             Console.Write(results.Sent);
 
             // Update recieve label
-            Console.SetCursorPosition(recLabelX, recLabelY);
+            Console.SetCursorPosition(m_RecvLabelX, m_RecvLabelY);
             Console.Write(blankLabel);
             Console.CursorLeft = Console.CursorLeft - 6;
             Console.Write(results.Received);
 
             // Update fail label
-            Console.SetCursorPosition(failLabelX, failLabelY);
+            Console.SetCursorPosition(m_FailLabelX, m_FailLabelY);
             Console.Write(blankLabel);
             Console.CursorLeft = Console.CursorLeft - 6;
             Console.Write(results.Lost);
 
             // Update RTT label
-            Console.SetCursorPosition(rttLabelX, rttLabelY);
+            Console.SetCursorPosition(m_RttLabelX, m_RttLabelY);
             Console.Write(blankLabel);
             Console.CursorLeft = Console.CursorLeft - 6;
             Console.Write("{0:0.0}ms", results.CurTime);
 
             // Update time label
-            Console.SetCursorPosition(timeLabelX, timeLabelY);
+            Console.SetCursorPosition(m_TimeLabelX, m_TimeLabelY);
             Console.Write(blankLabel + "        ");
             Console.CursorLeft = Console.CursorLeft - 14;
             Console.Write("{0:hh\\:mm\\:ss}", results.TotalRunTime);
@@ -388,12 +388,12 @@ namespace PowerPing
         /// </summary>
         private void AddColumnToGraph(String[] col)
         {
-            graphColumns.Add(col);
+            m_Columns.Add(col);
 
             // If number of columns exceeds x Axis length
-            if (graphColumns.Count >= xAxisLength) {
+            if (m_Columns.Count >= m_xAxisLength) {
                 // Remove first element
-                graphColumns.RemoveAt(0);
+                m_Columns.RemoveAt(0);
             }
         }
         /// <summary>
@@ -406,20 +406,20 @@ namespace PowerPing
             int cursorPositionY = Console.CursorTop;
 
             // Set cursor position to start of plot
-            Console.SetCursorPosition(plotStartX, plotStartY);
+            Console.SetCursorPosition(m_PlotStartX, m_PlotStartY);
 
-            String blankRow = new String(' ', xAxisLength);
-            String bottomRow = new String('─', xAxisLength);
+            String blankRow = new String(' ', m_xAxisLength);
+            String bottomRow = new String('─', m_xAxisLength);
 
             for (int x = 0; x <= (CompactGraph ? 11 : 21); x++) {
                 // Draw black spaces
                 Console.Write(blankRow);
-                Console.CursorLeft = plotStartX;
-                Console.CursorTop = plotStartY - x;
+                Console.CursorLeft = m_PlotStartX;
+                Console.CursorTop = m_PlotStartY - x;
             }
 
             // Draw bottom row
-            Console.CursorTop = plotStartY;
+            Console.CursorTop = m_PlotStartY;
             Console.Write(bottomRow);
 
             // Reset cursor to starting position

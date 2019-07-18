@@ -1,7 +1,7 @@
 ﻿/*
 MIT License - PowerPing 
 
-Copyright (c) 2018 Matthew Carney
+Copyright (c) 2019 Matthew Carney
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ namespace PowerPing
         // Properties
         public static bool Short { get; set; } = false;
         public static bool NoColor { get; set; } = false;
-        public static bool NoInput { get; set; } = true;
+        public static bool NoInput { get; set; } = false;
         public static bool UseSymbols { get; set; } = false;
         public static bool ShowOutput { get; set; } = true;
         public static bool ShowMessages { get; set; } = false;
@@ -47,6 +47,8 @@ namespace PowerPing
         public static bool ShowTimeouts { get; set; } = true;
         public static bool ShowRequests { get; set; } = false;
         public static bool ShowReplies { get; set; } = true;
+        public static bool ShowIntro { get; set; } = true;
+        public static bool ShowSummary { get; set; } = true;
         public static bool ShowChecksum { get; set; } = false;
         public static bool UseInputtedAddress { get; set; } = false;
         public static bool UseResolvedAddress { get; set; } = false;
@@ -109,7 +111,7 @@ namespace PowerPing
         const string REPLY_TIME_TXT = " time=";
 
         // Scan messages
-        const string SCAN_RANGE_TXT = "Scanning range [ {0} ] . . . ";
+        const string SCAN_RANGE_TXT = "Scanning range [ {0} ] ";
         const string SCAN_HOSTS_TXT = " Sent: {0} Found Hosts: {1}";
         const string SCAN_CUR_ADDR_TXT = " Pinging ";
         const string SCAN_RESULT_MSG = "Scan complete. {0} addresses scanned. {1} hosts active:";
@@ -160,7 +162,7 @@ Usage:
               [--b number] [--c number] [--w number] [-i number] [--in number]
               [--pt number] [--pc number] [--s number] [--m message] [--ti timing] 
               [--sh] [--dm] [--ts] [--nc] [--input] [--sym] [--r] [--nt] [--q] [--res]
-              [--ia] [--chk] [--l number] [dp number] target_name | target_address
+              [--ia] [--chk] [--l number] [--dp number] target_name | target_address
 
 Ping Options:
     --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)
@@ -175,7 +177,7 @@ Ping Options:
     --interval   [--in]  number   Interval between each ping (in milliseconds)
     --type       [--pt]  number   Use custom ICMP type
     --code       [--pc]  number   Use custom ICMP code value
-    --size       [--s]   number   Set size of packet (overwrites packet message)
+    --size       [--s]   number   Set size (in bytes) of packet (overwrites packet message)
     --message    [--m]   message  Ping packet message
     --timing     [--ti]  timing   Timing levels:
                                     0 - Paranoid    4 - Nimble
@@ -184,22 +186,20 @@ Ping Options:
                                     3 - Polite      7 - Random
 
 Display Options:
+    --noinput                     Don't ask for user input upon completion
     --shorthand  [--sh]           Show less detailed replies
     --displaymsg [--dm]           Display ICMP message field contents
     --timestamp  [--ts]           Display timestamp
     --nocolor    [--nc]           No colour
-    --input                       Require user input
     --symbols    [--sym]          Renders replies and timeouts as ASCII symbols
-    --request    [--r]            Show request packets
+    --requests   [--r]            Show request packets
     --notimeouts [--nt]           Don't display timeout messages
-    --quiet      [--q]            No output, only shows summary upon exit
+    --quiet      [--q]            No output (only affects normal ping)
     --resolve    [--res]          Resolve hostname of address from DNS
     --inputaddr  [--ia]           Show input address instead of revolved IP address
-    --checksum   [--chk]           Display checksum of packet
-    --limit      [--l]   number   Limits output to just replies(0) or requests(1)
-    --decimals   [--dp]  number   Num of decimal places to use(0 to 3)
-
-
+    --checksum   [--chk]          Display checksum of packet
+    --limit      [--l]   number   Limits output to just replies(1), requests(2) or summary(3)
+    --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
 
 Features:
     --scan       [--sc]  address  Network scanning, specify range ""127.0.0.1-55""
@@ -216,9 +216,8 @@ Other:
     --version    [--v]            Shows version and build information
     --examples   [--ex]           Displays some example usage
 
-type '--examples' for more
+Type '--examples' for more
 
-(Location info provided by http://freegeoip.net)
 Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=
 Find the project here[https://github.com/Killeroo/PowerPing]";
 
@@ -450,6 +449,8 @@ Get location information for 84.23.12.4";
 
             // Write version
             Console.WriteLine(version + (date ? "[Built " + buildTime + "]" : ""));
+            
+            Helper.WaitForUserInput();
         }
         /// <summary>
         /// Displays help message
@@ -457,13 +458,13 @@ Get location information for 84.23.12.4";
         public static void Help()
         {
             // Print help message
-            Version();
+            Version v = Assembly.GetExecutingAssembly().GetName().Version;
+            DateTime buildInfo = Assembly.GetExecutingAssembly().GetLinkerTime();
+            string version = Assembly.GetExecutingAssembly().GetName().Name + " v" + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ") ";
+            Console.WriteLine(version);
             Console.WriteLine(HELP_MSG);
 
-            if (!NoInput) {
-                // Wait for user input
-                PowerPing.Helper.Pause();
-            }
+            Helper.WaitForUserInput();
         }
         /// <summary>
         /// Displays example powerping usage
@@ -471,18 +472,16 @@ Get location information for 84.23.12.4";
         public static void Examples()
         {
             Console.WriteLine(EXAMPLE_MSG_PAGE_1);
+            Console.WriteLine("Press enter to continue...");
+            Console.ReadLine();
 
-            Helper.Pause();
             Console.WriteLine(EXAMPLE_MSG_PAGE_2);
+            Console.WriteLine("Press enter to continue...");
+            Console.ReadLine();
 
-            Helper.Pause();
             Console.WriteLine(EXAMPLE_MSG_PAGE_3);
 
-
-            if (!NoInput) {
-                // Wait for user input
-                PowerPing.Helper.Pause(true);
-            }
+            Helper.WaitForUserInput();
         }
         /// <summary>
         /// Display Initial ping message to screen, declaring simple info about the ping
@@ -491,14 +490,14 @@ Get location information for 84.23.12.4";
         /// <param name="ping">Ping object</param>
         public static void PingIntroMsg(PingAttributes attrs)
         {
-            if (!Display.ShowOutput) {
+            if (!Display.ShowOutput || !Display.ShowIntro) {
                 return;
             }
 
             // Construct string
             Console.WriteLine();
-            Console.Write(INTRO_ADDR_TXT, attrs.Host);
-            if (!String.Equals(attrs.Host, attrs.Address)) {
+            Console.Write(INTRO_ADDR_TXT, attrs.InputtedAddress);
+            if (!String.Equals(attrs.InputtedAddress, attrs.Address)) {
                 // Only show resolved address if inputted address and resolved address are different
                 Console.Write("[{0}] ", attrs.Address);
             }
@@ -539,7 +538,7 @@ Get location information for 84.23.12.4";
 
             // Print coloured type
             PacketType(packet);
-            Console.Write(REQUEST_CODE_TXT, packet.code);
+            Console.Write(REQUEST_CODE_TXT, packet.Code);
 
             // Display timestamp
             if (ShowTimeStamp) {
@@ -565,7 +564,7 @@ Get location information for 84.23.12.4";
 
             // If drawing symbols
             if (UseSymbols) {
-                if (packet.type == 0x00) {
+                if (packet.Type == 0x00) {
                     if (replyTime <= TimeSpan.FromMilliseconds(100)) {
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.Write("_");
@@ -595,7 +594,7 @@ Get location information for 84.23.12.4";
 
             // Display ICMP message (if specified)
             if (ShowMessages) {
-                string messageWithoutHeader = Encoding.ASCII.GetString(packet.message, 4, packet.message.Length - 4);
+                string messageWithoutHeader = Encoding.ASCII.GetString(packet.Message, 4, packet.Message.Length - 4);
                 Console.Write(REPLY_MSG_TXT, new string(messageWithoutHeader.Where(c => !char.IsControl(c)).ToArray()));
             }
 
@@ -615,7 +614,7 @@ Get location information for 84.23.12.4";
 
             // Display checksum
             if (ShowChecksum) {
-                Console.Write(REPLY_CHKSM_TXT, packet.checksum);
+                Console.Write(REPLY_CHKSM_TXT, packet.Checksum);
             }
 
             // Display timestamp
@@ -633,9 +632,9 @@ Get location information for 84.23.12.4";
         public static void CapturedPacket(ICMP packet, String address, String timeReceived, int bytesRead)
         {
             // Display captured packet
-            Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.type];
+            Console.BackgroundColor = packet.Type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.Type];
             Console.ForegroundColor = ConsoleColor.Black;
-            Console.WriteLine(CAPTURED_PACKET_MSG, timeReceived, bytesRead, address, packet.type, packet.code);
+            Console.WriteLine(CAPTURED_PACKET_MSG, timeReceived, bytesRead, address, packet.Type, packet.Code);
 
             // Reset console colours
             ResetColor();
@@ -691,7 +690,7 @@ Get location information for 84.23.12.4";
             }
             
         }
-        public static void ScanResults(int scanned, bool ranToEnd, List<Ping.ActiveHost> foundHosts)
+        public static void ScanResults(int scanned, bool ranToEnd, List<Scan.HostInformation> hosts)
         {
             Console.CursorVisible = true;
 
@@ -702,20 +701,18 @@ Get location information for 84.23.12.4";
             Console.ForegroundColor = DefaultForegroundColor;
             Console.Write(" addresses scanned. ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(foundHosts.Count);
+            Console.Write(hosts.Count);
             Console.ForegroundColor = DefaultForegroundColor;
             Console.WriteLine(" hosts found.");
-            if (foundHosts.Count != 0) {
-                for (int i = 0; i < foundHosts.Count; i++) {
-                    Ping.ActiveHost entry = foundHosts[i];
-                    Console.WriteLine((i == foundHosts.Count - 1 ? SCAN_END_CHAR : SCAN_CONNECTOR_CHAR) + SCAN_RESULT_ENTRY, entry.Address, entry.ResponseTime, entry.HostName != "" ? entry.HostName : "UNAVAILABLE");
+            if (hosts.Count != 0) {
+                for (int i = 0; i < hosts.Count; i++) {
+                    Scan.HostInformation entry = hosts[i];
+                    Console.WriteLine((i == hosts.Count - 1 ? SCAN_END_CHAR : SCAN_CONNECTOR_CHAR) + SCAN_RESULT_ENTRY, entry.Address, entry.ResponseTime, entry.HostName != "" ? entry.HostName : "UNAVAILABLE");
                 }
             }
             Console.WriteLine();
 
-            if (!NoInput) {
-                PowerPing.Helper.Pause();
-            }
+            Helper.WaitForUserInput();
         }
         /// <summary>
         /// Displays statistics for a ping object
@@ -723,6 +720,10 @@ Get location information for 84.23.12.4";
         /// <param name="ping"> </param>
         public static void PingResults(PingAttributes attrs, PingResults results)
         {
+            if (!Display.ShowOutput || !Display.ShowSummary) {
+                return;
+            }
+
             ResetColor();
 
             // Display stats
@@ -800,10 +801,8 @@ Get location information for 84.23.12.4";
                 Console.WriteLine();
             }
 
-            if (!NoInput) {
-                // Confirm to exit
-                PowerPing.Helper.Pause(true);
-            }
+
+            Helper.WaitForUserInput();
         }
         /// <summary>
         /// Displays and updates results of an ICMP flood
@@ -889,28 +888,15 @@ Get location information for 84.23.12.4";
         /// Display error message
         /// </summary>
         /// <param name="errMsg">Error message to display</param>
-        /// <param name="exit">Whether to exit program after displaying error</param>
-        public static void Error(String errMsg, bool exit = false, bool pause = false, bool newline = true)
+        public static void Error(string errMsg)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
 
             // Write error message
-            if (newline) {
-                Console.WriteLine(ERROR_TXT + errMsg);
-            } else {
-                Console.Write(ERROR_TXT + errMsg);
-            }
+            Console.WriteLine(ERROR_TXT + errMsg);
 
             // Reset console colours
             ResetColor();
-
-            if (pause && !NoInput) {
-                PowerPing.Helper.Pause();
-            }
-
-            if (exit) {
-                Environment.Exit(1);
-            }
         }
         /// <summary>
         /// Display a general message
@@ -935,26 +921,26 @@ Get location information for 84.23.12.4";
         {
             // Apply colour rules
             if (!NoColor) {
-                Console.BackgroundColor = packet.type > typeColors.Length ? ConsoleColor.White : typeColors[packet.type];
+                Console.BackgroundColor = packet.Type > typeColors.Length ? ConsoleColor.White : typeColors[packet.Type];
                 Console.ForegroundColor = ConsoleColor.Black;
             }
 
             // Print packet type
-            switch (packet.type) {
+            switch (packet.Type) {
                 case 3:
-                    Console.Write(packet.code > destUnreachableCodeValues.Length ? packetTypes[packet.type] : destUnreachableCodeValues[packet.code]);
+                    Console.Write(packet.Code > destUnreachableCodeValues.Length ? packetTypes[packet.Type] : destUnreachableCodeValues[packet.Code]);
                     break;
                 case 5:
-                    Console.Write(packet.code > redirectCodeValues.Length ? packetTypes[packet.type] : redirectCodeValues[packet.code]);
+                    Console.Write(packet.Code > redirectCodeValues.Length ? packetTypes[packet.Type] : redirectCodeValues[packet.Code]);
                     break;
                 case 11:
-                    Console.Write(packet.code > timeExceedCodeValues.Length ? packetTypes[packet.type] : timeExceedCodeValues[packet.code]);
+                    Console.Write(packet.Code > timeExceedCodeValues.Length ? packetTypes[packet.Type] : timeExceedCodeValues[packet.Code]);
                     break;
                 case 12:
-                    Console.Write(packet.code > badParameterCodeValues.Length ? packetTypes[packet.type] : badParameterCodeValues[packet.code]);
+                    Console.Write(packet.Code > badParameterCodeValues.Length ? packetTypes[packet.Type] : badParameterCodeValues[packet.Code]);
                     break;
                 default:
-                    Console.Write(packet.type > packetTypes.Length ? "[" + packet.type + "] UNASSIGNED " : packetTypes[packet.type]);
+                    Console.Write(packet.Type > packetTypes.Length ? "[" + packet.Type + "] UNASSIGNED " : packetTypes[packet.Type]);
                     break;
             }
 

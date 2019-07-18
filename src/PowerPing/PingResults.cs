@@ -1,7 +1,7 @@
 ﻿/*
 MIT License - PowerPing 
 
-Copyright (c) 2018 Matthew Carney
+Copyright (c) 2019 Matthew Carney
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ namespace PowerPing
     {
         // Properties
         public DateTime StartTime { get; private set; } // Time operation started at 
-        public TimeSpan TotalRunTime { get { return operationTimer.Elapsed; } } // Total ping operation runtime
+        public TimeSpan TotalRunTime { get { return m_OperationTimer.Elapsed; } } // Total ping operation runtime
         public ulong Sent { get; set; } // Number of sent ping packets
         public ulong Received { get; set; } // Number of received packets
         public ulong Lost { get; set; }  // Amount of lost packets
@@ -49,9 +49,8 @@ namespace PowerPing
         public bool HasOverflowed { get; set; } // Specifies if any of the results have overflowed
         public bool ScanWasCanceled { get; set; } // Whether the scan was canceled early
 
-        // Local variables
-        private readonly Stopwatch operationTimer = new Stopwatch();
-        private double sum = 0; // Sum of all reply times
+        private readonly Stopwatch m_OperationTimer = new Stopwatch();
+        private double m_ResponseTimeSum = 0; // Sum of all reply times
 
         public PingResults()
         {
@@ -73,7 +72,7 @@ namespace PowerPing
             StartTime = DateTime.Now;
 
             // Start timing operation
-            operationTimer.Start();
+            m_OperationTimer.Start();
         }
 
         public void SaveResponseTime(double time)
@@ -95,8 +94,8 @@ namespace PowerPing
 
             try {
                 // Work out average
-                sum += time;
-                AvgTime = sum / Received; // Avg = Total / Count
+                m_ResponseTimeSum += time;
+                AvgTime = m_ResponseTimeSum / Received; // Avg = Total / Count
             } catch (OverflowException) {
                 HasOverflowed = true;
             }

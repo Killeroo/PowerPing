@@ -1,7 +1,7 @@
 ﻿/*
 MIT License - PowerPing 
 
-Copyright (c) 2018 Matthew Carney
+Copyright (c) 2019 Matthew Carney
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,18 @@ SOFTWARE.
 
 namespace PowerPing
 {
+    public enum PingOperation
+    {
+        Normal,
+        Flood,
+        Listen,
+        Scan,
+        Graph,
+        CompactGraph,
+        Location,
+        Whoami,
+        Whois
+    }
 
     /// <summary>
     /// Stores attributes of a ping operation
@@ -31,10 +43,10 @@ namespace PowerPing
     public class PingAttributes
     {
         // Properties
-        public string Host { get; set; } // Name of host being pinged // TODO: Rename to display/inputted name
-        public string Address { get; set; } // Address to send the ping to
+        public string InputtedAddress { get; set; } // Address as it was inputted by user 
+        public string Address { get; set; } // Address to send the ping to (after lookup etc)
         public string Message { get; set; } // Message to store with in ICMP message field
-        public string Source { get; set; }
+        public string Source { get; set; } // (NOT USED)
         public int Interval { get; set; } // Time interval between sending each ping
         public int Timeout { get; set; } // Recieve timeout (milliseconds)
         public int Count { get; set; } // Number of pings to send
@@ -50,13 +62,14 @@ namespace PowerPing
         public bool RandomMsg { get; set; } // Fills ICMP message field with random characters    
         public bool DontFragment { get; set; } // Sets the Don't Fragment flag in an IPv4 header
         public bool RandomTiming { get; set; } // Generate random wait time each time ping is sent
-        public string[] AddressList { get; set; } // Optional attribute: Used when scanning, stores addresses to ping
+        public string[] AddressList { get; set; } // Optional attribute: Used when scanning, stores addresses to ping (NOT USED)
+        public PingOperation Operation { get; set; } // Current ping operation we are performing
 
         public PingAttributes()
         {
             // Default attributes
-            Host = "localhost";
-            Address = "127.0.0.1";
+            InputtedAddress = "";
+            Address = "";
             Message = "R U Alive?";
             Interval = 1000;
             Timeout = 3000;
@@ -74,6 +87,7 @@ namespace PowerPing
             RecieveBufferSize = 5096;
             DontFragment = false;
             RandomTiming = false;
+            Operation = PingOperation.Normal;
         }
     }
 

@@ -10,11 +10,11 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Matthew Carney")]
 [assembly: AssemblyProduct("PowerPing")]
-[assembly: AssemblyCopyright("Copyright © Matthew Carney 2018")]
+[assembly: AssemblyCopyright("Copyright © Matthew Carney 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
 [assembly: ComVisible(false)]
 [assembly: Guid("4fa774f6-c5f6-4429-bf60-c3cfc61ec560")]
 
-[assembly: AssemblyVersion("1.3.0.*")]
+[assembly: AssemblyVersion("1.3.1")]

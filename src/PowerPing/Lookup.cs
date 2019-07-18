@@ -1,4 +1,28 @@
-﻿using System;
+﻿/*
+MIT License - PowerPing 
+
+Copyright (c) 2019 Matthew Carney
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+using System;
 using System.Xml;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -6,7 +30,6 @@ using System.Net.Sockets;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PowerPing
 {
@@ -46,36 +69,39 @@ namespace PowerPing
         }
 
         /// <summary>
-        /// Gets location information about IP Address
-        /// IP location info by freegeoip.net
+        /// Prints location information about IP Address
         /// </summary>
         /// <param name="addr">Address to get location info on. Can be in IP or address format.</param>
         /// <param name="detailed">Display detailed or simplified location info</param>
-        /// <returns>none detailed information string</returns>
-        public static string AddressLocation(string addr, bool detailed)
+        public static void AddressLocation(string addr, bool detailed)
         {
-            string loc = null;
-
             try {
 
                 using (var objClient = new System.Net.WebClient()) {
 
                     // Download xml data for address
-                    var file = objClient.DownloadString("http://freegeoip.net/xml/" + addr);
+                    var file = objClient.DownloadString(
+                        $"http://api.ipstack.com/{addr}?access_key=INSERT_KEY_HERE&output=xml");
 
                     // Load xml file into object
                     XmlDocument xmlDoc = new XmlDocument();
                     xmlDoc.LoadXml(file);
                     XmlNodeList elements = (xmlDoc.DocumentElement).ChildNodes;
 
+                    if (elements == null) {
+                        throw new Exception();
+                    }
+
                     // Print it out
                     if (detailed) {
                         Console.WriteLine("Queried address: --{0}--", addr);
                         foreach (XmlElement element in elements) {
-                            Console.WriteLine(element.Name + ": " + (element.InnerText == "" ? "NA" : element.InnerText));
+                            if (element.Name != "location") {
+                                Console.WriteLine(element.Name + ": " + (element.InnerText == "" ? "NA" : element.InnerText));
+                            }
                         }
-                        Console.WriteLine(PerformWhoIsLookup("whois.verisign-grs.com", addr));
                     } else {
+                        string loc = null;
                         if (elements[2].InnerText != "") {
                             loc = "[" + elements[2].InnerText;
                         }
@@ -86,20 +112,15 @@ namespace PowerPing
                             loc = loc + ", " + elements[5].InnerText;
                         }
                         loc += "]";
+
+                        Console.WriteLine(loc);
                     }
                 }
             } catch (Exception) {
-                loc = "[Location unavaliable]";
                 Console.WriteLine("[Location unavaliable]");
             }
-
-            Console.WriteLine(loc);
-
-            if (!Display.NoInput) {
-                Helper.Pause();
-            }
-
-            return loc;
+            
+            Helper.WaitForUserInput();
         }
 
         /// <summary>
@@ -114,7 +135,7 @@ namespace PowerPing
 
             // Check address format
             if (Uri.CheckHostName(address) == UriHostNameType.Unknown) {
-                PowerPing.Display.Error("PowerPing could not resolve host [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
+                Helper.ErrorAndExit("PowerPing could not resolve host [" + address + "] " + Environment.NewLine + "Check address and try again.");
             }
 
             // Only resolve address if not already in IP address format
@@ -135,7 +156,7 @@ namespace PowerPing
 
             // If no address resolved then exit
             if (ipAddr == null) {
-                PowerPing.Display.Error("PowerPing could not find host [" + address + "] " + Environment.NewLine + "Check address and try again.", true, true);
+                Helper.ErrorAndExit("PowerPing could not find host [" + address + "] " + Environment.NewLine + "Check address and try again.");
             }
 
             return ipAddr.ToString();
@@ -175,7 +196,7 @@ namespace PowerPing
 
             // Quick sanity check before we proceed
             if (keyword == "" || tld == "") {
-                PowerPing.Display.Error("Incorrectly formatted address, please check format and try again (web addresses only)", true);
+                Helper.ErrorAndExit("Incorrectly formatted address, please check format and try again");
             }
             PowerPing.Display.Message("WHOIS [" + address + "]:", ConsoleColor.Yellow);
 
@@ -196,9 +217,7 @@ namespace PowerPing
             Console.WriteLine(result);
             PowerPing.Display.Message("WHOIS LOOKUP FOR [" + address + "] COMPLETE.", ConsoleColor.Yellow);
 
-            if (!Display.NoInput) {
-                Helper.Pause();
-            }
+            Helper.WaitForUserInput();
         }
 
         /// <summary>

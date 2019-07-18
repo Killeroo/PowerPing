@@ -1,7 +1,7 @@
 ﻿/*
 MIT License - PowerPing 
 
-Copyright (c) 2018 Matthew Carney
+Copyright (c) 2019 Matthew Carney
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -30,23 +30,22 @@ using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace PowerPing
 {
     /// <summary>
     /// Ping Class, used for constructing and sending ICMP packets.
-    /// Also contains other ping-like functions such as flooding, listening
-    /// scanning and others.
     /// </summary>
     class Ping
     {
-        private static readonly ushort sessionId = Helper.GenerateSessionId();
-        private readonly CancellationToken cancellationToken;
-        private bool debug = false;
+        private static readonly ushort m_SessionId = Helper.GenerateSessionId();
+        private readonly CancellationToken m_CancellationToken;
+        private bool m_Debug = false;
 
         public Ping(CancellationToken cancellationTkn)
         {
-            cancellationToken = cancellationTkn;
+            m_CancellationToken = cancellationTkn;
         }
 
         /// <summary>
@@ -58,20 +57,22 @@ namespace PowerPing
         /// </summary>
         public PingResults Send(PingAttributes attrs, Action<PingResults> onResultsUpdate = null)
         {
-            // Lookup address
-            attrs.Address = PowerPing.Lookup.QueryDNS(attrs.Host, attrs.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+            // Lookup host if specified
+            if (attrs.InputtedAddress != "") {
+                attrs.Address = PowerPing.Lookup.QueryDNS(attrs.InputtedAddress, attrs.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+            }
 
             PowerPing.Display.PingIntroMsg(attrs);
 
             if (Display.UseResolvedAddress) {
                 try {
-                    attrs.Host = Helper.RunWithCancellationToken(() => Lookup.QueryHost(attrs.Address), cancellationToken);
+                    attrs.InputtedAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(attrs.Address), m_CancellationToken);
                 } catch (OperationCanceledException) {
                     return new PingResults();
                 }
-                if (attrs.Host == "") {
+                if (attrs.InputtedAddress == "") {
                     // If reverse lookup fails just display whatever is in the address field
-                    attrs.Host = attrs.Address; 
+                    attrs.InputtedAddress = attrs.Address; 
                 }
             }
 
@@ -110,27 +111,26 @@ namespace PowerPing
                 PowerPing.Display.ListenIntroMsg();
 
                 // Listening loop
-                while (!cancellationToken.IsCancellationRequested) {
+                while (!m_CancellationToken.IsCancellationRequested) {
                     byte[] buffer = new byte[4096]; // TODO: could cause overflow?
                     
                     // Recieve any incoming ICMPv4 packets
                     EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                    int bytesRead = Helper.RunWithCancellationToken(() => listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint), cancellationToken);
+                    int bytesRead = Helper.RunWithCancellationToken(() => listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint), m_CancellationToken);
                     ICMP response = new ICMP(buffer, bytesRead);
 
                     // Display captured packet
                     PowerPing.Display.CapturedPacket(response, remoteEndPoint.ToString(), DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead);
 
                     // Store results
-                    results.CountPacketType(response.type);
+                    results.CountPacketType(response.Type);
                     results.Received++;
                 }
             } catch (OperationCanceledException) {
             } catch (SocketException) {
                 PowerPing.Display.Error("Could not read packet from socket");
-                results.Lost++;
-            } catch (Exception) {
-                PowerPing.Display.Error("General exception occured", true);
+            } catch (Exception e) {
+                PowerPing.Display.Error($"General exception occured while trying to create listening socket (Exception: {e.GetType().ToString().Split('.').Last()}");
             }
 
             // Clean up
@@ -144,139 +144,6 @@ namespace PowerPing
         /// Not implemented yet
         /// </summary>
         public void Trace() { throw new NotSupportedException(); }
-        /// <summary>
-        /// Network scanning method.
-        ///
-        /// Uses pings to scan a IP address range and identify hosts
-        /// that are active.
-        ///
-        /// range should be in format 192.0.0.1-255, where - denotes the range
-        /// This can be specified at any octlet of the address (192.0.1-100.1.255)
-        /// </summary>
-        /// <param name="range">Range of addresses to scan</param>
-        public void Scan(string range, bool recursing = false)
-        {
-            List<string> scanList = new List<string>(); // List of addresses to scan
-            String[] ipSegments = range.Split('.');
-            List<ActiveHost> activeHosts = new List<ActiveHost>();
-            Stopwatch scanTimer = new Stopwatch();
-            int scanned = 0;
-            
-            // Setup scan ping attributes
-            PingAttributes attrs = new PingAttributes();
-            attrs.Timeout = 500;
-            attrs.Interval = 0;
-            attrs.Count = 1;
-            Display.ShowOutput = false;
-
-            // Check format of address (for '-'s and disallow multipl '-'s in one segment)
-            if (!range.Contains("-")) {
-                Display.Error("Scan - No range specified, must be specified in format: 192.168.1.1-254", true, true);
-            }
-
-            // Holds the ranges for each ip segment
-            int[] segLower = new int[4];
-            int[] segUpper = new int[4];
-
-            // Work out upper and lower ranges for each segment
-            try{
-                for (int y = 0; y < 4; y++) {
-                    string[] ranges = ipSegments[y].Split('-');
-                    segLower[y] = Convert.ToInt16(ranges[0]);
-                    segUpper[y] = (ranges.Length == 1) ? segLower[y] : Convert.ToInt16(ranges[1]);
-                }
-            } catch (FormatException) {
-                Display.Error("Scan - Incorrect format [" + range + "], must be specified in format: 192.168.1.1-254", true, true);
-            }
-
-            // Build list of addresses from ranges
-            for (int seg1 = segLower[0]; seg1 <= segUpper[0]; seg1++) {
-                for (int seg2 = segLower[1]; seg2 <= segUpper[1]; seg2++) {
-                    for (int seg3 = segLower[2]; seg3 <= segUpper[2]; seg3++) {
-                        for (int seg4 = segLower[3]; seg4 <= segUpper[3]; seg4++) {
-                            scanList.Add(new IPAddress(new byte[] { (byte)seg1, (byte)seg2, (byte)seg3, (byte)seg4 }).ToString());
-                        }
-                    }
-                }
-            }
-
-            scanTimer.Start();
-
-            try {
-                // Scan loop
-                foreach (string host in scanList) {
-                    // Update host
-                    attrs.Address = host;
-
-                    // Send ping
-                    PingResults results = SendICMP(attrs);
-                    if (results.ScanWasCanceled) {
-                        // Cancel was requested during scan
-                        throw new OperationCanceledException();
-                    }
-                    scanned++;
-                    Display.ScanProgress(scanned, activeHosts.Count, scanList.Count, scanTimer.Elapsed, range, attrs.Address);
-
-                    if (results.Lost == 0 && results.ErrorPackets != 1) {
-                        // If host is active, add to list
-                        string hostName = Helper.RunWithCancellationToken(() => Lookup.QueryHost(host), cancellationToken);
-                        activeHosts.Add(new ActiveHost {
-                            Address = host,
-                            HostName = hostName,
-                            ResponseTime = results.CurTime
-                        });
-                    }
-                }
-            } catch (OperationCanceledException) { }
-
-            PowerPing.Display.ScanResults(scanned, !cancellationToken.IsCancellationRequested, activeHosts);
-        }
-        /// <summary>
-        /// Sends high volume of ping packets
-        /// </summary>
-        public void Flood(string address)
-        {
-            PingAttributes attrs = new PingAttributes();
-            RateLimiter displayUpdateLimiter = new RateLimiter(TimeSpan.FromMilliseconds(500));
-            ulong previousPingsSent = 0;
-
-            // Verify address
-            attrs.Address = PowerPing.Lookup.QueryDNS(address, AddressFamily.InterNetwork);
-
-            // Setup ping attributes
-            attrs.Interval = 0;
-            attrs.Timeout = 100;
-            attrs.Message = "R U Dead Yet?";
-            attrs.Continous = true;
-
-            // Disable output for faster speeds
-            Display.ShowOutput = false;
-
-            // This callback will run after each ping iteration
-            void ResultsUpdateCallback(PingResults r) {
-                // Make sure we're not updating the display too frequently
-                if (!displayUpdateLimiter.RequestRun()) {
-                    return;
-                }
-
-                // Calculate pings per second
-                double pingsPerSecond = 0;
-                if (displayUpdateLimiter.ElapsedSinceLastRun != TimeSpan.Zero) {
-                    pingsPerSecond = (r.Sent - previousPingsSent) / displayUpdateLimiter.ElapsedSinceLastRun.TotalSeconds;
-                }
-                previousPingsSent = r.Sent;
-
-                // Update results text
-                Display.FloodProgress(r.Sent, (ulong)Math.Round(pingsPerSecond), address);
-            }
-
-            // Start flooding
-            PingResults results = Send(attrs, ResultsUpdateCallback);
-
-            // Display results
-            Display.PingResults(attrs, results);
-        }
-
         /// <summary>
         /// Creates a raw socket for ping operations.
         ///
@@ -296,7 +163,7 @@ namespace PowerPing
             try {
                 s = new Socket(family, SocketType.Raw, family == AddressFamily.InterNetwork ? ProtocolType.Icmp : ProtocolType.IcmpV6);
             } catch (SocketException) {
-                PowerPing.Display.Error("Socket cannot be created " + Environment.NewLine + "Please run as Administrator and try again.", true);
+                PowerPing.Helper.ErrorAndExit("Socket cannot be created " + Environment.NewLine + "Please run as Administrator and try again.");
             }
             return s;
         }
@@ -351,19 +218,19 @@ namespace PowerPing
             }
 
             // Construct our ICMP packet
-            packet.type = attrs.Type;
-            packet.code = attrs.Code;
-            Buffer.BlockCopy(BitConverter.GetBytes(sessionId), 0, packet.message, 0, 2); // Add identifier to ICMP message
-            Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length); // Add text into ICMP message
-            packet.messageSize = payload.Length + 4;
-            packetSize = packet.messageSize + 4;
+            packet.Type = attrs.Type;
+            packet.Code = attrs.Code;
+            Buffer.BlockCopy(BitConverter.GetBytes(m_SessionId), 0, packet.Message, 0, 2); // Add identifier to ICMP message
+            Buffer.BlockCopy(payload, 0, packet.Message, 4, payload.Length); // Add text into ICMP message
+            packet.MessageSize = payload.Length + 4;
+            packetSize = packet.MessageSize + 4;
 
             // Sending loop
             for (int index = 1; attrs.Continous || index <= attrs.Count; index++) {
 
                 if (index != 1) {
                     // Wait for set interval before sending again or cancel if requested
-                    if (cancellationToken.WaitHandle.WaitOne(attrs.Interval)) {
+                    if (m_CancellationToken.WaitHandle.WaitOne(attrs.Interval)) {
                         break;
                     }
 
@@ -375,24 +242,24 @@ namespace PowerPing
 
                 // Include sequence number in ping message
                 ushort sequenceNum = (ushort)index;
-                Buffer.BlockCopy(BitConverter.GetBytes(sequenceNum), 0, packet.message, 2, 2);
+                Buffer.BlockCopy(BitConverter.GetBytes(sequenceNum), 0, packet.Message, 2, 2);
 
                 // Fill ICMP message field
                 if (attrs.RandomMsg) {
                     payload = Encoding.ASCII.GetBytes(Helper.RandomString());
-                    Buffer.BlockCopy(payload, 0, packet.message, 4, payload.Length);
+                    Buffer.BlockCopy(payload, 0, packet.Message, 4, payload.Length);
                 }
 
                 // Update packet checksum
-                packet.checksum = 0;
+                packet.Checksum = 0;
                 UInt16 chksm = packet.GetChecksum();
-                packet.checksum = chksm;
+                packet.Checksum = chksm;
 
                 try {
 
                     // Show request packet
                     if (Display.ShowRequests) {
-                        Display.RequestPacket(packet, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : attrs.Address, index);
+                        Display.RequestPacket(packet, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.InputtedAddress : attrs.Address, index);
                     }
 
                     // If there were extra responses from a prior request, ignore them
@@ -406,7 +273,7 @@ namespace PowerPing
                     try { results.Sent++; }
                     catch (OverflowException) { results.HasOverflowed = true; }
                     
-                    if (debug) {
+                    if (m_Debug) {
                         // Induce random wait for debugging 
                         Random rnd = new Random();
                         Thread.Sleep(rnd.Next(700));
@@ -418,7 +285,7 @@ namespace PowerPing
                     TimeSpan replyTime = TimeSpan.Zero;
                     do {
                         // Cancel if requested
-                        cancellationToken.ThrowIfCancellationRequested();
+                        m_CancellationToken.ThrowIfCancellationRequested();
 
                         // Set receive timeout, limited to 250ms so we don't block very long without checking for
                         // cancellation. If the requested ping timeout is longer, we will wait some more in subsequent
@@ -445,10 +312,10 @@ namespace PowerPing
 
                             // If we sent an echo and receive a response with a different identifier or sequence
                             // number, ignore it (it could correspond to an older request that timed out)
-                            if (packet.type == 8 && response.type == 0) {
-                                ushort responseSessionId = BitConverter.ToUInt16(response.message, 0);
-                                ushort responseSequenceNum = BitConverter.ToUInt16(response.message, 2);
-                                if (responseSessionId != sessionId || responseSequenceNum != sequenceNum) {
+                            if (packet.Type == 8 && response.Type == 0) {
+                                ushort responseSessionId = BitConverter.ToUInt16(response.Message, 0);
+                                ushort responseSequenceNum = BitConverter.ToUInt16(response.Message, 2);
+                                if (responseSessionId != m_SessionId || responseSequenceNum != sequenceNum) {
                                     response = null;
                                 }
                             }
@@ -457,13 +324,13 @@ namespace PowerPing
 
                     // Display reply packet
                     if (Display.ShowReplies) {
-                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.Host : responseEP.ToString(), index, replyTime, bytesRead);
+                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.InputtedAddress : responseEP.ToString(), index, replyTime, bytesRead);
                     }
 
                     // Store response info
                     try { results.Received++; }
                     catch (OverflowException) { results.HasOverflowed = true; }
-                    results.CountPacketType(response.type);
+                    results.CountPacketType(response.Type);
                     results.SaveResponseTime(replyTime.TotalMilliseconds);
                     
                     if (attrs.BeepLevel == 2) {
