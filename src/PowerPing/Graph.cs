@@ -25,6 +25,7 @@ SOFTWARE.
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Linq;
 
 namespace PowerPing
 {
@@ -47,6 +48,7 @@ namespace PowerPing
         private readonly Ping m_Ping;
         private readonly PingAttributes m_PingAttributes = new PingAttributes();
         private readonly List<String[]> m_Columns = new List<string[]>();
+        private readonly List<string> m_ResponseTimes = new List<string>();
         private bool m_IsGraphSetup = false;
         private int m_yAxisLength = 20;
         private int m_xAxisLength = 40;
@@ -113,6 +115,8 @@ namespace PowerPing
                 Console.CursorTop = m_PlotStartY;
                 Console.CursorLeft = m_PlotStartX;
 
+                DrawYAxisLabels();
+
                 // Draw graph columns
                 DrawGraphColumns();
 
@@ -145,6 +149,7 @@ namespace PowerPing
         /// <summary>
         /// Draw all graph coloums/bars
         /// </summary>
+        bool inverting = true;
         private void DrawGraphColumns()
         {
             // Clear columns space before drawing
@@ -154,7 +159,7 @@ namespace PowerPing
                 // Change colour for most recent column 
                 if (x == m_Columns.Count - 1) {
                     Console.ForegroundColor = ConsoleColor.Green;
-                }
+                } 
                 DrawBar(m_Columns[x]);
                 Console.CursorLeft++;
             }
@@ -275,12 +280,15 @@ namespace PowerPing
         }
         public void DrawYAxisLabels()
         {
-            m_Scale = 1;
-            CompactGraph = true;
+            //m_Scale = 1;
+            //CompactGraph = true;
 
             int factor = CompactGraph ? 1 : 2;
             int maxLines = CompactGraph ? 10 : 20;
             int maxYValue = maxLines * m_Scale;
+
+            int topStart = Console.CursorTop;
+            int leftStart = Console.CursorLeft;
 
             Console.CursorTop = m_yAxisStart;
 
@@ -309,6 +317,9 @@ namespace PowerPing
                 currValue -= m_Scale;
             }
             
+            // Reset cursor position
+            Console.CursorLeft = leftStart;
+            Console.CursorTop = topStart;
         }
         /// <summary>
         /// Update graph text labels
@@ -406,36 +417,46 @@ namespace PowerPing
             // Replace lowest bar segment
             bar[0] = "▀";
 
-            // Work out top segment based on length
-            if (CompactGraph) { // Work out for compact graph
-                if (count + 1 % 2 == 0) {
-                    bar[count] = FULL_BAR_BLOCK_CHAR;
-                } else if (time <= 100) {
-                    if (time <= 50) {
-                        bar[count] = "▀";
-                    } else {
-                        bar[count] = HALF_BAR_BLOCK_CHAR;
-                    }
-                } else {
-                    bar[count] = FULL_BAR_BLOCK_CHAR;
-                }
-            } else { // Work out for full graph
-                if (count + 1 % 2 == 0) {
-                    bar[count] = FULL_BAR_BLOCK_CHAR;
-                } else if (time <= 100) {
-                    if (time <= 25) {
-                        bar[count] = "▀";
-                    } else if (time <= 50) {
-                        bar[count] = HALF_BAR_BLOCK_CHAR;
-                    } else if (time <= 75) {
-                        bar[count] = FULL_BAR_BLOCK_CHAR;
-                    } else {
-                        bar[count] = HALF_BAR_BLOCK_CHAR;
-                    }
-                } else {
-                    bar[count] = FULL_BAR_BLOCK_CHAR;
-                }
+            // Replace the last segment based on graph size
+            if (CompactGraph)
+            {
+                bar[bar.Length - 1] = FULL_BAR_BLOCK_CHAR;
             }
+            else
+            {
+                bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
+            }
+
+            //// Work out top segment based on length
+            //if (CompactGraph) { // Work out for compact graph
+            //    if (count + 1 % 2 == 0) {
+            //        bar[count] = FULL_BAR_BLOCK_CHAR;
+            //    } else if (time <= 100) {
+            //        if (time <= 50) {
+            //            bar[count] = "▀";
+            //        } else {
+            //            bar[count] = HALF_BAR_BLOCK_CHAR;
+            //        }
+            //    } else {
+            //        bar[count] = FULL_BAR_BLOCK_CHAR;
+            //    }
+            //} else { // Work out for full graph
+            //    if (count + 1 % 2 == 0) {
+            //        bar[count] = FULL_BAR_BLOCK_CHAR;
+            //    } else if (time <= 100) {
+            //        if (time <= 25) {
+            //            bar[count] = "▀";
+            //        } else if (time <= 50) {
+            //            bar[count] = HALF_BAR_BLOCK_CHAR;
+            //        } else if (time <= 75) {
+            //            bar[count] = FULL_BAR_BLOCK_CHAR;
+            //        } else {
+            //            bar[count] = HALF_BAR_BLOCK_CHAR;
+            //        }
+            //    } else {
+            //        bar[count] = FULL_BAR_BLOCK_CHAR;
+            //    }
+            //}
 
             return bar;
 
