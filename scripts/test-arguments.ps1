@@ -1,6 +1,7 @@
 ﻿$powershellLocation = (Get-Location).Path + "\PowerPing.exe"
 Write-Warning $powershellLocation
 
+$global:FailedTestDescriptions = @()
 $global:stats = @{
     TestsPerformed   = [uint64] 0;
     TestsPassed      = [uint64] 0;
@@ -22,6 +23,7 @@ function Run-Test($description, $arguments, [int]$returnCode)
     } else {
         Write-Host("--- Test Failed ---") -ForegroundColor Red 
         $stats.TestsFailed += 1
+        $global:FailedTestDescriptions += $description
     }
 
 }
@@ -62,20 +64,29 @@ Run-Test "Test url with protocol" "-c 1 https://google.com" 1
 Run-Test "Test full url" "https://en.wikipedia.org/w/index.php?search=harimau&title=Special%3ASearch&go=Go&ns0=1" 1
 
 Write-Host
-Write-Host "Test argument parameters"
+Write-Host "Test arguments"
 Write-Host "----------------------"
 Run-Test "Test `'count`' with parameter" "-c 1 8.8.8.8" 0
+Run-Test "Test `'count`' with missing address" "-c 1" 1
 Run-Test "Test `'count`' with empty parameter" "-c 8.8.8.8" 1
 Run-Test "Test `'count`' with invalid positive parameter" "-c 100000000000000000000000000000000000000000000000000000000000000000000000000000000000 8.8.8.8" 1
 Run-Test "Test `'count`' with invalid negative parameter" "-c -1 8.8.8.8" 1
 Run-Test "Test `'limit`' with paramater" "-l 1 8.8.8.8" 0
+Run-Test "Test `'limit`' with missing address" "-l 1" 1
 Run-Test "Test `'limit`' with empty parameter" "-l 8.8.8.8" 1
 Run-Test "Test `'limit`' with invalid positive parameter" "-l 2 8.8.8.8" 1
 Run-Test "Test `'limit`' with invalid negative parameter" "-l -1 8.8.8.8" 1
 Run-Test "Test `'decimals`' with parameter" "-dp 1 8.8.8.8" 0
+Run-Test "Test `'decimals`' with missing address" "-dp 1" 1
+Run-Test "Test `'decimals`' with empty argument" "-dp" 1
 Run-Test "Test `'decimals`' with empty parameter" "-dp 8.8.8.8" 1
-Run-Test "Test `'decimals`' with invalid positive parameter" "-dp 4" 1
-Run-Test "Test `'decimals`' with invalid negative parameter" "-dp -1" 1
+Run-Test "Test `'decimals`' with invalid positive parameter" "-dp 4 8.8.8.8" 1
+Run-Test "Test `'decimals`' with invalid negative parameter" "-dp -1 8.8.8.8" 1
+Run-Test "Test `'timing`' with parameter" "-ti 4 8.8.8.8" 0
+Run-Test "Test `'timing`' with missing address" "-ti 4" 1
+Run-Test "Test `'timing`' with empty argument" "-ti 8.8.8.8" 1
+Run-Test "Test `'timing`' with invalid positive parameter" "-ti 8 8.8.8.8" 1
+Run-Test "Test `'timing`' with invalid negative parameter" "-ti -1 8.8.8.8" 1
 
 
 Write-Host
@@ -91,5 +102,9 @@ Run-Test "Test url at end" "-c 1 -ts google.com" 0
 Write-Host
 Write-Host($stats.TestsPerformed.ToString() + " tests performed. " + $stats.TestsPassed.ToString() + " tests passed, " +$stats.TestsFailed.ToString() + " failed.")
 if ($stats.TestsFailed -gt 0) {
-    Write-Warning("One or more tests failed.");
+    Write-Warning("One or more tests failed:");
+    foreach ($test in $global:FailedTestDescriptions) {
+        Write-Host("-> ") -NoNewline
+        Write-Host($test) -ForegroundColor Yellow
+    }
 }
