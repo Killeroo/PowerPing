@@ -186,7 +186,7 @@ Ping Options:
                                     3 - Polite      7 - Random
 
 Display Options:
-    --noinput                     Don't ask for user input upon completion
+    --noinput    [--ni]           Don't ask for user input upon completion
     --shorthand  [--sh]           Show less detailed replies
     --displaymsg [--dm]           Display ICMP message field contents
     --timestamp  [--ts]           Display timestamp

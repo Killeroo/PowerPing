@@ -188,10 +188,15 @@ namespace PowerPing
                             case "--nc": // No color mode
                                 Display.NoColor = true;
                                 break;
+                            case "/ni":
+                            case "-ni":
+                            case "--ni":
                             case "/noinput":
                             case "-noinput":
                             case "--noinput":// No input mode
                                 Display.NoInput = true;
+                                Properties.Settings.Default.RequireInput = !Properties.Settings.Default.RequireInput;
+                                Properties.Settings.Default.Save();
                                 break;
                             case "/decimals":
                             case "-decimals":
