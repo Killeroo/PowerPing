@@ -48,11 +48,11 @@ namespace PowerPing
         private readonly Ping m_Ping;
         private readonly PingAttributes m_PingAttributes = new PingAttributes();
         private readonly List<String[]> m_Columns = new List<string[]>();
-        private readonly List<string> m_ResponseTimes = new List<string>();
+        private readonly List<double> m_ResponseTimes = new List<double>();
         private bool m_IsGraphSetup = false;
         private int m_yAxisLength = 20;
         private int m_xAxisLength = 40;
-        private int m_Scale = 1;
+        private int m_Scale = 20;
 
         // Location of graph plotting space
         private int m_PlotStartX;
@@ -107,24 +107,25 @@ namespace PowerPing
             // This callback will run after each ping iteration
             void ResultsUpdateCallback(PingResults r) {
                 // Make sure we're not updating the display too frequently
-                if (!displayUpdateLimiter.RequestRun()) {
-                    return;
-                }
+                //if (!displayUpdateLimiter.RequestRun()) {
+                //    return;
+                //}
+                
 
                 // Reset position
                 Console.CursorTop = m_PlotStartY;
                 Console.CursorLeft = m_PlotStartX;
 
-                DrawYAxisLabels();
+                // Update labels
+                UpdateLegend(r);
+
+                // Get results from ping and add to graph
+                AddResponseToGraph(r.CurrTime);
 
                 // Draw graph columns
                 DrawGraphColumns();
 
-                // Update labels
-                UpdateLabels(r);
-
-                // Get results from ping and add to graph
-                AddColumnToGraph(CreateColumn(r.CurTime));
+                DrawYAxisLabels();
 
                 Console.CursorTop = EndCursorPosY;
             }
@@ -153,15 +154,17 @@ namespace PowerPing
         private void DrawGraphColumns()
         {
             // Clear columns space before drawing
+            // TODO: Don't always redraw graph, determine if scale has changed
             Clear();
 
-            for (int x = 0; x < m_Columns.Count; x++) {
-                // Change colour for most recent column 
-                if (x == m_Columns.Count - 1) {
+            for (int x = 0; x < m_ResponseTimes.Count; x++) {
+                if (x == m_Columns.Count - 1)
+                {
                     Console.ForegroundColor = ConsoleColor.Green;
-                } 
-                DrawBar(m_Columns[x]);
-                Console.CursorLeft++;
+                }
+                DrawBar(CreateColumn(m_ResponseTimes[x]));
+
+                Console.CursorLeft++; 
             }
 
             // Reset colour after
@@ -322,10 +325,10 @@ namespace PowerPing
             Console.CursorTop = topStart;
         }
         /// <summary>
-        /// Update graph text labels
+        /// Update graph legend text labels
         /// </summary>
         /// <param name="results"></param>
-        private void UpdateLabels(PingResults results)
+        private void UpdateLegend(PingResults results)
         {
             // save cursor location
             int cursorPositionX = Console.CursorLeft;
@@ -358,7 +361,7 @@ namespace PowerPing
             Console.SetCursorPosition(m_RttLabelX, m_RttLabelY);
             Console.Write(blankLabel);
             Console.CursorLeft = Console.CursorLeft - 6;
-            Console.Write("{0:0.0}ms", results.CurTime);
+            Console.Write("{0:0.0}ms", results.CurrTime);
 
             // Update time label
             Console.SetCursorPosition(m_TimeLabelX, m_TimeLabelY);
@@ -464,14 +467,14 @@ namespace PowerPing
         /// <summary>
         /// Add a column to the graph list
         /// </summary>
-        private void AddColumnToGraph(String[] col)
+        private void AddResponseToGraph(double responseTime)
         {
-            m_Columns.Add(col);
+            m_ResponseTimes.Add(responseTime);
 
             // If number of columns exceeds x Axis length
-            if (m_Columns.Count >= m_xAxisLength) {
+            if (m_ResponseTimes.Count >= m_xAxisLength) {
                 // Remove first element
-                m_Columns.RemoveAt(0);
+                m_ResponseTimes.RemoveAt(0);
             }
         }
         /// <summary>

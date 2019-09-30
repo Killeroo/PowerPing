@@ -97,7 +97,7 @@ namespace PowerPing
                         activeHosts.Add(new HostInformation {
                             Address = host,
                             HostName = "",
-                            ResponseTime = results.CurTime
+                            ResponseTime = results.CurrTime
                         });
                     }
                 }
