@@ -98,6 +98,7 @@ namespace PowerPing
             IPAddress localAddress = null;
             Socket listeningSocket = null;
             PingResults results = new PingResults();
+            int bufferSize = 4096;
 
             // Find local address
             localAddress = IPAddress.Parse(PowerPing.Lookup.LocalAddress());
@@ -107,12 +108,13 @@ namespace PowerPing
                 listeningSocket = CreateRawSocket(AddressFamily.InterNetwork);
                 listeningSocket.Bind(new IPEndPoint(localAddress, 0));
                 listeningSocket.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 }); // Set SIO_RCVALL flag to socket IO control
+                listeningSocket.ReceiveBufferSize = bufferSize;
 
                 PowerPing.Display.ListenIntroMsg();
 
                 // Listening loop
                 while (!m_CancellationToken.IsCancellationRequested) {
-                    byte[] buffer = new byte[4096]; // TODO: could cause overflow?
+                    byte[] buffer = new byte[bufferSize]; 
                     
                     // Recieve any incoming ICMPv4 packets
                     EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
@@ -208,6 +210,7 @@ namespace PowerPing
             // Set socket options
             sock.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.IpTimeToLive, attrs.Ttl);
             sock.DontFragment = attrs.DontFragment;
+            sock.ReceiveBufferSize = attrs.RecieveBufferSize;
 
             // Create packet message payload
             byte[] payload;
