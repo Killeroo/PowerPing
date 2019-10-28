@@ -30,6 +30,7 @@ using System.Text.RegularExpressions;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace PowerPing
 {
@@ -230,7 +231,36 @@ namespace PowerPing
             uint n = (uint)Process.GetCurrentProcess().Id;
             return (ushort)(n ^ (n >> 16));
         }
-        
+
+        /// <summary>
+        /// Checks github api for latest release of PowerPing against current assembly version
+        /// Prints message to update if newer version has been released.
+        /// TODO: Add to version command and help command
+        /// </summary>
+        /// <returns></returns>
+        public static string CheckRecentVersion()
+        {
+            string latestRelease = "";
+            using (var webClient = new System.Net.WebClient())
+            {
+                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072; // TLS 1.2
+                webClient.Headers["User-Agent"] = "PowerPing"; // Need to specif a valid user agent for github api: https://stackoverflow.com/a/39912696
+
+                try
+                {
+                    // Fetch latest release from github api
+                    latestRelease = webClient.DownloadString(
+                        $"http://api.github.com/repos/killeroo/powerping/releases/latest");
+
+                }
+                catch (Exception) { }// We just want to blanket catch any exception and silently continue
+
+            }
+            
+            return latestRelease;
+
+        }
+
         public static long StopwatchToTimeSpanTicks(long stopwatchTicks)
         {
             return (long)(stopwatchTicks * m_StopwatchToTimeSpanTicksScale);
