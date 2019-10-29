@@ -241,16 +241,44 @@ namespace PowerPing
         public static string CheckRecentVersion()
         {
             string latestRelease = "";
+            bool outOfDate = false;
             using (var webClient = new System.Net.WebClient())
             {
                 ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072; // TLS 1.2
-                webClient.Headers["User-Agent"] = "PowerPing"; // Need to specif a valid user agent for github api: https://stackoverflow.com/a/39912696
+                webClient.Headers["User-Agent"] = "PowerPing_version_check"; // Need to specif a valid user agent for github api: https://stackoverflow.com/a/39912696
 
                 try
                 {
                     // Fetch latest release from github api
                     latestRelease = webClient.DownloadString(
                         $"http://api.github.com/repos/killeroo/powerping/releases/latest");
+
+                    Console.WriteLine(latestRelease);
+
+                    Regex regex = new Regex(@"""(tag_name)"":""((\\""|[^""])*)""");
+                    var result = regex.Match(latestRelease);
+                    if (result.Success) {
+                        string matchString = result.Value;
+                        string[] theirVersion = matchString.Split(':')[1].Replace("\"", string.Empty).Replace("v", string.Empty).Split('.');
+                        Version v = Assembly.GetExecutingAssembly().GetName().Version;
+                        string ourVersion = "v" + v.Major + "." + v.Minor + "." + v.Build;
+
+                        if (v.Major < Convert.ToInt32(theirVersion[0])) {
+                            outOfDate = true;
+                        } else if (v.Major == Convert.ToInt32(theirVersion[0]) 
+                                    && v.Minor < Convert.ToInt32(theirVersion[1])) {
+                            outOfDate = true;
+                        } else if (v.Major == Convert.ToInt32(theirVersion[0])
+                                    && v.Minor == Convert.ToInt32(theirVersion[1]) 
+                                    && v.Build < Convert.ToInt32(theirVersion[2])) {
+                            outOfDate = true;
+                        }
+
+                        if (outOfDate) {
+                            Console.WriteLine("New version of PowerPing available (old: {0} new: {1})", ourVersion, theirVersion);
+                            Console.WriteLine("Download the new version at: {0}", @"https://github.com/killeroo/powerping/releases/latest");
+                        }
+                    }
 
                 }
                 catch (Exception) { }// We just want to blanket catch any exception and silently continue
