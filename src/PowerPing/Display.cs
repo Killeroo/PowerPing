@@ -219,7 +219,7 @@ Other:
 Type '--examples' for more
 
 Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=
-Find the project here[https://github.com/Killeroo/PowerPing]";
+Find the project here [https://github.com/Killeroo/PowerPing]";
 
         const string EXAMPLE_MSG_PAGE_1 =
 @"
@@ -450,7 +450,6 @@ Get location information for 84.23.12.4";
             // Write version
             Console.WriteLine(version + (date ? "[Built " + buildTime + "]" : ""));
             
-            Helper.WaitForUserInput();
         }
         /// <summary>
         /// Displays help message
@@ -464,7 +463,8 @@ Get location information for 84.23.12.4";
             Console.WriteLine(version);
             Console.WriteLine(HELP_MSG);
 
-            Helper.WaitForUserInput();
+            Helper.CheckRecentVersion();
+
         }
         /// <summary>
         /// Displays example powerping usage

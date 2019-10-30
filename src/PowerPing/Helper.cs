@@ -235,57 +235,42 @@ namespace PowerPing
         /// <summary>
         /// Checks github api for latest release of PowerPing against current assembly version
         /// Prints message to update if newer version has been released.
-        /// TODO: Add to version command and help command
         /// </summary>
         /// <returns></returns>
-        public static string CheckRecentVersion()
+        public static void CheckRecentVersion()
         {
-            string latestRelease = "";
-            bool outOfDate = false;
             using (var webClient = new System.Net.WebClient())
             {
                 ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072; // TLS 1.2
-                webClient.Headers["User-Agent"] = "PowerPing_version_check"; // Need to specif a valid user agent for github api: https://stackoverflow.com/a/39912696
+                webClient.Headers["User-Agent"] = "PowerPing (version_check)"; // Need to specif a valid user agent for github api: https://stackoverflow.com/a/39912696
 
                 try
                 {
-                    // Fetch latest release from github api
-                    latestRelease = webClient.DownloadString(
+                    // Fetch latest release info from github api
+                    string jsonResult = webClient.DownloadString(
                         $"http://api.github.com/repos/killeroo/powerping/releases/latest");
 
-                    Console.WriteLine(latestRelease);
-
+                    // Extract version from returned json
                     Regex regex = new Regex(@"""(tag_name)"":""((\\""|[^""])*)""");
-                    var result = regex.Match(latestRelease);
+                    Match result = regex.Match(jsonResult);
                     if (result.Success) {
                         string matchString = result.Value;
-                        string[] theirVersion = matchString.Split(':')[1].Replace("\"", string.Empty).Replace("v", string.Empty).Split('.');
-                        Version v = Assembly.GetExecutingAssembly().GetName().Version;
-                        string ourVersion = "v" + v.Major + "." + v.Minor + "." + v.Build;
-
-                        if (v.Major < Convert.ToInt32(theirVersion[0])) {
-                            outOfDate = true;
-                        } else if (v.Major == Convert.ToInt32(theirVersion[0]) 
-                                    && v.Minor < Convert.ToInt32(theirVersion[1])) {
-                            outOfDate = true;
-                        } else if (v.Major == Convert.ToInt32(theirVersion[0])
-                                    && v.Minor == Convert.ToInt32(theirVersion[1]) 
-                                    && v.Build < Convert.ToInt32(theirVersion[2])) {
-                            outOfDate = true;
-                        }
-
-                        if (outOfDate) {
-                            Console.WriteLine("New version of PowerPing available (old: {0} new: {1})", ourVersion, theirVersion);
+                        Version theirVersion = new Version(matchString.Split(':')[1].Replace("\"", string.Empty).Replace("v", string.Empty));
+                        Version ourVersion = Assembly.GetExecutingAssembly().GetName().Version;
+                        
+                        if (theirVersion > ourVersion) {
+                            Console.WriteLine();
+                            Console.WriteLine("=========================================================");
+                            Console.WriteLine("A new version of PowerPing is available ({0})", theirVersion);
                             Console.WriteLine("Download the new version at: {0}", @"https://github.com/killeroo/powerping/releases/latest");
+                            Console.WriteLine("=========================================================");
                         }
                     }
 
                 }
-                catch (Exception) { }// We just want to blanket catch any exception and silently continue
+                catch (Exception) { } // We just want to blanket catch any exception and silently continue
 
             }
-            
-            return latestRelease;
 
         }
 

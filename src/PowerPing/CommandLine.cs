@@ -32,6 +32,8 @@ namespace PowerPing
                             case "-v":
                             case "--v":
                                 Display.Version(true);
+                                Helper.CheckRecentVersion();
+                                Helper.WaitForUserInput();
                                 Environment.Exit(0);
                                 break;
                             case "/beep":
@@ -88,7 +90,12 @@ namespace PowerPing
                             case "/i":
                             case "-i":
                             case "--i": // Time To Live
-                                attributes.Ttl = Convert.ToInt16(args[count + 1]);
+                                int ttl = Convert.ToInt16(args[count + 1]);
+                                if (ttl > 255) {
+                                    PowerPing.Display.Message("TTL has to be between 0 and 255");
+                                    throw new ArgumentFormatException();
+                                }
+                                attributes.Ttl = ttl;
                                 break;
                             case "/interval":
                             case "-interval":
@@ -160,7 +167,8 @@ namespace PowerPing
                             case "/?":
                             case "-?":
                             case "--?": // Display help message
-                                PowerPing.Display.Help();
+                                Display.Help();
+                                Helper.WaitForUserInput();
                                 Environment.Exit(0);
                                 break;
                             case "/examples":
