@@ -35,9 +35,7 @@
     <DocumentationFile>
     </DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationManifest>..\PowerPing\Properties\app.manifest</ApplicationManifest>
-  </PropertyGroup>
+  <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug\</OutputPath>
@@ -78,6 +76,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -88,18 +89,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\PowerPing\Display.cs" />
+    <Compile Include="..\PowerPing\Display.cs">
+      <Link>Core\Display.cs</Link>
+    </Compile>
     <Compile Include="..\PowerPing\Exceptions.cs">
       <Link>Utils\Exceptions.cs</Link>
     </Compile>
     <Compile Include="..\PowerPing\Graph.cs">
       <Link>Commands\Graph.cs</Link>
     </Compile>
-    <Compile Include="..\PowerPing\ICMP.cs" />
+    <Compile Include="..\PowerPing\ICMP.cs">
+      <Link>Core\ICMP.cs</Link>
+    </Compile>
     <Compile Include="..\PowerPing\Helper.cs">
       <Link>Utils\Helper.cs</Link>
     </Compile>
-    <Compile Include="..\PowerPing\Ping.cs" />
+    <Compile Include="..\PowerPing\Ping.cs">
+      <Link>Core\Ping.cs</Link>
+    </Compile>
     <Compile Include="..\PowerPing\PingAttributes.cs">
       <Link>DataStructures\PingAttributes.cs</Link>
     </Compile>
