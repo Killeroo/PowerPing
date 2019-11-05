@@ -47,25 +47,25 @@ namespace PowerPing
         /// <bug>There is a currently a bug where the address of a VM interface can be used 
         /// instead of the actual local address</bug>
         /// <returns>IP address string, if no address found then returns a null</returns>
-        public static string LocalAddress()
+        public static string GetLocalAddress()
         {
             // If not connected to a network return null
             if (!NetworkInterface.GetIsNetworkAvailable()) {
-                return null;
+                return string.Empty;
             }
 
             // Get all addresses assocatied with this computer
-            var hostAddress = Dns.GetHostEntry(Dns.GetHostName());
+            IPHostEntry hostAddress = Dns.GetHostEntry(Dns.GetHostName());
 
             // Loop through each associated address
-            foreach (var address in hostAddress.AddressList) {
+            foreach (IPAddress address in hostAddress.AddressList) {
                 // If address is IPv4
-                if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) {
+                if (address.AddressFamily == AddressFamily.InterNetwork) {
                     return address.ToString();
                 }
             }
 
-            return null;
+            return string.Empty;
         }
 
         /// <summary>

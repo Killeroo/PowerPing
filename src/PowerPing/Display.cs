@@ -95,7 +95,7 @@ namespace PowerPing
         const string FLOOD_EXIT_TXT = "Press Control-C to stop...";
 
         // Listen messages
-        const string LISTEN_INTRO_MSG = "Listening for ICMP Packets ...";
+        const string LISTEN_INTRO_MSG = "Listening for ICMP Packets on [ {0} ]";
         const string CAPTURED_PACKET_MSG = "{0}: ICMPv4: {1} bytes from {2} [type {3}] [code {4}]";
 
         // Request messages
@@ -516,9 +516,9 @@ Get location information for 84.23.12.4";
         /// <summary>
         /// Display initial listening message
         /// </summary>
-        public static void ListenIntroMsg()
+        public static void ListenIntroMsg(string address)
         {
-            Console.WriteLine(LISTEN_INTRO_MSG);
+            Console.WriteLine(LISTEN_INTRO_MSG, address);
         }
         /// <summary>
         /// Display ICMP packet that have been sent

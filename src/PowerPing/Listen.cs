@@ -25,7 +25,7 @@ namespace PowerPing
             int bufferSize = 4096;
 
             // Find local address
-            localAddress = IPAddress.Parse(PowerPing.Lookup.LocalAddress());
+            localAddress = IPAddress.Parse(PowerPing.Lookup.GetLocalAddress());
 
             try {
                 // Create listener socket
@@ -34,7 +34,7 @@ namespace PowerPing
                 listeningSocket.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 }); // Set SIO_RCVALL flag to socket IO control
                 listeningSocket.ReceiveBufferSize = bufferSize;
 
-                PowerPing.Display.ListenIntroMsg();
+                PowerPing.Display.ListenIntroMsg(localAddress.ToString());
 
                 // Listening loop
                 while (!cancellationToken.IsCancellationRequested) {
