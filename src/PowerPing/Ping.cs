@@ -86,11 +86,6 @@ namespace PowerPing
             return results;
         }
         /// <summary>
-        /// ICMP Traceroute
-        /// Not implemented yet
-        /// </summary>
-        public void Trace() { throw new NotSupportedException(); }
-        /// <summary>
         /// Creates a raw socket for ping operations.
         ///
         /// We have to use raw sockets here as we are using our own 
