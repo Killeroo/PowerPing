@@ -72,7 +72,7 @@ namespace PowerPing
             m_Ping = new Ping(cancellationTkn);
 
             // Setup ping attributes
-            m_PingAttributes.InputtedAddress = PowerPing.Lookup.QueryDNS(address, System.Net.Sockets.AddressFamily.InterNetwork);
+            m_PingAttributes.InputtedAddress = Lookup.QueryDNS(address, System.Net.Sockets.AddressFamily.InterNetwork);
             m_PingAttributes.Continous = true;
         }
 

@@ -44,7 +44,7 @@ namespace PowerPing
                             case "--b":
                                 int level = Convert.ToInt32(args[count + 1]);
                                 if (level > 2) {
-                                    PowerPing.Display.Message("Invalid beep level, please use a number between 0 & 2");
+                                    Display.Message("Invalid beep level, please use a number between 0 & 2");
                                     throw new ArgumentFormatException();
                                 }
                                 attributes.BeepLevel = level;
@@ -92,7 +92,7 @@ namespace PowerPing
                             case "--i": // Time To Live
                                 int ttl = Convert.ToInt16(args[count + 1]);
                                 if (ttl > 255) {
-                                    PowerPing.Display.Message("TTL has to be between 0 and 255");
+                                    Display.Message("TTL has to be between 0 and 255");
                                     throw new ArgumentFormatException();
                                 }
                                 attributes.Ttl = ttl;
@@ -105,7 +105,7 @@ namespace PowerPing
                             case "--in": // Interval
                                 attributes.Interval = Convert.ToInt32(args[count + 1]);
                                 if (attributes.Interval < 1) {
-                                    PowerPing.Display.Message("Ping interval cannot be less than 1ms");
+                                    Display.Message("Ping interval cannot be less than 1ms");
                                     throw new ArgumentFormatException();
                                 }
                                 break;
@@ -177,7 +177,7 @@ namespace PowerPing
                             case "/ex":
                             case "-ex":
                             case "--ex": // Displays examples
-                                PowerPing.Display.Examples();
+                                Display.Examples();
                                 Environment.Exit(0); // Exit after displaying examples
                                 break;
                             case "/shorthand":
@@ -469,23 +469,23 @@ namespace PowerPing
                 }
             }
             catch (IndexOutOfRangeException) {
-                PowerPing.Display.Error($"Missing argument parameter @ \"PowerPing >>>{args[curArg]}<<<\"");
+                Display.Error($"Missing argument parameter @ \"PowerPing >>>{args[curArg]}<<<\"");
                 return false;
             }
             catch (OverflowException) {
-                PowerPing.Display.Error($"Overflow while converting @ \"PowerPing {args[curArg]} >>>{args[curArg + 1]}<<<\"");
+                Display.Error($"Overflow while converting @ \"PowerPing {args[curArg]} >>>{args[curArg + 1]}<<<\"");
                 return false;
             }
             catch (InvalidArgumentException) {
-                PowerPing.Display.Error($"Invalid argument @ \"PowerPing >>>{args[curArg]}<<<\"");
+                Display.Error($"Invalid argument @ \"PowerPing >>>{args[curArg]}<<<\"");
                 return false;
             }
             catch (ArgumentFormatException) {
-                PowerPing.Display.Error($"Incorrect parameter for [{args[curArg]}] @ \"PowerPing {args[curArg]} >>>{args[curArg + 1]}<<<\"");
+                Display.Error($"Incorrect parameter for [{args[curArg]}] @ \"PowerPing {args[curArg]} >>>{args[curArg + 1]}<<<\"");
                 return false;
             }
             catch (Exception e) {
-                PowerPing.Display.Error($"An {e.GetType().ToString().Split('.').Last()} exception occured @ \"PowerPing >>>{args[curArg]}<<<\"");
+                Display.Error($"An {e.GetType().ToString().Split('.').Last()} exception occured @ \"PowerPing >>>{args[curArg]}<<<\"");
                 return false;
             }
             return true;

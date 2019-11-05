@@ -59,10 +59,10 @@ namespace PowerPing
         {
             // Lookup host if specified
             if (attrs.InputtedAddress != "") {
-                attrs.Address = PowerPing.Lookup.QueryDNS(attrs.InputtedAddress, attrs.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+                attrs.Address = Lookup.QueryDNS(attrs.InputtedAddress, attrs.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
             }
 
-            PowerPing.Display.PingIntroMsg(attrs);
+            Display.PingIntroMsg(attrs);
 
             if (Display.UseResolvedAddress) {
                 try {
@@ -80,7 +80,7 @@ namespace PowerPing
             PingResults results = SendICMP(attrs, onResultsUpdate);
 
             if (Display.ShowOutput) {
-                PowerPing.Display.PingResults(attrs, results);
+                Display.PingResults(attrs, results);
             }
 
             return results;
@@ -104,7 +104,7 @@ namespace PowerPing
             try {
                 s = new Socket(family, SocketType.Raw, family == AddressFamily.InterNetwork ? ProtocolType.Icmp : ProtocolType.IcmpV6);
             } catch (SocketException) {
-                PowerPing.Helper.ErrorAndExit("Socket cannot be created " + Environment.NewLine + "Please run as Administrator and try again.");
+                Helper.ErrorAndExit("Socket cannot be created " + Environment.NewLine + "Please run as Administrator and try again.");
             }
             return s;
         }
@@ -266,7 +266,7 @@ namespace PowerPing
 
                     // Display reply packet
                     if (Display.ShowReplies) {
-                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.InputtedAddress : responseEP.ToString(), index, replyTime, bytesRead);
+                        Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.InputtedAddress : responseEP.ToString(), index, replyTime, bytesRead);
                     }
 
                     // Store response info
@@ -282,7 +282,7 @@ namespace PowerPing
                 } catch (IOException) {
 
                     if (Display.ShowOutput) {
-                        PowerPing.Display.Error("General transmit error");
+                        Display.Error("General transmit error");
                     }
                     results.SaveResponseTime(-1);
                     try { results.Lost++; }
@@ -290,7 +290,7 @@ namespace PowerPing
 
                 } catch (SocketException) {
 
-                    PowerPing.Display.Timeout(index);
+                    Display.Timeout(index);
                     if (attrs.BeepLevel == 1) {
                         try { Console.Beep(); }
                         catch (Exception) { results.HasOverflowed = true; }
@@ -307,7 +307,7 @@ namespace PowerPing
                 } catch (Exception) {
 
                     if (Display.ShowOutput) {
-                        PowerPing.Display.Error("General error occured");
+                        Display.Error("General error occured");
                     }
                     results.SaveResponseTime(-1);
                     try { results.Lost++; }

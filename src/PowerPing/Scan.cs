@@ -115,7 +115,7 @@ namespace PowerPing
             Console.WriteLine("                                    ");
             Console.CursorTop--;
 
-            PowerPing.Display.ScanResults(scanned, !cancellationToken.IsCancellationRequested, activeHosts);
+            Display.ScanResults(scanned, !cancellationToken.IsCancellationRequested, activeHosts);
         }
 
         /// <summary>

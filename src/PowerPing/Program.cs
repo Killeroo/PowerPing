@@ -86,16 +86,16 @@ namespace PowerPing
             Graph g;
             switch (attributes.Operation) {
                 case PingOperation.Listen:
-                    PowerPing.Listen.Start(m_CancellationTokenSource.Token);
+                    Listen.Start(m_CancellationTokenSource.Token);
                     break;
                 case PingOperation.Location:
-                    PowerPing.Lookup.AddressLocation(attributes.InputtedAddress, true);
+                    Lookup.AddressLocation(attributes.InputtedAddress, true);
                     break;
                 case PingOperation.Whoami:
-                    PowerPing.Lookup.AddressLocation("", true);
+                    Lookup.AddressLocation("", true);
                     break;
                 case PingOperation.Whois:
-                    PowerPing.Lookup.QueryWhoIs(attributes.InputtedAddress);
+                    Lookup.QueryWhoIs(attributes.InputtedAddress);
                     break;
                 case PingOperation.Graph:
                     g = new Graph(attributes.InputtedAddress, m_CancellationTokenSource.Token);
@@ -107,10 +107,10 @@ namespace PowerPing
                     g.Start();
                     break;
                 case PingOperation.Flood:
-                    PowerPing.Flood.Start(attributes.InputtedAddress, m_CancellationTokenSource.Token);
+                    Flood.Start(attributes.InputtedAddress, m_CancellationTokenSource.Token);
                     break;
                 case PingOperation.Scan:
-                    PowerPing.Scan.Start(attributes.InputtedAddress, m_CancellationTokenSource.Token);
+                    Scan.Start(attributes.InputtedAddress, m_CancellationTokenSource.Token);
                     break;
                 case PingOperation.Normal:
                     // Send ping normally

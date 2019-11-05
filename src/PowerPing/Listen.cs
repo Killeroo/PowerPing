@@ -25,7 +25,7 @@ namespace PowerPing
             int bufferSize = 4096;
 
             // Find local address
-            localAddress = IPAddress.Parse(PowerPing.Lookup.GetLocalAddress());
+            localAddress = IPAddress.Parse(Lookup.GetLocalAddress());
 
             try {
                 // Create listener socket
@@ -34,7 +34,7 @@ namespace PowerPing
                 listeningSocket.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 }); // Set SIO_RCVALL flag to socket IO control
                 listeningSocket.ReceiveBufferSize = bufferSize;
 
-                PowerPing.Display.ListenIntroMsg(localAddress.ToString());
+                Display.ListenIntroMsg(localAddress.ToString());
 
                 // Listening loop
                 while (!cancellationToken.IsCancellationRequested) {
@@ -46,7 +46,7 @@ namespace PowerPing
                     ICMP response = new ICMP(buffer, bytesRead);
 
                     // Display captured packet
-                    PowerPing.Display.CapturedPacket(response, remoteEndPoint.ToString(), DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead);
+                    Display.CapturedPacket(response, remoteEndPoint.ToString(), DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead);
 
                     // Store results
                     results.CountPacketType(response.Type);
@@ -56,10 +56,10 @@ namespace PowerPing
             catch (OperationCanceledException) {
             }
             catch (SocketException) {
-                PowerPing.Display.Error("Could not read packet from socket");
+                Display.Error("Could not read packet from socket");
             }
             catch (Exception e) {
-                PowerPing.Display.Error($"General exception occured while trying to create listening socket (Exception: {e.GetType().ToString().Split('.').Last()}");
+                Display.Error($"General exception occured while trying to create listening socket (Exception: {e.GetType().ToString().Split('.').Last()}");
             }
 
             // Clean up
