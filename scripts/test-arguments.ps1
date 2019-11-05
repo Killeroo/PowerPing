@@ -15,7 +15,7 @@ function Run-Test($description, $arguments, [int]$returnCode)
 
     $stats.TestsPerformed += 1
 
-    $Result = Start-Process 'C:\Projects\PowerPing\src\PowerPing.Net45\bin\Debug\PowerPing.exe' -ArgumentList ('-noinput ' + $arguments) -PassThru -Wait
+    $Result = Start-Process 'C:\Repos\PowerPing\src\PowerPing.Net45\bin\Debug\PowerPing.exe' -ArgumentList ('-noinput ' + $arguments) -PassThru -Wait
     if($Result.ExitCode -eq $returnCode) {
         Write-Host("==== Test passed =====") -ForegroundColor Green
         $stats.TestsPassed += 1
@@ -70,7 +70,7 @@ Run-Test "Test `'count`' with invalid positive parameter" "-c 100000000000000000
 Run-Test "Test `'count`' with invalid negative parameter" "-c -1 8.8.8.8" 1
 Run-Test "Test `'limit`' with paramater" "-l 1 8.8.8.8" 0
 Run-Test "Test `'limit`' with empty parameter" "-l 8.8.8.8" 1
-Run-Test "Test `'limit`' with invalid positive parameter" "-l 2 8.8.8.8" 1
+Run-Test "Test `'limit`' with invalid positive parameter" "-l 4 8.8.8.8" 1
 Run-Test "Test `'limit`' with invalid negative parameter" "-l -1 8.8.8.8" 1
 Run-Test "Test `'decimals`' with parameter" "-dp 1 8.8.8.8" 0
 Run-Test "Test `'decimals`' with empty parameter" "-dp 8.8.8.8" 1
