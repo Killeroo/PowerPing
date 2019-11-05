@@ -56,7 +56,8 @@ namespace PowerPing
 
             // Check if no arguments
             if (args.Length == 0) {
-                PowerPing.Display.Help();
+                Display.Help();
+                Helper.WaitForUserInput();
                 return;
             }
 

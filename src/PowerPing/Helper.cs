@@ -264,6 +264,7 @@ namespace PowerPing
                             Console.WriteLine("A new version of PowerPing is available ({0})", theirVersion);
                             Console.WriteLine("Download the new version at: {0}", @"https://github.com/killeroo/powerping/releases/latest");
                             Console.WriteLine("=========================================================");
+                            Console.WriteLine();
                         }
                     }
 
