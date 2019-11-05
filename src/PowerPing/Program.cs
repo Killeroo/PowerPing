@@ -89,10 +89,12 @@ namespace PowerPing
                     Listen.Start(m_CancellationTokenSource.Token);
                     break;
                 case PingOperation.Location:
-                    Lookup.AddressLocation(attributes.InputtedAddress, true);
+                    Console.WriteLine(Lookup.GetAddressLocationInfo(attributes.InputtedAddress, false));
+                    Helper.WaitForUserInput();
                     break;
                 case PingOperation.Whoami:
-                    Lookup.AddressLocation("", true);
+                    Console.WriteLine(Lookup.GetAddressLocationInfo("", true));
+                    Helper.WaitForUserInput();
                     break;
                 case PingOperation.Whois:
                     Lookup.QueryWhoIs(attributes.InputtedAddress);
