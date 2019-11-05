@@ -104,6 +104,7 @@
     <Compile Include="..\PowerPing\CommandLine.cs" />
     <Compile Include="..\PowerPing\Scan.cs" />
     <Compile Include="..\PowerPing\Flood.cs" />
+    <Compile Include="..\PowerPing\Listen.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\PowerPing\Properties\App.config">

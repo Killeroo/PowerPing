@@ -86,7 +86,7 @@ namespace PowerPing
             Graph g;
             switch (attributes.Operation) {
                 case PingOperation.Listen:
-                    p.Listen();
+                    PowerPing.Listen.Start(m_CancellationTokenSource.Token);
                     break;
                 case PingOperation.Location:
                     PowerPing.Lookup.AddressLocation(attributes.InputtedAddress, true);

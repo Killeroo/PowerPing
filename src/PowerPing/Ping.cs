@@ -86,62 +86,6 @@ namespace PowerPing
             return results;
         }
         /// <summary>
-        /// Listens for all ICMPv4 activity on localhost.
-        ///
-        /// Does this by setting a raw socket to SV_IO_ALL which
-        /// will recieve all packets and filters to just show
-        /// ICMP packets. Runs until ctrl-c or exit
-        /// </summary>
-        /// <source>https://stackoverflow.com/a/9174392</source>
-        public void Listen()
-        {
-            IPAddress localAddress = null;
-            Socket listeningSocket = null;
-            PingResults results = new PingResults();
-            int bufferSize = 4096;
-
-            // Find local address
-            localAddress = IPAddress.Parse(PowerPing.Lookup.LocalAddress());
-
-            try {
-                // Create listener socket
-                listeningSocket = CreateRawSocket(AddressFamily.InterNetwork);
-                listeningSocket.Bind(new IPEndPoint(localAddress, 0));
-                listeningSocket.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 }); // Set SIO_RCVALL flag to socket IO control
-                listeningSocket.ReceiveBufferSize = bufferSize;
-
-                PowerPing.Display.ListenIntroMsg();
-
-                // Listening loop
-                while (!m_CancellationToken.IsCancellationRequested) {
-                    byte[] buffer = new byte[bufferSize]; 
-                    
-                    // Recieve any incoming ICMPv4 packets
-                    EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                    int bytesRead = Helper.RunWithCancellationToken(() => listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint), m_CancellationToken);
-                    ICMP response = new ICMP(buffer, bytesRead);
-
-                    // Display captured packet
-                    PowerPing.Display.CapturedPacket(response, remoteEndPoint.ToString(), DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead);
-
-                    // Store results
-                    results.CountPacketType(response.Type);
-                    results.Received++;
-                }
-            } catch (OperationCanceledException) {
-            } catch (SocketException) {
-                PowerPing.Display.Error("Could not read packet from socket");
-            } catch (Exception e) {
-                PowerPing.Display.Error($"General exception occured while trying to create listening socket (Exception: {e.GetType().ToString().Split('.').Last()}");
-            }
-
-            // Clean up
-            listeningSocket.Close();
-
-            // TODO: Implement ListenResults method
-            //Display.ListenResults(results);
-        }
-        /// <summary>
         /// ICMP Traceroute
         /// Not implemented yet
         /// </summary>
@@ -384,13 +328,6 @@ namespace PowerPing
             sock.Close();
 
             return results;
-        }
-
-        public class ActiveHost
-        {
-            public string Address { get; set; }
-            public string HostName { get; set; }
-            public double ResponseTime { get; set; }
         }
     }
 }
