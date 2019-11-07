@@ -33,25 +33,25 @@ _Future features:_
                [--g] | [--cg] | [--t] [--4] [--rng] [--df] [--rb number] [--b number] 
                [--c number] [--w number] [-i number] [--in number] [--pt number] [--pc number]
                [--m "message"] [--s number] [--ti timing] [--sh] [--dm] [--ts] [--nc] [--input] [--sym] [--r]
-               [--nt] [--q] [--res] [--ia] [--l number] [--dp number] [--chk] target_name | target_address
+               [--nt] [--q] [--res] [--ia] [--l number] [--dp number] [--chk] [--fts] target_name | target_address
                
 ## Arguments:
     Ping Options:
-        --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)
-        --ipv4       [--4]            Force using IPv4
-        --random     [--rng]          Generates random ICMP message
-        --dontfrag   [--df]           Set 'Don't Fragment' flag
-        --buffer     [--rb]  number   Sets recieve buffer size (default is 5096)
-        --beep       [--b]   number   Beep on timeout (1) or on reply (2)
-        --count      [--c]   number   Number of pings to send
-        --timeout    [--w]   number   Time to wait for reply (in milliseconds)
-        --ttl        [--i]   number   Time To Live for packet
-        --interval   [--in]  number   Interval between each ping (in milliseconds)
-        --type       [--pt]  number   Use custom ICMP type
-        --code       [--pc]  number   Use custom ICMP code value
-        --size       [--s]   number   Set size (in bytes) of packet (overwrites packet message)
-        --message    [--m]   message  Ping packet message
-        --timing     [--ti]  timing   Timing levels:
+        --infinite      [--t]            Ping the target until stopped (Ctrl-C to stop)
+        --ipv4          [--4]            Force using IPv4
+        --random        [--rng]          Generates random ICMP message
+        --dontfrag      [--df]           Set 'Don't Fragment' flag
+        --buffer        [--rb]  number   Sets recieve buffer size (default is 5096)
+        --beep          [--b]   number   Beep on timeout (1) or on reply (2)
+        --count         [--c]   number   Number of pings to send
+        --timeout       [--w]   number   Time to wait for reply (in milliseconds)
+        --ttl           [--i]   number   Time To Live for packet
+        --interval      [--in]  number   Interval between each ping (in milliseconds)
+        --type          [--pt]  number   Use custom ICMP type
+        --code          [--pc]  number   Use custom ICMP code value
+        --size          [--s]   number   Set size (in bytes) of packet (overwrites packet message)
+        --message       [--m]   message  Ping packet message
+        --timing        [--ti]  timing   Timing levels:
                                             0 - Paranoid    4 - Nimble
                                             1 - Sneaky      5 - Speedy
                                             2 - Quiet       6 - Insane
@@ -59,27 +59,28 @@ _Future features:_
     
     Display Options:
         --noinput                     Don't ask for user input upon completion
-        --shorthand  [--sh]           Show less detailed replies
-        --displaymsg [--dm]           Display ICMP message contents
-        --timestamp  [--ts]           Display timestamp
-        --nocolor    [--nc]           No colour
-        --symbols    [--sym]          Renders replies and timeouts as ASCII symbols
-        --requests   [--r]            Show request packets
-        --notimeouts [--nt]           Don't display timeout messages
-        --quiet      [--q]            No output (only affects normal ping)
-        --resolve    [--res]          Resolve hostname of address from DNS
-        --inputaddr  [--ia]           Show input address instead of revolved one
-        --checksum   [--chk]          Display checksum of packet
-        --limit      [--l]   number   Limits output to just replies (1), requests (2) or summary(3)
-        --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
+        --shorthand     [--sh]           Show less detailed replies
+        --displaymsg    [--dm]           Display ICMP message contents
+        --timestamp     [--ts]           Display timestamps
+        --fulltimestamp [--fts]       Display full timestamps with localised date and time
+        --nocolor       [--nc]           No colour
+        --symbols       [--sym]          Renders replies and timeouts as ASCII symbols
+        --requests      [--r]            Show request packets
+        --notimeouts    [--nt]           Don't display timeout messages
+        --quiet         [--q]            No output (only affects normal ping)
+        --resolve       [--res]          Resolve hostname of address from DNS
+        --inputaddr     [--ia]           Show input address instead of revolved one
+        --checksum      [--chk]          Display checksum of packet
+        --limit         [--l]   number   Limits output to just replies (1), requests (2) or summary(3)
+        --decimals      [--dp]  number   Num of decimal places to use (0 to 3)
 
-    Features:
-        --scan       [--sc]  address  Network scanning, specify range "127.0.0.1-55"
-        --listen     [--li]  address  Listen for ICMP packets
-        --flood      [--fl]  address  Send high volume of pings to address
-        --graph      [--g]   address  Graph view
-        --compact    [--cg]  address  Compact graph view
-        --location   [--loc] address  Location info for an address
+    Modes:
+        --scan          [--sc]  address  Network scanning, specify range "127.0.0.1-55"
+        --listen        [--li]  address  Listen for ICMP packets
+        --flood         [--fl]  address  Send high volume of pings to address
+        --graph         [--g]   address  Graph view
+        --compact       [--cg]  address  Compact graph view
+        --location      [--loc] address  Location info for an address
         --whois              address  Whois lookup for an address
         --whoami                      Location info for current host
 

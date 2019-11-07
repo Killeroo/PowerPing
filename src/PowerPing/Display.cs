@@ -26,6 +26,7 @@ using System;
 using System.Reflection;
 using System.Text;
 using System.Linq;
+using System.Globalization;
 using System.Collections.Generic;
 
 namespace PowerPing
@@ -44,6 +45,7 @@ namespace PowerPing
         public static bool ShowOutput { get; set; } = true;
         public static bool ShowMessages { get; set; } = false;
         public static bool ShowTimeStamp { get; set; } = false;
+        public static bool ShowFullTimeStamp { get; set; } = false;
         public static bool ShowTimeouts { get; set; } = true;
         public static bool ShowRequests { get; set; } = false;
         public static bool ShowReplies { get; set; } = true;
@@ -162,7 +164,7 @@ Usage:
               [--b number] [--c number] [--w number] [-i number] [--in number]
               [--pt number] [--pc number] [--s number] [--m message] [--ti timing] 
               [--sh] [--dm] [--ts] [--nc] [--input] [--sym] [--r] [--nt] [--q] [--res]
-              [--ia] [--chk] [--l number] [--dp number] target_name | target_address
+              [--ia] [--chk] [--l number] [--dp number] [--fts] target_name | target_address
 
 Ping Options:
     --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)
@@ -187,34 +189,35 @@ Ping Options:
 
 Display Options:
     --noinput                     Don't ask for user input upon completion
-    --shorthand  [--sh]           Show less detailed replies
-    --displaymsg [--dm]           Display ICMP message field contents
-    --timestamp  [--ts]           Display timestamp
-    --nocolor    [--nc]           No colour
-    --symbols    [--sym]          Renders replies and timeouts as ASCII symbols
-    --requests   [--r]            Show request packets
-    --notimeouts [--nt]           Don't display timeout messages
-    --quiet      [--q]            No output (only affects normal ping)
-    --resolve    [--res]          Resolve hostname of address from DNS
-    --inputaddr  [--ia]           Show input address instead of revolved IP address
-    --checksum   [--chk]          Display checksum of packet
-    --limit      [--l]   number   Limits output to just replies(1), requests(2) or summary(3)
-    --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
+    --shorthand     [--sh]           Show less detailed replies
+    --displaymsg    [--dm]           Display ICMP message field contents
+    --timestamp     [--ts]           Display timestamps
+    --fulltimestamp [--fts]          Display full timestamps with localised date and time
+    --nocolor       [--nc]           No colour
+    --symbols       [--sym]          Renders replies and timeouts as ASCII symbols
+    --requests      [--r]            Show request packets
+    --notimeouts    [--nt]           Don't display timeout messages
+    --quiet         [--q]            No output (only affects normal ping)
+    --resolve       [--res]          Resolve hostname of address from DNS
+    --inputaddr     [--ia]           Show input address instead of revolved IP address
+    --checksum      [--chk]          Display checksum of packet
+    --limit         [--l]   number   Limits output to just replies(1), requests(2) or summary(3)
+    --decimals      [--dp]  number   Num of decimal places to use (0 to 3)
 
-Features:
-    --scan       [--sc]  address  Network scanning, specify range ""127.0.0.1-55""
-    --listen     [--li]  address  Listen for ICMP packets
-    --flood      [--fl]  address  Send high volume of pings to address
-    --graph      [--g]   address  Graph view
-    --compact    [--cg]  address  Compact graph view
-    --location   [--loc] address  Location info for an address
+Modes:
+    --scan          [--sc]  address  Network scanning, specify range ""127.0.0.1-55""
+    --listen        [--li]  address  Listen for ICMP packets
+    --flood         [--fl]  address  Send high volume of pings to address
+    --graph         [--g]   address  Graph view
+    --compact       [--cg]  address  Compact graph view
+    --location      [--loc] address  Location info for an address
     --whois              address  Whois lookup for an address
     --whoami                      Location info for current host
 
 Other:
-    --help       [--?]            Displays this help message
-    --version    [--v]            Shows version and build information
-    --examples   [--ex]           Displays some example usage
+    --help          [--?]            Displays this help message
+    --version       [--v]            Shows version and build information
+    --examples      [--ex]           Displays some example usage
 
 Type '--examples' for more
 
@@ -541,7 +544,9 @@ Get location information for 84.23.12.4";
             Console.Write(REQUEST_CODE_TXT, packet.Code);
 
             // Display timestamp
-            if (ShowTimeStamp) {
+            if (ShowFullTimeStamp) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString(CultureInfo.CurrentCulture));
+            } else if (ShowTimeStamp) {
                 Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
             }
 
@@ -618,7 +623,10 @@ Get location information for 84.23.12.4";
             }
 
             // Display timestamp
-            if (ShowTimeStamp) {
+            if (ShowFullTimeStamp)
+            {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString(CultureInfo.CurrentCulture));
+            } else if(ShowTimeStamp) {
                 Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
             }
 
@@ -876,7 +884,9 @@ Get location information for 84.23.12.4";
             }
 
             // Display timestamp
-            if (ShowTimeStamp) {
+            if (ShowFullTimeStamp) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString(CultureInfo.CurrentCulture));
+            } else if (ShowTimeStamp) {
                 Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
             }
 

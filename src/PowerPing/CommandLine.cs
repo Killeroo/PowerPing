@@ -268,6 +268,14 @@ namespace PowerPing
                             case "--ts": // Display timestamp
                                 Display.ShowTimeStamp = true;
                                 break;
+                            case "/fulltimestamp":
+                            case "-fulltimestamp":
+                            case "--fulltimestamp":
+                            case "/fts":
+                            case "-fts":
+                            case "--fts": // Display timestamp
+                                Display.ShowFullTimeStamp = true;
+                                break;
                             case "/timing":
                             case "-timing":
                             case "--timing":
