@@ -1,33 +1,53 @@
-﻿$powershellLocation = (Get-Location).Path + "\PowerPing.exe"
-Write-Warning $powershellLocation
+﻿Write-Host "============ test-arguments script ============" -ForegroundColor Yellow
 
+# Location of script
+$script_path = (split-path -parent $MyInvocation.MyCommand.Definition)
+
+# Executable locations
+$powerping_x64_location = (split-path -parent $MyInvocation.MyCommand.Definition).ToString() + "\build\x64\PowerPing.exe"
+$powerping_x86_location = (split-path -parent $MyInvocation.MyCommand.Definition).ToString() + "\build\x86\PowerPing.exe"
+
+# Remove tests directoy from the path
+$powerping_x86_location = $powerping_x86_location.replace("\tests\","\")
+$powerping_x64_location = $powerping_x64_location.replace("\tests\","\")
+
+# Structure to store test results
 $global:stats = @{
     TestsPerformed   = [uint64] 0;
     TestsPassed      = [uint64] 0;
     TestsFailed      = [uint64] 0;
 }
 
+# Function for running test
 function Run-Test($description, $arguments, [int]$returnCode)
 {
     Write-Host($description) -NoNewline -ForegroundColor White
     Write-Host(" (`"" + $arguments + "`") expects") -NoNewline 
     Write-Host(" [" + $returnCode + "]: ") -NoNewline -ForegroundColor Magenta
-
+    
+    Write-Host("[x64]") -NoNewline -ForegroundColor Yellow
     $stats.TestsPerformed += 1
-
-    $Result = Start-Process 'C:\Repos\PowerPing\src\PowerPing.Net45\bin\Debug\PowerPing.exe' -ArgumentList ('-noinput ' + $arguments) -PassThru -Wait
+    $Result = Start-Process -FilePath $powerping_x64_location -ArgumentList ('-noinput ' + $arguments) -PassThru -Wait
     if($Result.ExitCode -eq $returnCode) {
-        Write-Host("==== Test passed =====") -ForegroundColor Green
+        Write-Host(" ==== Test passed ===== ") -NoNewLine -ForegroundColor Green
         $stats.TestsPassed += 1
     } else {
-        Write-Host("--- Test Failed ---") -ForegroundColor Red 
+        Write-Host(" --- Test Failed --- ") -NoNewLine -ForegroundColor Red 
         $stats.TestsFailed += 1
     }
 
+    Write-Host("[x86]") -NoNewline -ForegroundColor Yellow
+    $stats.TestsPerformed += 1
+    $Result = Start-Process -FilePath $powerping_x86_location -ArgumentList ('-noinput ' + $arguments) -PassThru -Wait
+    if($Result.ExitCode -eq $returnCode) {
+        Write-Host(" ==== Test passed =====") -ForegroundColor Green
+        $stats.TestsPassed += 1
+    } else {
+        Write-Host(" --- Test Failed ---") -ForegroundColor Red 
+        $stats.TestsFailed += 1
+    }
 }
 
-#$processPath = (Get-Location).Path+'C:\Projects\PowerPing\src\PowerPing.Net45\bin\Debug\PowerPing.exe'
-#Sending input to running process https://stackoverflow.com/a/16100200
 Write-Host
 Write-Host "Baseline tests"
 Write-Host "----------------------"
