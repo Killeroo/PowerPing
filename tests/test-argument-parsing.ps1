@@ -1,4 +1,4 @@
-﻿Write-Host "============ test-arguments script ============" -ForegroundColor Yellow
+﻿Write-Host "============ test-argument parsing script ============" -ForegroundColor Yellow
 
 # Location of script
 $script_path = (split-path -parent $MyInvocation.MyCommand.Definition)

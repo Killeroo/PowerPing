@@ -20,7 +20,7 @@ if ([reflection.assemblyname]::GetAssemblyName($powerping_x86_location).Processo
 } 
 
 # Run test scripts
-& "$scriptPath\tests\test-arguments.ps1"
+& "$scriptPath\tests\test-argument-parsing.ps1"
 & "$scriptPath\tests\test-lookup-functions.ps1"
 & "$scriptPath\tests\test-core-functions.ps1"
 
