@@ -8,8 +8,9 @@ $powerping_x64_location = (split-path -parent $MyInvocation.MyCommand.Definition
 $powerping_x86_location = (split-path -parent $MyInvocation.MyCommand.Definition).ToString() + "\build\x86\PowerPing.exe"
 
 # Remove tests directoy from the path
-$powerping_x86_location = $powerping_x86_location.replace("\tests\","\")
-$powerping_x64_location = $powerping_x64_location.replace("\tests\","\")
+$seperator = [IO.Path]::DirectorySeparatorChar
+$powerping_x86_location = $powerping_x86_location.replace($seperator + "tests" + $seperator, $seperator)
+$powerping_x64_location = $powerping_x64_location.replace($seperator + "tests" + $seperator, $seperator)
 
 # Structure to store test results
 $global:stats = @{
