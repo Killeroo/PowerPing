@@ -1,5 +1,14 @@
-﻿# Load the PowerPing assembly into powershell
-[Reflection.Assembly]::LoadFile("C:\Repos\PowerPing\PowerPing.exe");
+﻿Write-Host "============ test-lookup-functions script ============" -ForegroundColor Yellow
+
+# Location of script
+$script_path = (split-path -parent $MyInvocation.MyCommand.Definition)
+
+# Locate x64 assembly and load into powershell
+# TODO: Test x86 arch as well?
+$seperator = [IO.Path]::DirectorySeparatorChar
+$powerping_x64_location = (split-path -parent $MyInvocation.MyCommand.Definition).ToString() + "\build\x64\PowerPing.exe"
+$powerping_x64_location = $powerping_x64_location.replace($seperator + "tests" + $seperator, $seperator)
+[Reflection.Assembly]::LoadFile($powerping_x64_location)
 
 # For storing test results
 $global:stats = @{
@@ -12,6 +21,7 @@ function Run-GetLocalAddress-Test($description)
 {
     Write-Host "[GetLocalAddress()] " -NoNewline
     Write-Host $description -NoNewLine
+    Write-Host ": " -NoNewline
     $powerping_local_address = $powerpingLocalAddress = [PowerPing.Lookup]::GetLocalAddress()
     $our_addresses = Get-NetIPAddress
     $match = $false
@@ -27,8 +37,7 @@ function Run-GetLocalAddress-Test($description)
 
     # You know in alot of ways powershell accesses the same api as c# so how much of a test really is this
     if ($match -eq $true) {
-        $stats.TestsPassed += 1
-        Write-Host $powerping_local_address -BackgroundColor Green -NoNewline
+        Write-Host "($powerping_local_address)" -BackgroundColor Green -NoNewline
         Write-Host " ==== Test passed =====" -ForegroundColor Green
         Write-Warning "This could be a virtual adapter address, please check its origin."
     } else {
@@ -108,7 +117,7 @@ function Run-QueryDNS-Test($description, $address)
 
 function Run-QueryHost-Test($description, $address)
 {
-    Write-Host "[QueryDNS()] " -NoNewline
+    Write-Host "[QueryHost()] " -NoNewline
     Write-Host $description -NoNewline
     Write-Host " ("-NoNewline
     Write-Host $address -ForegroundColor Cyan -NoNewline
@@ -119,27 +128,18 @@ function Run-QueryHost-Test($description, $address)
     $powerping_hostname = [PowerPing.Lookup]::QueryHost($address)
     
     if ($powerping_hostname -eq $our_hostname.NameHost) {
-        Write-Host(" --- Test Failed ---") -ForegroundColor Red 
-        $stats.TestsFailed += 1
-    } else {
         Write-Host(" ==== Test passed =====") -ForegroundColor Green
         $stats.TestsPassed += 1
+    } else {
+        Write-Host(" --- Test Failed ---") -ForegroundColor Red 
+        $stats.TestsFailed += 1
     }
 }
 
-Run-QueryHost-Test "Test valid ip address" "8.8.8.8"
-Run-QueryHost-Test "Test valid ip address" "1.1.1.1"
-#Write-Host "Going to test a load of load addresses..." -BackgroundColor Yellow
-#$our_addresses = Get-NetIPAddress
-#Get-NetIPAddress | fl
-#return
-#foreach ($address in $our_addresses) {
-#    #Run-QueryHost-Test "Test local address" $address.IPAddress
-#}
-#Run-QueryHost-Test "Test local address" "192.168.1.5"
-
+## Local address finding 
 Run-GetLocalAddress-Test "Check local address matches powershell's local address"
 
+## Address location functions
 Run-GetAddressLocationInfo-NotDetailed-Test "Test valid ip address" "8.8.8.8"
 Run-GetAddressLocationInfo-NotDetailed-Test "Test valid ip address" "1.1.1.1"
 Run-GetAddressLocationInfo-NotDetailed-Test "Test valid URL" "www.google.com"
@@ -162,14 +162,33 @@ Run-GetAddressLocationInfo-Detailed-Test "Test valid URL" "https://www.iana.org"
 Run-GetAddressLocationInfo-Detailed-Test "Test full URL" "https://en.wikipedia.org/wiki/Wipeout_(video_game)"
 Run-GetAddressLocationInfo-Detailed-Test "Test full URL" "https://www.iana.org/domains/idn-tables"
 
+## DNS lookup
 Run-QueryDNS-Test "Look up address for URL" "google.com"
 Run-QueryDNS-Test "Look up address for URL" "www.iana.org"
 Run-QueryDNS-Test "Look up address for URL" "en.wikipedia.org"
+Run-QueryDNS-Test "Look up address for URL/DNS" "dns.msftncsi.com"
 Run-QueryDNS-Test "Look up address for IPv4 address (this might fail as powerping does not query for ip addresses)" "8.8.8.8"
 Run-QueryDNS-Test "Look up address for IPv4 address (this might fail as powerping does not query for ip addresses)" "1.1.1.1"
+
+## Reverse DNS lookup
+Run-QueryHost-Test "Test valid ip address" "8.8.8.8"
+Run-QueryHost-Test "Test valid ip address" "8.8.4.4"
+Run-QueryHost-Test "Test valid ip address" "1.1.1.1"
+Run-QueryHost-Test "Test valid ip address" "131.107.255.255"
+#Write-Host "Going to test a load of load addresses..." -BackgroundColor Yellow
+#$our_addresses = Get-NetIPAddress
+#Get-NetIPAddress | fl
+#return
+#foreach ($address in $our_addresses) {
+#    #Run-QueryHost-Test "Test local address" $address.IPAddress
+#}
+#Run-QueryHost-Test "Test local address" "192.168.1.5"
 
 Write-Host
 Write-Host($stats.TestsPerformed.ToString() + " tests performed. " + $stats.TestsPassed.ToString() + " tests passed, " +$stats.TestsFailed.ToString() + " failed.")
 if ($stats.TestsFailed -gt 0) {
     Write-Warning("One or more tests failed.");
 }
+
+# Return results to caller script
+return $stats.TestsPassed.ToString() + "/" + $stats.TestsPerformed.ToString()
