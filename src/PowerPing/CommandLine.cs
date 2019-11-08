@@ -266,15 +266,23 @@ namespace PowerPing
                             case "/ts":
                             case "-ts":
                             case "--ts": // Display timestamp
-                                Display.ShowTimeStamp = true;
+                                if (args[count + 1].ToLower() == "utc") {
+                                    Display.ShowtimeStampUTC = true;
+                                } else {
+                                    Display.ShowTimeStamp = true;
+                                }
                                 break;
                             case "/fulltimestamp":
                             case "-fulltimestamp":
                             case "--fulltimestamp":
                             case "/fts":
                             case "-fts":
-                            case "--fts": // Display timestamp
-                                Display.ShowFullTimeStamp = true;
+                            case "--fts": // Display timestamp with date
+                                if (args[count + 1].ToLower() == "utc") {
+                                    Display.ShowFullTimeStampUTC = true;
+                                } else {
+                                    Display.ShowFullTimeStamp = true;
+                                }
                                 break;
                             case "/timing":
                             case "-timing":

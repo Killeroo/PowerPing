@@ -58,11 +58,11 @@ _Future features:_
                                             3 - Polite      7 - Random
     
     Display Options:
-        --noinput                     Don't ask for user input upon completion
+        --noinput                        Don't ask for user input upon completion
         --shorthand     [--sh]           Show less detailed replies
         --displaymsg    [--dm]           Display ICMP message contents
-        --timestamp     [--ts]           Display timestamps
-        --fulltimestamp [--fts]       Display full timestamps with localised date and time
+        --timestamp     [--ts]           Display timestamps (add 'UTC' for Coordinated Universal Time)
+        --fulltimestamp [--fts]          Display full timestamps with localised date and time
         --nocolor       [--nc]           No colour
         --symbols       [--sym]          Renders replies and timeouts as ASCII symbols
         --requests      [--r]            Show request packets
@@ -81,13 +81,13 @@ _Future features:_
         --graph         [--g]   address  Graph view
         --compact       [--cg]  address  Compact graph view
         --location      [--loc] address  Location info for an address
-        --whois              address  Whois lookup for an address
-        --whoami                      Location info for current host
+        --whois                 address  Whois lookup for an address
+        --whoami                         Location info for current host
 
     Others:
-        --help       [--?]            Displays this help message
-        --version    [--v]            Shows version and build information
-        --examples   [--ex]           Shows example usage
+        --help       [--?]               Displays this help message
+        --version    [--v]               Shows version and build information
+        --examples   [--ex]              Shows example usage
 
 ## Examples:
      powerping 8.8.8.8                    -     Send ping to google DNS with default values (3000ms timeout, 5 pings)

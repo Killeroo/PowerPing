@@ -45,7 +45,9 @@ namespace PowerPing
         public static bool ShowOutput { get; set; } = true;
         public static bool ShowMessages { get; set; } = false;
         public static bool ShowTimeStamp { get; set; } = false;
+        public static bool ShowtimeStampUTC { get; set; } = false;
         public static bool ShowFullTimeStamp { get; set; } = false;
+        public static bool ShowFullTimeStampUTC { get; set; } = false;
         public static bool ShowTimeouts { get; set; } = true;
         public static bool ShowRequests { get; set; } = false;
         public static bool ShowReplies { get; set; } = true;
@@ -167,31 +169,31 @@ Usage:
               [--ia] [--chk] [--l number] [--dp number] [--fts] target_name | target_address
 
 Ping Options:
-    --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)
-    --ipv4       [--4]            Force using IPv4
-    --random     [--rng]          Generates random ICMP message
-    --dontfrag   [--df]           Set 'Don't Fragment' flag
-    --buffer     [--rb]  number   Sets recieve buffer size (default is 5096)
-    --beep       [--b]   number   Beep on timeout(1) or on reply(2)
-    --count      [--c]   number   Number of pings to send
-    --timeout    [--w]   number   Time to wait for reply (in milliseconds)
-    --ttl        [--i]   number   Time To Live for packet
-    --interval   [--in]  number   Interval between each ping (in milliseconds)
-    --type       [--pt]  number   Use custom ICMP type
-    --code       [--pc]  number   Use custom ICMP code value
-    --size       [--s]   number   Set size (in bytes) of packet (overwrites packet message)
-    --message    [--m]   message  Ping packet message
-    --timing     [--ti]  timing   Timing levels:
-                                    0 - Paranoid    4 - Nimble
-                                    1 - Sneaky      5 - Speedy
-                                    2 - Quiet       6 - Insane
-                                    3 - Polite      7 - Random
+    --infinite      [--t]            Ping the target until stopped (Ctrl-C to stop)
+    --ipv4          [--4]            Force using IPv4
+    --random        [--rng]          Generates random ICMP message
+    --dontfrag      [--df]           Set 'Don't Fragment' flag
+    --buffer        [--rb]  number   Sets recieve buffer size (default is 5096)
+    --beep          [--b]   number   Beep on timeout(1) or on reply(2)
+    --count         [--c]   number   Number of pings to send
+    --timeout       [--w]   number   Time to wait for reply (in milliseconds)
+    --ttl           [--i]   number   Time To Live for packet
+    --interval      [--in]  number   Interval between each ping (in milliseconds)
+    --type          [--pt]  number   Use custom ICMP type
+    --code          [--pc]  number   Use custom ICMP code value
+    --size          [--s]   number   Set size (in bytes) of packet (overwrites packet message)
+    --message       [--m]   message  Ping packet message
+    --timing        [--ti]  timing   Timing levels:
+                                        0 - Paranoid    4 - Nimble
+                                        1 - Sneaky      5 - Speedy
+                                        2 - Quiet       6 - Insane
+                                        3 - Polite      7 - Random
 
 Display Options:
-    --noinput                     Don't ask for user input upon completion
+    --noinput                        Don't ask for user input upon completion
     --shorthand     [--sh]           Show less detailed replies
     --displaymsg    [--dm]           Display ICMP message field contents
-    --timestamp     [--ts]           Display timestamps
+    --timestamp     [--ts]           Display timestamps (add 'UTC' for Coordinated Universal Time)
     --fulltimestamp [--fts]          Display full timestamps with localised date and time
     --nocolor       [--nc]           No colour
     --symbols       [--sym]          Renders replies and timeouts as ASCII symbols
@@ -211,8 +213,8 @@ Modes:
     --graph         [--g]   address  Graph view
     --compact       [--cg]  address  Compact graph view
     --location      [--loc] address  Location info for an address
-    --whois              address  Whois lookup for an address
-    --whoami                      Location info for current host
+    --whois                 address  Whois lookup for an address
+    --whoami                         Location info for current host
 
 Other:
     --help          [--?]            Displays this help message
@@ -546,8 +548,12 @@ Get location information for 84.23.12.4";
             // Display timestamp
             if (ShowFullTimeStamp) {
                 Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString(CultureInfo.CurrentCulture));
+            } else if (ShowFullTimeStampUTC) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString(CultureInfo.CurrentCulture));
             } else if (ShowTimeStamp) {
                 Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
+            } else if (ShowtimeStampUTC) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString("HH:mm:ss"));
             }
 
             // End line
@@ -614,7 +620,7 @@ Get location information for 84.23.12.4";
                     Console.ForegroundColor = ConsoleColor.Red;
                 }
             }
-            Console.Write("{0:0." + new String('0', DecimalPlaces) + "}ms", replyTime.TotalMilliseconds);
+            Console.Write("{0:0." + new string('0', DecimalPlaces) + "}ms", replyTime.TotalMilliseconds);
             ResetColor();
 
             // Display checksum
@@ -623,15 +629,18 @@ Get location information for 84.23.12.4";
             }
 
             // Display timestamp
-            if (ShowFullTimeStamp)
-            {
+            if (ShowFullTimeStamp) {
                 Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString(CultureInfo.CurrentCulture));
-            } else if(ShowTimeStamp) {
+            } else if (ShowFullTimeStampUTC) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString(CultureInfo.CurrentCulture));
+            } else if (ShowTimeStamp) {
                 Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
+            } else if (ShowtimeStampUTC) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString("HH:mm:ss"));
             }
 
-            // End line
-            Console.WriteLine();
+	        // End line
+	        Console.WriteLine();
 
         }
         /// <summary>
@@ -886,8 +895,12 @@ Get location information for 84.23.12.4";
             // Display timestamp
             if (ShowFullTimeStamp) {
                 Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString(CultureInfo.CurrentCulture));
+            } else if (ShowFullTimeStampUTC) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString(CultureInfo.CurrentCulture));
             } else if (ShowTimeStamp) {
                 Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
+            } else if (ShowtimeStampUTC) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString("HH:mm:ss"));
             }
 
             // Make double sure we dont get the red line bug
