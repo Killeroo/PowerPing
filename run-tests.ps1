@@ -1,11 +1,15 @@
 ﻿$scriptPath = split-path -parent $MyInvocation.MyCommand.Definition
 
 # build PowerPing
+Write-Host "============ build project ============" -ForegroundColor Yellow
 $buildScriptPath = $scriptPath + "\scripts\build_dotnet_framework.bat"
 cmd.exe /C "$buildScriptPath"
-# TODO: Check return type of build 
+if ($LASTEXITCODE -ne 0) {
+    Write-Warning "Build failed, you will probably see alot of errors"
+}
 
 # Check architectures of builds are correct
+Write-Host "============ build architecture check ============" -ForegroundColor Yellow
 $powerping_x64_location = (split-path -parent $MyInvocation.MyCommand.Definition).ToString() + "\build\x64\PowerPing.exe"
 $powerping_x86_location = (split-path -parent $MyInvocation.MyCommand.Definition).ToString() + "\build\x86\PowerPing.exe"
 if ([reflection.assemblyname]::GetAssemblyName($powerping_x64_location).ProcessorArchitecture -eq "Amd64") {
