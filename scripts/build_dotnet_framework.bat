@@ -1,5 +1,6 @@
 @echo off
 
+:: Set directory to location of the script
 cd "%~dp0" 
 
 :: Arguments check
@@ -11,13 +12,9 @@ cd "%~dp0"
 ::)
 ::set projectPath=%~f1
 
-:: Set .NET 4.6 framework path
-set windows_msbuild_path="%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\"
-set vs_msbuild_path="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\amd64\msbuild.exe"
+:: Find appropriate msbuild path using vswhere
+for /f "usebackq tokens=*" %%A in (`vswhere -version "[15.0,16.0)" -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe`) do SET msbuild_path=%%A
 
 :: Run build command
-cd..
-::%windows_msbuild_path%\msbuild.exe PowerPing.sln /p:Configuration=Release /p:Platform="x86"
-::%windows_msbuild_path%\msbuild.exe PowerPing.sln /p:Configuration=Release /p:Platform="x64"
-%vs_msbuild_path% PowerPing.sln /p:Configuration=Release /p:Platform="x86"
-%vs_msbuild_path% PowerPing.sln /p:Configuration=Release /p:Platform="x64"
+call "%msbuild_path%" ..\PowerPing.sln /p:Configuration=Release /p:Platform="x64" /t:rebuild
+call "%msbuild_path%" ..\PowerPing.sln /p:Configuration=Release /p:Platform="x86" /t:rebuild
