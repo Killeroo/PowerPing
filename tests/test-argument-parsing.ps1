@@ -1,4 +1,4 @@
-﻿Write-Host "============ test-argument parsing script ============" -ForegroundColor Yellow
+﻿Write-Host "============ test-argument-parsing script ============" -ForegroundColor Yellow
 
 # Location of script
 $script_path = (split-path -parent $MyInvocation.MyCommand.Definition)
@@ -114,3 +114,6 @@ Write-Host($stats.TestsPerformed.ToString() + " tests performed. " + $stats.Test
 if ($stats.TestsFailed -gt 0) {
     Write-Warning("One or more tests failed.");
 }
+
+# Return results to caller script
+return $stats.TestsPassed.ToString() + "/" + $stats.TestsPerformed.ToString()
