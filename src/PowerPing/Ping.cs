@@ -41,7 +41,7 @@ namespace PowerPing
     {
         private static readonly ushort m_SessionId = Helper.GenerateSessionId();
         private readonly CancellationToken m_CancellationToken;
-        private bool m_Debug = false;
+        private bool m_Debug = true;
 
         public Ping(CancellationToken cancellationTkn)
         {

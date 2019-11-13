@@ -144,9 +144,12 @@ namespace PowerPing
 Just to put that into perspective you would have to be running a normal ping program with default settings for 584,942,417,355 YEARS to achieve this!
 Well done brave soul, I don't know your motive but I salute you =^-^=";
 
-        // Symbol characters
-        const string REPLY_SYMBOL = ".";
-        const string TIMEOUT_SYMBOL = "!";
+        // Characters used in symbol mode
+        const string REPLY_LT_100_MS_SYMBOL = "█";
+        const string REPLY_LT_250_MS_SYMBOL = "▓";
+        const string REPLY_LT_500_MS_SYMBOL = "▒";
+        const string REPLY_GT_500_MS_SYMBOL = "░";
+        const string REPLY_TIMEOUT_SYMBOL = "!";
 
         const string HELP_MSG =
 @"__________                         __________.__                
@@ -578,13 +581,16 @@ Get location information for 84.23.12.4";
                 if (packet.Type == 0x00) {
                     if (replyTime <= TimeSpan.FromMilliseconds(100)) {
                         Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Write("_");
-                    } else if (replyTime <= TimeSpan.FromMilliseconds(500)) {
+                        Console.Write(REPLY_LT_100_MS_SYMBOL);
+                    } else if (replyTime <= TimeSpan.FromMilliseconds(250)) {
                         Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.Write("▄");
-                    } else {
+                        Console.Write(REPLY_LT_250_MS_SYMBOL);
+                    } else if (replyTime <= TimeSpan.FromMilliseconds(500)) {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write("█");
+                        Console.Write(REPLY_LT_500_MS_SYMBOL);
+                    } else {
+                        Console.ForegroundColor = ConsoleColor.Magenta;
+                        Console.Write(REPLY_GT_500_MS_SYMBOL);
                     }
                     ResetColor();
                 } else {
@@ -875,8 +881,8 @@ Get location information for 84.23.12.4";
 
             // If drawing symbols
             if (UseSymbols) {
-                Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.Write(TIMEOUT_SYMBOL);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write(REPLY_TIMEOUT_SYMBOL);
                 ResetColor();
                 return;
             }
