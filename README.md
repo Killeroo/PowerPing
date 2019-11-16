@@ -58,7 +58,7 @@ _Future features:_
                                             3 - Polite      7 - Random
     
     Display Options:
-        --noinput                        Don't ask for user input upon completion
+        --noinput       [--ni]           Don't ask for user input upon completion (persists)
         --shorthand     [--sh]           Show less detailed replies
         --displaymsg    [--dm]           Display ICMP message contents
         --timestamp     [--ts]           Display timestamps (add 'UTC' for Coordinated Universal Time)

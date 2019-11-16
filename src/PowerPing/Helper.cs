@@ -52,7 +52,7 @@ namespace PowerPing
         public static void WaitForUserInput()
         {
             // Only ask for user input if NoInput hasn't been set
-            if (Display.NoInput)
+            if (!Properties.Settings.Default.RequireInput)
                 return;
 
             Console.Write("Press any key to continue...");
