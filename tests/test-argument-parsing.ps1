@@ -40,7 +40,7 @@ function Run-Test($description, $arguments, [int]$returnCode)
 
     Write-Host("[x86]") -NoNewline -ForegroundColor Yellow
     $stats.TestsPerformed += 1
-    $Result = Start-Process -FilePath $powerping_x86_location -ArgumentList ('-noinput ' + $arguments) -PassThru -Wait
+    $Result = Start-Process -FilePath $powerping_x86_location -ArgumentList ($arguments) -PassThru -Wait
     if($Result.ExitCode -eq $returnCode) {
         Write-Host(" ==== Test passed =====") -ForegroundColor Green
         $stats.TestsPassed += 1
@@ -54,6 +54,7 @@ function Run-Test($description, $arguments, [int]$returnCode)
 Write-Host
 Write-Host "Baseline tests"
 Write-Host "----------------------"
+Run-Test "Test noinput flag works (all tests reply on it)" "-noinput" 1
 Run-Test "Test with just address" "8.8.8.8" 0
 Run-Test "Run with no arguments or address" "" 0
 Run-Test "Run help argument" "-help" 0
