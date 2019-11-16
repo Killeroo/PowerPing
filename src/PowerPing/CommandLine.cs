@@ -205,6 +205,12 @@ namespace PowerPing
                                 Display.NoInput = true;
                                 Properties.Settings.Default.RequireInput = !Properties.Settings.Default.RequireInput;
                                 Properties.Settings.Default.Save();
+                                Display.Message(
+                                    "(RequireInput is now " + 
+                                    (Properties.Settings.Default.RequireInput ? 
+                                    "ON, from now on you will be prompted for user input when PowerPing is finished)" 
+                                    : "OFF, you will no longer prompted for user input when PowerPing is finished)"), 
+                                    ConsoleColor.Cyan);
                                 break;
                             case "/decimals":
                             case "-decimals":
