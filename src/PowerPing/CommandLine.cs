@@ -209,7 +209,7 @@ namespace PowerPing
                                     "(RequireInput is now " + 
                                     (Properties.Settings.Default.RequireInput ? 
                                     "ON, from now on you will be prompted for user input when PowerPing is finished)" 
-                                    : "OFF, you will no longer prompted for user input when PowerPing is finished)"), 
+                                    : "OFF, you will no longer be prompted for user input when PowerPing is finished)"), 
                                     ConsoleColor.Cyan);
                                 break;
                             case "/decimals":
