@@ -104,7 +104,9 @@ namespace PowerPing
             try {
                 s = new Socket(family, SocketType.Raw, family == AddressFamily.InterNetwork ? ProtocolType.Icmp : ProtocolType.IcmpV6);
             } catch (SocketException) {
-                Helper.ErrorAndExit("Socket cannot be created " + Environment.NewLine + "Please run as Administrator and try again.");
+                Display.Message("PowerPing uses raw sockets which require Administrative rights to create." + Environment.NewLine +
+                                "(You can find more info at https://github.com/Killeroo/PowerPing/issues/110)", ConsoleColor.Cyan);
+                Helper.ErrorAndExit("Socket cannot be created, please run as Administrator and try again.");
             }
             return s;
         }
