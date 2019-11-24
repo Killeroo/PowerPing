@@ -106,7 +106,7 @@ namespace PowerPing
             } catch (SocketException) {
                 Display.Message("PowerPing uses raw sockets which require Administrative rights to create." + Environment.NewLine +
                                 "(You can find more info at https://github.com/Killeroo/PowerPing/issues/110)", ConsoleColor.Cyan);
-                Helper.ErrorAndExit("Socket cannot be created, please run as Administrator and try again.");
+                Helper.ErrorAndExit("Socket cannot be created, make sure you are running as an Administrator and try again.");
             }
             return s;
         }
