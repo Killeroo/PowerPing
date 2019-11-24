@@ -112,7 +112,7 @@ _Future features:_
 
 License under the MIT License:
 
-Copyright (c) 2018 Matthew Carney <matthewcarney64@gmail.com>
+Copyright (c) 2019 Matthew Carney <matthewcarney64@gmail.com>
 
 ### Note: 
-**Requires _Elevated Rights (Admininstrator)_ to Run**
+**Requires _Elevated Rights (Admininstrator)_ to Run (More info [here](https://github.com/Killeroo/PowerPing/issues/110))**
