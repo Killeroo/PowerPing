@@ -145,10 +145,10 @@ Just to put that into perspective you would have to be running a normal ping pro
 Well done brave soul, I don't know your motive but I salute you =^-^=";
 
         // Characters used in symbol mode
-        const string REPLY_LT_100_MS_SYMBOL = "█";
-        const string REPLY_LT_250_MS_SYMBOL = "▓";
-        const string REPLY_LT_500_MS_SYMBOL = "▒";
-        const string REPLY_GT_500_MS_SYMBOL = "░";
+        const string REPLY_LT_100_MS_SYMBOL = "_";
+        const string REPLY_LT_250_MS_SYMBOL = "▄";
+        const string REPLY_LT_500_MS_SYMBOL = "█";
+        const string REPLY_GT_500_MS_SYMBOL = "█";
         const string REPLY_TIMEOUT_SYMBOL = "!";
 
         const string HELP_MSG =
