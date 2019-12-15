@@ -230,6 +230,22 @@ namespace PowerPing
                             case "-sym":
                             case "--sym":
                                 Display.UseSymbols = true;
+                                Display.SetAsciiReplySymbolsTheme(0);
+
+                                // Change symbols theme if an argument is present
+                                if (args.Length < count + 1) {
+                                    count++;
+                                    continue;
+                                }
+                                if ((args[count + 1].Contains("--") 
+                                    || args[count + 1].Contains("//") 
+                                    || args[count + 1].Contains("-") 
+                                    || args[count + 1].Contains("."))) {
+                                    count++;
+                                    continue;
+                                }
+                                int theme = Convert.ToInt32(args[count + 1]);
+                                Display.SetAsciiReplySymbolsTheme(theme);
                                 break;
                             case "/random":
                             case "-random":

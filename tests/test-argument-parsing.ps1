@@ -29,12 +29,12 @@ function Run-Test($description, $arguments, [int]$returnCode)
     
     Write-Host("[x64]") -NoNewline -ForegroundColor Yellow
     $stats.TestsPerformed += 1
-    $Result = Start-Process -FilePath $powerping_x64_location -ArgumentList ('-noinput ' + $arguments) -PassThru -Wait
+    $Result = Start-Process -FilePath $powerping_x64_location -ArgumentList ($arguments) -PassThru -Wait
     if($Result.ExitCode -eq $returnCode) {
-        Write-Host(" ==== Test passed ===== ") -NoNewLine -ForegroundColor Green
+        Write-Host(" ==== Test passed ===== ") -NoNewline -ForegroundColor Green
         $stats.TestsPassed += 1
     } else {
-        Write-Host(" --- Test Failed --- ") -NoNewLine -ForegroundColor Red 
+        Write-Host(" --- Test Failed --- ") -NoNewline -ForegroundColor Red 
         $stats.TestsFailed += 1
     }
 
@@ -109,7 +109,15 @@ Run-Test "Test `'timing`' with missing address" "-ti 4" 1
 Run-Test "Test `'timing`' with empty argument" "-ti 8.8.8.8" 1
 Run-Test "Test `'timing`' with invalid positive parameter" "-ti 8 8.8.8.8" 1
 Run-Test "Test `'timing`' with invalid negative parameter" "-ti -1 8.8.8.8" 1
-
+Run-Test "Test `'symbols`' with no arguments, and address at end" "-sym 8.8.8.8" 0
+Run-Test "Test `'symbols`' with no arguments, and address at start" "8.8.8.8 -sym" 0
+Run-Test "Test `'symbols`' with arguments, and address at end" "-sym 1 8.8.8.8" 0
+Run-Test "Test `'symbols`' with arguments, and address at start" "8.8.8.8 -sym 1" 0
+Run-Test "Test `'symbols`' with no arguments and leading argument" "-sym -c 1 8.8.8.8" 0
+Run-Test "Test `'symbols`' with argument and leading argument" "-sym 1 -c 1 8.8.8.8" 0
+Run-Test "Test `'symbols`' with invalid positive theme number" "-sym 1000 8.8.8.8" 0
+Run-Test "Test `'symbols`' with invalid negative theme number" "-sym -1000 8.8.8.8" 0
+Run-Test "Test `'symbols`' with valid theme number" "-sym 0 8.8.8.8" 0
 
 Write-Host
 Write-Host "Address location tests"

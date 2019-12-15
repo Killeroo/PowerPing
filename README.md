@@ -64,7 +64,7 @@ _Future features:_
         --timestamp     [--ts]           Display timestamps (add 'UTC' for Coordinated Universal Time)
         --fulltimestamp [--fts]          Display full timestamps with localised date and time
         --nocolor       [--nc]           No colour
-        --symbols       [--sym]          Renders replies and timeouts as ASCII symbols
+        --symbols       [--sym]          Renders replies and timeouts as ASCII symbols (add '1' for alt theme)
         --requests      [--r]            Show request packets
         --notimeouts    [--nt]           Don't display timeout messages
         --quiet         [--q]            No output (only affects normal ping)
@@ -115,4 +115,4 @@ License under the MIT License:
 Copyright (c) 2019 Matthew Carney <matthewcarney64@gmail.com>
 
 ### Note: 
-**Requires _Elevated Rights (Admininstrator)_ to Run (More info [here](https://github.com/Killeroo/PowerPing/issues/110))**
+**Requires _Elevated Rights (Admininstrator)_ to Run (more info [here](https://github.com/Killeroo/PowerPing/issues/110))**

@@ -145,12 +145,46 @@ Just to put that into perspective you would have to be running a normal ping pro
 Well done brave soul, I don't know your motive but I salute you =^-^=";
 
         // Characters used in symbol mode
-        const string REPLY_LT_100_MS_SYMBOL = "_";
-        const string REPLY_LT_250_MS_SYMBOL = "▄";
-        const string REPLY_LT_500_MS_SYMBOL = "█";
-        const string REPLY_GT_500_MS_SYMBOL = "█";
-        const string REPLY_TIMEOUT_SYMBOL = "!";
+        const string REPLY_LT_100_MS_SYMBOL_1 = ".";
+        const string REPLY_LT_250_MS_SYMBOL_1 = ".";
+        const string REPLY_LT_500_MS_SYMBOL_1 = ".";
+        const string REPLY_GT_500_MS_SYMBOL_1 = ".";
+        const string REPLY_TIMEOUT_SYMBOL_1 = "!";
 
+        const string REPLY_LT_100_MS_SYMBOL_2 = "_";
+        const string REPLY_LT_250_MS_SYMBOL_2 = "▄";
+        const string REPLY_LT_500_MS_SYMBOL_2 = "█";
+        const string REPLY_GT_500_MS_SYMBOL_2 = "█";
+        const string REPLY_TIMEOUT_SYMBOL_2 = "!";
+
+        private struct ASCIIReplySymbols
+        {
+            public string LessThan100;
+            public string LessThan250;
+            public string LessThan500;
+            public string GreaterThan500;
+            public string Timeout;
+        };
+        private static ASCIIReplySymbols ReplySymbols;
+
+        public static void SetAsciiReplySymbolsTheme(int theme)
+        {
+            if (theme == 0) {
+                ReplySymbols.LessThan100 = REPLY_LT_100_MS_SYMBOL_1;
+                ReplySymbols.LessThan250 = REPLY_LT_250_MS_SYMBOL_1;
+                ReplySymbols.LessThan500 = REPLY_LT_500_MS_SYMBOL_1;
+                ReplySymbols.GreaterThan500 = REPLY_GT_500_MS_SYMBOL_1;
+                ReplySymbols.Timeout = REPLY_TIMEOUT_SYMBOL_1;
+            } else {
+                ReplySymbols.LessThan100 = REPLY_LT_100_MS_SYMBOL_2;
+                ReplySymbols.LessThan250 = REPLY_LT_250_MS_SYMBOL_2;
+                ReplySymbols.LessThan500 = REPLY_LT_500_MS_SYMBOL_2;
+                ReplySymbols.GreaterThan500 = REPLY_GT_500_MS_SYMBOL_2;
+                ReplySymbols.Timeout = REPLY_TIMEOUT_SYMBOL_2;
+            }
+        }
+
+        
         const string HELP_MSG =
 @"__________                         __________.__                
 \______   \______  _  __ __________\______   \__| ____    ____  
@@ -199,7 +233,7 @@ Display Options:
     --timestamp     [--ts]           Display timestamps (add 'UTC' for Coordinated Universal Time)
     --fulltimestamp [--fts]          Display full timestamps with localised date and time
     --nocolor       [--nc]           No colour
-    --symbols       [--sym]          Renders replies and timeouts as ASCII symbols
+    --symbols       [--sym]          Renders replies and timeouts as ASCII symbols (add '1' for alt theme)
     --requests      [--r]            Show request packets
     --notimeouts    [--nt]           Don't display timeout messages
     --quiet         [--q]            No output (only affects normal ping)
@@ -581,16 +615,16 @@ Get location information for 84.23.12.4";
                 if (packet.Type == 0x00) {
                     if (replyTime <= TimeSpan.FromMilliseconds(100)) {
                         Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Write(REPLY_LT_100_MS_SYMBOL);
+                        Console.Write(ReplySymbols.LessThan100);
                     } else if (replyTime <= TimeSpan.FromMilliseconds(250)) {
                         Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.Write(REPLY_LT_250_MS_SYMBOL);
+                        Console.Write(ReplySymbols.LessThan250);
                     } else if (replyTime <= TimeSpan.FromMilliseconds(500)) {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write(REPLY_LT_500_MS_SYMBOL);
+                        Console.Write(ReplySymbols.LessThan500);
                     } else {
                         Console.ForegroundColor = ConsoleColor.Magenta;
-                        Console.Write(REPLY_GT_500_MS_SYMBOL);
+                        Console.Write(ReplySymbols.GreaterThan500);
                     }
                     ResetColor();
                 } else {
@@ -882,7 +916,7 @@ Get location information for 84.23.12.4";
             // If drawing symbols
             if (UseSymbols) {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write(REPLY_TIMEOUT_SYMBOL);
+                Console.Write(ReplySymbols.Timeout);
                 ResetColor();
                 return;
             }
