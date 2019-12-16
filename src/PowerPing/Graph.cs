@@ -157,7 +157,7 @@ namespace PowerPing
             // TODO: Don't always redraw graph, determine if scale has changed
             Clear();
 
-            for (int x = 0; x < m_ResponseTimes.Count; x++) {
+            /*for (int x = 0; x < m_ResponseTimes.Count; x++) {
                 if (x == m_Columns.Count - 1)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -165,11 +165,41 @@ namespace PowerPing
                 DrawBar(CreateColumn(m_ResponseTimes[x]));
 
                 Console.CursorLeft++; 
-            }
-
+            }*/
+            DrawColumns();
             // Reset colour after
             Console.ForegroundColor = ConsoleColor.Gray;
             // TODO: Stripped colour instead of gray
+        }
+        private void DrawColumns()
+        {
+            //private readonly List<String[]> m_Columns  = 
+            // Work out columns
+            string[][] columns = new string[m_ResponseTimes.Count][];
+            for (int x = 0; x < m_ResponseTimes.Count; x++) {
+                columns[x] = CreateColumn(m_ResponseTimes[x]);
+            }
+
+            // Work out lines
+            List<string> lines = new List<string>();
+            for (int x = 0; x < m_yAxisLength; x++) {
+                string line = "";
+                for (int y = 0; y < columns.Length; y++) {
+                    try {
+                        line += columns[y][x];
+                    } catch (IndexOutOfRangeException) {
+                        line += " ";
+                    }
+                }
+                lines.Add(line);
+            }
+
+            // Draw lines
+            Console.CursorTop = m_yAxisStart;
+            foreach (string line in lines) {
+                Console.CursorLeft = 21; // TODO: Dynamic
+                Console.WriteLine(line);
+            }
         }
         /// <summary>
         /// Draw graph background
