@@ -52,7 +52,7 @@ namespace PowerPing
         private bool m_IsGraphSetup = false;
         private int m_yAxisLength = 20;
         private int m_xAxisLength = 40;
-        private int m_Scale = 20;
+        private int m_Scale = 25;//50;
 
         // Location of graph plotting space
         private int m_PlotStartX;
@@ -140,7 +140,7 @@ namespace PowerPing
         {
             // Determine Xaxis size
             if (!CompactGraph) {
-                m_xAxisLength = Console.WindowWidth - 30;
+                m_xAxisLength = Console.WindowWidth - 50;
             }
 
             DrawBackground();
@@ -157,16 +157,20 @@ namespace PowerPing
             // TODO: Don't always redraw graph, determine if scale has changed
             Clear();
 
-            /*for (int x = 0; x < m_ResponseTimes.Count; x++) {
-                if (x == m_Columns.Count - 1)
-                {
+            for (int x = 0; x < m_ResponseTimes.Count; x++) {
+                if (x % 2 == 0) {
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                } else {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                }
+                if (x == m_ResponseTimes.Count - 1) {
                     Console.ForegroundColor = ConsoleColor.Green;
                 }
                 DrawBar(CreateColumn(m_ResponseTimes[x]));
 
                 Console.CursorLeft++; 
-            }*/
-            DrawColumns();
+            }
+            //DrawColumns();
             // Reset colour after
             Console.ForegroundColor = ConsoleColor.Gray;
             // TODO: Stripped colour instead of gray
@@ -313,9 +317,6 @@ namespace PowerPing
         }
         public void DrawYAxisLabels()
         {
-            //m_Scale = 1;
-            //CompactGraph = true;
-
             int factor = CompactGraph ? 1 : 2;
             int maxLines = CompactGraph ? 10 : 20;
             int maxYValue = maxLines * m_Scale;
