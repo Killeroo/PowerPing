@@ -38,6 +38,7 @@ namespace PowerPing
         // Constants
         const string FULL_BAR_BLOCK_CHAR = "█";
         const string HALF_BAR_BLOCK_CHAR = "▄";
+        const string BOTTOM_BAR_BLOCK_CHAR = "▀";
 
         // Properties
         public bool CompactGraph = false;
@@ -110,7 +111,6 @@ namespace PowerPing
                 //if (!displayUpdateLimiter.RequestRun()) {
                 //    return;
                 //}
-                
 
                 // Reset position
                 Console.CursorTop = m_PlotStartY;
@@ -170,6 +170,10 @@ namespace PowerPing
 
                 Console.CursorLeft++; 
             }
+
+            // TODO change scale here
+
+
             //DrawColumns();
             // Reset colour after
             Console.ForegroundColor = ConsoleColor.Gray;
@@ -452,16 +456,20 @@ namespace PowerPing
             bar[0] = "▀";
 
             // Replace the last segment based on graph size
-            if (CompactGraph)
-            {
+            if (CompactGraph) {
                 bar[bar.Length - 1] = FULL_BAR_BLOCK_CHAR;
-            }
-            else
-            {
+            } else {
                 bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
             }
 
-            //// Work out top segment based on length
+            // Work out top character
+            //if (time % m_Scale >= 0) {
+            //    bar[count] = FULL_BAR_BLOCK_CHAR;
+            //} else {
+            //    bar[count] = HALF_BAR_BLOCK_CHAR;
+            //}
+
+            // Work out top segment based on length
             //if (CompactGraph) { // Work out for compact graph
             //    if (count + 1 % 2 == 0) {
             //        bar[count] = FULL_BAR_BLOCK_CHAR;

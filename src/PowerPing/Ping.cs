@@ -41,7 +41,7 @@ namespace PowerPing
     {
         private static readonly ushort m_SessionId = Helper.GenerateSessionId();
         private readonly CancellationToken m_CancellationToken;
-        private bool m_Debug = false;
+        private bool m_Debug = true;
 
         public Ping(CancellationToken cancellationTkn)
         {
@@ -123,6 +123,8 @@ namespace PowerPing
         /// <param name="attrs">Properties of pings to be sent</param>
         /// <param name="resultsUpdateCallback">Method to call after each iteration</param>
         /// <returns>Set of ping results</returns>
+        int scale = 10;
+        bool inverting = false;
         private PingResults SendICMP(PingAttributes attrs, Action<PingResults> resultsUpdateCallback = null)
         {
             PingResults results = new PingResults();
@@ -220,8 +222,25 @@ namespace PowerPing
                     if (m_Debug) {
                         // Induce random wait for debugging 
                         Random rnd = new Random();
-                        Thread.Sleep(rnd.Next(700));
-                        if (rnd.Next(20) == 1) { throw new SocketException(); }
+                        Thread.Sleep(scale);//rnd.Next(scale));//1500));
+                        //Thread.Sleep(rnd.Next(100));
+                        if (inverting)
+                        {
+                            scale -= 5;
+                        }
+                        else
+                        {
+                            scale += 5;
+                        }
+                        if (scale > 1100)
+                        {
+                            inverting = true;
+                        }
+                        else if (scale == 10)
+                        {
+                            inverting = false;
+                        }
+                        //if (rnd.Next(20) == 1) { throw new SocketException(); }
                     }
 
                     ICMP response;
