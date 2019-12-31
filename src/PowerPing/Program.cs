@@ -56,7 +56,8 @@ namespace PowerPing
 
             // Check if no arguments
             if (args.Length == 0) {
-                PowerPing.Display.Help();
+                Display.Help();
+                Helper.WaitForUserInput();
                 return;
             }
 
@@ -85,16 +86,18 @@ namespace PowerPing
             Graph g;
             switch (attributes.Operation) {
                 case PingOperation.Listen:
-                    p.Listen();
+                    Listen.Start(m_CancellationTokenSource.Token);
                     break;
                 case PingOperation.Location:
-                    PowerPing.Lookup.AddressLocation(attributes.InputtedAddress, true);
+                    Console.WriteLine(Lookup.GetAddressLocationInfo(attributes.InputtedAddress, false));
+                    Helper.WaitForUserInput();
                     break;
                 case PingOperation.Whoami:
-                    PowerPing.Lookup.AddressLocation("", true);
+                    Console.WriteLine(Lookup.GetAddressLocationInfo("", true));
+                    Helper.WaitForUserInput();
                     break;
                 case PingOperation.Whois:
-                    PowerPing.Lookup.QueryWhoIs(attributes.InputtedAddress);
+                    Lookup.QueryWhoIs(attributes.InputtedAddress);
                     break;
                 case PingOperation.Graph:
                     g = new Graph(attributes.InputtedAddress, m_CancellationTokenSource.Token);
@@ -106,10 +109,10 @@ namespace PowerPing
                     g.Start();
                     break;
                 case PingOperation.Flood:
-                    PowerPing.Flood.Start(attributes.InputtedAddress, m_CancellationTokenSource.Token);
+                    Flood.Start(attributes.InputtedAddress, m_CancellationTokenSource.Token);
                     break;
                 case PingOperation.Scan:
-                    PowerPing.Scan.Start(attributes.InputtedAddress, m_CancellationTokenSource.Token);
+                    Scan.Start(attributes.InputtedAddress, m_CancellationTokenSource.Token);
                     break;
                 case PingOperation.Normal:
                     // Send ping normally

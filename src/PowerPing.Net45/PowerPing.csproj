@@ -35,9 +35,7 @@
     <DocumentationFile>
     </DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationManifest>..\PowerPing\Properties\app.manifest</ApplicationManifest>
-  </PropertyGroup>
+  <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug\</OutputPath>
@@ -78,6 +76,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -88,23 +89,57 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\PowerPing\Display.cs" />
-    <Compile Include="..\PowerPing\Exceptions.cs" />
-    <Compile Include="..\PowerPing\Graph.cs" />
-    <Compile Include="..\PowerPing\ICMP.cs" />
-    <Compile Include="..\PowerPing\Helper.cs" />
-    <Compile Include="..\PowerPing\Ping.cs" />
-    <Compile Include="..\PowerPing\PingAttributes.cs" />
-    <Compile Include="..\PowerPing\PingResults.cs" />
+    <Compile Include="..\PowerPing\Display.cs">
+      <Link>Core\Display.cs</Link>
+    </Compile>
+    <Compile Include="..\PowerPing\Exceptions.cs">
+      <Link>Utils\Exceptions.cs</Link>
+    </Compile>
+    <Compile Include="..\PowerPing\Graph.cs">
+      <Link>Commands\Graph.cs</Link>
+    </Compile>
+    <Compile Include="..\PowerPing\ICMP.cs">
+      <Link>Core\ICMP.cs</Link>
+    </Compile>
+    <Compile Include="..\PowerPing\Helper.cs">
+      <Link>Utils\Helper.cs</Link>
+    </Compile>
+    <Compile Include="..\PowerPing\Ping.cs">
+      <Link>Core\Ping.cs</Link>
+    </Compile>
+    <Compile Include="..\PowerPing\PingAttributes.cs">
+      <Link>DataStructures\PingAttributes.cs</Link>
+    </Compile>
+    <Compile Include="..\PowerPing\PingResults.cs">
+      <Link>DataStructures\PingResults.cs</Link>
+    </Compile>
     <Compile Include="..\PowerPing\Program.cs" />
     <Compile Include="..\PowerPing\Properties\AssemblyInfo.cs" />
-    <Compile Include="..\PowerPing\Lookup.cs" />
-    <Compile Include="..\PowerPing\RateLimiter.cs" />
-    <Compile Include="..\PowerPing\ExtensionMethods.cs" />
-    <Compile Include="..\PowerPing\CommandLine.cs" />
-    <Compile Include="..\PowerPing\Scan.cs" />
-    <Compile Include="..\PowerPing\Flood.cs" />
-    <Compile Include="Properties\Settings.Designer.cs">
+    <Compile Include="..\PowerPing\Lookup.cs">
+      <Link>Commands\Lookup.cs</Link>
+    </Compile>
+    <Compile Include="..\PowerPing\RateLimiter.cs">
+      <Link>Utils\RateLimiter.cs</Link>
+    </Compile>
+    <Compile Include="..\PowerPing\ExtensionMethods.cs">
+      <Link>Utils\ExtensionMethods.cs</Link>
+    </Compile>
+    <Compile Include="..\PowerPing\CommandLine.cs">
+      <Link>Utils\CommandLine.cs</Link>
+    </Compile>
+    <Compile Include="..\PowerPing\Scan.cs">
+      <Link>Commands\Scan.cs</Link>
+    </Compile>
+    <Compile Include="..\PowerPing\Flood.cs">
+      <Link>Commands\Flood.cs</Link>
+    </Compile>
+    <Compile Include="..\PowerPing\Listen.cs">
+      <Link>Commands\Listen.cs</Link>
+    </Compile>
+    <Compile Include="..\PowerPing\Trace.cs">
+      <Link>Commands\Trace.cs</Link>
+    </Compile>
+    <Compile Include="..\PowerPing\Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
@@ -118,11 +153,12 @@
       <SubType>Designer</SubType>
     </None>
     <None Include=".editorconfig" />
-    <None Include="Properties\Settings.settings">
+    <None Include="..\PowerPing\Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

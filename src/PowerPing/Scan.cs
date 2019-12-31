@@ -97,7 +97,7 @@ namespace PowerPing
                         activeHosts.Add(new HostInformation {
                             Address = host,
                             HostName = "",
-                            ResponseTime = results.CurTime
+                            ResponseTime = results.CurrTime
                         });
                     }
                 }
@@ -115,7 +115,7 @@ namespace PowerPing
             Console.WriteLine("                                    ");
             Console.CursorTop--;
 
-            PowerPing.Display.ScanResults(scanned, !cancellationToken.IsCancellationRequested, activeHosts);
+            Display.ScanResults(scanned, !cancellationToken.IsCancellationRequested, activeHosts);
         }
 
         /// <summary>

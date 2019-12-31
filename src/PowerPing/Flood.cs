@@ -43,7 +43,7 @@ namespace PowerPing
             Ping p = new Ping(cancellationToken);
 
             // Verify address
-            attrs.Address = PowerPing.Lookup.QueryDNS(address, AddressFamily.InterNetwork); ;
+            attrs.Address = Lookup.QueryDNS(address, AddressFamily.InterNetwork); ;
 
             // Setup ping attributes
             attrs.Interval = 0;

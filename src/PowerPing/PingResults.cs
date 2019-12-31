@@ -42,7 +42,7 @@ namespace PowerPing
         public double MaxTime { get; private set; } // Highest ping reply time
         public double MinTime { get; private set; } // Lowest ping reply time
         public double AvgTime { get; private set; } // Average reply time
-        public double CurTime { get; private set; } // Most recent packet response time
+        public double CurrTime { get; private set; } // Most recent packet response time
         public ulong ErrorPackets { get; private set; } // Number of Error packet received
         public ulong GoodPackets { get; private set; } // Number of good replies received
         public ulong OtherPackets { get; private set; } // Number of other packet types received
@@ -61,7 +61,7 @@ namespace PowerPing
             MaxTime = 0;
             MinTime = 0;
             AvgTime = 0;
-            CurTime = -1;
+            CurrTime = -1;
             ErrorPackets = 0;
             GoodPackets = 0;
             OtherPackets = 0;
@@ -78,7 +78,7 @@ namespace PowerPing
         public void SaveResponseTime(double time)
         {
             if (time == -1f) {
-                CurTime = 0;
+                CurrTime = 0;
                 return;
             }
 
@@ -99,7 +99,7 @@ namespace PowerPing
             } catch (OverflowException) {
                 HasOverflowed = true;
             }
-            CurTime = time;
+            CurrTime = time;
         }
         public void CountPacketType(int type)
         {

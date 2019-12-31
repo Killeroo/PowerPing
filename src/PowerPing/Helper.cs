@@ -30,6 +30,7 @@ using System.Text.RegularExpressions;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace PowerPing
 {
@@ -230,7 +231,50 @@ namespace PowerPing
             uint n = (uint)Process.GetCurrentProcess().Id;
             return (ushort)(n ^ (n >> 16));
         }
-        
+
+        /// <summary>
+        /// Checks github api for latest release of PowerPing against current assembly version
+        /// Prints message to update if newer version has been released.
+        /// </summary>
+        /// <returns></returns>
+        public static void CheckRecentVersion()
+        {
+            using (var webClient = new System.Net.WebClient())
+            {
+                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072; // TLS 1.2
+                webClient.Headers["User-Agent"] = "PowerPing (version_check)"; // Need to specif a valid user agent for github api: https://stackoverflow.com/a/39912696
+
+                try
+                {
+                    // Fetch latest release info from github api
+                    string jsonResult = webClient.DownloadString(
+                        $"http://api.github.com/repos/killeroo/powerping/releases/latest");
+
+                    // Extract version from returned json
+                    Regex regex = new Regex(@"""(tag_name)"":""((\\""|[^""])*)""");
+                    Match result = regex.Match(jsonResult);
+                    if (result.Success) {
+                        string matchString = result.Value;
+                        Version theirVersion = new Version(matchString.Split(':')[1].Replace("\"", string.Empty).Replace("v", string.Empty));
+                        Version ourVersion = Assembly.GetExecutingAssembly().GetName().Version;
+                        
+                        if (theirVersion > ourVersion) {
+                            Console.WriteLine();
+                            Console.WriteLine("=========================================================");
+                            Console.WriteLine("A new version of PowerPing is available ({0})", theirVersion);
+                            Console.WriteLine("Download the new version at: {0}", @"https://github.com/killeroo/powerping/releases/latest");
+                            Console.WriteLine("=========================================================");
+                            Console.WriteLine();
+                        }
+                    }
+
+                }
+                catch (Exception) { } // We just want to blanket catch any exception and silently continue
+
+            }
+
+        }
+
         public static long StopwatchToTimeSpanTicks(long stopwatchTicks)
         {
             return (long)(stopwatchTicks * m_StopwatchToTimeSpanTicksScale);

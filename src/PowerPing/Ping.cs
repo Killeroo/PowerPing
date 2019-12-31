@@ -41,7 +41,7 @@ namespace PowerPing
     {
         private static readonly ushort m_SessionId = Helper.GenerateSessionId();
         private readonly CancellationToken m_CancellationToken;
-        private bool m_Debug = false;
+        private bool m_Debug = true;
 
         public Ping(CancellationToken cancellationTkn)
         {
@@ -59,10 +59,10 @@ namespace PowerPing
         {
             // Lookup host if specified
             if (attrs.InputtedAddress != "") {
-                attrs.Address = PowerPing.Lookup.QueryDNS(attrs.InputtedAddress, attrs.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+                attrs.Address = Lookup.QueryDNS(attrs.InputtedAddress, attrs.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
             }
 
-            PowerPing.Display.PingIntroMsg(attrs);
+            Display.PingIntroMsg(attrs);
 
             if (Display.UseResolvedAddress) {
                 try {
@@ -80,70 +80,11 @@ namespace PowerPing
             PingResults results = SendICMP(attrs, onResultsUpdate);
 
             if (Display.ShowOutput) {
-                PowerPing.Display.PingResults(attrs, results);
+                Display.PingResults(attrs, results);
             }
 
             return results;
         }
-        /// <summary>
-        /// Listens for all ICMPv4 activity on localhost.
-        ///
-        /// Does this by setting a raw socket to SV_IO_ALL which
-        /// will recieve all packets and filters to just show
-        /// ICMP packets. Runs until ctrl-c or exit
-        /// </summary>
-        /// <source>https://stackoverflow.com/a/9174392</source>
-        public void Listen()
-        {
-            IPAddress localAddress = null;
-            Socket listeningSocket = null;
-            PingResults results = new PingResults();
-
-            // Find local address
-            localAddress = IPAddress.Parse(PowerPing.Lookup.LocalAddress());
-
-            try {
-                // Create listener socket
-                listeningSocket = CreateRawSocket(AddressFamily.InterNetwork);
-                listeningSocket.Bind(new IPEndPoint(localAddress, 0));
-                listeningSocket.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 }); // Set SIO_RCVALL flag to socket IO control
-
-                PowerPing.Display.ListenIntroMsg();
-
-                // Listening loop
-                while (!m_CancellationToken.IsCancellationRequested) {
-                    byte[] buffer = new byte[4096]; // TODO: could cause overflow?
-                    
-                    // Recieve any incoming ICMPv4 packets
-                    EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                    int bytesRead = Helper.RunWithCancellationToken(() => listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint), m_CancellationToken);
-                    ICMP response = new ICMP(buffer, bytesRead);
-
-                    // Display captured packet
-                    PowerPing.Display.CapturedPacket(response, remoteEndPoint.ToString(), DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead);
-
-                    // Store results
-                    results.CountPacketType(response.Type);
-                    results.Received++;
-                }
-            } catch (OperationCanceledException) {
-            } catch (SocketException) {
-                PowerPing.Display.Error("Could not read packet from socket");
-            } catch (Exception e) {
-                PowerPing.Display.Error($"General exception occured while trying to create listening socket (Exception: {e.GetType().ToString().Split('.').Last()}");
-            }
-
-            // Clean up
-            listeningSocket.Close();
-
-            // TODO: Implement ListenResults method
-            //Display.ListenResults(results);
-        }
-        /// <summary>
-        /// ICMP Traceroute
-        /// Not implemented yet
-        /// </summary>
-        public void Trace() { throw new NotSupportedException(); }
         /// <summary>
         /// Creates a raw socket for ping operations.
         ///
@@ -163,7 +104,9 @@ namespace PowerPing
             try {
                 s = new Socket(family, SocketType.Raw, family == AddressFamily.InterNetwork ? ProtocolType.Icmp : ProtocolType.IcmpV6);
             } catch (SocketException) {
-                PowerPing.Helper.ErrorAndExit("Socket cannot be created " + Environment.NewLine + "Please run as Administrator and try again.");
+                Display.Message("PowerPing uses raw sockets which require Administrative rights to create." + Environment.NewLine +
+                                "(You can find more info at https://github.com/Killeroo/PowerPing/issues/110)", ConsoleColor.Cyan);
+                Helper.ErrorAndExit("Socket cannot be created, make sure you are running as an Administrator and try again.");
             }
             return s;
         }
@@ -180,6 +123,8 @@ namespace PowerPing
         /// <param name="attrs">Properties of pings to be sent</param>
         /// <param name="resultsUpdateCallback">Method to call after each iteration</param>
         /// <returns>Set of ping results</returns>
+        int scale = 10;
+        bool inverting = false;
         private PingResults SendICMP(PingAttributes attrs, Action<PingResults> resultsUpdateCallback = null)
         {
             PingResults results = new PingResults();
@@ -208,6 +153,7 @@ namespace PowerPing
             // Set socket options
             sock.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.IpTimeToLive, attrs.Ttl);
             sock.DontFragment = attrs.DontFragment;
+            sock.ReceiveBufferSize = attrs.RecieveBufferSize;
 
             // Create packet message payload
             byte[] payload;
@@ -276,8 +222,25 @@ namespace PowerPing
                     if (m_Debug) {
                         // Induce random wait for debugging 
                         Random rnd = new Random();
-                        Thread.Sleep(rnd.Next(700));
-                        if (rnd.Next(20) == 1) { throw new SocketException(); }
+                        Thread.Sleep(scale);//rnd.Next(scale));//1500));
+                        //Thread.Sleep(rnd.Next(100));
+                        if (inverting)
+                        {
+                            scale -= 5;
+                        }
+                        else
+                        {
+                            scale += 5;
+                        }
+                        if (scale > 1100)
+                        {
+                            inverting = true;
+                        }
+                        else if (scale == 10)
+                        {
+                            inverting = false;
+                        }
+                        //if (rnd.Next(20) == 1) { throw new SocketException(); }
                     }
 
                     ICMP response;
@@ -324,7 +287,7 @@ namespace PowerPing
 
                     // Display reply packet
                     if (Display.ShowReplies) {
-                        PowerPing.Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.InputtedAddress : responseEP.ToString(), index, replyTime, bytesRead);
+                        Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.InputtedAddress : responseEP.ToString(), index, replyTime, bytesRead);
                     }
 
                     // Store response info
@@ -340,7 +303,7 @@ namespace PowerPing
                 } catch (IOException) {
 
                     if (Display.ShowOutput) {
-                        PowerPing.Display.Error("General transmit error");
+                        Display.Error("General transmit error");
                     }
                     results.SaveResponseTime(-1);
                     try { results.Lost++; }
@@ -348,7 +311,7 @@ namespace PowerPing
 
                 } catch (SocketException) {
 
-                    PowerPing.Display.Timeout(index);
+                    Display.Timeout(index);
                     if (attrs.BeepLevel == 1) {
                         try { Console.Beep(); }
                         catch (Exception) { results.HasOverflowed = true; }
@@ -365,7 +328,7 @@ namespace PowerPing
                 } catch (Exception) {
 
                     if (Display.ShowOutput) {
-                        PowerPing.Display.Error("General error occured");
+                        Display.Error("General error occured");
                     }
                     results.SaveResponseTime(-1);
                     try { results.Lost++; }
@@ -381,13 +344,6 @@ namespace PowerPing
             sock.Close();
 
             return results;
-        }
-
-        public class ActiveHost
-        {
-            public string Address { get; set; }
-            public string HostName { get; set; }
-            public double ResponseTime { get; set; }
         }
     }
 }

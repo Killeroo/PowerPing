@@ -32,6 +32,8 @@ namespace PowerPing
                             case "-v":
                             case "--v":
                                 Display.Version(true);
+                                Helper.CheckRecentVersion();
+                                Helper.WaitForUserInput();
                                 Environment.Exit(0);
                                 break;
                             case "/beep":
@@ -42,7 +44,7 @@ namespace PowerPing
                             case "--b":
                                 int level = Convert.ToInt32(args[count + 1]);
                                 if (level > 2) {
-                                    PowerPing.Display.Message("Invalid beep level, please use a number between 0 & 2");
+                                    Display.Message("Invalid beep level, please use a number between 0 & 2");
                                     throw new ArgumentFormatException();
                                 }
                                 attributes.BeepLevel = level;
@@ -88,7 +90,12 @@ namespace PowerPing
                             case "/i":
                             case "-i":
                             case "--i": // Time To Live
-                                attributes.Ttl = Convert.ToInt16(args[count + 1]);
+                                int ttl = Convert.ToInt16(args[count + 1]);
+                                if (ttl > 255) {
+                                    Display.Message("TTL has to be between 0 and 255");
+                                    throw new ArgumentFormatException();
+                                }
+                                attributes.Ttl = ttl;
                                 break;
                             case "/interval":
                             case "-interval":
@@ -98,7 +105,7 @@ namespace PowerPing
                             case "--in": // Interval
                                 attributes.Interval = Convert.ToInt32(args[count + 1]);
                                 if (attributes.Interval < 1) {
-                                    PowerPing.Display.Message("Ping interval cannot be less than 1ms");
+                                    Display.Message("Ping interval cannot be less than 1ms");
                                     throw new ArgumentFormatException();
                                 }
                                 break;
@@ -160,7 +167,8 @@ namespace PowerPing
                             case "/?":
                             case "-?":
                             case "--?": // Display help message
-                                PowerPing.Display.Help();
+                                Display.Help();
+                                Helper.WaitForUserInput();
                                 Environment.Exit(0);
                                 break;
                             case "/examples":
@@ -169,7 +177,7 @@ namespace PowerPing
                             case "/ex":
                             case "-ex":
                             case "--ex": // Displays examples
-                                PowerPing.Display.Examples();
+                                Display.Examples();
                                 Environment.Exit(0); // Exit after displaying examples
                                 break;
                             case "/shorthand":
@@ -197,6 +205,12 @@ namespace PowerPing
                                 Display.NoInput = true;
                                 Properties.Settings.Default.RequireInput = !Properties.Settings.Default.RequireInput;
                                 Properties.Settings.Default.Save();
+                                Display.Message(
+                                    "(RequireInput is now " + 
+                                    (Properties.Settings.Default.RequireInput ? 
+                                    "ON, from now on you will be prompted for user input when PowerPing is finished)" 
+                                    : "OFF, you will no longer be prompted for user input when PowerPing is finished)"), 
+                                    ConsoleColor.Cyan);
                                 break;
                             case "/decimals":
                             case "-decimals":
@@ -216,6 +230,22 @@ namespace PowerPing
                             case "-sym":
                             case "--sym":
                                 Display.UseSymbols = true;
+                                Display.SetAsciiReplySymbolsTheme(0);
+
+                                // Change symbols theme if an argument is present
+                                if (args.Length < count + 1) {
+                                    count++;
+                                    continue;
+                                }
+                                if ((args[count + 1].Contains("--") 
+                                    || args[count + 1].Contains("//") 
+                                    || args[count + 1].Contains("-") 
+                                    || args[count + 1].Contains("."))) {
+                                    count++;
+                                    continue;
+                                }
+                                int theme = Convert.ToInt32(args[count + 1]);
+                                Display.SetAsciiReplySymbolsTheme(theme);
                                 break;
                             case "/random":
                             case "-random":
@@ -263,7 +293,23 @@ namespace PowerPing
                             case "/ts":
                             case "-ts":
                             case "--ts": // Display timestamp
-                                Display.ShowTimeStamp = true;
+                                if (args[count + 1].ToLower() == "utc") {
+                                    Display.ShowtimeStampUTC = true;
+                                } else {
+                                    Display.ShowTimeStamp = true;
+                                }
+                                break;
+                            case "/fulltimestamp":
+                            case "-fulltimestamp":
+                            case "--fulltimestamp":
+                            case "/fts":
+                            case "-fts":
+                            case "--fts": // Display timestamp with date
+                                if (args[count + 1].ToLower() == "utc") {
+                                    Display.ShowFullTimeStampUTC = true;
+                                } else {
+                                    Display.ShowFullTimeStamp = true;
+                                }
                                 break;
                             case "/timing":
                             case "-timing":
@@ -466,23 +512,23 @@ namespace PowerPing
                 }
             }
             catch (IndexOutOfRangeException) {
-                PowerPing.Display.Error($"Missing argument parameter @ \"PowerPing >>>{args[curArg]}<<<\"");
+                Display.Error($"Missing argument parameter @ \"PowerPing >>>{args[curArg]}<<<\"");
                 return false;
             }
             catch (OverflowException) {
-                PowerPing.Display.Error($"Overflow while converting @ \"PowerPing {args[curArg]} >>>{args[curArg + 1]}<<<\"");
+                Display.Error($"Overflow while converting @ \"PowerPing {args[curArg]} >>>{args[curArg + 1]}<<<\"");
                 return false;
             }
             catch (InvalidArgumentException) {
-                PowerPing.Display.Error($"Invalid argument @ \"PowerPing >>>{args[curArg]}<<<\"");
+                Display.Error($"Invalid argument @ \"PowerPing >>>{args[curArg]}<<<\"");
                 return false;
             }
             catch (ArgumentFormatException) {
-                PowerPing.Display.Error($"Incorrect parameter for [{args[curArg]}] @ \"PowerPing {args[curArg]} >>>{args[curArg + 1]}<<<\"");
+                Display.Error($"Incorrect parameter for [{args[curArg]}] @ \"PowerPing {args[curArg]} >>>{args[curArg + 1]}<<<\"");
                 return false;
             }
             catch (Exception e) {
-                PowerPing.Display.Error($"An {e.GetType().ToString().Split('.').Last()} exception occured @ \"PowerPing >>>{args[curArg]}<<<\"");
+                Display.Error($"An {e.GetType().ToString().Split('.').Last()} exception occured @ \"PowerPing >>>{args[curArg]}<<<\"");
                 return false;
             }
             return true;

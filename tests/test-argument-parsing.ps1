@@ -1,38 +1,60 @@
-﻿$powershellLocation = (Get-Location).Path + "\PowerPing.exe"
-Write-Warning $powershellLocation
+﻿Write-Host "============ test-argument-parsing script ============" -ForegroundColor Yellow
 
 $global:FailedTestDescriptions = @()
+
+$script_path = (split-path -parent $MyInvocation.MyCommand.Definition)
+
+# Executable locations
+$powerping_x64_location = (split-path -parent $MyInvocation.MyCommand.Definition).ToString() + "\build\x64\PowerPing.exe"
+$powerping_x86_location = (split-path -parent $MyInvocation.MyCommand.Definition).ToString() + "\build\x86\PowerPing.exe"
+
+# Remove tests directoy from the path
+$seperator = [IO.Path]::DirectorySeparatorChar
+$powerping_x86_location = $powerping_x86_location.replace($seperator + "tests" + $seperator, $seperator)
+$powerping_x64_location = $powerping_x64_location.replace($seperator + "tests" + $seperator, $seperator)
+
+# Structure to store test results
 $global:stats = @{
     TestsPerformed   = [uint64] 0;
     TestsPassed      = [uint64] 0;
     TestsFailed      = [uint64] 0;
 }
 
+# Function for running test
 function Run-Test($description, $arguments, [int]$returnCode)
 {
     Write-Host($description) -NoNewline -ForegroundColor White
     Write-Host(" (`"" + $arguments + "`") expects") -NoNewline 
     Write-Host(" [" + $returnCode + "]: ") -NoNewline -ForegroundColor Magenta
-
+    
+    Write-Host("[x64]") -NoNewline -ForegroundColor Yellow
     $stats.TestsPerformed += 1
-
-    $Result = Start-Process 'C:\Projects\PowerPing\src\PowerPing.Net45\bin\Debug\PowerPing.exe' -ArgumentList ('-noinput ' + $arguments) -PassThru -Wait
+    $Result = Start-Process -FilePath $powerping_x64_location -ArgumentList ($arguments) -PassThru -Wait
     if($Result.ExitCode -eq $returnCode) {
-        Write-Host("==== Test passed =====") -ForegroundColor Green
+        Write-Host(" ==== Test passed ===== ") -NoNewline -ForegroundColor Green
         $stats.TestsPassed += 1
     } else {
-        Write-Host("--- Test Failed ---") -ForegroundColor Red 
+        Write-Host(" --- Test Failed --- ") -NoNewline -ForegroundColor Red 
+        $stats.TestsFailed += 1
+    }
+
+    Write-Host("[x86]") -NoNewline -ForegroundColor Yellow
+    $stats.TestsPerformed += 1
+    $Result = Start-Process -FilePath $powerping_x86_location -ArgumentList ($arguments) -PassThru -Wait
+    if($Result.ExitCode -eq $returnCode) {
+        Write-Host(" ==== Test passed =====") -ForegroundColor Green
+        $stats.TestsPassed += 1
+    } else {
+        Write-Host(" --- Test Failed ---") -ForegroundColor Red 
         $stats.TestsFailed += 1
         $global:FailedTestDescriptions += $description
     }
-
 }
 
-#$processPath = (Get-Location).Path+'C:\Projects\PowerPing\src\PowerPing.Net45\bin\Debug\PowerPing.exe'
-#Sending input to running process https://stackoverflow.com/a/16100200
 Write-Host
 Write-Host "Baseline tests"
 Write-Host "----------------------"
+Run-Test "Test noinput flag works (all tests reply on it)" "-noinput" 1
 Run-Test "Test with just address" "8.8.8.8" 0
 Run-Test "Run with no arguments or address" "" 0
 Run-Test "Run help argument" "-help" 0
@@ -74,7 +96,7 @@ Run-Test "Test `'count`' with invalid negative parameter" "-c -1 8.8.8.8" 1
 Run-Test "Test `'limit`' with paramater" "-l 1 8.8.8.8" 0
 Run-Test "Test `'limit`' with missing address" "-l 1" 1
 Run-Test "Test `'limit`' with empty parameter" "-l 8.8.8.8" 1
-Run-Test "Test `'limit`' with invalid positive parameter" "-l 2 8.8.8.8" 1
+Run-Test "Test `'limit`' with invalid positive parameter" "-l 4 8.8.8.8" 1
 Run-Test "Test `'limit`' with invalid negative parameter" "-l -1 8.8.8.8" 1
 Run-Test "Test `'decimals`' with parameter" "-dp 1 8.8.8.8" 0
 Run-Test "Test `'decimals`' with missing address" "-dp 1" 1
@@ -87,7 +109,15 @@ Run-Test "Test `'timing`' with missing address" "-ti 4" 1
 Run-Test "Test `'timing`' with empty argument" "-ti 8.8.8.8" 1
 Run-Test "Test `'timing`' with invalid positive parameter" "-ti 8 8.8.8.8" 1
 Run-Test "Test `'timing`' with invalid negative parameter" "-ti -1 8.8.8.8" 1
-
+Run-Test "Test `'symbols`' with no arguments, and address at end" "-sym 8.8.8.8" 0
+Run-Test "Test `'symbols`' with no arguments, and address at start" "8.8.8.8 -sym" 0
+Run-Test "Test `'symbols`' with arguments, and address at end" "-sym 1 8.8.8.8" 0
+Run-Test "Test `'symbols`' with arguments, and address at start" "8.8.8.8 -sym 1" 0
+Run-Test "Test `'symbols`' with no arguments and leading argument" "-sym -c 1 8.8.8.8" 0
+Run-Test "Test `'symbols`' with argument and leading argument" "-sym 1 -c 1 8.8.8.8" 0
+Run-Test "Test `'symbols`' with invalid positive theme number" "-sym 1000 8.8.8.8" 0
+Run-Test "Test `'symbols`' with invalid negative theme number" "-sym -1000 8.8.8.8" 0
+Run-Test "Test `'symbols`' with valid theme number" "-sym 0 8.8.8.8" 0
 
 Write-Host
 Write-Host "Address location tests"
@@ -108,3 +138,6 @@ if ($stats.TestsFailed -gt 0) {
         Write-Host($test) -ForegroundColor Yellow
     }
 }
+
+# Return results to caller script
+return $stats.TestsPassed.ToString() + "/" + $stats.TestsPerformed.ToString()

@@ -26,6 +26,7 @@ using System;
 using System.Reflection;
 using System.Text;
 using System.Linq;
+using System.Globalization;
 using System.Collections.Generic;
 
 namespace PowerPing
@@ -44,6 +45,9 @@ namespace PowerPing
         public static bool ShowOutput { get; set; } = true;
         public static bool ShowMessages { get; set; } = false;
         public static bool ShowTimeStamp { get; set; } = false;
+        public static bool ShowtimeStampUTC { get; set; } = false;
+        public static bool ShowFullTimeStamp { get; set; } = false;
+        public static bool ShowFullTimeStampUTC { get; set; } = false;
         public static bool ShowTimeouts { get; set; } = true;
         public static bool ShowRequests { get; set; } = false;
         public static bool ShowReplies { get; set; } = true;
@@ -95,7 +99,7 @@ namespace PowerPing
         const string FLOOD_EXIT_TXT = "Press Control-C to stop...";
 
         // Listen messages
-        const string LISTEN_INTRO_MSG = "Listening for ICMP Packets ...";
+        const string LISTEN_INTRO_MSG = "Listening for ICMP Packets on [ {0} ]";
         const string CAPTURED_PACKET_MSG = "{0}: ICMPv4: {1} bytes from {2} [type {3}] [code {4}]";
 
         // Request messages
@@ -140,10 +144,47 @@ namespace PowerPing
 Just to put that into perspective you would have to be running a normal ping program with default settings for 584,942,417,355 YEARS to achieve this!
 Well done brave soul, I don't know your motive but I salute you =^-^=";
 
-        // Symbol characters
-        const string REPLY_SYMBOL = ".";
-        const string TIMEOUT_SYMBOL = "!";
+        // Characters used in symbol mode
+        const string REPLY_LT_100_MS_SYMBOL_1 = ".";
+        const string REPLY_LT_250_MS_SYMBOL_1 = ".";
+        const string REPLY_LT_500_MS_SYMBOL_1 = ".";
+        const string REPLY_GT_500_MS_SYMBOL_1 = ".";
+        const string REPLY_TIMEOUT_SYMBOL_1 = "!";
 
+        const string REPLY_LT_100_MS_SYMBOL_2 = "_";
+        const string REPLY_LT_250_MS_SYMBOL_2 = "▄";
+        const string REPLY_LT_500_MS_SYMBOL_2 = "█";
+        const string REPLY_GT_500_MS_SYMBOL_2 = "█";
+        const string REPLY_TIMEOUT_SYMBOL_2 = "!";
+
+        private struct ASCIIReplySymbols
+        {
+            public string LessThan100;
+            public string LessThan250;
+            public string LessThan500;
+            public string GreaterThan500;
+            public string Timeout;
+        };
+        private static ASCIIReplySymbols ReplySymbols;
+
+        public static void SetAsciiReplySymbolsTheme(int theme)
+        {
+            if (theme == 0) {
+                ReplySymbols.LessThan100 = REPLY_LT_100_MS_SYMBOL_1;
+                ReplySymbols.LessThan250 = REPLY_LT_250_MS_SYMBOL_1;
+                ReplySymbols.LessThan500 = REPLY_LT_500_MS_SYMBOL_1;
+                ReplySymbols.GreaterThan500 = REPLY_GT_500_MS_SYMBOL_1;
+                ReplySymbols.Timeout = REPLY_TIMEOUT_SYMBOL_1;
+            } else {
+                ReplySymbols.LessThan100 = REPLY_LT_100_MS_SYMBOL_2;
+                ReplySymbols.LessThan250 = REPLY_LT_250_MS_SYMBOL_2;
+                ReplySymbols.LessThan500 = REPLY_LT_500_MS_SYMBOL_2;
+                ReplySymbols.GreaterThan500 = REPLY_GT_500_MS_SYMBOL_2;
+                ReplySymbols.Timeout = REPLY_TIMEOUT_SYMBOL_2;
+            }
+        }
+
+        
         const string HELP_MSG =
 @"__________                         __________.__                
 \______   \______  _  __ __________\______   \__| ____    ____  
@@ -162,64 +203,65 @@ Usage:
               [--b number] [--c number] [--w number] [-i number] [--in number]
               [--pt number] [--pc number] [--s number] [--m message] [--ti timing] 
               [--sh] [--dm] [--ts] [--nc] [--input] [--sym] [--r] [--nt] [--q] [--res]
-              [--ia] [--chk] [--l number] [--dp number] target_name | target_address
+              [--ia] [--chk] [--l number] [--dp number] [--fts] target_name | target_address
 
 Ping Options:
-    --infinite   [--t]            Ping the target until stopped (Ctrl-C to stop)
-    --ipv4       [--4]            Force using IPv4
-    --random     [--rng]          Generates random ICMP message
-    --dontfrag   [--df]           Set 'Don't Fragment' flag
-    --buffer     [--rb]  number   Sets recieve buffer size (default is 5096)
-    --beep       [--b]   number   Beep on timeout(1) or on reply(2)
-    --count      [--c]   number   Number of pings to send
-    --timeout    [--w]   number   Time to wait for reply (in milliseconds)
-    --ttl        [--i]   number   Time To Live for packet
-    --interval   [--in]  number   Interval between each ping (in milliseconds)
-    --type       [--pt]  number   Use custom ICMP type
-    --code       [--pc]  number   Use custom ICMP code value
-    --size       [--s]   number   Set size (in bytes) of packet (overwrites packet message)
-    --message    [--m]   message  Ping packet message
-    --timing     [--ti]  timing   Timing levels:
-                                    0 - Paranoid    4 - Nimble
-                                    1 - Sneaky      5 - Speedy
-                                    2 - Quiet       6 - Insane
-                                    3 - Polite      7 - Random
+    --infinite      [--t]            Ping the target until stopped (Ctrl-C to stop)
+    --ipv4          [--4]            Force using IPv4
+    --random        [--rng]          Generates random ICMP message
+    --dontfrag      [--df]           Set 'Don't Fragment' flag
+    --buffer        [--rb]  number   Sets recieve buffer size (default is 5096)
+    --beep          [--b]   number   Beep on timeout(1) or on reply(2)
+    --count         [--c]   number   Number of pings to send
+    --timeout       [--w]   number   Time to wait for reply (in milliseconds)
+    --ttl           [--i]   number   Time To Live for packet
+    --interval      [--in]  number   Interval between each ping (in milliseconds)
+    --type          [--pt]  number   Use custom ICMP type
+    --code          [--pc]  number   Use custom ICMP code value
+    --size          [--s]   number   Set size (in bytes) of packet (overwrites packet message)
+    --message       [--m]   message  Ping packet message
+    --timing        [--ti]  timing   Timing levels:
+                                        0 - Paranoid    4 - Nimble
+                                        1 - Sneaky      5 - Speedy
+                                        2 - Quiet       6 - Insane
+                                        3 - Polite      7 - Random
 
 Display Options:
-    --noinput    [--ni]           Don't ask for user input upon completion
-    --shorthand  [--sh]           Show less detailed replies
-    --displaymsg [--dm]           Display ICMP message field contents
-    --timestamp  [--ts]           Display timestamp
-    --nocolor    [--nc]           No colour
-    --symbols    [--sym]          Renders replies and timeouts as ASCII symbols
-    --requests   [--r]            Show request packets
-    --notimeouts [--nt]           Don't display timeout messages
-    --quiet      [--q]            No output (only affects normal ping)
-    --resolve    [--res]          Resolve hostname of address from DNS
-    --inputaddr  [--ia]           Show input address instead of revolved IP address
-    --checksum   [--chk]          Display checksum of packet
-    --limit      [--l]   number   Limits output to just replies(1), requests(2) or summary(3)
-    --decimals   [--dp]  number   Num of decimal places to use (0 to 3)
+    --noinput       [--ni]           Don't ask for user input upon completion (persists)
+    --shorthand     [--sh]           Show less detailed replies
+    --displaymsg    [--dm]           Display ICMP message field contents
+    --timestamp     [--ts]           Display timestamps (add 'UTC' for Coordinated Universal Time)
+    --fulltimestamp [--fts]          Display full timestamps with localised date and time
+    --nocolor       [--nc]           No colour
+    --symbols       [--sym]          Renders replies and timeouts as ASCII symbols (add '1' for alt theme)
+    --requests      [--r]            Show request packets
+    --notimeouts    [--nt]           Don't display timeout messages
+    --quiet         [--q]            No output (only affects normal ping)
+    --resolve       [--res]          Resolve hostname of address from DNS
+    --inputaddr     [--ia]           Show input address instead of revolved IP address
+    --checksum      [--chk]          Display checksum of packet
+    --limit         [--l]   number   Limits output to just replies(1), requests(2) or summary(3)
+    --decimals      [--dp]  number   Num of decimal places to use (0 to 3)
 
-Features:
-    --scan       [--sc]  address  Network scanning, specify range ""127.0.0.1-55""
-    --listen     [--li]  address  Listen for ICMP packets
-    --flood      [--fl]  address  Send high volume of pings to address
-    --graph      [--g]   address  Graph view
-    --compact    [--cg]  address  Compact graph view
-    --location   [--loc] address  Location info for an address
-    --whois              address  Whois lookup for an address
-    --whoami                      Location info for current host
+Modes:
+    --scan          [--sc]  address  Network scanning, specify range ""127.0.0.1-55""
+    --listen        [--li]  address  Listen for ICMP packets
+    --flood         [--fl]  address  Send high volume of pings to address
+    --graph         [--g]   address  Graph view
+    --compact       [--cg]  address  Compact graph view
+    --location      [--loc] address  Location info for an address
+    --whois                 address  Whois lookup for an address
+    --whoami                         Location info for current host
 
 Other:
-    --help       [--?]            Displays this help message
-    --version    [--v]            Shows version and build information
-    --examples   [--ex]           Displays some example usage
+    --help          [--?]            Displays this help message
+    --version       [--v]            Shows version and build information
+    --examples      [--ex]           Displays some example usage
 
 Type '--examples' for more
 
 Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=
-Find the project here[https://github.com/Killeroo/PowerPing]";
+Find the project here [https://github.com/Killeroo/PowerPing]";
 
         const string EXAMPLE_MSG_PAGE_1 =
 @"
@@ -450,7 +492,6 @@ Get location information for 84.23.12.4";
             // Write version
             Console.WriteLine(version + (date ? "[Built " + buildTime + "]" : ""));
             
-            Helper.WaitForUserInput();
         }
         /// <summary>
         /// Displays help message
@@ -464,7 +505,8 @@ Get location information for 84.23.12.4";
             Console.WriteLine(version);
             Console.WriteLine(HELP_MSG);
 
-            Helper.WaitForUserInput();
+            Helper.CheckRecentVersion();
+
         }
         /// <summary>
         /// Displays example powerping usage
@@ -516,9 +558,9 @@ Get location information for 84.23.12.4";
         /// <summary>
         /// Display initial listening message
         /// </summary>
-        public static void ListenIntroMsg()
+        public static void ListenIntroMsg(string address)
         {
-            Console.WriteLine(LISTEN_INTRO_MSG);
+            Console.WriteLine(LISTEN_INTRO_MSG, address);
         }
         /// <summary>
         /// Display ICMP packet that have been sent
@@ -541,8 +583,14 @@ Get location information for 84.23.12.4";
             Console.Write(REQUEST_CODE_TXT, packet.Code);
 
             // Display timestamp
-            if (ShowTimeStamp) {
+            if (ShowFullTimeStamp) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString(CultureInfo.CurrentCulture));
+            } else if (ShowFullTimeStampUTC) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString(CultureInfo.CurrentCulture));
+            } else if (ShowTimeStamp) {
                 Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
+            } else if (ShowtimeStampUTC) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString("HH:mm:ss"));
             }
 
             // End line
@@ -567,13 +615,16 @@ Get location information for 84.23.12.4";
                 if (packet.Type == 0x00) {
                     if (replyTime <= TimeSpan.FromMilliseconds(100)) {
                         Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Write("_");
-                    } else if (replyTime <= TimeSpan.FromMilliseconds(500)) {
+                        Console.Write(ReplySymbols.LessThan100);
+                    } else if (replyTime <= TimeSpan.FromMilliseconds(250)) {
                         Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.Write("▄");
-                    } else {
+                        Console.Write(ReplySymbols.LessThan250);
+                    } else if (replyTime <= TimeSpan.FromMilliseconds(500)) {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write("█");
+                        Console.Write(ReplySymbols.LessThan500);
+                    } else {
+                        Console.ForegroundColor = ConsoleColor.Magenta;
+                        Console.Write(ReplySymbols.GreaterThan500);
                     }
                     ResetColor();
                 } else {
@@ -609,7 +660,7 @@ Get location information for 84.23.12.4";
                     Console.ForegroundColor = ConsoleColor.Red;
                 }
             }
-            Console.Write("{0:0." + new String('0', DecimalPlaces) + "}ms", replyTime.TotalMilliseconds);
+            Console.Write("{0:0." + new string('0', DecimalPlaces) + "}ms", replyTime.TotalMilliseconds);
             ResetColor();
 
             // Display checksum
@@ -618,12 +669,18 @@ Get location information for 84.23.12.4";
             }
 
             // Display timestamp
-            if (ShowTimeStamp) {
+            if (ShowFullTimeStamp) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString(CultureInfo.CurrentCulture));
+            } else if (ShowFullTimeStampUTC) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString(CultureInfo.CurrentCulture));
+            } else if (ShowTimeStamp) {
                 Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
+            } else if (ShowtimeStampUTC) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString("HH:mm:ss"));
             }
 
-            // End line
-            Console.WriteLine();
+	        // End line
+	        Console.WriteLine();
 
         }
         /// <summary>
@@ -858,8 +915,8 @@ Get location information for 84.23.12.4";
 
             // If drawing symbols
             if (UseSymbols) {
-                Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.Write(TIMEOUT_SYMBOL);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write(ReplySymbols.Timeout);
                 ResetColor();
                 return;
             }
@@ -876,8 +933,14 @@ Get location information for 84.23.12.4";
             }
 
             // Display timestamp
-            if (ShowTimeStamp) {
+            if (ShowFullTimeStamp) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString(CultureInfo.CurrentCulture));
+            } else if (ShowFullTimeStampUTC) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString(CultureInfo.CurrentCulture));
+            } else if (ShowTimeStamp) {
                 Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
+            } else if (ShowtimeStampUTC) {
+                Console.Write(TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString("HH:mm:ss"));
             }
 
             // Make double sure we dont get the red line bug

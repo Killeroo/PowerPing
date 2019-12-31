@@ -25,6 +25,7 @@ SOFTWARE.
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Linq;
 
 namespace PowerPing
 {
@@ -37,6 +38,7 @@ namespace PowerPing
         // Constants
         const string FULL_BAR_BLOCK_CHAR = "█";
         const string HALF_BAR_BLOCK_CHAR = "▄";
+        const string BOTTOM_BAR_BLOCK_CHAR = "▀";
 
         // Properties
         public bool CompactGraph = false;
@@ -47,8 +49,11 @@ namespace PowerPing
         private readonly Ping m_Ping;
         private readonly PingAttributes m_PingAttributes = new PingAttributes();
         private readonly List<String[]> m_Columns = new List<string[]>();
+        private readonly List<double> m_ResponseTimes = new List<double>();
         private bool m_IsGraphSetup = false;
+        private int m_yAxisLength = 20;
         private int m_xAxisLength = 40;
+        private int m_Scale = 25;//50;
 
         // Location of graph plotting space
         private int m_PlotStartX;
@@ -60,6 +65,7 @@ namespace PowerPing
         private int m_FailLabelX, m_FailLabelY;
         private int m_RttLabelX, m_RttLabelY;
         private int m_TimeLabelX, m_TimeLabelY;
+        private int m_yAxisStart;
         
         public Graph(string address, CancellationToken cancellationTkn)
         {
@@ -67,7 +73,7 @@ namespace PowerPing
             m_Ping = new Ping(cancellationTkn);
 
             // Setup ping attributes
-            m_PingAttributes.InputtedAddress = PowerPing.Lookup.QueryDNS(address, System.Net.Sockets.AddressFamily.InterNetwork);
+            m_PingAttributes.InputtedAddress = Lookup.QueryDNS(address, System.Net.Sockets.AddressFamily.InterNetwork);
             m_PingAttributes.Continous = true;
         }
 
@@ -102,22 +108,24 @@ namespace PowerPing
             // This callback will run after each ping iteration
             void ResultsUpdateCallback(PingResults r) {
                 // Make sure we're not updating the display too frequently
-                if (!displayUpdateLimiter.RequestRun()) {
-                    return;
-                }
+                //if (!displayUpdateLimiter.RequestRun()) {
+                //    return;
+                //}
 
                 // Reset position
                 Console.CursorTop = m_PlotStartY;
                 Console.CursorLeft = m_PlotStartX;
 
+                // Update labels
+                UpdateLegend(r);
+
+                // Get results from ping and add to graph
+                AddResponseToGraph(r.CurrTime);
+
                 // Draw graph columns
                 DrawGraphColumns();
 
-                // Update labels
-                UpdateLabels(r);
-
-                // Get results from ping and add to graph
-                AddColumnToGraph(CreateColumn(r.CurTime));
+                DrawYAxisLabels();
 
                 Console.CursorTop = EndCursorPosY;
             }
@@ -132,7 +140,7 @@ namespace PowerPing
         {
             // Determine Xaxis size
             if (!CompactGraph) {
-                m_xAxisLength = Console.WindowWidth - 30;
+                m_xAxisLength = Console.WindowWidth - 50;
             }
 
             DrawBackground();
@@ -142,22 +150,64 @@ namespace PowerPing
         /// <summary>
         /// Draw all graph coloums/bars
         /// </summary>
+        bool inverting = true;
         private void DrawGraphColumns()
         {
             // Clear columns space before drawing
+            // TODO: Don't always redraw graph, determine if scale has changed
             Clear();
 
-            for (int x = 0; x < m_Columns.Count; x++) {
-                // Change colour for most recent column 
-                if (x == m_Columns.Count - 1) {
+            for (int x = 0; x < m_ResponseTimes.Count; x++) {
+                if (x % 2 == 0) {
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                } else {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                }
+                if (x == m_ResponseTimes.Count - 1) {
                     Console.ForegroundColor = ConsoleColor.Green;
                 }
-                DrawBar(m_Columns[x]);
-                Console.CursorLeft++;
+                DrawBar(CreateColumn(m_ResponseTimes[x]));
+
+                Console.CursorLeft++; 
             }
 
+            // TODO change scale here
+
+
+            //DrawColumns();
             // Reset colour after
             Console.ForegroundColor = ConsoleColor.Gray;
+            // TODO: Stripped colour instead of gray
+        }
+        private void DrawColumns()
+        {
+            //private readonly List<String[]> m_Columns  = 
+            // Work out columns
+            string[][] columns = new string[m_ResponseTimes.Count][];
+            for (int x = 0; x < m_ResponseTimes.Count; x++) {
+                columns[x] = CreateColumn(m_ResponseTimes[x]);
+            }
+
+            // Work out lines
+            List<string> lines = new List<string>();
+            for (int x = 0; x < m_yAxisLength; x++) {
+                string line = "";
+                for (int y = 0; y < columns.Length; y++) {
+                    try {
+                        line += columns[y][x];
+                    } catch (IndexOutOfRangeException) {
+                        line += " ";
+                    }
+                }
+                lines.Add(line);
+            }
+
+            // Draw lines
+            Console.CursorTop = m_yAxisStart;
+            foreach (string line in lines) {
+                Console.CursorLeft = 21; // TODO: Dynamic
+                Console.WriteLine(line);
+            }
         }
         /// <summary>
         /// Draw graph background
@@ -166,6 +216,9 @@ namespace PowerPing
         {
             // Draw title
             Console.WriteLine();
+
+            // Save position for later
+            m_yAxisStart = Console.CursorTop;
 
             // Draw Y axis of graph
             if (CompactGraph) {
@@ -255,6 +308,7 @@ namespace PowerPing
             int cursorPositionX = Console.CursorLeft;
             int cursorPositionY = Console.CursorTop;
 
+            // TODO: draw bars along instead of down
             foreach(String segment in bar)
             {
                 Console.Write(segment);
@@ -265,11 +319,51 @@ namespace PowerPing
             // Reset cursor to starting position
             Console.SetCursorPosition(cursorPositionX, cursorPositionY);
         }
+        public void DrawYAxisLabels()
+        {
+            int factor = CompactGraph ? 1 : 2;
+            int maxLines = CompactGraph ? 10 : 20;
+            int maxYValue = maxLines * m_Scale;
+
+            int topStart = Console.CursorTop;
+            int leftStart = Console.CursorLeft;
+
+            Console.CursorTop = m_yAxisStart;
+
+            int currValue = maxYValue;
+            for (int x = maxLines; x != 0; x--)
+            {
+                // write current value with padding
+                if (CompactGraph || x % 2 == 0)
+                    Console.Write(currValue.ToString().PadLeft(14) + " ");
+                else {
+                    Console.Write(new string(' ', 15));
+                }
+
+                // Add indentation every 2 lines if we aren't making a compact graph
+                if (!CompactGraph && x % 2 == 0)
+                    Console.Write("─");
+                else {
+                    Console.Write(" ");
+                }
+                
+                if (x == maxLines)
+                    Console.WriteLine("┐");
+                else 
+                    Console.WriteLine("┤");
+
+                currValue -= m_Scale;
+            }
+            
+            // Reset cursor position
+            Console.CursorLeft = leftStart;
+            Console.CursorTop = topStart;
+        }
         /// <summary>
-        /// Update graph text labels
+        /// Update graph legend text labels
         /// </summary>
         /// <param name="results"></param>
-        private void UpdateLabels(PingResults results)
+        private void UpdateLegend(PingResults results)
         {
             // save cursor location
             int cursorPositionX = Console.CursorLeft;
@@ -302,7 +396,7 @@ namespace PowerPing
             Console.SetCursorPosition(m_RttLabelX, m_RttLabelY);
             Console.Write(blankLabel);
             Console.CursorLeft = Console.CursorLeft - 6;
-            Console.Write("{0:0.0}ms", results.CurTime);
+            Console.Write("{0:0.0}ms", results.CurrTime);
 
             // Update time label
             Console.SetCursorPosition(m_TimeLabelX, m_TimeLabelY);
@@ -324,19 +418,31 @@ namespace PowerPing
             int time = Convert.ToInt32(replyTime);
 
             // Work out bar length
-            for (int x = 0; x < time; x = x + (CompactGraph ? 50 : 25)) {
+            for (int x = 0; x < time; x = x + (CompactGraph ? 50 : m_Scale)) {
                 count++;
             }
 
-            if (time > 1000) {
+            if (time > m_Scale * (CompactGraph ? 10 : 20)) {
                 // If reply time over graph Y range draw max size column
+                m_Scale *= 2;
+
                 count = CompactGraph ? 20 : 10;
             } else if (time == 0) {
                 // If no reply dont draw column
                 return new String[] { "─" };
             }
 
-            count = count / 2;
+            int maxLength = CompactGraph ? 10 : 20;
+            int maxValue = maxLength * m_Scale;
+            bar = new String[maxLength];
+            int value = System.Math.Abs(maxValue / time);
+            for (int x = 0; x < bar.Length; x++) {
+                
+            }
+
+            // Add special character at top and below
+
+            // Remove all the stuff below
 
             // Create array to store bar
             bar = new String[count + 1];
@@ -349,36 +455,50 @@ namespace PowerPing
             // Replace lowest bar segment
             bar[0] = "▀";
 
-            // Work out top segment based on length
-            if (CompactGraph) { // Work out for compact graph
-                if (count + 1 % 2 == 0) {
-                    bar[count] = FULL_BAR_BLOCK_CHAR;
-                } else if (time <= 100) {
-                    if (time <= 50) {
-                        bar[count] = "▀";
-                    } else {
-                        bar[count] = HALF_BAR_BLOCK_CHAR;
-                    }
-                } else {
-                    bar[count] = FULL_BAR_BLOCK_CHAR;
-                }
-            } else { // Work out for full graph
-                if (count + 1 % 2 == 0) {
-                    bar[count] = FULL_BAR_BLOCK_CHAR;
-                } else if (time <= 100) {
-                    if (time <= 25) {
-                        bar[count] = "▀";
-                    } else if (time <= 50) {
-                        bar[count] = HALF_BAR_BLOCK_CHAR;
-                    } else if (time <= 75) {
-                        bar[count] = FULL_BAR_BLOCK_CHAR;
-                    } else {
-                        bar[count] = HALF_BAR_BLOCK_CHAR;
-                    }
-                } else {
-                    bar[count] = FULL_BAR_BLOCK_CHAR;
-                }
+            // Replace the last segment based on graph size
+            if (CompactGraph) {
+                bar[bar.Length - 1] = FULL_BAR_BLOCK_CHAR;
+            } else {
+                bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
             }
+
+            // Work out top character
+            //if (time % m_Scale >= 0) {
+            //    bar[count] = FULL_BAR_BLOCK_CHAR;
+            //} else {
+            //    bar[count] = HALF_BAR_BLOCK_CHAR;
+            //}
+
+            // Work out top segment based on length
+            //if (CompactGraph) { // Work out for compact graph
+            //    if (count + 1 % 2 == 0) {
+            //        bar[count] = FULL_BAR_BLOCK_CHAR;
+            //    } else if (time <= 100) {
+            //        if (time <= 50) {
+            //            bar[count] = "▀";
+            //        } else {
+            //            bar[count] = HALF_BAR_BLOCK_CHAR;
+            //        }
+            //    } else {
+            //        bar[count] = FULL_BAR_BLOCK_CHAR;
+            //    }
+            //} else { // Work out for full graph
+            //    if (count + 1 % 2 == 0) {
+            //        bar[count] = FULL_BAR_BLOCK_CHAR;
+            //    } else if (time <= 100) {
+            //        if (time <= 25) {
+            //            bar[count] = "▀";
+            //        } else if (time <= 50) {
+            //            bar[count] = HALF_BAR_BLOCK_CHAR;
+            //        } else if (time <= 75) {
+            //            bar[count] = FULL_BAR_BLOCK_CHAR;
+            //        } else {
+            //            bar[count] = HALF_BAR_BLOCK_CHAR;
+            //        }
+            //    } else {
+            //        bar[count] = FULL_BAR_BLOCK_CHAR;
+            //    }
+            //}
 
             return bar;
 
@@ -386,14 +506,14 @@ namespace PowerPing
         /// <summary>
         /// Add a column to the graph list
         /// </summary>
-        private void AddColumnToGraph(String[] col)
+        private void AddResponseToGraph(double responseTime)
         {
-            m_Columns.Add(col);
+            m_ResponseTimes.Add(responseTime);
 
             // If number of columns exceeds x Axis length
-            if (m_Columns.Count >= m_xAxisLength) {
+            if (m_ResponseTimes.Count >= m_xAxisLength) {
                 // Remove first element
-                m_Columns.RemoveAt(0);
+                m_ResponseTimes.RemoveAt(0);
             }
         }
         /// <summary>

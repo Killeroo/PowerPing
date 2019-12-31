@@ -47,25 +47,25 @@ namespace PowerPing
         /// <bug>There is a currently a bug where the address of a VM interface can be used 
         /// instead of the actual local address</bug>
         /// <returns>IP address string, if no address found then returns a null</returns>
-        public static string LocalAddress()
+        public static string GetLocalAddress()
         {
             // If not connected to a network return null
             if (!NetworkInterface.GetIsNetworkAvailable()) {
-                return null;
+                return string.Empty;
             }
 
             // Get all addresses assocatied with this computer
-            var hostAddress = Dns.GetHostEntry(Dns.GetHostName());
+            IPHostEntry hostAddress = Dns.GetHostEntry(Dns.GetHostName());
 
             // Loop through each associated address
-            foreach (var address in hostAddress.AddressList) {
+            foreach (IPAddress address in hostAddress.AddressList) {
                 // If address is IPv4
-                if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) {
+                if (address.AddressFamily == AddressFamily.InterNetwork) {
                     return address.ToString();
                 }
             }
 
-            return null;
+            return string.Empty;
         }
 
         /// <summary>
@@ -73,19 +73,21 @@ namespace PowerPing
         /// </summary>
         /// <param name="addr">Address to get location info on. Can be in IP or address format.</param>
         /// <param name="detailed">Display detailed or simplified location info</param>
-        public static void AddressLocation(string addr, bool detailed)
+        public static string GetAddressLocationInfo(string addr, bool detailed)
         {
+            string result = "";
+
             try {
 
-                using (var objClient = new System.Net.WebClient()) {
+                using (WebClient objClient = new WebClient()) {
 
                     // Download xml data for address
-                    var file = objClient.DownloadString(
+                    string downloadedText = objClient.DownloadString(
                         $"http://api.ipstack.com/{addr}?access_key=INSERT_KEY_HERE&output=xml");
-
+                    
                     // Load xml file into object
                     XmlDocument xmlDoc = new XmlDocument();
-                    xmlDoc.LoadXml(file);
+                    xmlDoc.LoadXml(downloadedText);
                     XmlNodeList elements = (xmlDoc.DocumentElement).ChildNodes;
 
                     if (elements == null) {
@@ -94,33 +96,27 @@ namespace PowerPing
 
                     // Print it out
                     if (detailed) {
-                        Console.WriteLine("Queried address: --{0}--", addr);
                         foreach (XmlElement element in elements) {
                             if (element.Name != "location") {
-                                Console.WriteLine(element.Name + ": " + (element.InnerText == "" ? "NA" : element.InnerText));
+                                result += element.Name + ": " + (element.InnerText == "" ? "N/A" : element.InnerText) + Environment.NewLine;
                             }
                         }
                     } else {
-                        string loc = null;
-                        if (elements[2].InnerText != "") {
-                            loc = "[" + elements[2].InnerText;
+                        result += "[";
+                        if (elements[7].InnerText != "") {
+                            result += elements[7].InnerText + ", ";
                         }
-                        if (elements[3].InnerText != "") {
-                            loc = loc + ", " + elements[3].InnerText;
+                        if (elements[4].InnerText != "") {
+                            result += elements[4].InnerText;
                         }
-                        if (elements[5].InnerText != "") {
-                            loc = loc + ", " + elements[5].InnerText;
-                        }
-                        loc += "]";
-
-                        Console.WriteLine(loc);
+                        result += "]";
                     }
                 }
             } catch (Exception) {
-                Console.WriteLine("[Location unavaliable]");
+                result = "[Location unavaliable]";
             }
-            
-            Helper.WaitForUserInput();
+
+            return result;
         }
 
         /// <summary>
@@ -198,24 +194,24 @@ namespace PowerPing
             if (keyword == "" || tld == "") {
                 Helper.ErrorAndExit("Incorrectly formatted address, please check format and try again");
             }
-            PowerPing.Display.Message("WHOIS [" + address + "]:", ConsoleColor.Yellow);
+            Display.Message("WHOIS [" + address + "]:", ConsoleColor.Yellow);
 
             // Find appropriate whois for the tld
-            PowerPing.Display.Message("QUERYING [" + ROOT_WHOIS_SERVER + "] FOR TLD [" + tld + "]:", ConsoleColor.Yellow, false);
+            Display.Message("QUERYING [" + ROOT_WHOIS_SERVER + "] FOR TLD [" + tld + "]:", ConsoleColor.Yellow, false);
             string whoisRoot = PerformWhoIsLookup(ROOT_WHOIS_SERVER, tld);
-            PowerPing.Display.Message(" DONE", ConsoleColor.Yellow);
+            Display.Message(" DONE", ConsoleColor.Yellow);
             if (full) {
                 Console.WriteLine(whoisRoot);
             }
             whoisRoot = whoisRoot.Remove(0, whoisRoot.IndexOf("whois:", StringComparison.Ordinal) + 6).TrimStart();
             whoisRoot = whoisRoot.Substring(0, whoisRoot.IndexOf('\r'));
-            PowerPing.Display.Message("QUERYING [" + whoisRoot + "] FOR DOMAIN [" + address + "]:", ConsoleColor.Yellow, false);
+            Display.Message("QUERYING [" + whoisRoot + "] FOR DOMAIN [" + address + "]:", ConsoleColor.Yellow, false);
 
             // Next query resulting whois for the domain
             string result = PerformWhoIsLookup(whoisRoot, address);
-            PowerPing.Display.Message(" DONE", ConsoleColor.Yellow);
+            Display.Message(" DONE", ConsoleColor.Yellow);
             Console.WriteLine(result);
-            PowerPing.Display.Message("WHOIS LOOKUP FOR [" + address + "] COMPLETE.", ConsoleColor.Yellow);
+            Display.Message("WHOIS LOOKUP FOR [" + address + "] COMPLETE.", ConsoleColor.Yellow);
 
             Helper.WaitForUserInput();
         }
