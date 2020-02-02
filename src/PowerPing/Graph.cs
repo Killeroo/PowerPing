@@ -122,9 +122,8 @@ namespace PowerPing
                 // Get results from ping and add to graph
                 AddResponseToGraph(r.CurrTime);
 
-                // Draw graph columns
+                // Draw graph columns and y axis labels
                 DrawGraphColumns();
-
                 DrawYAxisLabels();
 
                 Console.CursorTop = EndCursorPosY;
@@ -321,6 +320,8 @@ namespace PowerPing
         }
         public void DrawYAxisLabels()
         {
+            // TODO: Only redraw if they have changed
+
             int factor = CompactGraph ? 1 : 2;
             int maxLines = CompactGraph ? 10 : 20;
             int maxYValue = maxLines * m_Scale;
@@ -328,7 +329,9 @@ namespace PowerPing
             int topStart = Console.CursorTop;
             int leftStart = Console.CursorLeft;
 
+            // Setup cursor position for drawing labels
             Console.CursorTop = m_yAxisStart;
+            Console.CursorLeft = 0;
 
             int currValue = maxYValue;
             for (int x = maxLines; x != 0; x--)
@@ -530,7 +533,7 @@ namespace PowerPing
 
             String blankRow = new String(' ', m_xAxisLength);
             String bottomRow = new String('─', m_xAxisLength);
-
+            
             for (int x = 0; x <= (CompactGraph ? 11 : 21); x++) {
                 // Draw black spaces
                 Console.Write(blankRow);
