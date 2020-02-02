@@ -127,8 +127,7 @@ namespace PowerPing
                 DrawYAxisLabels();
 
                 Console.CursorTop = EndCursorPosY;
-
-                Console.WriteLine(m_Scale);
+                
             }
 
             // Start pinging
@@ -149,9 +148,43 @@ namespace PowerPing
             m_IsGraphSetup = true;
         }
         /// <summary>
+        /// Checks if the graph scales need to be 
+        /// </summary>
+        /// <param name="newResponseTime"></param>
+        void CheckGraphScale(double newResponseTime)
+        {
+            int newTime = Convert.ToInt32(newResponseTime);
+            int maxTime = m_Scale * m_yAxisLength;
+
+            // Did we exceed our current scale?
+            if (newTime > maxTime)
+            {
+               m_Scale *= 2; // Expand!
+            }
+
+            // Check if the highest value is less than half way up the graph
+            bool scaleDown = true;
+            foreach (double responseTime in m_ResponseTimes)
+            {
+                int time = Convert.ToInt32(responseTime);
+
+                if (time > maxTime / 2)
+                {
+                    scaleDown = false;
+                }
+            }
+
+            // Scale down
+            if (scaleDown && m_Scale != 25)
+            {
+                m_Scale /= 2;
+            }
+        }
+
+        /// <summary>
         /// Draw all graph coloums/bars
         /// </summary>
-        bool inverting = true;
+
         private void DrawGraphColumns()
         {
             // Clear columns space before drawing
@@ -301,8 +334,11 @@ namespace PowerPing
             foreach(String segment in bar)
             {
                 Console.Write(segment);
-                Console.CursorTop--;
-                Console.CursorLeft--;
+                if (Console.CursorTop != 0)
+                {
+                    Console.CursorTop--;
+                    Console.CursorLeft--;
+                }
             }
 
             // Reset cursor to starting position
@@ -423,9 +459,11 @@ namespace PowerPing
                 count++;
             }
 
+
+            CheckGraphScale(replyTime);
+
             if (time > m_Scale * m_yAxisLength) {
                 // If reply time over graph Y range draw max size column
-                m_Scale *= 2;
 
                 count = 10;
             } else if (time == 0) {
