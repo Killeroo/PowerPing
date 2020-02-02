@@ -312,7 +312,7 @@ namespace PowerPing
         {
             // TODO: Only redraw if they have changed
             
-            int maxLines = 20;
+            int maxLines = m_yAxisLength;
             int maxYValue = maxLines * m_Scale;
 
             int topStart = Console.CursorTop;
@@ -423,7 +423,7 @@ namespace PowerPing
                 count++;
             }
 
-            if (time > m_Scale * 20) {
+            if (time > m_Scale * m_yAxisLength) {
                 // If reply time over graph Y range draw max size column
                 m_Scale *= 2;
 
