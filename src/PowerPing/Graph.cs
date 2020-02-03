@@ -48,7 +48,7 @@ namespace PowerPing
         private readonly CancellationToken m_CancellationToken;
         private readonly Ping m_Ping;
         private readonly PingAttributes m_PingAttributes = new PingAttributes();
-        private readonly List<String[]> m_Columns = new List<string[]>();
+        private readonly List<string[]> m_Columns = new List<string[]>();
         private readonly List<double> m_ResponseTimes = new List<double>();
         private bool m_IsGraphSetup = false;
         private int m_yAxisLength = 20;
@@ -148,9 +148,11 @@ namespace PowerPing
             m_IsGraphSetup = true;
         }
         /// <summary>
-        /// Checks if the graph scales need to be 
+        /// Checks if the graph Y axis need to be scaled down or up
+        /// Scaling is linear, so scale doubles or halves each time.
+        /// I couldn't be asked to try and hack exponential scaling here 
+        /// althrough it would probably work better
         /// </summary>
-        /// <param name="newResponseTime"></param>
         void CheckGraphScale(double newResponseTime)
         {
             int newTime = Convert.ToInt32(newResponseTime);
@@ -162,7 +164,8 @@ namespace PowerPing
                m_Scale *= 2; // Expand!
             }
 
-            // Check if the highest value is less than half way up the graph
+            // Check if any value on the graph is larger than half our current
+            // max y axis value
             bool scaleDown = true;
             foreach (double responseTime in m_ResponseTimes)
             {
@@ -174,7 +177,7 @@ namespace PowerPing
                 }
             }
 
-            // Scale down
+            // If so scale down
             if (scaleDown && m_Scale != 25)
             {
                 m_Scale /= 2;
@@ -283,7 +286,7 @@ namespace PowerPing
             // Save start of graph plotting area
             m_PlotStartX = Console.CursorLeft;
             m_PlotStartY = Console.CursorTop;
-            Console.WriteLine(new String('─', m_xAxisLength));
+            Console.WriteLine(new string('─', m_xAxisLength));
             Console.WriteLine();
 
             // Draw info (and get location info for each label)
@@ -324,14 +327,13 @@ namespace PowerPing
         /// Draw graph bar
         /// </summary>
         /// <param name="bar"></param>
-        private void DrawBar(String[] bar)
+        private void DrawBar(string[] bar)
         {
             // save cursor location
             int cursorPositionX = Console.CursorLeft;
             int cursorPositionY = Console.CursorTop;
-
-            // TODO: draw bars along instead of down
-            foreach(String segment in bar)
+            
+            foreach(string segment in bar)
             {
                 Console.Write(segment);
                 if (Console.CursorTop != 0)
@@ -406,7 +408,7 @@ namespace PowerPing
             int cursorPositionX = Console.CursorLeft;
             int cursorPositionY = Console.CursorTop;
 
-            String blankLabel = new String(' ', 6);
+            string blankLabel = new string(' ', 6);
 
             // Update sent label
             Console.SetCursorPosition(m_SentLabelX, m_SentLabelY);
@@ -448,9 +450,9 @@ namespace PowerPing
         /// Generate bar for graph
         /// </summary>
         /// <param name="time">Reply time of packet to plot</param>
-        private String[] CreateColumn(double replyTime)
+        private string[] CreateColumn(double replyTime)
         {
-            String[] bar;
+            string[] bar;
             int count = 0;
             int time = Convert.ToInt32(replyTime);
 
@@ -468,7 +470,7 @@ namespace PowerPing
                 count = 10;
             } else if (time == 0) {
                 // If no reply dont draw column
-                return new String[] { "─" };
+                return new string[] { "─" };
             }
 
             // Add special character at top and below
@@ -476,18 +478,44 @@ namespace PowerPing
             // Remove all the stuff below
 
             // Create array to store bar
-            bar = new String[count + 1];
+            bar = new string[count + 1];
 
             // Fill bar
-            for (int x = 0; x < count + 1; x = x + 1) {
+            for (int x = 0; x < count; x = x + 1) { // count + 1
                 bar[x] = FULL_BAR_BLOCK_CHAR;
             }
 
             // Replace lowest bar segment
             bar[0] = "▀";
 
-            // Replace the last segment
-            bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
+            // Replace the last segment 
+            if (0 < time - (count * m_Scale))
+            {
+
+                //bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
+                if (time % m_Scale > m_Scale / 2)
+                {
+                    bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
+                }
+                else
+                {
+                    bar[bar.Length - 1] = FULL_BAR_BLOCK_CHAR;
+                }
+            } 
+            else
+            {
+                bar[bar.Length - 1] = " ";
+            }
+
+            //Console.WriteLine(time - (count * m_Scale));
+            
+            // m_Scale/2 < Math.Abs(time - (count * m_Scale)))
+            //    bar[bar.Length - 1] = " ";
+            //} 
+            //    else
+            //    {
+            //        bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
+            //    }
 
             // Work out top character
             //if (time % m_Scale >= 0) {
@@ -524,8 +552,8 @@ namespace PowerPing
             // Set cursor position to start of plot
             Console.SetCursorPosition(m_PlotStartX, m_PlotStartY);
 
-            String blankRow = new String(' ', m_xAxisLength);
-            String bottomRow = new String('─', m_xAxisLength);
+            string blankRow = new string(' ', m_xAxisLength);
+            string bottomRow = new string('─', m_xAxisLength);
             
             for (int x = 0; x <= 21; x++) {
                 // Draw black spaces
