@@ -1,6 +1,6 @@
 # PowerPing - Advanced Windows Ping 
 
-[![](https://img.shields.io/badge/stable%20version-1.3.0-brightgreen.svg)](https://github.com/Killeroo/PowerPing/releases) 
+[![](https://img.shields.io/badge/stable%20version-1.3.5-brightgreen.svg)](https://github.com/Killeroo/PowerPing/releases) 
 
 Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
 
@@ -112,7 +112,7 @@ _Future features:_
 
 License under the MIT License:
 
-Copyright (c) 2019 Matthew Carney <matthewcarney64@gmail.com>
+Copyright (c) 2020 Matthew Carney <matthewcarney64@gmail.com>
 
 ### Note: 
 **Requires _Elevated Rights (Admininstrator)_ to Run (more info [here](https://github.com/Killeroo/PowerPing/issues/110))**
