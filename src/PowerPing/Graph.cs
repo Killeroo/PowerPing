@@ -326,6 +326,8 @@ namespace PowerPing
                 Console.CursorLeft--;
                 return;
             }
+
+            bool inverting = false;
             foreach (string segment in column)
             {
                 //if (segment == "─")
@@ -334,8 +336,26 @@ namespace PowerPing
                 //}
                 //else
                 //{
+                if (color != ConsoleColor.DarkGray && color != ConsoleColor.Gray)
+                {
+
                     Console.ForegroundColor = color;
-                //}
+                }
+                else
+                {
+
+                    //}
+                    if (inverting)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                        inverting = false;
+                    }
+                    else
+                    {
+                        inverting = true;
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                    }
+                }
 
                 Console.Write(segment);
 
