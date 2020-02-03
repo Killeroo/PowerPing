@@ -123,7 +123,7 @@ namespace PowerPing
                 AddResponseToGraph(r.CurrTime);
 
                 // Draw graph columns and y axis labels
-                DrawGraphColumns();
+                DrawColumns();
                 DrawYAxisLabels();
 
                 Console.CursorTop = EndCursorPosY;
@@ -183,68 +183,54 @@ namespace PowerPing
                 m_Scale /= 2;
             }
         }
-
         /// <summary>
         /// Draw all graph coloums/bars
         /// </summary>
-
-        private void DrawGraphColumns()
+        private void DrawColumns()
         {
             // Clear columns space before drawing
-            // TODO: Don't always redraw graph, determine if scale has changed
             Clear();
             
             for (int x = 0; x < m_ResponseTimes.Count; x++) {
+
+                ConsoleColor color = ConsoleColor.Gray;
+
+                // This causes us to draw a continous lower line of red when we are continously timing out
+                // Instead of always drawing big red lines, we draw them at either end of the continous zone
+                // I think it will just look nicer, it will cause slightly hackier code but oh well
+                bool drawTimeoutSegment = false; 
+
+                // Alternate colour between columns for clarity
                 if (x % 2 == 0) {
-                    Console.ForegroundColor = ConsoleColor.Gray;
+                    color = ConsoleColor.Gray;
                 } else {
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    color = ConsoleColor.DarkGray;
                 }
                 if (x == m_ResponseTimes.Count - 1) {
-                    Console.ForegroundColor = ConsoleColor.Green;
+                    color = ConsoleColor.Green;
                 }
-                DrawBar(CreateColumn(m_ResponseTimes[x]));
+                if (m_ResponseTimes[x] == 0)
+                {
+                    color = ConsoleColor.DarkRed;
+                }
+
+                // So to get a timeout segment we peak at the elements ahead and behind to check they are timeouts
+                // if not we will just draw a normal line at the end of the timeout
+                // Horrible hacky inline logic to make sure we don't outofbounds while checking behind and head in the array
+                if (m_ResponseTimes[x] == 0 
+                    && (x != 0 ? m_ResponseTimes[x - 1] == 0 : false)
+                    && ((x < m_ResponseTimes.Count -1 ? m_ResponseTimes[x + 1] == 0 : false) || x == m_ResponseTimes.Count - 1)) 
+                {
+                    drawTimeoutSegment = true;
+                }
+
+                DrawSingleColumn(CreateColumn(m_ResponseTimes[x]), color, drawTimeoutSegment);
 
                 Console.CursorLeft++; 
             }
 
-            // TODO change scale here
-
-
-            //DrawColumns();
             // Reset colour after
             Console.ForegroundColor = ConsoleColor.Gray;
-            // TODO: Stripped colour instead of gray
-        }
-        private void DrawColumns()
-        {
-            //private readonly List<String[]> m_Columns  = 
-            // Work out columns
-            string[][] columns = new string[m_ResponseTimes.Count][];
-            for (int x = 0; x < m_ResponseTimes.Count; x++) {
-                columns[x] = CreateColumn(m_ResponseTimes[x]);
-            }
-
-            // Work out lines
-            List<string> lines = new List<string>();
-            for (int x = 0; x < m_yAxisLength; x++) {
-                string line = "";
-                for (int y = 0; y < columns.Length; y++) {
-                    try {
-                        line += columns[y][x];
-                    } catch (IndexOutOfRangeException) {
-                        line += " ";
-                    }
-                }
-                lines.Add(line);
-            }
-
-            // Draw lines
-            Console.CursorTop = m_yAxisStart;
-            foreach (string line in lines) {
-                Console.CursorLeft = 21; // TODO: Dynamic
-                Console.WriteLine(line);
-            }
         }
         /// <summary>
         /// Draw graph background
@@ -326,16 +312,33 @@ namespace PowerPing
         /// <summary>
         /// Draw graph bar
         /// </summary>
-        /// <param name="bar"></param>
-        private void DrawBar(string[] bar)
+        /// <param name="column">Column segments in array</param>
+        private void DrawSingleColumn(string[] column, ConsoleColor color, bool timeoutSegment)
         {
             // save cursor location
             int cursorPositionX = Console.CursorLeft;
             int cursorPositionY = Console.CursorTop;
-            
-            foreach(string segment in bar)
+
+            if (timeoutSegment)
             {
+                Console.Write("─");
+
+                Console.CursorLeft--;
+                return;
+            }
+            foreach (string segment in column)
+            {
+                //if (segment == "─")
+                //{
+                //    //Console.ForegroundColor = ConsoleColor.Gray;
+                //}
+                //else
+                //{
+                    Console.ForegroundColor = color;
+                //}
+
                 Console.Write(segment);
+
                 if (Console.CursorTop != 0)
                 {
                     Console.CursorTop--;
@@ -470,7 +473,13 @@ namespace PowerPing
                 count = 10;
             } else if (time == 0) {
                 // If no reply dont draw column
-                return new string[] { "─" };
+                string[] timeoutBar = new string[m_yAxisLength];
+                timeoutBar[0] = "┴";
+                for (int x = 1; x < m_yAxisLength; x++)
+                {
+                    timeoutBar[x] = "|";
+                }
+                return timeoutBar;//new string[] { "─" };
             }
 
             // Add special character at top and below
