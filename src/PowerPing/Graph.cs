@@ -489,22 +489,34 @@ namespace PowerPing
             bar[0] = "▀";
 
             // Replace the last segment 
-            if (0 < time - (count * m_Scale))
-            {
+            // https://stackoverflow.com/a/2705553
+            int nearestMultiple = (int)Math.Round((time / (double)m_Scale), MidpointRounding.AwayFromZero) * m_Scale;
+            //Console.WriteLine(nearestMultiple - time);
+            //if (0 < time - (count * m_Scale))
+            //{
 
-                //bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
-                if (time % m_Scale > m_Scale / 2)
-                {
-                    bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
-                }
-                else
-                {
-                    bar[bar.Length - 1] = FULL_BAR_BLOCK_CHAR;
-                }
-            } 
-            else
+            //    //bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
+            //    if (time % m_Scale > m_Scale / 2)
+            //    {
+            //        bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
+            //    }
+            //    else
+            //    {
+            //        bar[bar.Length - 1] = FULL_BAR_BLOCK_CHAR;
+            //    }
+            //} 
+            //else
+            //{
+            //    bar[bar.Length - 1] = " ";
+            //}
+
+            if (nearestMultiple - time < 0)
             {
                 bar[bar.Length - 1] = " ";
+            }
+            else
+            {
+                bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
             }
 
             //Console.WriteLine(time - (count * m_Scale));
