@@ -164,6 +164,12 @@ namespace PowerPing
             if (newTime > maxTime)
             {
                m_Scale *= 2; // Expand!
+
+                // Recurse back into ourself to check the scale again
+                // Just in case we have to increase the scale all at once
+                // we want to do it now, instead we will have a jumpy 
+                // rescaling look over the new few bars 
+               CheckGraphScale(newResponseTime);
             }
 
             // Check if any value on the graph is larger than half our current
