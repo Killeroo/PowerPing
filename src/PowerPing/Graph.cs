@@ -53,7 +53,8 @@ namespace PowerPing
         private bool m_IsGraphSetup = false;
         private int m_yAxisLength = 20;
         private int m_xAxisLength = 40;
-        private int m_Scale = 25;//50;
+        private int m_StartScale = 5;
+        private int m_Scale = 5;//50;
 
         // Location of graph plotting space
         private int m_PlotStartX;
@@ -71,6 +72,7 @@ namespace PowerPing
         {
             m_CancellationToken = cancellationTkn;
             m_Ping = new Ping(cancellationTkn);
+            m_Scale = m_StartScale;
 
             // Setup ping attributes
             m_PingAttributes.InputtedAddress = Lookup.QueryDNS(address, System.Net.Sockets.AddressFamily.InterNetwork);
@@ -108,9 +110,9 @@ namespace PowerPing
             // This callback will run after each ping iteration
             void ResultsUpdateCallback(PingResults r) {
                 // Make sure we're not updating the display too frequently
-                //if (!displayUpdateLimiter.RequestRun()) {
-                //    return;
-                //}
+                if (!displayUpdateLimiter.RequestRun()) {
+                    return;
+                }
 
                 // Reset position
                 Console.CursorTop = m_PlotStartY;
@@ -178,7 +180,7 @@ namespace PowerPing
             }
 
             // If so scale down
-            if (scaleDown && m_Scale != 25)
+            if (scaleDown && m_Scale != m_StartScale)
             {
                 m_Scale /= 2;
             }
@@ -330,12 +332,6 @@ namespace PowerPing
             bool inverting = false;
             foreach (string segment in column)
             {
-                //if (segment == "─")
-                //{
-                //    //Console.ForegroundColor = ConsoleColor.Gray;
-                //}
-                //else
-                //{
                 if (color != ConsoleColor.DarkGray && color != ConsoleColor.Gray)
                 {
 
@@ -343,8 +339,6 @@ namespace PowerPing
                 }
                 else
                 {
-
-                    //}
                     if (inverting)
                     {
                         Console.ForegroundColor = ConsoleColor.Gray;
@@ -358,6 +352,12 @@ namespace PowerPing
                 }
 
                 Console.Write(segment);
+
+                // Stop over drawing at the top of the graph
+                if (Console.CursorTop == m_yAxisStart)
+                {
+                    break;
+                }
 
                 if (Console.CursorTop != 0)
                 {
@@ -431,39 +431,39 @@ namespace PowerPing
             int cursorPositionX = Console.CursorLeft;
             int cursorPositionY = Console.CursorTop;
 
-            string blankLabel = new string(' ', 6);
+            string blankLabel = new string(' ', 8);
 
             // Update sent label
             Console.SetCursorPosition(m_SentLabelX, m_SentLabelY);
             // Clear label first
             Console.Write(blankLabel);
             // Move cursor back
-            Console.CursorLeft = Console.CursorLeft - 6;
+            Console.CursorLeft = Console.CursorLeft - 8;
             // Write label value
             Console.Write(results.Sent);
 
             // Update recieve label
             Console.SetCursorPosition(m_RecvLabelX, m_RecvLabelY);
             Console.Write(blankLabel);
-            Console.CursorLeft = Console.CursorLeft - 6;
+            Console.CursorLeft = Console.CursorLeft - 8;
             Console.Write(results.Received);
 
             // Update fail label
             Console.SetCursorPosition(m_FailLabelX, m_FailLabelY);
             Console.Write(blankLabel);
-            Console.CursorLeft = Console.CursorLeft - 6;
+            Console.CursorLeft = Console.CursorLeft - 8;
             Console.Write(results.Lost);
 
             // Update RTT label
             Console.SetCursorPosition(m_RttLabelX, m_RttLabelY);
             Console.Write(blankLabel);
-            Console.CursorLeft = Console.CursorLeft - 6;
+            Console.CursorLeft = Console.CursorLeft - 8;
             Console.Write("{0:0.0}ms", results.CurrTime);
 
             // Update time label
             Console.SetCursorPosition(m_TimeLabelX, m_TimeLabelY);
             Console.Write(blankLabel + "        ");
-            Console.CursorLeft = Console.CursorLeft - 14;
+            Console.CursorLeft = Console.CursorLeft - 16;
             Console.Write("{0:hh\\:mm\\:ss}", results.TotalRunTime);
 
             // Reset cursor to starting position
