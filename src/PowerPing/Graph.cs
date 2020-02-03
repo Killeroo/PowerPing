@@ -114,6 +114,8 @@ namespace PowerPing
                     return;
                 }
 
+                int scalePrevious = m_Scale;
+
                 // Reset position
                 Console.CursorTop = m_PlotStartY;
                 Console.CursorLeft = m_PlotStartX;
@@ -124,9 +126,14 @@ namespace PowerPing
                 // Get results from ping and add to graph
                 AddResponseToGraph(r.CurrTime);
 
-                // Draw graph columns and y axis labels
+                // Draw graph columns
                 DrawColumns();
-                DrawYAxisLabels();
+
+                // Only draw the y axis labels if the scale has changed
+                if (scalePrevious != m_Scale)
+                {
+                    DrawYAxisLabels();
+                }
 
                 Console.CursorTop = EndCursorPosY;
                 
@@ -146,6 +153,8 @@ namespace PowerPing
             }
 
             DrawBackground();
+
+            DrawYAxisLabels();
 
             m_IsGraphSetup = true;
         }
@@ -400,9 +409,9 @@ namespace PowerPing
                 }
 
                 // Add indentation every 2 lines 
-                if (x % 2 == 0)
+                if (x % 2 == 0) { 
                     Console.Write("─");
-                else {
+                } else {
                     Console.Write(" ");
                 }
                 
