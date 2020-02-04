@@ -41,8 +41,8 @@ namespace PowerPing
         const string BOTTOM_BAR_BLOCK_CHAR = "▀";
 
         // Properties
-        public bool CompactGraph = false;
-        public int EndCursorPosY = 0; // Position to move cursor to when graph exits
+        public bool CompactGraph { get; set; } = false;
+        public int EndCursorPosY { get; set; } = 0; // Position to move cursor to when graph exits
 
         // Local variable declaration
         private readonly CancellationToken m_CancellationToken;
@@ -53,8 +53,20 @@ namespace PowerPing
         private bool m_IsGraphSetup = false;
         private int m_yAxisLength = 20;
         private int m_xAxisLength = 40;
-        private int m_StartScale = 5;
-        private int m_Scale = 5;//50;
+        private int m_yAxisLeftPadding = 14;
+        private int m_LegendLeftPadding = 16;
+        private int m_StartScale = 5; // Stops graph from scaling in past its start scale
+        private int m_Scale = 5;//50; // Our current yaxis graph scale 
+
+        // Properties to use for normal and compact graph modes
+        private int m_NormalLegendLeftPadding = 13;
+        private int m_NormalYAxisLeftPadding = 11;
+        private int m_NormalYAxisLength = 20;
+        private int m_NormalXAxisLength = 40;
+        private int m_CompactLegendLeftPadding = 2;
+        private int m_CompactYAxisLeftPadding = 5;
+        private int m_CompactYAxisLength = 10;
+        private int m_CompactXAxisLength = 30;
 
         // Location of graph plotting space
         private int m_PlotStartX;
@@ -145,11 +157,27 @@ namespace PowerPing
         ///<summary>
         /// Setup graph
         /// </summary>
-        private void Setup() 
+        private void Setup()
         {
             // Determine Xaxis size
             if (!CompactGraph) {
-                m_xAxisLength = Console.WindowWidth - 50;
+                //m_xAxisLength = Console.WindowWidth - 50;
+            }
+
+            // Setup graph properties based on graph type
+            if (CompactGraph)
+            {
+                m_yAxisLength = m_CompactYAxisLength;
+                m_xAxisLength = m_CompactXAxisLength;
+                m_LegendLeftPadding = m_CompactLegendLeftPadding;
+                m_yAxisLeftPadding = m_CompactYAxisLeftPadding;
+            }
+            else
+            {
+                m_yAxisLength = m_NormalYAxisLength;
+                m_xAxisLength = m_NormalXAxisLength;
+                m_LegendLeftPadding = m_NormalLegendLeftPadding;
+                m_yAxisLeftPadding = m_NormalYAxisLeftPadding;
             }
 
             DrawBackground();
@@ -260,31 +288,42 @@ namespace PowerPing
             // Save position for later
             m_yAxisStart = Console.CursorTop;
 
-            // Draw Y axis of graph
-            Console.WriteLine("                ┐");
-            Console.WriteLine("                ┤");
-            Console.WriteLine("               ─┤");
-            Console.WriteLine("                ┤");
-            Console.WriteLine("               ─┤");
-            Console.WriteLine("                ┤");
-            Console.WriteLine("               ─┤");
-            Console.WriteLine("                ┤");
-            Console.WriteLine(" Response      ─┤");
-            Console.WriteLine("   Time         ┤");
-            Console.WriteLine("   (ms)        ─┤");
-            Console.WriteLine("                ┤");
-            Console.WriteLine("               ─┤");
-            Console.WriteLine("                ┤");
-            Console.WriteLine("               ─┤");
-            Console.WriteLine("                ┤");
-            Console.WriteLine("               ─┤");
-            Console.WriteLine("                ┤");
-            Console.WriteLine("               ─┤");
-            Console.WriteLine("                ┤");
+            // Draw graph y axis 
+            int maxLines = m_yAxisLength;
+            int maxYValue = maxLines * m_Scale;
+            int currValue = maxYValue;
+            for (int x = maxLines; x != 0; x--)
+            {
+                // write current value with m_LegendLeftPadding (slightly less every 2 lines)
+                if (x % 2 == 0)
+                {
+                    Console.Write(currValue.ToString().PadLeft(m_yAxisLeftPadding) + " ");
+                }
+                else
+                {
+                    Console.Write(new string(' ', m_yAxisLeftPadding + 1));
+                }
 
+                // Add indentation every 2 lines 
+                if (x % 2 == 0)
+                {
+                    Console.Write("─");
+                }
+                else
+                {
+                    Console.Write(" ");
+                }
+
+                if (x == maxLines)
+                    Console.WriteLine("┐");
+                else
+                    Console.WriteLine("┤");
+
+                currValue -= m_Scale;
+            }
 
             // Draw X axis of graph
-            Console.Write("              0 └");
+            Console.Write(new string(' ', m_yAxisLeftPadding) + "0 └");
 
             // Save start of graph plotting area
             m_PlotStartX = Console.CursorLeft;
@@ -292,12 +331,14 @@ namespace PowerPing
             Console.WriteLine(new string('─', m_xAxisLength));
             Console.WriteLine();
 
-            // Draw info (and get location info for each label)
-            Console.WriteLine("                 Ping Statistics:");
-            Console.WriteLine("                -----------------------------------");
-            Console.WriteLine("                 Destination [ {0} ]", m_PingAttributes.InputtedAddress);
+            string leftPadding = new string(' ', m_LegendLeftPadding);
 
-            Console.Write("                     Sent: ");
+            // Draw info (and get location info for each label)
+            Console.WriteLine(leftPadding + " Ping Statistics:");
+            Console.WriteLine(leftPadding + "-----------------------------------");
+            Console.WriteLine(leftPadding + " Destination [ {0} ]", m_PingAttributes.InputtedAddress);
+
+            Console.Write(leftPadding + "    Sent: ");
             m_SentLabelX = Console.CursorLeft;
             m_SentLabelY = Console.CursorTop;
 
@@ -308,7 +349,7 @@ namespace PowerPing
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Gray;
 
-            Console.Write("                      RTT: ");
+            Console.Write(leftPadding + "     RTT: ");
             m_RttLabelX = Console.CursorLeft;
             m_RttLabelY = Console.CursorTop;
 
@@ -319,7 +360,7 @@ namespace PowerPing
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Gray;
             
-            Console.Write("                 Time Elapsed: ");
+            Console.Write(leftPadding + " Time Elapsed: ");
             m_TimeLabelX = Console.CursorLeft;
             m_TimeLabelY = Console.CursorTop;
             Console.WriteLine();
@@ -403,9 +444,9 @@ namespace PowerPing
             {
                 // write current value with padding (slightly less every 2 lines)
                 if (x % 2 == 0) {
-                    Console.Write(currValue.ToString().PadLeft(14) + " ");
+                    Console.Write(currValue.ToString().PadLeft(m_yAxisLeftPadding) + " ");
                 } else {
-                    Console.Write(new string(' ', 15));
+                    Console.Write(new string(' ', m_yAxisLeftPadding + 1));
                 }
 
                 // Add indentation every 2 lines 
@@ -423,14 +464,20 @@ namespace PowerPing
                 currValue -= m_Scale;
             }
 
-            // Draw name of axis
-            Console.CursorTop = m_yAxisStart + maxLines / 2;
-            Console.CursorLeft = 1;
-            Console.WriteLine("Response");
-            Console.CursorLeft = 3;
-            Console.WriteLine("time");
-            Console.CursorLeft = 3;
-            Console.WriteLine("(MS)");
+            // Draw name of y axis
+            // (Don't bother in compact mode, to save space)
+            if (!CompactGraph)
+            {
+                Console.CursorTop = m_yAxisStart + maxLines / 2;
+                Console.CursorLeft = 1;
+                Console.WriteLine("Round");
+                Console.CursorLeft = 2;
+                Console.WriteLine("Trip");
+                Console.CursorLeft = 2;
+                Console.WriteLine("Time");
+                Console.CursorLeft = 2;
+                Console.WriteLine("(MS)");
+            }
 
             // Reset cursor position
             Console.CursorLeft = leftStart;
@@ -606,12 +653,12 @@ namespace PowerPing
             int cursorPositionY = Console.CursorTop;
 
             // Set cursor position to start of plot
-            Console.SetCursorPosition(m_PlotStartX, m_PlotStartY);
+            Console.SetCursorPosition(m_PlotStartX, m_yAxisStart);//m_PlotStartY);
 
             string blankRow = new string(' ', m_xAxisLength);
             string bottomRow = new string('─', m_xAxisLength);
-            
-            for (int x = 0; x <= 21; x++) {
+
+            for (int x = 0; x <= m_yAxisLength; x++) { //21; x++) {
                 // Draw black spaces
                 Console.Write(blankRow);
                 Console.CursorLeft = m_PlotStartX;
