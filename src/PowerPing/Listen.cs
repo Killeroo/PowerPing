@@ -17,7 +17,22 @@ namespace PowerPing
     static class Listen 
     {
 
-        public static void Start(CancellationToken cancellationToken)
+        private static IPAddress[] GetLocalAddresses()
+        {
+            IPHostEntry hostAddress = null;
+
+            // Get all addresses assocatied with this computer
+            try {
+                hostAddress = Dns.GetHostEntry(Dns.GetHostName());
+            } catch (Exception e) {
+                Display.Error("Could not fetch local addresses (" + e.GetType().ToString() + ")");
+            }
+
+            // Loop through each associated address
+            return hostAddress.AddressList;
+        }
+
+        private static void ListenForICMPOnAddress(IPAddress address)
         {
             IPAddress localAddress = null;
             Socket listeningSocket = null;
@@ -27,7 +42,8 @@ namespace PowerPing
             // Find local address
             localAddress = IPAddress.Parse(Lookup.GetLocalAddress());
 
-            try {
+            try
+            {
                 // Create listener socket
                 listeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.Icmp);
                 listeningSocket.Bind(new IPEndPoint(localAddress, 0));
@@ -37,12 +53,13 @@ namespace PowerPing
                 Display.ListenIntroMsg(localAddress.ToString());
 
                 // Listening loop
-                while (!cancellationToken.IsCancellationRequested) {
+                while (true)//!cancellationToken.IsCancellationRequested)
+                {
                     byte[] buffer = new byte[bufferSize];
 
                     // Recieve any incoming ICMPv4 packets
                     EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                    int bytesRead = Helper.RunWithCancellationToken(() => listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint), cancellationToken);
+                    int bytesRead = listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint);//Helper.RunWithCancellationToken(() => listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint), cancellationToken);
                     ICMP response = new ICMP(buffer, bytesRead);
 
                     // Display captured packet
@@ -53,17 +70,38 @@ namespace PowerPing
                     results.Received++;
                 }
             }
-            catch (OperationCanceledException) {
+            catch (OperationCanceledException)
+            {
             }
-            catch (SocketException) {
+            catch (SocketException)
+            {
                 Display.Error("Could not read packet from socket");
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 Display.Error($"General exception occured while trying to create listening socket (Exception: {e.GetType().ToString().Split('.').Last()}");
             }
 
             // Clean up
             listeningSocket.Close();
+        }
+
+        public static void Start(CancellationToken cancellationToken)
+        {
+            IPAddress[] localAddresses = GetLocalAddresses();
+            if (localAddresses == null) {
+                return;
+            }
+
+            Thread[] listenThreads = new Thread[localAddresses.Length];
+            for (int x = 0; x < localAddresses.Length; x++) {
+                listenThreads[x] = new Thread(() => {
+                    ListenForICMPOnAddress(localAddresses[x]);
+                });
+                listenThreads[x].Start();
+            }
+
+
 
             // TODO: Implement ListenResults method
             //Display.ListenResults(results);
