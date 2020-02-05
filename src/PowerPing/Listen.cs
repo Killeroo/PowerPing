@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -16,54 +17,95 @@ namespace PowerPing
     /// <source>https://stackoverflow.com/a/9174392</source>
     static class Listen 
     {
+        private static Thread[] listenThreads;
+
+        public static void Start(CancellationToken cancellationToken)
+        {
+            IPAddress[] localAddresses = GetLocalAddresses();
+            if (localAddresses == null)
+            {
+                return;
+            }
+
+            // Start a listening thread for each ipv4 local address
+            int size = localAddresses.Length;
+            listenThreads = new Thread[size];
+            for (int x = 0; x < localAddresses.Length; x++)
+            {
+                int index = x;
+                listenThreads[index] = new Thread(() => {
+                    ListenForICMPOnAddress(localAddresses[index]);
+                });
+                listenThreads[index].IsBackground = true;
+                listenThreads[index].Start();
+            }
+
+            // Wait for cancellation signal
+            while(true)
+            {
+                if (cancellationToken.IsCancellationRequested) {
+                    return;
+                }
+                Thread.Sleep(50);
+            }
+
+            // TODO: Implement ListenResults method
+            //Display.ListenResults(results);
+        }
 
         private static IPAddress[] GetLocalAddresses()
         {
             IPHostEntry hostAddress = null;
 
             // Get all addresses assocatied with this computer
-            try {
+            try
+            {
                 hostAddress = Dns.GetHostEntry(Dns.GetHostName());
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 Display.Error("Could not fetch local addresses (" + e.GetType().ToString() + ")");
             }
 
-            // Loop through each associated address
-            return hostAddress.AddressList;
+            // Only get IPv4 address
+            List<IPAddress> addresses = new List<IPAddress>();
+            foreach (IPAddress address in hostAddress.AddressList) {
+                if (address.AddressFamily == AddressFamily.InterNetwork) {
+                    addresses.Add(address);
+                }
+            }
+
+            return addresses.ToArray();
         }
 
-        private static void ListenForICMPOnAddress(IPAddress address)
+        public static void ListenForICMPOnAddress(IPAddress address)
         {
-            IPAddress localAddress = null;
             Socket listeningSocket = null;
             PingResults results = new PingResults();
             int bufferSize = 4096;
-
-            // Find local address
-            localAddress = IPAddress.Parse(Lookup.GetLocalAddress());
-
+            
             try
             {
                 // Create listener socket
                 listeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.Icmp);
-                listeningSocket.Bind(new IPEndPoint(localAddress, 0));
+                listeningSocket.Bind(new IPEndPoint(address, 0));
                 listeningSocket.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 }); // Set SIO_RCVALL flag to socket IO control
                 listeningSocket.ReceiveBufferSize = bufferSize;
 
-                Display.ListenIntroMsg(localAddress.ToString());
+                Display.ListenIntroMsg(address.ToString());
 
                 // Listening loop
-                while (true)//!cancellationToken.IsCancellationRequested)
+                while (true)
                 {
                     byte[] buffer = new byte[bufferSize];
 
                     // Recieve any incoming ICMPv4 packets
                     EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                    int bytesRead = listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint);//Helper.RunWithCancellationToken(() => listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint), cancellationToken);
+                    int bytesRead = listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint);
                     ICMP response = new ICMP(buffer, bytesRead);
 
                     // Display captured packet
-                    Display.CapturedPacket(response, remoteEndPoint.ToString(), DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead);
+                    Display.CapturedPacket(address.ToString(), response, remoteEndPoint.ToString(), DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead);
 
                     // Store results
                     results.CountPacketType(response.Type);
@@ -86,25 +128,6 @@ namespace PowerPing
             listeningSocket.Close();
         }
 
-        public static void Start(CancellationToken cancellationToken)
-        {
-            IPAddress[] localAddresses = GetLocalAddresses();
-            if (localAddresses == null) {
-                return;
-            }
 
-            Thread[] listenThreads = new Thread[localAddresses.Length];
-            for (int x = 0; x < localAddresses.Length; x++) {
-                listenThreads[x] = new Thread(() => {
-                    ListenForICMPOnAddress(localAddresses[x]);
-                });
-                listenThreads[x].Start();
-            }
-
-
-
-            // TODO: Implement ListenResults method
-            //Display.ListenResults(results);
-        }
     }
 }

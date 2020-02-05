@@ -100,7 +100,7 @@ namespace PowerPing
 
         // Listen messages
         const string LISTEN_INTRO_MSG = "Listening for ICMP Packets on [ {0} ]";
-        const string CAPTURED_PACKET_MSG = "{0}: ICMPv4: {1} bytes from {2} [type {3}] [code {4}]";
+        const string CAPTURED_PACKET_MSG = "{0}: [{5}] ICMPv4: {1} bytes for {2} [type {3}] [code {4}]";
 
         // Request messages
         const string REQUEST_MSG = "Request to: {0}:0 seq={1} bytes={2} type=";
@@ -686,12 +686,12 @@ Get location information for 84.23.12.4";
         /// <summary>
         /// Display information about a captured packet
         /// </summary>
-        public static void CapturedPacket(ICMP packet, String address, String timeReceived, int bytesRead)
+        public static void CapturedPacket(string localAddress, ICMP packet, string remoteAddress, string timeReceived, int bytesRead)
         {
             // Display captured packet
             Console.BackgroundColor = packet.Type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.Type];
             Console.ForegroundColor = ConsoleColor.Black;
-            Console.WriteLine(CAPTURED_PACKET_MSG, timeReceived, bytesRead, address, packet.Type, packet.Code);
+            Console.WriteLine(CAPTURED_PACKET_MSG, timeReceived, bytesRead, remoteAddress, packet.Type, packet.Code, localAddress);
 
             // Reset console colours
             ResetColor();
