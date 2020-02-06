@@ -58,13 +58,10 @@ namespace PowerPing
             IPHostEntry hostAddress = null;
 
             // Get all addresses assocatied with this computer
-            try
-            {
+            try {
                 hostAddress = Dns.GetHostEntry(Dns.GetHostName());
-            }
-            catch (Exception e)
-            {
-                Display.Error("Could not fetch local addresses (" + e.GetType().ToString() + ")");
+            } catch (Exception e) {
+                Display.Error($"Could not fetch local addresses ({e.GetType().ToString().Split('.').Last()})");
             }
 
             // Only get IPv4 address
@@ -83,22 +80,27 @@ namespace PowerPing
             Socket listeningSocket = null;
             PingResults results = new PingResults();
             int bufferSize = 4096;
-            
+
+            // Create listener socket
             try
             {
-                // Create listener socket
                 listeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.Icmp);
                 listeningSocket.Bind(new IPEndPoint(address, 0));
                 listeningSocket.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 }); // Set SIO_RCVALL flag to socket IO control
                 listeningSocket.ReceiveBufferSize = bufferSize;
+            } catch (Exception e) {
+                Display.Error($"General exception occured while trying to create listening socket (Exception: {e.GetType().ToString().Split('.').Last()}");
+            }
 
-                Display.ListenIntroMsg(address.ToString());
+            Display.ListenIntroMsg(address.ToString());
 
-                // Listening loop
-                while (true)
-                {
-                    byte[] buffer = new byte[bufferSize];
+            // Listening loop
+            while (true)
+            {
+                byte[] buffer = new byte[bufferSize];
 
+
+                try {
                     // Recieve any incoming ICMPv4 packets
                     EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
                     int bytesRead = listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint);
@@ -110,22 +112,16 @@ namespace PowerPing
                     // Store results
                     results.CountPacketType(response.Type);
                     results.Received++;
+                } catch (OperationCanceledException) {
+                } catch (SocketException) {
+                    Display.Error("Could not read packet from socket");
                 }
             }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (SocketException)
-            {
-                Display.Error("Could not read packet from socket");
-            }
-            catch (Exception e)
-            {
-                Display.Error($"General exception occured while trying to create listening socket (Exception: {e.GetType().ToString().Split('.').Last()}");
-            }
 
-            // Clean up
+
+
             listeningSocket.Close();
+
         }
 
 
