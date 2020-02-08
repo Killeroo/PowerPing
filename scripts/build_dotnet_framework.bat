@@ -19,7 +19,7 @@ if "%msbuild_path%"=="" GOTO MSBUILD_NOT_FOUND
 
 :: Run build command
 call "%msbuild_path%" ..\PowerPing.sln /p:Configuration=Release /p:Platform="x64" /t:rebuild
-if errorlevel 0 GOTO BUILD_FAILED
+if errorlevel 1 GOTO BUILD_FAILED
 call "%msbuild_path%" ..\PowerPing.sln /p:Configuration=Release /p:Platform="x86" /t:rebuild
 if errorlevel 1 GOTO BUILD_FAILED
 goto:eof
