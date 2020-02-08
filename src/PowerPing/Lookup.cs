@@ -81,9 +81,11 @@ namespace PowerPing
 
                 using (WebClient objClient = new WebClient()) {
 
+                    int key = 1234567;
+
                     // Download xml data for address
                     string downloadedText = objClient.DownloadString(
-                        $"http://api.ipstack.com/{addr}?access_key=INSERT_KEY_HERE&output=xml");
+                        $"http://api.ipstack.com/{addr}?access_key={key}&output=xml");
                     
                     // Load xml file into object
                     XmlDocument xmlDoc = new XmlDocument();
