@@ -123,8 +123,6 @@ namespace PowerPing
         /// <param name="attrs">Properties of pings to be sent</param>
         /// <param name="resultsUpdateCallback">Method to call after each iteration</param>
         /// <returns>Set of ping results</returns>
-        int scale = 10;
-        bool inverting = false;
         private PingResults SendICMP(PingAttributes attrs, Action<PingResults> resultsUpdateCallback = null)
         {
             PingResults results = new PingResults();
@@ -219,28 +217,12 @@ namespace PowerPing
                     try { results.Sent++; }
                     catch (OverflowException) { results.HasOverflowed = true; }
                     
+                    // Just for artifically testing higher ping response times
                     if (m_Debug) {
-                        // Induce random wait for debugging 
                         Random rnd = new Random();
-                        Thread.Sleep(scale);//rnd.Next(scale));//1500));
-                        //Thread.Sleep(rnd.Next(100));
-                        if (inverting)
-                        {
-                            scale -= 5;
-                        }
-                        else
-                        {
-                            scale += 5;
-                        }
-                        if (scale > 1100)
-                        {
-                            inverting = true;
-                        }
-                        else if (scale == 10)
-                        {
-                            inverting = false;
-                        }
-                        //if (rnd.Next(20) == 1) { throw new SocketException(); }
+                        Thread.Sleep(rnd.Next(10, 400));
+                        m_Debug = false;
+                        if (rnd.Next(3) == 1) { timeouts = 0; timingout = true; throw new SocketException(); }
                     }
 
                     ICMP response;
