@@ -159,11 +159,6 @@ namespace PowerPing
         /// </summary>
         private void Setup()
         {
-            // Determine Xaxis size
-            if (!CompactGraph) {
-                //m_xAxisLength = Console.WindowWidth - 50;
-            }
-
             // Setup graph properties based on graph type
             if (CompactGraph) {
                 m_yAxisLength = m_CompactYAxisLength;
@@ -177,8 +172,8 @@ namespace PowerPing
                 m_yAxisLeftPadding = m_NormalYAxisLeftPadding;
             }
 
+            CheckAndResizeGraph();
             DrawBackground();
-
             DrawYAxisLabels();
 
             m_IsGraphSetup = true;
@@ -189,7 +184,7 @@ namespace PowerPing
         /// I couldn't be asked to try and hack exponential scaling here 
         /// althrough it would probably work better
         /// </summary>
-        void CheckGraphScale(double newResponseTime)
+        private void CheckGraphScale(double newResponseTime)
         {
             int newTime = Convert.ToInt32(newResponseTime);
             int maxTime = m_Scale * m_yAxisLength;
@@ -219,6 +214,19 @@ namespace PowerPing
             // If so scale down
             if (scaleDown && m_Scale != m_StartScale) {
                 m_Scale /= 2;
+            }
+        }
+        /// <summary>
+        /// Checks the current console window size and adjusts the graph if
+        /// required.
+        /// </summary>
+        private void CheckAndResizeGraph()
+        {
+            if (Console.WindowWidth < m_xAxisLength + m_yAxisLeftPadding) {
+                m_xAxisLength = Math.Max(Console.WindowWidth - m_yAxisLeftPadding - 5, 35);
+            }
+            if (Console.WindowHeight < m_yAxisLength) {
+                m_yAxisLength = Math.Max(Console.WindowHeight - 5, 10);
             }
         }
         /// <summary>
@@ -279,35 +287,31 @@ namespace PowerPing
             m_yAxisStart = Console.CursorTop;
 
             // Draw graph y axis 
+            // Hack: this is code that I copied from the y axis generation function
             int maxLines = m_yAxisLength;
             int maxYValue = maxLines * m_Scale;
             int currValue = maxYValue;
             for (int x = maxLines; x != 0; x--)
             {
                 // write current value with m_LegendLeftPadding (slightly less every 2 lines)
-                if (x % 2 == 0)
-                {
+                if (x % 2 == 0) {
                     Console.Write(currValue.ToString().PadLeft(m_yAxisLeftPadding) + " ");
-                }
-                else
-                {
+                } else {
                     Console.Write(new string(' ', m_yAxisLeftPadding + 1));
                 }
 
                 // Add indentation every 2 lines 
-                if (x % 2 == 0)
-                {
+                if (x % 2 == 0) {
                     Console.Write("─");
-                }
-                else
-                {
+                } else {
                     Console.Write(" ");
                 }
 
-                if (x == maxLines)
+                if (x == maxLines) {
                     Console.WriteLine("┐");
-                else
+                } else {
                     Console.WriteLine("┤");
+                }
 
                 currValue -= m_Scale;
             }
