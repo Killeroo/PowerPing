@@ -62,7 +62,7 @@ namespace PowerPing
         private int m_NormalLegendLeftPadding = 13;
         private int m_NormalYAxisLeftPadding = 11;
         private int m_NormalYAxisLength = 20;
-        private int m_NormalXAxisLength = 40;
+        private int m_NormalXAxisLength = 70;
         private int m_CompactLegendLeftPadding = 2;
         private int m_CompactYAxisLeftPadding = 5;
         private int m_CompactYAxisLength = 10;
@@ -243,20 +243,17 @@ namespace PowerPing
                 // This causes us to draw a continous lower line of red when we are continously timing out
                 // Instead of always drawing big red lines, we draw them at either end of the continous zone
                 // I think it will just look nicer, it will cause slightly hackier code but oh well
-                bool drawTimeoutSegment = false; 
+                bool drawTimeoutSegment = false;
 
-                // Alternate colour between columns for clarity
-                if (x % 2 == 0) {
-                    color = ConsoleColor.Gray;
-                } else {
-                    color = ConsoleColor.DarkGray;
-                }
+                // Column type
+                bool timeout = false;
+                bool current = false;
+                
                 if (x == m_ResponseTimes.Count - 1) {
-                    color = ConsoleColor.Green;
+                    current = true;
                 }
-                if (m_ResponseTimes[x] == 0)
-                {
-                    color = ConsoleColor.DarkRed;
+                if (m_ResponseTimes[x] == 0) {
+                    timeout = true;
                 }
 
                 // So to get a timeout segment we peak at the elements ahead and behind to check they are timeouts
@@ -269,7 +266,7 @@ namespace PowerPing
                     drawTimeoutSegment = true;
                 }
 
-                DrawSingleColumn(CreateColumn(m_ResponseTimes[x]), color, drawTimeoutSegment);
+                DrawSingleColumn(CreateColumn(m_ResponseTimes[x]), current, timeout, drawTimeoutSegment);
 
                 Console.CursorLeft++; 
             }
@@ -370,12 +367,11 @@ namespace PowerPing
         /// <summary>
         /// Draw graph bar
         /// </summary>
-        /// <param name="column">Column segments in array</param>
-        private void DrawSingleColumn(string[] column, ConsoleColor color, bool timeoutSegment)
+        private void DrawSingleColumn(string[] column, bool current, bool timeout, bool timeoutSegment)
         {
             // save cursor location
-            int cursorPositionX = Console.CursorLeft;
-            int cursorPositionY = Console.CursorTop;
+            int startingCursorPositionX = Console.CursorLeft;
+            int startingCursorPositionY = Console.CursorTop;
 
             if (timeoutSegment)
             {
@@ -388,42 +384,52 @@ namespace PowerPing
             bool inverting = false;
             foreach (string segment in column)
             {
-                if (color != ConsoleColor.DarkGray && color != ConsoleColor.Gray)
+                
+                // Determine colour of segment
+                if (timeout)
                 {
-
-                    Console.ForegroundColor = color;
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                }
+                else if (current)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                }
+                else if (inverting)
+                {
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    inverting = false;
                 }
                 else
                 {
-                    if (inverting)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Gray;
-                        inverting = false;
-                    }
-                    else
-                    {
-                        inverting = true;
-                        Console.ForegroundColor = ConsoleColor.DarkGray;
-                    }
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    inverting = true;
                 }
 
                 Console.Write(segment);
 
+                // in an attempt to save time by not always accessing 
+                // Console.Cursor positions too many times (doesn't really
+                // make that much of a difference)
+                int cursorPositionLeft = Console.CursorLeft;
+                int cursorPositionTop = Console.CursorTop;
+
                 // Stop over drawing at the top of the graph
-                if (Console.CursorTop == m_yAxisStart)
+                if (cursorPositionTop == m_yAxisStart)
                 {
                     break;
                 }
 
-                if (Console.CursorTop != 0)
+                if (cursorPositionTop != 0)
                 {
-                    Console.CursorTop--;
-                    Console.CursorLeft--;
+                    cursorPositionTop--;
+                    cursorPositionLeft--;
+
+                    Console.SetCursorPosition(cursorPositionLeft, cursorPositionTop);
                 }
             }
 
             // Reset cursor to starting position
-            Console.SetCursorPosition(cursorPositionX, cursorPositionY);
+            Console.SetCursorPosition(startingCursorPositionX, startingCursorPositionY);
         }
         public void DrawYAxisLabels()
         {
