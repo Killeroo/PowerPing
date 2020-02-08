@@ -152,7 +152,6 @@
     <None Include="..\PowerPing\Properties\app.manifest">
       <SubType>Designer</SubType>
     </None>
-    <None Include=".editorconfig" />
     <None Include="..\PowerPing\Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
