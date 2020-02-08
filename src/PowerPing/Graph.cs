@@ -181,6 +181,36 @@ namespace PowerPing
             m_IsGraphSetup = true;
         }
         /// <summary>
+        /// Clear the plotting area of the graph
+        /// </summary>
+        private void Clear()
+        {
+            // save cursor location
+            int cursorPositionX = Console.CursorLeft;
+            int cursorPositionY = Console.CursorTop;
+
+            // Set cursor position to start of plot
+            Console.SetCursorPosition(m_PlotStartX, m_yAxisStart);//m_PlotStartY);
+
+            string blankRow = new string(' ', m_xAxisLength);
+            string bottomRow = new string('─', m_xAxisLength);
+
+            for (int x = 0; x <= m_yAxisLength; x++) { //21; x++) {
+                // Draw black spaces
+                Console.Write(blankRow);
+                Console.CursorLeft = m_PlotStartX;
+                Console.CursorTop = m_PlotStartY - x;
+            }
+
+            // Draw bottom row
+            Console.CursorTop = m_PlotStartY;
+            Console.Write(bottomRow);
+
+            // Reset cursor to starting position
+            Console.SetCursorPosition(cursorPositionX, cursorPositionY);
+        }
+
+        /// <summary>
         /// Checks if the graph Y axis need to be scaled down or up
         /// Scaling is linear, so scale doubles or halves each time.
         /// I couldn't be asked to try and hack exponential scaling here 
@@ -231,6 +261,21 @@ namespace PowerPing
                 m_yAxisLength = Math.Max(Console.WindowHeight - 5, 10);
             }
         }
+
+        /// <summary>
+        /// Add a column to the graph list
+        /// </summary>
+        private void AddResponseToGraph(double responseTime)
+        {
+            m_ResponseTimes.Add(responseTime);
+
+            // If number of columns exceeds x Axis length
+            if (m_ResponseTimes.Count >= m_xAxisLength) {
+                // Remove first element
+                m_ResponseTimes.RemoveAt(0);
+            }
+        }
+
         /// <summary>
         /// Draw all graph coloums/bars
         /// </summary>
@@ -274,6 +319,63 @@ namespace PowerPing
 
             // Reset colour after
             Console.ForegroundColor = ConsoleColor.Gray;
+        }
+        /// <summary>
+        /// Generate bar for graph
+        /// </summary>
+        /// <param name="time">Reply time of packet to plot</param>
+        private string[] CreateColumn(double replyTime)
+        {
+            string[] bar;
+            int count = 0;
+            int time = Convert.ToInt32(replyTime);
+
+            // Work out bar length
+            for (int x = 0; x < time; x = x + m_Scale) {
+                count++;
+            }
+
+            // Scale up or down graph as needed
+            CheckGraphScale(replyTime);
+
+            if (time > m_Scale * m_yAxisLength) {
+                // If reply time over graph Y range draw max size column
+                count = 10;
+            }
+            else if (time == 0) {
+                // If no reply dont draw column
+                string[] timeoutBar = new string[m_yAxisLength + 1];
+                for (int x = 0; x < timeoutBar.Length; x++) {
+                    timeoutBar[x] = "|";
+                }
+                timeoutBar[0] = "┴";
+                return timeoutBar;
+            }
+
+            // Create array to store bar
+            bar = new string[count + 1];
+
+            // Fill bar
+            for (int x = 0; x < count; x = x + 1) { // count + 1
+                bar[x] = FULL_BAR_BLOCK_CHAR;
+            }
+
+            // Replace lowest bar segment
+            bar[0] = "▀";
+
+            // Replace the last segment 
+            // https://stackoverflow.com/a/2705553
+            int nearestMultiple = (int)Math.Round((time / (double)m_Scale), MidpointRounding.AwayFromZero) * m_Scale;
+
+            if (nearestMultiple - time < 0) {
+                bar[bar.Length - 1] = " ";
+            }
+            else {
+                bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
+            }
+
+            return bar;
+
         }
         /// <summary>
         /// Draw graph background
@@ -524,102 +626,6 @@ namespace PowerPing
             // Reset cursor to starting position
             Console.SetCursorPosition(cursorPositionX, cursorPositionY);
         }
-        /// <summary>
-        /// Generate bar for graph
-        /// </summary>
-        /// <param name="time">Reply time of packet to plot</param>
-        private string[] CreateColumn(double replyTime)
-        {
-            string[] bar;
-            int count = 0;
-            int time = Convert.ToInt32(replyTime);
 
-            // Work out bar length
-            for (int x = 0; x < time; x = x +  m_Scale) {
-                count++;
-            }
-
-            // Scale up or down graph as needed
-            CheckGraphScale(replyTime);
-
-            if (time > m_Scale * m_yAxisLength) {
-                // If reply time over graph Y range draw max size column
-                count = 10;
-            } else if (time == 0) {
-                // If no reply dont draw column
-                string[] timeoutBar = new string[m_yAxisLength + 1];
-                for (int x = 0; x < timeoutBar.Length; x++) {
-                    timeoutBar[x] = "|";
-                }
-                timeoutBar[0] = "┴";
-                return timeoutBar;
-            }
-
-            // Create array to store bar
-            bar = new string[count + 1];
-
-            // Fill bar
-            for (int x = 0; x < count; x = x + 1) { // count + 1
-                bar[x] = FULL_BAR_BLOCK_CHAR;
-            }
-
-            // Replace lowest bar segment
-            bar[0] = "▀";
-
-            // Replace the last segment 
-            // https://stackoverflow.com/a/2705553
-            int nearestMultiple = (int)Math.Round((time / (double)m_Scale), MidpointRounding.AwayFromZero) * m_Scale;
-
-            if (nearestMultiple - time < 0) {
-                bar[bar.Length - 1] = " ";
-            } else {
-                bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
-            }
-
-            return bar;
-
-        }
-        /// <summary>
-        /// Add a column to the graph list
-        /// </summary>
-        private void AddResponseToGraph(double responseTime)
-        {
-            m_ResponseTimes.Add(responseTime);
-
-            // If number of columns exceeds x Axis length
-            if (m_ResponseTimes.Count >= m_xAxisLength) {
-                // Remove first element
-                m_ResponseTimes.RemoveAt(0);
-            }
-        }
-        /// <summary>
-        /// Clear the plotting area of the graph
-        /// </summary>
-        private void Clear()
-        {
-            // save cursor location
-            int cursorPositionX = Console.CursorLeft;
-            int cursorPositionY = Console.CursorTop;
-
-            // Set cursor position to start of plot
-            Console.SetCursorPosition(m_PlotStartX, m_yAxisStart);//m_PlotStartY);
-
-            string blankRow = new string(' ', m_xAxisLength);
-            string bottomRow = new string('─', m_xAxisLength);
-
-            for (int x = 0; x <= m_yAxisLength; x++) { //21; x++) {
-                // Draw black spaces
-                Console.Write(blankRow);
-                Console.CursorLeft = m_PlotStartX;
-                Console.CursorTop = m_PlotStartY - x;
-            }
-
-            // Draw bottom row
-            Console.CursorTop = m_PlotStartY;
-            Console.Write(bottomRow);
-
-            // Reset cursor to starting position
-            Console.SetCursorPosition(cursorPositionX, cursorPositionY);
-        }
     }
 }
