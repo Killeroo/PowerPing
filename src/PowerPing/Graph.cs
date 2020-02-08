@@ -91,6 +91,9 @@ namespace PowerPing
             m_PingAttributes.Continous = true;
         }
 
+        /// <summary>
+        /// Draws and sets up graph when it is first run
+        /// </summary>
         public void Start()
         {
             // Disable output
@@ -110,7 +113,6 @@ namespace PowerPing
             // Show cursor
             Console.CursorVisible = true;
         }
-
         /// <summary>
         /// Stores graph drawing loop
         /// </summary>
@@ -238,9 +240,7 @@ namespace PowerPing
             Clear();
             
             for (int x = 0; x < m_ResponseTimes.Count; x++) {
-
-                ConsoleColor color = ConsoleColor.Gray;
-
+                
                 // This causes us to draw a continous lower line of red when we are continously timing out
                 // Instead of always drawing big red lines, we draw them at either end of the continous zone
                 // I think it will just look nicer, it will cause slightly hackier code but oh well
@@ -380,7 +380,6 @@ namespace PowerPing
             bool inverting = false;
             foreach (string segment in column)
             {
-                
                 // Determine colour of segment
                 if (timeout) {
                     Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -418,10 +417,11 @@ namespace PowerPing
             // Reset cursor to starting position
             Console.SetCursorPosition(startingCursorPositionX, startingCursorPositionY);
         }
+        /// <summary>
+        /// Draws the labels for the y axis based on our current m_Scale
+        /// </summary>
         public void DrawYAxisLabels()
         {
-            // TODO: Only redraw if they have changed
-            
             int maxLines = m_yAxisLength;
             int maxYValue = maxLines * m_Scale;
 
@@ -547,8 +547,8 @@ namespace PowerPing
                 count = 10;
             } else if (time == 0) {
                 // If no reply dont draw column
-                string[] timeoutBar = new string[m_yAxisLength];
-                for (int x = 0; x < m_yAxisLength; x++) {
+                string[] timeoutBar = new string[m_yAxisLength + 1];
+                for (int x = 0; x < timeoutBar.Length; x++) {
                     timeoutBar[x] = "|";
                 }
                 timeoutBar[0] = "┴";
