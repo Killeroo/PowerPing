@@ -120,7 +120,8 @@ namespace PowerPing
             RateLimiter displayUpdateLimiter = new RateLimiter(TimeSpan.FromMilliseconds(500));
 
             // This callback will run after each ping iteration
-            void ResultsUpdateCallback(PingResults r) {
+            void ResultsUpdateCallback(PingResults r)
+            {
                 // Make sure we're not updating the display too frequently
                 if (!displayUpdateLimiter.RequestRun()) {
                     return;
@@ -142,8 +143,7 @@ namespace PowerPing
                 DrawColumns();
 
                 // Only draw the y axis labels if the scale has changed
-                if (scalePrevious != m_Scale)
-                {
+                if (scalePrevious != m_Scale) {
                     DrawYAxisLabels();
                 }
 
@@ -165,15 +165,12 @@ namespace PowerPing
             }
 
             // Setup graph properties based on graph type
-            if (CompactGraph)
-            {
+            if (CompactGraph) {
                 m_yAxisLength = m_CompactYAxisLength;
                 m_xAxisLength = m_CompactXAxisLength;
                 m_LegendLeftPadding = m_CompactLegendLeftPadding;
                 m_yAxisLeftPadding = m_CompactYAxisLeftPadding;
-            }
-            else
-            {
+            } else {
                 m_yAxisLength = m_NormalYAxisLength;
                 m_xAxisLength = m_NormalXAxisLength;
                 m_LegendLeftPadding = m_NormalLegendLeftPadding;
@@ -198,8 +195,7 @@ namespace PowerPing
             int maxTime = m_Scale * m_yAxisLength;
 
             // Did we exceed our current scale?
-            if (newTime > maxTime)
-            {
+            if (newTime > maxTime) {
                m_Scale *= 2; // Expand!
 
                 // Recurse back into ourself to check the scale again
@@ -212,19 +208,16 @@ namespace PowerPing
             // Check if any value on the graph is larger than half our current
             // max y axis value
             bool scaleDown = true;
-            foreach (double responseTime in m_ResponseTimes)
-            {
+            foreach (double responseTime in m_ResponseTimes) {
                 int time = Convert.ToInt32(responseTime);
 
-                if (time > maxTime / 2)
-                {
+                if (time > maxTime / 2) {
                     scaleDown = false;
                 }
             }
 
             // If so scale down
-            if (scaleDown && m_Scale != m_StartScale)
-            {
+            if (scaleDown && m_Scale != m_StartScale) {
                 m_Scale /= 2;
             }
         }
@@ -373,8 +366,7 @@ namespace PowerPing
             int startingCursorPositionX = Console.CursorLeft;
             int startingCursorPositionY = Console.CursorTop;
 
-            if (timeoutSegment)
-            {
+            if (timeoutSegment) {
                 Console.Write("─");
 
                 Console.CursorLeft--;
@@ -386,21 +378,14 @@ namespace PowerPing
             {
                 
                 // Determine colour of segment
-                if (timeout)
-                {
+                if (timeout) {
                     Console.ForegroundColor = ConsoleColor.DarkRed;
-                }
-                else if (current)
-                {
+                } else if (current) {
                     Console.ForegroundColor = ConsoleColor.Green;
-                }
-                else if (inverting)
-                {
+                } else if (inverting) {
                     Console.ForegroundColor = ConsoleColor.Gray;
                     inverting = false;
-                }
-                else
-                {
+                } else {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     inverting = true;
                 }
@@ -414,13 +399,11 @@ namespace PowerPing
                 int cursorPositionTop = Console.CursorTop;
 
                 // Stop over drawing at the top of the graph
-                if (cursorPositionTop == m_yAxisStart)
-                {
+                if (cursorPositionTop == m_yAxisStart) {
                     break;
                 }
 
-                if (cursorPositionTop != 0)
-                {
+                if (cursorPositionTop != 0) {
                     cursorPositionTop--;
                     cursorPositionLeft--;
 
@@ -462,18 +445,18 @@ namespace PowerPing
                     Console.Write(" ");
                 }
                 
-                if (x == maxLines)
+                if (x == maxLines) {
                     Console.WriteLine("┐");
-                else 
+                } else {
                     Console.WriteLine("┤");
+                }
 
                 currValue -= m_Scale;
             }
 
             // Draw name of y axis
             // (Don't bother in compact mode, to save space)
-            if (!CompactGraph)
-            {
+            if (!CompactGraph) {
                 Console.CursorTop = m_yAxisStart + maxLines / 2;
                 Console.CursorLeft = 1;
                 Console.WriteLine("Round");
@@ -552,27 +535,21 @@ namespace PowerPing
                 count++;
             }
 
-
+            // Scale up or down graph as needed
             CheckGraphScale(replyTime);
 
             if (time > m_Scale * m_yAxisLength) {
                 // If reply time over graph Y range draw max size column
-
                 count = 10;
             } else if (time == 0) {
                 // If no reply dont draw column
                 string[] timeoutBar = new string[m_yAxisLength];
-                timeoutBar[0] = "┴";
-                for (int x = 1; x < m_yAxisLength; x++)
-                {
+                for (int x = 0; x < m_yAxisLength; x++) {
                     timeoutBar[x] = "|";
                 }
-                return timeoutBar;//new string[] { "─" };
+                timeoutBar[0] = "┴";
+                return timeoutBar;
             }
-
-            // Add special character at top and below
-
-            // Remove all the stuff below
 
             // Create array to store bar
             bar = new string[count + 1];
@@ -588,50 +565,12 @@ namespace PowerPing
             // Replace the last segment 
             // https://stackoverflow.com/a/2705553
             int nearestMultiple = (int)Math.Round((time / (double)m_Scale), MidpointRounding.AwayFromZero) * m_Scale;
-            //Console.WriteLine(nearestMultiple - time);
-            //if (0 < time - (count * m_Scale))
-            //{
 
-            //    //bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
-            //    if (time % m_Scale > m_Scale / 2)
-            //    {
-            //        bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
-            //    }
-            //    else
-            //    {
-            //        bar[bar.Length - 1] = FULL_BAR_BLOCK_CHAR;
-            //    }
-            //} 
-            //else
-            //{
-            //    bar[bar.Length - 1] = " ";
-            //}
-
-            if (nearestMultiple - time < 0)
-            {
+            if (nearestMultiple - time < 0) {
                 bar[bar.Length - 1] = " ";
-            }
-            else
-            {
+            } else {
                 bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
             }
-
-            //Console.WriteLine(time - (count * m_Scale));
-            
-            // m_Scale/2 < Math.Abs(time - (count * m_Scale)))
-            //    bar[bar.Length - 1] = " ";
-            //} 
-            //    else
-            //    {
-            //        bar[bar.Length - 1] = HALF_BAR_BLOCK_CHAR;
-            //    }
-
-            // Work out top character
-            //if (time % m_Scale >= 0) {
-            //    bar[count] = FULL_BAR_BLOCK_CHAR;
-            //} else {
-            //    bar[count] = HALF_BAR_BLOCK_CHAR;
-            //}
 
             return bar;
 
