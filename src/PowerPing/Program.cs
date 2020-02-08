@@ -86,7 +86,12 @@ namespace PowerPing
             Graph g;
             switch (attributes.Operation) {
                 case PingOperation.Listen:
-                    Listen.Start(m_CancellationTokenSource.Token);
+                    // If we find an address then pass it to listen, otherwise start it without one
+                    if (CommandLine.FindAddress(args, ref attributes)) {
+                        Listen.Start(m_CancellationTokenSource.Token, attributes.InputtedAddress);
+                    } else {
+                        Listen.Start(m_CancellationTokenSource.Token);
+                    }
                     break;
                 case PingOperation.Location:
                     Console.WriteLine(Lookup.GetAddressLocationInfo(attributes.InputtedAddress, false));

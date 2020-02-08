@@ -19,30 +19,36 @@ namespace PowerPing
     {
         private static Thread[] listenThreads;
 
-        public static void Start(CancellationToken cancellationToken)
+        public static void Start(CancellationToken cancellationToken, string address = "")
         {
-            IPAddress[] localAddresses = GetLocalAddresses();
-            if (localAddresses == null)
-            {
-                return;
+            IPAddress[] addresses = new IPAddress[0];
+
+            if (address == "") {
+                // If no address is given then listen on all local addresses
+                addresses = GetLocalAddresses();
+                if (addresses == null) {
+                    return;
+                }
+            } else {
+                // Otherwise just listen on the address we are given
+                addresses = new IPAddress[] { IPAddress.Parse(address) };
             }
 
             // Start a listening thread for each ipv4 local address
-            int size = localAddresses.Length;
+            int size = addresses.Length;
             listenThreads = new Thread[size];
-            for (int x = 0; x < localAddresses.Length; x++)
+            for (int x = 0; x < addresses.Length; x++)
             {
                 int index = x;
                 listenThreads[index] = new Thread(() => {
-                    ListenForICMPOnAddress(localAddresses[index]);
+                    ListenForICMPOnAddress(addresses[index]);
                 });
                 listenThreads[index].IsBackground = true;
                 listenThreads[index].Start();
             }
 
             // Wait for cancellation signal
-            while(true)
-            {
+            while(true) {
                 if (cancellationToken.IsCancellationRequested) {
                     return;
                 }
@@ -89,7 +95,8 @@ namespace PowerPing
                 listeningSocket.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 }); // Set SIO_RCVALL flag to socket IO control
                 listeningSocket.ReceiveBufferSize = bufferSize;
             } catch (Exception e) {
-                Display.Error($"General exception occured while trying to create listening socket (Exception: {e.GetType().ToString().Split('.').Last()}");
+                Display.Error($"Exception occured while trying to create listening socket for {address.ToString()} ({e.GetType().ToString().Split('.').Last()})");
+                return;
             }
 
             Display.ListenIntroMsg(address.ToString());
