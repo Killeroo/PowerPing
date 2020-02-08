@@ -243,8 +243,8 @@ Display Options:
     --decimals      [--dp]  number   Num of decimal places to use (0 to 3)
 
 Input Options: 
-    --noinput       [--ni]           Don't ask for user input upon completion (persists)
-    --requireinput  [--ri]           Always ask for user input upon completion (persists)
+    --noinput       [--ni]           Don't ever ask for user input upon finishing
+    --requireinput  [--ri]           Always ask for user input upon completion 
                                      (NOTE: These settings persist between runs so only need
                                       to be used once. However, they will function the same 
                                       if used in every command.)
