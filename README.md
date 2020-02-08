@@ -28,13 +28,6 @@ _Future features:_
 - [Tunnelling](https://en.wikipedia.org/wiki/ICMP_tunnel)
 - [IPv6/ICMPv6](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_version_6)
 
-## Usage: 
-     PowerPing [--?] | [--ex] | [--li] | [--whoami] | [--whois] | [--loc] | [--fl] | [--sc] |
-               [--g] | [--cg] | [--t] [--4] [--rng] [--df] [--rb number] [--b number] 
-               [--c number] [--w number] [-i number] [--in number] [--pt number] [--pc number]
-               [--m "message"] [--s number] [--ti timing] [--sh] [--dm] [--ts] [--nc] [--input] [--sym] [--r]
-               [--nt] [--q] [--res] [--ia] [--l number] [--dp number] [--chk] [--fts] target_name | target_address
-               
 ## Arguments:
     Ping Options:
         --infinite      [--t]            Ping the target until stopped (Ctrl-C to stop)
@@ -73,20 +66,22 @@ _Future features:_
         --limit         [--l]   number   Limits output to just replies (1), requests (2) or summary(3)
         --decimals      [--dp]  number   Num of decimal places to use (0 to 3)
 
-Input Options: 
-    --noinput       [--ni]           Don't ask for user input upon completion (persists)
-    --requireinput  [--ri]           Always ask for user input upon completion (persists)
-                                     (NOTE: These settings persist between runs so only need
-                                      to be used once. However, they will have function the same 
-                                      if used in every command.)
+    Input Options: 
+        --noinput       [--ni]           Don't ask for user input upon completion 
+        --requireinput  [--ri]           Always ask for user input upon completion 
+                                         (NOTE: These settings persist between runs so only need
+                                          to be used once. However, they will function the same 
+                                          if used in every command.)
 
     Modes:
         --scan          [--sc]  address  Network scanning, specify range "127.0.0.1-55"
-        --listen        [--li]  address  Listen for ICMP packets
+                                         (listen command without address will listen on all local network adapters)
         --flood         [--fl]  address  Send high volume of pings to address
         --graph         [--g]   address  Graph view
         --compact       [--cg]  address  Compact graph view
         --location      [--loc] address  Location info for an address
+        --listen        [--li]  address  Listen for ICMP packets on an address
+        --listen        [--li]           Listen for ICMP packets on all local network adapters
         --whois                 address  Whois lookup for an address
         --whoami                         Location info for current host
 

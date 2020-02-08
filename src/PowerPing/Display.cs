@@ -197,15 +197,7 @@ Description:
         Advanced ping utility - Provides geoip querying, ICMP packet
         customization, graphs and result colourization.
 
-Usage: 
-    PowerPing [--?] | [--ex] | [--li] | [--whoami] | [--whois] [--loc] | [--fl] |
-              [--sc] | [--g] | [--cg] | [--t] [--4] [--rng] [--df] [--rb number] 
-              [--b number] [--c number] [--w number] [-i number] [--in number]
-              [--pt number] [--pc number] [--s number] [--m message] [--ti timing] 
-              [--sh] [--dm] [--ts] [--nc] [--input] [--sym] [--r] [--nt] [--q] [--res]
-              [--ia] [--chk] [--l number] [--dp number] [--fts] target_name | target_address
-
-Ping Options:
+Ping Arguments:
     --infinite      [--t]            Ping the target until stopped (Ctrl-C to stop)
     --ipv4          [--4]            Force using IPv4
     --random        [--rng]          Generates random ICMP message
@@ -226,7 +218,7 @@ Ping Options:
                                         2 - Quiet       6 - Insane
                                         3 - Polite      7 - Random
 
-Display Options:
+Display Arguments:
     --shorthand     [--sh]           Show less detailed replies
     --displaymsg    [--dm]           Display ICMP message field contents
     --timestamp     [--ts]           Display timestamps (add 'UTC' for Coordinated Universal Time)
@@ -242,7 +234,7 @@ Display Options:
     --limit         [--l]   number   Limits output to just replies(1), requests(2) or summary(3)
     --decimals      [--dp]  number   Num of decimal places to use (0 to 3)
 
-Input Options: 
+Input Arguments: 
     --noinput       [--ni]           Don't ever ask for user input upon finishing
     --requireinput  [--ri]           Always ask for user input upon completion 
                                      (NOTE: These settings persist between runs so only need
@@ -251,11 +243,12 @@ Input Options:
 
 Modes:
     --scan          [--sc]  address  Network scanning, specify range ""127.0.0.1-55""
-    --listen        [--li]  address  Listen for ICMP packets
     --flood         [--fl]  address  Send high volume of pings to address
     --graph         [--g]   address  Graph view
     --compact       [--cg]  address  Compact graph view
     --location      [--loc] address  Location info for an address
+    --listen        [--li]  address  Listen for ICMP packets on specific address
+    --listen        [--li]           Listen for ICMP packets on all local network adapters
     --whois                 address  Whois lookup for an address
     --whoami                         Location info for current host
 
