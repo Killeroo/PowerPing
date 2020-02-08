@@ -56,7 +56,7 @@ Write-Host "Baseline tests"
 Write-Host "----------------------"
 Run-Test "Test noinput flag works (all tests reply on it)" "-noinput" 1
 Run-Test "Test with just address" "8.8.8.8" 0
-Run-Test "Run with no arguments or address" "" 0
+Run-Test "Run with no arguments or address" " " 0
 Run-Test "Run help argument" "-help" 0
 Run-Test "Test with no address" "-t" 1
 Run-Test "Test with no address (but with agrument paramter" "-c 5" 1
