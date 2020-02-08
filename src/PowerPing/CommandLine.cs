@@ -203,13 +203,23 @@ namespace PowerPing
                             case "-noinput":
                             case "--noinput":// No input mode
                                 Display.NoInput = true;
-                                Properties.Settings.Default.RequireInput = !Properties.Settings.Default.RequireInput;
+                                Properties.Settings.Default.RequireInput = false;
                                 Properties.Settings.Default.Save();
                                 Display.Message(
-                                    "(RequireInput is now " + 
-                                    (Properties.Settings.Default.RequireInput ? 
-                                    "ON, from now on you will be prompted for user input when PowerPing is finished)" 
-                                    : "OFF, you will no longer be prompted for user input when PowerPing is finished)"), 
+                                    "(RequireInput is now OFF, you will no longer be prompted for user input when PowerPing is finished)", 
+                                    ConsoleColor.Cyan);
+                                break;
+                            case "/ri":
+                            case "-ri":
+                            case "--ri":
+                            case "/requireinput":
+                            case "-requireinput":
+                            case "--requireinput":
+                                Display.NoInput = false;
+                                Properties.Settings.Default.RequireInput = true;
+                                Properties.Settings.Default.Save();
+                                Display.Message(
+                                    "(RequireInput is now ON, from now on you will be prompted for user input when PowerPing is finished)",
                                     ConsoleColor.Cyan);
                                 break;
                             case "/decimals":

@@ -58,7 +58,6 @@ _Future features:_
                                             3 - Polite      7 - Random
     
     Display Options:
-        --noinput       [--ni]           Don't ask for user input upon completion (persists)
         --shorthand     [--sh]           Show less detailed replies
         --displaymsg    [--dm]           Display ICMP message contents
         --timestamp     [--ts]           Display timestamps (add 'UTC' for Coordinated Universal Time)
@@ -73,6 +72,13 @@ _Future features:_
         --checksum      [--chk]          Display checksum of packet
         --limit         [--l]   number   Limits output to just replies (1), requests (2) or summary(3)
         --decimals      [--dp]  number   Num of decimal places to use (0 to 3)
+
+Input Options: 
+    --noinput       [--ni]           Don't ask for user input upon completion (persists)
+    --requireinput  [--ri]           Always ask for user input upon completion (persists)
+                                     (NOTE: These settings persist between runs so only need
+                                      to be used once. However, they will have function the same 
+                                      if used in every command.)
 
     Modes:
         --scan          [--sc]  address  Network scanning, specify range "127.0.0.1-55"
