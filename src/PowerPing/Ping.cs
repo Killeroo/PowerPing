@@ -222,7 +222,7 @@ namespace PowerPing
                         Random rnd = new Random();
                         Thread.Sleep(rnd.Next(10, 400));
                         m_Debug = false;
-                        if (rnd.Next(3) == 1) { timeouts = 0; timingout = true; throw new SocketException(); }
+                        if (rnd.Next(3) == 1) { throw new SocketException(); }
                     }
 
                     ICMP response;
