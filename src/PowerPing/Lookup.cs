@@ -81,7 +81,7 @@ namespace PowerPing
 
                 using (WebClient objClient = new WebClient()) {
 
-                    int key = 1234567;
+                    string key = "";
 
                     // Download xml data for address
                     string downloadedText = objClient.DownloadString(
