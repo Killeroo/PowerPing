@@ -4,7 +4,7 @@
 
 Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
 
-![alt text](https://user-images.githubusercontent.com/9999745/50736454-c6964380-11b5-11e9-80c4-adb6a2850a20.png "PowerPing in action")
+![alt text](https://user-images.githubusercontent.com/9999745/74611062-8ad7e800-50f0-11ea-880c-17b7a76a0bab.png "PowerPing in action")
 
 # Downloads
 Stable releases can be downloaded [[here]](https://github.com/Killeroo/PowerPing/releases)
@@ -90,6 +90,15 @@ _Future features:_
         --version    [--v]               Shows version and build information
         --examples   [--ex]              Shows example usage
 
+## License
+
+License under the MIT License:
+
+Copyright (c) 2020 Matthew Carney <matthewcarney64@gmail.com>
+
+### Note: 
+**Requires _Elevated Rights (Admininstrator)_ to Run (more info [here](https://github.com/Killeroo/PowerPing/issues/110))**
+
 ## Examples:
      powerping 8.8.8.8                    -     Send ping to google DNS with default values (3000ms timeout, 5 pings)
      powerping github.com --w 500 --t     -     Send pings indefinitely to github.com with a 500ms timeout
@@ -103,17 +112,9 @@ _Future features:_
 
 ## Screenshots
 
-![alt text](https://user-images.githubusercontent.com/9999745/50736455-c6964380-11b5-11e9-9ac4-4042fcbe450e.png "Powerping's Graph view")
-![alt text](https://user-images.githubusercontent.com/9999745/50736456-c6964380-11b5-11e9-95e8-0357e8cd3d27.png "Powerping Listening for ICMP activity")
-![alt text](https://user-images.githubusercontent.com/9999745/50736458-c6964380-11b5-11e9-9b5c-b4bbcf49f238.png "Powerping showing request packets and sending random ICMP data")
-![alt text](https://user-images.githubusercontent.com/9999745/50736461-c72eda00-11b5-11e9-836c-4beb7dd55f00.png "Showing ping results as ascii symbols")
-![alt text](https://user-images.githubusercontent.com/9999745/50736459-c72eda00-11b5-11e9-87c3-4030033f9fab.png "Powerping using timestamp")
-
-## License
-
-License under the MIT License:
-
-Copyright (c) 2020 Matthew Carney <matthewcarney64@gmail.com>
-
-### Note: 
-**Requires _Elevated Rights (Admininstrator)_ to Run (more info [here](https://github.com/Killeroo/PowerPing/issues/110))**
+![alt text](https://user-images.githubusercontent.com/9999745/74611061-8a3f5180-50f0-11ea-978b-c9fe568c1f8c.png "powerping /g 8.8.8.8")
+![alt text](https://user-images.githubusercontent.com/9999745/74611055-87446100-50f0-11ea-81ac-50551f948437.png "powerping /li")
+![alt text](https://user-images.githubusercontent.com/9999745/74611057-88758e00-50f0-11ea-9259-7b1c8ac83e55.png "powerping /requests /random /displaymsg")
+![alt text](https://user-images.githubusercontent.com/9999745/74611059-89a6bb00-50f0-11ea-9ed4-a2ec4f109dab.png "powerping /t /sym 8.8.8.8")
+![alt text](https://user-images.githubusercontent.com/9999745/74611060-8a3f5180-50f0-11ea-839e-65f9cf03f020.png "powerping /t /sym 1 8.8.8.8")
+![alt text](https://user-images.githubusercontent.com/9999745/74611058-890e2480-50f0-11ea-9ddb-ec79ecf9ce5b.png "powerping 8.8.8.8 /random /fts utc /displaymsg /nocolor /ti polite /t")
