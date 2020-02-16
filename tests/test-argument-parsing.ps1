@@ -4,6 +4,8 @@ $global:FailedTestDescriptions = @()
 
 $script_path = (split-path -parent $MyInvocation.MyCommand.Definition)
 
+# TODO: Need a way to test different argument characters
+
 # Executable locations
 $powerping_x64_location = (split-path -parent $MyInvocation.MyCommand.Definition).ToString() + "\build\x64\PowerPing.exe"
 $powerping_x86_location = (split-path -parent $MyInvocation.MyCommand.Definition).ToString() + "\build\x86\PowerPing.exe"
@@ -113,7 +115,8 @@ Run-Test "Test `'symbols`' with no arguments, and address at end" "-sym 8.8.8.8"
 Run-Test "Test `'symbols`' with no arguments, and address at start" "8.8.8.8 -sym" 0
 Run-Test "Test `'symbols`' with arguments, and address at end" "-sym 1 8.8.8.8" 0
 Run-Test "Test `'symbols`' with arguments, and address at start" "8.8.8.8 -sym 1" 0
-Run-Test "Test `'symbols`' with no arguments and leading argument" "-sym -c 1 8.8.8.8" 0
+Run-Test "Test `'symbols`' with no arguments and leading argument, with address at start" "-sym -c 1 8.8.8.8" 0
+Run-Test "Test `'symbols`' with no arguments and leading argument, with address at end" "8.8.8.8 -sym -c 1 " 0
 Run-Test "Test `'symbols`' with argument and leading argument" "-sym 1 -c 1 8.8.8.8" 0
 Run-Test "Test `'symbols`' with invalid positive theme number" "-sym 1000 8.8.8.8" 0
 Run-Test "Test `'symbols`' with invalid negative theme number" "-sym -1000 8.8.8.8" 0
