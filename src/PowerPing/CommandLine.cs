@@ -79,7 +79,7 @@ namespace PowerPing
                             case "/m":
                             case "-m":
                             case "--m": // Message
-                                if (args[count + 1].Contains("--") || args[count + 1].Contains("//") || args[count + 1].Contains("-")) {
+                                if (args[count + 1].Contains("--") || args[count + 1].Contains('/') || args[count + 1].Contains("-")) {
                                     throw new ArgumentFormatException();
                                 }
                                 attributes.Message = args[count + 1];
@@ -252,10 +252,10 @@ namespace PowerPing
                                     count++;
                                     continue;
                                 }
-                                if ((args[count + 1].Contains("--") 
-                                    || args[count + 1].Contains("//") 
+                                if (args[count + 1].Contains("--") 
+                                    || args[count + 1].Contains('/') 
                                     || args[count + 1].Contains("-") 
-                                    || args[count + 1].Contains("."))) {
+                                    || args[count + 1].Contains(".")) {
                                     count++;
                                     continue;
                                 }
@@ -320,7 +320,9 @@ namespace PowerPing
                             case "/fts":
                             case "-fts":
                             case "--fts": // Display timestamp with date
-                                if (args[count + 1].ToLower() == "utc") {
+                                if (count + 1 > args.Length) {
+                                    Display.ShowFullTimeStamp = true;
+                                } else if (args[count + 1].ToLower() == "utc") {
                                     Display.ShowFullTimeStampUTC = true;
                                 } else {
                                     Display.ShowFullTimeStamp = true;
