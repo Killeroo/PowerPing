@@ -90,6 +90,18 @@ _Future features:_
         --version    [--v]               Shows version and build information
         --examples   [--ex]              Shows example usage
 
+## Example usage:
+     powerping 8.8.8.8                    -     Send ping to google DNS with default values (3000ms timeout, 5 pings)
+     powerping github.com --w 500 --t     -     Send pings indefinitely to github.com with a 500ms timeout     
+	 powerping --w 500 --t github.com     -     Address can also be specified at the end
+     
+     powerping 127.0.0.1 --m Meow         -     Send ping with packet message "Meow" to loopback address
+     powerping 127.0.0.1 --pt 3 --pc 2    -     Send ping with ICMP type 3 (dest unreachable) and code 2
+     
+     powerping 8.8.8.8 /c 5 -w 500 --sh   -     Different argument switches (/, - or --) can be used in any combination
+     powerping google.com /ti Paranoid    -     Sends using the 'Paranoid' timing option
+     powerping google.com /ti 1           -     Same as above
+
 ## License
 
 License under the MIT License:
@@ -98,17 +110,6 @@ Copyright (c) 2020 Matthew Carney <matthewcarney64@gmail.com>
 
 ### Note: 
 **Requires _Elevated Rights (Admininstrator)_ to Run (more info [here](https://github.com/Killeroo/PowerPing/issues/110))**
-
-## Examples:
-     powerping 8.8.8.8                    -     Send ping to google DNS with default values (3000ms timeout, 5 pings)
-     powerping github.com --w 500 --t     -     Send pings indefinitely to github.com with a 500ms timeout
-     
-     powerping 127.0.0.1 --m Meow         -     Send ping with packet message "Meow" to loopback address
-     powerping 127.0.0.1 --pt 3 --pc 2    -     Send ping with ICMP type 3 (dest unreachable) and code 2
-     
-     powerping 8.8.8.8 /c 5 -w 500 --sh   -     Different argument switches (/, - or --) can be used in any combination
-     powerping google.com /ti Paranoid    -     Sends using the 'Paranoid' timing option
-     powerping google.com /ti 1           -     Same as above
 
 ## Screenshots
 
