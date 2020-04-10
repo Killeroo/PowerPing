@@ -89,8 +89,7 @@ namespace PowerPing
 
         // Intro messages
         const string INTRO_ADDR_TXT = "Pinging {0} ";
-        const string INTRO_MSG = "(Packet message \"{0}\") [Type={1} Code={2}] [TTL={3}]";
-        const string INTRO_RNG_MSG = "(*Random packet messages*) [Type={0} Code={1}] [TTL={2}]";
+        const string INTRO_MSG = "with {0} bytes of data [Type={1} Code={2}] [TTL={3}]";
 
         // Flood messages
         const string FLOOD_INTO_TXT = "Flooding {0}...";
@@ -544,10 +543,20 @@ Get location information for 84.23.12.4";
             }
 
             if (!Short) { // Only show extra detail when not in Short mode
-                if (attrs.RandomMsg) {
-                    Console.Write(INTRO_RNG_MSG, attrs.Type, attrs.Code, attrs.Ttl);
+                if (attrs.Size != -1) { 
+                    // If custom packet size has been specified, show that
+                    Console.Write(INTRO_MSG, 
+                        attrs.Size.ToString(), 
+                        attrs.Type, 
+                        attrs.Code, 
+                        attrs.Ttl);
                 } else {
-                    Console.Write(INTRO_MSG, attrs.Message, attrs.Type, attrs.Code, attrs.Ttl);
+                    // Else show how big the string is in bytes
+                    Console.Write(INTRO_MSG, 
+                        ASCIIEncoding.ASCII.GetByteCount(attrs.Message), 
+                        attrs.Type, 
+                        attrs.Code, 
+                        attrs.Ttl);
                 }
             }
 

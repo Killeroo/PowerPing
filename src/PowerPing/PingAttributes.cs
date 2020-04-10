@@ -70,7 +70,7 @@ namespace PowerPing
             // Default attributes
             InputtedAddress = "";
             Address = "";
-            Message = "R U Alive?";
+            Message = "abcdefghijklmnopqrstuvyxyz";
             Interval = 1000;
             Timeout = 3000;
             Count = 5;
