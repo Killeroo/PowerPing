@@ -247,18 +247,16 @@ namespace PowerPing
                                 Display.UseSymbols = true;
                                 Display.SetAsciiReplySymbolsTheme(0);
 
-                                // Change symbols theme if an argument is present
+                                // Check proceeding argument
                                 if (args.Length < count + 1) {
-                                    count++;
                                     continue;
                                 }
-                                if (args[count + 1].Contains("--") 
-                                    || args[count + 1].Contains('/') 
-                                    || args[count + 1].Contains("-") 
+                                if (IsArgument(args[count + 1])
                                     || args[count + 1].Contains(".")) {
-                                    count++;
                                     continue;
                                 }
+
+                                // Change symbols theme if an argument is present
                                 int theme = Convert.ToInt32(args[count + 1]);
                                 Display.SetAsciiReplySymbolsTheme(theme);
                                 break;
@@ -518,7 +516,7 @@ namespace PowerPing
                                 break;
                             default:
                                 // Check for invalid argument 
-                                if ((args[count].Contains("--") || args[count].Contains("/") || args[count].Contains("-"))
+                                if (IsArgument(args[count])
                                     && attributes.Operation != PingOperation.Scan // (ignore if scanning) // TODO: Change this
                                     && (!Helper.IsURL(args[count]) && !Helper.IsIPv4Address(args[count]))) { 
                                     throw new InvalidArgumentException();
@@ -595,6 +593,20 @@ namespace PowerPing
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Checks if a string is a valid argument
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        private static bool IsArgument(string arg)
+        {
+            if (arg.Contains("--") || arg.Contains("/") || arg.Contains("-")) {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 }
