@@ -60,7 +60,7 @@ _Future features:_
         --requests      [--r]            Show request packets
         --notimeouts    [--nt]           Don't display timeout messages
         --quiet         [--q]            No output (only affects normal ping)
-        --resolve       [--res]          Resolve hostname of address from DNS
+        --resolve       [--res]          Resolve hostname of response address from DNS
         --inputaddr     [--ia]           Show input address instead of revolved one
         --checksum      [--chk]          Display checksum of packet
         --limit         [--l]   number   Limits output to just replies (1), requests (2) or summary(3)

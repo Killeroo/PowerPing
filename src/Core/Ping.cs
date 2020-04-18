@@ -267,9 +267,22 @@ namespace PowerPing
                         }
                     } while (response == null);
 
-                    // Display reply packet
                     if (Display.ShowReplies) {
-                        Display.ReplyPacket(response, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.InputtedAddress : responseEP.ToString(), index, replyTime, bytesRead);
+
+                        // Determine what form the response address is going to be displayed in
+                        string responseAddress = responseEP.ToString();
+                        if (Display.UseResolvedAddress) {
+                            // Returned address normally have port at the end (eg 8.8.8.8:0) so we need to remove that before trying to query the DNS 
+                            string responseIP = responseEP.ToString().Split(':')[0];
+
+                            // Resolve the ip and store as the response address
+                            responseAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(responseIP), m_CancellationToken);
+                        } else if (Display.UseInputtedAddress) {
+                            responseAddress = attrs.InputtedAddress;
+                        }
+
+                        Display.ReplyPacket(response, responseAddress, index, replyTime, bytesRead);
+
                     }
 
                     // Store response info

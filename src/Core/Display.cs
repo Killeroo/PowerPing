@@ -227,7 +227,7 @@ Display Arguments:
     --requests      [--r]            Show request packets
     --notimeouts    [--nt]           Don't display timeout messages
     --quiet         [--q]            No output (only affects normal ping)
-    --resolve       [--res]          Resolve hostname of address from DNS
+    --resolve       [--res]          Resolve hostname of response address from DNS
     --inputaddr     [--ia]           Show input address instead of revolved IP address
     --checksum      [--chk]          Display checksum of packet
     --limit         [--l]   number   Limits output to just replies(1), requests(2) or summary(3)
@@ -612,7 +612,7 @@ Get location information for 84.23.12.4";
         /// <param name="address">Reply address</param>
         /// <param name="index">Sequence number</param>
         /// <param name="replyTime">Time taken before reply received in milliseconds</param>
-        public static void ReplyPacket(ICMP packet, String address, int index, TimeSpan replyTime, int bytesRead)
+        public static void ReplyPacket(ICMP packet, string address, int index, TimeSpan replyTime, int bytesRead)
         {
             if (!Display.ShowOutput) {
                 return;
