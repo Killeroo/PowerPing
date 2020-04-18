@@ -54,6 +54,8 @@ namespace PowerPing
             // Show current version info
             //Display.Version();
 
+            Helper.EnableIncomingICMPv4ThroughFirewall();
+
             // Check if no arguments
             if (args.Length == 0) {
                 Display.Help();
