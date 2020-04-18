@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -28,7 +28,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\build\</OutputPath>
+    <OutputPath>..\build\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -38,7 +38,7 @@
   <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
+    <OutputPath>..\debug\x64\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
@@ -47,7 +47,7 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>..\..\build\x64\</OutputPath>
+    <OutputPath>..\build\x64\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -58,7 +58,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
+    <OutputPath>..\debug\x86\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -67,7 +67,7 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>..\..\build\x86\</OutputPath>
+    <OutputPath>..\build\x86\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -89,70 +89,38 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\PowerPing\Display.cs">
-      <Link>Core\Display.cs</Link>
-    </Compile>
-    <Compile Include="..\PowerPing\Exceptions.cs">
-      <Link>Utils\Exceptions.cs</Link>
-    </Compile>
-    <Compile Include="..\PowerPing\Graph.cs">
-      <Link>Commands\Graph.cs</Link>
-    </Compile>
-    <Compile Include="..\PowerPing\ICMP.cs">
-      <Link>Core\ICMP.cs</Link>
-    </Compile>
-    <Compile Include="..\PowerPing\Helper.cs">
-      <Link>Utils\Helper.cs</Link>
-    </Compile>
-    <Compile Include="..\PowerPing\Ping.cs">
-      <Link>Core\Ping.cs</Link>
-    </Compile>
-    <Compile Include="..\PowerPing\PingAttributes.cs">
-      <Link>DataStructures\PingAttributes.cs</Link>
-    </Compile>
-    <Compile Include="..\PowerPing\PingResults.cs">
-      <Link>DataStructures\PingResults.cs</Link>
-    </Compile>
-    <Compile Include="..\PowerPing\Program.cs" />
-    <Compile Include="..\PowerPing\Properties\AssemblyInfo.cs" />
-    <Compile Include="..\PowerPing\Lookup.cs">
-      <Link>Commands\Lookup.cs</Link>
-    </Compile>
-    <Compile Include="..\PowerPing\RateLimiter.cs">
-      <Link>Utils\RateLimiter.cs</Link>
-    </Compile>
-    <Compile Include="..\PowerPing\ExtensionMethods.cs">
-      <Link>Utils\ExtensionMethods.cs</Link>
-    </Compile>
-    <Compile Include="..\PowerPing\CommandLine.cs">
-      <Link>Utils\CommandLine.cs</Link>
-    </Compile>
-    <Compile Include="..\PowerPing\Scan.cs">
-      <Link>Commands\Scan.cs</Link>
-    </Compile>
-    <Compile Include="..\PowerPing\Flood.cs">
-      <Link>Commands\Flood.cs</Link>
-    </Compile>
-    <Compile Include="..\PowerPing\Listen.cs">
-      <Link>Commands\Listen.cs</Link>
-    </Compile>
-    <Compile Include="..\PowerPing\Trace.cs">
-      <Link>Commands\Trace.cs</Link>
-    </Compile>
-    <Compile Include="..\PowerPing\Properties\Settings.Designer.cs">
+    <Compile Include="Program.cs" />
+    <Compile Include="Core\Display.cs"/>
+    <Compile Include="Core\ICMP.cs"/>
+    <Compile Include="Core\Ping.cs"/>
+    <Compile Include="DataStructures\PingAttributes.cs"/>
+    <Compile Include="DataStructures\PingResults.cs"/>
+    <Compile Include="Utils\Helper.cs"/>
+    <Compile Include="Utils\RateLimiter.cs"/>
+    <Compile Include="Utils\ExtensionMethods.cs"/>
+    <Compile Include="Utils\CommandLine.cs"/>
+    <Compile Include="Utils\Exceptions.cs"/>
+    <Compile Include="Commands\Graph.cs"/>
+    <Compile Include="Commands\Scan.cs"/>
+    <Compile Include="Commands\Flood.cs"/>
+    <Compile Include="Commands\Listen.cs"/>
+    <Compile Include="Commands\Trace.cs"/>
+    <Compile Include="Commands\Lookup.cs"/>
+    <Compile Include="Properties\AssemblyInfo.cs"/>
+    <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\PowerPing\Properties\App.config">
+    <None Include="Properties\App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="..\PowerPing\Properties\app.manifest">
+    <None Include="Properties\app.manifest">
       <SubType>Designer</SubType>
     </None>
-    <None Include="..\PowerPing\Properties\Settings.settings">
+    <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
