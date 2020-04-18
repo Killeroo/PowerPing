@@ -79,6 +79,9 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\App.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -90,23 +93,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
-    <Compile Include="Core\Display.cs"/>
-    <Compile Include="Core\ICMP.cs"/>
-    <Compile Include="Core\Ping.cs"/>
-    <Compile Include="DataStructures\PingAttributes.cs"/>
-    <Compile Include="DataStructures\PingResults.cs"/>
-    <Compile Include="Utils\Helper.cs"/>
-    <Compile Include="Utils\RateLimiter.cs"/>
-    <Compile Include="Utils\ExtensionMethods.cs"/>
-    <Compile Include="Utils\CommandLine.cs"/>
-    <Compile Include="Utils\Exceptions.cs"/>
-    <Compile Include="Commands\Graph.cs"/>
-    <Compile Include="Commands\Scan.cs"/>
-    <Compile Include="Commands\Flood.cs"/>
-    <Compile Include="Commands\Listen.cs"/>
-    <Compile Include="Commands\Trace.cs"/>
-    <Compile Include="Commands\Lookup.cs"/>
-    <Compile Include="Properties\AssemblyInfo.cs"/>
+    <Compile Include="Core\Display.cs" />
+    <Compile Include="Core\ICMP.cs" />
+    <Compile Include="Core\Ping.cs" />
+    <Compile Include="DataStructures\PingAttributes.cs" />
+    <Compile Include="DataStructures\PingResults.cs" />
+    <Compile Include="Utils\Helper.cs" />
+    <Compile Include="Utils\RateLimiter.cs" />
+    <Compile Include="Utils\ExtensionMethods.cs" />
+    <Compile Include="Utils\CommandLine.cs" />
+    <Compile Include="Utils\Exceptions.cs" />
+    <Compile Include="Commands\Graph.cs" />
+    <Compile Include="Commands\Scan.cs" />
+    <Compile Include="Commands\Flood.cs" />
+    <Compile Include="Commands\Listen.cs" />
+    <Compile Include="Commands\Trace.cs" />
+    <Compile Include="Commands\Lookup.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -114,10 +117,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Properties\App.manifest" />
     <None Include="Properties\App.config">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Properties\app.manifest">
       <SubType>Designer</SubType>
     </None>
     <None Include="Properties\Settings.settings">
