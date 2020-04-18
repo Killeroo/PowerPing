@@ -34,23 +34,23 @@ namespace PowerPing
     public class PingResults
     {
         // Properties
-        public DateTime StartTime { get; private set; } // Time operation started at 
-        public TimeSpan TotalRunTime { get { return m_OperationTimer.Elapsed; } } // Total ping operation runtime
-        public ulong Sent { get; set; } // Number of sent ping packets
-        public ulong Received { get; set; } // Number of received packets
-        public ulong Lost { get; set; }  // Amount of lost packets
-        public double MaxTime { get; private set; } // Highest ping reply time
-        public double MinTime { get; private set; } // Lowest ping reply time
-        public double AvgTime { get; private set; } // Average reply time
-        public double CurrTime { get; private set; } // Most recent packet response time
-        public ulong ErrorPackets { get; private set; } // Number of Error packet received
-        public ulong GoodPackets { get; private set; } // Number of good replies received
-        public ulong OtherPackets { get; private set; } // Number of other packet types received
-        public bool HasOverflowed { get; set; } // Specifies if any of the results have overflowed
-        public bool ScanWasCanceled { get; set; } // Whether the scan was canceled early
+        public DateTime StartTime { get; private set; }                             // Time operation started at 
+        public TimeSpan TotalRunTime { get { return m_OperationTimer.Elapsed; } }   // Total ping operation runtime
+        public ulong Sent { get; set; }                                             // Number of sent ping packets
+        public ulong Received { get; set; }                                         // Number of received packets
+        public ulong Lost { get; set; }                                             // Amount of lost packets
+        public double MaxTime { get; private set; }                                 // Highest ping reply time
+        public double MinTime { get; private set; }                                 // Lowest ping reply time
+        public double AvgTime { get; private set; }                                 // Average reply time
+        public double CurrTime { get; private set; }                                // Most recent packet response time
+        public ulong ErrorPackets { get; private set; }                             // Number of Error packet received
+        public ulong GoodPackets { get; private set; }                              // Number of good replies received
+        public ulong OtherPackets { get; private set; }                             // Number of other packet types received
+        public bool HasOverflowed { get; set; }                                     // Specifies if any of the results have overflowed
+        public bool ScanWasCanceled { get; set; }                                   // Whether the scan was canceled early
 
-        private readonly Stopwatch m_OperationTimer = new Stopwatch();
-        private double m_ResponseTimeSum = 0; // Sum of all reply times
+        private readonly Stopwatch m_OperationTimer = new Stopwatch();              // Used to time total time spent doing operation
+        private double m_ResponseTimeSum = 0;                                       // Sum of all reply times (used to work out general average 
 
         public PingResults()
         {
