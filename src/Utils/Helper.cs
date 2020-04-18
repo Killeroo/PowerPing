@@ -32,6 +32,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
 
+using NetFwTypeLib;
+
 namespace PowerPing
 {
     /// <summary>
@@ -273,6 +275,51 @@ namespace PowerPing
 
             }
 
+        }
+
+        /// <summary>
+        /// Adds exception in windows firewall to allow all inbound ICMPv4 traffic.
+        /// Certain ICMP traffic (like TTL expiration packets https://github.com/Killeroo/PowerPing/issues/111)
+        /// was being blocked from reaching PowerPing so solution seems to be to add exception in firewall for 
+        /// to allow ICMPv4 packets through to all programs on the system.
+        /// 
+        /// The reason we can't just allow PowerPing through the firewall seems to be because we are a .NET
+        /// exectuable so are actually getting interpretted by .NET framework at run time and not really 
+        /// by out actual application.
+        /// 
+        /// Either we somehow create a self contained .NET framework application (not really possible) or we 
+        /// somehow restrict exception to just .NET framework applications or we allow all ICMPv4 traffic through
+        /// (could be a bit rude to crteate an exception like this without user conscent even if it is just ICMPv4
+        /// traffic) or we can't have access to recieving certain types of packets (which means no traceroute)
+        /// 
+        /// Source: https://stackoverflow.com/a/34018032
+        /// </summary>
+        public static void EnableIncomingICMPv4ThroughFirewall()
+        {
+            // TODO:
+            // 1) Find a way to limit rule to just PowerPing
+            // 2) Check if rule isn't already present 
+            // 3) if no other way to limit traffic is present could add conscent message to ttl and traceroute commands
+
+            // Get current firewall profile and forwarding policies
+            Type tNetFwPolicy2 = Type.GetTypeFromProgID("HNetCfg.FwPolicy2");
+            INetFwPolicy2 fwPolicy2 = (INetFwPolicy2)Activator.CreateInstance(tNetFwPolicy2);
+            var currentProfiles = fwPolicy2.CurrentProfileTypes;
+
+            // Specify new inbound rule
+            INetFwRule2 inboundRule = (INetFwRule2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
+            inboundRule.Name = "PowerPing";
+            inboundRule.Profiles = currentProfiles;
+            inboundRule.Enabled = true;
+            inboundRule.Protocol = 1; // ICMPv4
+            inboundRule.Grouping = "Core Networking";
+            //inboundRule.ApplicationName = "C:\\Program Files(x86)\\Microsoft Visual Studio\\2017\\Community\\Common7\\IDE\\devenv.exe";
+            //inboundRule.ApplicationName = Assembly.GetExecutingAssembly().Location;// Assembly.GetExecutingAssembly().Location;// Path.Combine(Directory.GetCurrentDirectory(), "PowerPing.exe");
+            inboundRule.Description = "Inbound ICMP access for PowerPing.exe to be able to access all incoming ICMP/ping packets";
+
+            // Add new rule to our current policy
+            INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
+            firewallPolicy.Rules.Add(inboundRule);
         }
 
         public static long StopwatchToTimeSpanTicks(long stopwatchTicks)
