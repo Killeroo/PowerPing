@@ -36,9 +36,9 @@ namespace PowerPing
         // Properties
         public DateTime StartTime { get; private set; }                             // Time operation started at 
         public TimeSpan TotalRunTime { get { return m_OperationTimer.Elapsed; } }   // Total ping operation runtime
-        public ulong Sent { get; set; }                                             // Number of sent ping packets
-        public ulong Received { get; set; }                                         // Number of received packets
-        public ulong Lost { get; set; }                                             // Amount of lost packets
+        public ulong Sent { get; private set; }                                     // Number of sent ping packets
+        public ulong Received { get; private set; }                                 // Number of received packets
+        public ulong Lost { get; private set; }                                     // Amount of lost packets
         public double MaxTime { get; private set; }                                 // Highest ping reply time
         public double MinTime { get; private set; }                                 // Lowest ping reply time
         public double AvgTime { get; private set; }                                 // Average reply time
@@ -112,6 +112,31 @@ namespace PowerPing
                 } else {
                     OtherPackets++;
                 }
+            } catch (OverflowException) {
+                HasOverflowed = true;
+            }
+        }
+
+        public void IncrementSentPackets()
+        {
+            try {
+                Sent++;
+            } catch (OverflowException) {
+                HasOverflowed = true;
+            }
+        }
+        public void IncrementReceivedPackets()
+        {
+            try {
+                Received++;
+            } catch (OverflowException) {
+                HasOverflowed = true;
+            }
+        }
+        public void IncrementLostPackets()
+        {
+            try {
+                Lost++;
             } catch (OverflowException) {
                 HasOverflowed = true;
             }

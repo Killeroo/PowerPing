@@ -37,235 +37,260 @@ namespace PowerPing
     /// <summary>
     /// Ping Class, used for constructing and sending ICMP packets.
     /// </summary>
-    class Ping
-    {
-        private static readonly ushort m_SessionId = Helper.GenerateSessionId();
+    class Ping {
+        public Action<PingResults> OnPingResultsUpdateCallback = null;
+
+        private PingAttributes m_PingAttributes = null;
+        private PingResults m_PingResults = null;
+
+        private Socket m_Socket = null;
+        private ICMP m_Packet = null;
+        private int m_PacketSize = 0;
+        private IPEndPoint m_RemoteEndpoint = null;
         private readonly CancellationToken m_CancellationToken;
         private bool m_Debug = false;
 
-        public Ping(CancellationToken cancellationTkn)
+        private ushort m_CurrentSequenceNumber = 0;
+        private int m_CurrentReceiveTimeout = 0;
+
+        private static readonly ushort m_SessionId = Helper.GenerateSessionId();
+
+        public Ping(PingAttributes attributes, CancellationToken cancellationToken, Action<PingResults> resultsUpdateCallback = null) // On results update
         {
-            m_CancellationToken = cancellationTkn;
+            m_PingAttributes = attributes;
+            m_PingResults = new PingResults();
+            m_CancellationToken = cancellationToken;
+            OnPingResultsUpdateCallback = resultsUpdateCallback;
+
+            Setup();
+        }
+        ~Ping()
+        {
+            Cleanup();
         }
 
-        /// <summary>
-        /// Sends a set of ping packets, results are stores within
-        /// Ping.Results of the called object
-        ///
-        /// Acts as a basic wrapper to SendICMP and feeds it a specific
-        /// set of PingAttributes 
-        /// </summary>
-        public PingResults Send(PingAttributes attrs, Action<PingResults> onResultsUpdate = null)
+        private void Setup()
         {
-            // Lookup host if specified
-            if (attrs.InputtedAddress != "") {
-                attrs.Address = Lookup.QueryDNS(attrs.InputtedAddress, attrs.ForceV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
-            }
-
-            Display.PingIntroMsg(attrs);
-
-            if (Display.UseResolvedAddress) {
-                try {
-                    attrs.InputtedAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(attrs.Address), m_CancellationToken);
-                } catch (OperationCanceledException) {
-                    return new PingResults();
-                }
-                if (attrs.InputtedAddress == "") {
-                    // If reverse lookup fails just display whatever is in the address field
-                    attrs.InputtedAddress = attrs.Address; 
-                }
-            }
-
-            // Perform ping operation and store results
-            PingResults results = SendICMP(attrs, onResultsUpdate);
-
-            if (Display.ShowOutput) {
-                Display.PingResults(attrs, results);
-            }
-
-            return results;
+            CreateRawSocket();
+            SetupSocketOptions();
+            CreateRemoteEndpoint();
+            ConstructPacket();
+            UpdatePacketChecksum();
         }
-        /// <summary>
-        /// Creates a raw socket for ping operations.
-        ///
-        /// We have to use raw sockets here as we are using our own 
-        /// implementation of ICMP and only raw sockets will allow us
-        /// to send whatever data we want through it.
-        /// 
-        /// The downside is this is why we need to run as administrator
-        /// but it allows us the greater degree of control over the packets
-        /// that we need
-        /// </summary>
-        /// <param name="family">AddressFamily to use (IP4 or IP6)</param>
-        /// <returns>A raw socket</returns>
-        private static Socket CreateRawSocket(AddressFamily family)
+        private void Cleanup()
         {
-            Socket s = null;
+            // On deconstruction
+            m_Socket.Close();
+            m_Packet = null;
+            m_PingAttributes = null;
+            m_PingResults = null;
+            OnPingResultsUpdateCallback = null;
+        }
+        private void Reset()
+        {
+            m_CurrentSequenceNumber = 0;
+            m_CurrentReceiveTimeout = 0;
+
+            // Wipe any previous results 
+            m_PingResults = new PingResults();
+        }
+
+        private void CreateRawSocket()
+        {
+            // Determine what address family we are using
+            AddressFamily family;
+            ProtocolType protocol;
+            if (m_PingAttributes.UseICMPv4) {
+                family = AddressFamily.InterNetwork;
+                protocol = ProtocolType.Icmp;
+            }
+            else {
+                family = AddressFamily.InterNetworkV6;
+                protocol = ProtocolType.IcmpV6;
+            }
+
+            // Create the raw socket
             try {
-                s = new Socket(family, SocketType.Raw, family == AddressFamily.InterNetwork ? ProtocolType.Icmp : ProtocolType.IcmpV6);
-            } catch (SocketException) {
+                m_Socket = new Socket(family, SocketType.Raw, protocol);
+            }
+            catch (SocketException) {
                 Display.Message("PowerPing uses raw sockets which require Administrative rights to create." + Environment.NewLine +
                                 "(You can find more info at https://github.com/Killeroo/PowerPing/issues/110)", ConsoleColor.Cyan);
                 Helper.ErrorAndExit("Socket cannot be created, make sure you are running as an Administrator and try again.");
             }
-            return s;
         }
-        /// <summary>
-        /// Core ICMP sending method (used by all other functions)
-        /// Takes a set of attributes, performs operation and returns a set of results.
-        ///
-        /// Works specifically by creating a raw socket, creating a ICMP object and
-        /// other socket properties (timeouts, interval etc) using the 
-        /// inputted properties (attrs), then performs ICMP operation 
-        /// before cleaning up and returning results.
-        ///
-        /// </summary>
-        /// <param name="attrs">Properties of pings to be sent</param>
-        /// <param name="resultsUpdateCallback">Method to call after each iteration</param>
-        /// <returns>Set of ping results</returns>
-        private PingResults SendICMP(PingAttributes attrs, Action<PingResults> resultsUpdateCallback = null)
+        private void SetupSocketOptions()
         {
-            PingResults results = new PingResults();
-            ICMP packet = new ICMP();
-            byte[] receiveBuffer = new byte[attrs.RecieveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
-            int bytesRead, packetSize;
+            m_Socket.Ttl = (short)m_PingAttributes.Ttl;
+            m_Socket.DontFragment = m_PingAttributes.DontFragment;
+            m_Socket.ReceiveBufferSize = m_PingAttributes.RecieveBufferSize;
+        }
+        private void CreateRemoteEndpoint()
+        {
+            // Convert our resolved address
+            IPAddress addr = IPAddress.Parse(m_PingAttributes.ResolvedAddress);
 
-            // Convert to IPAddress
-            IPAddress ipAddr = IPAddress.Parse(attrs.Address);
+            // Create the endpoint we are going to recieve from
+            m_RemoteEndpoint = new IPEndPoint(addr, 0);
+        }
+        private void SetSocketReceiveTimeout(int timeout)
+        {
+            if (timeout != m_CurrentReceiveTimeout) {
+                m_Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, timeout);
+                m_CurrentReceiveTimeout = timeout;
+            }
+        }
 
-            // Setup endpoint
-            IPEndPoint iep = new IPEndPoint(ipAddr, 0);
+        private void ConstructPacket()
+        {
+            m_Packet = new ICMP();
+            m_Packet.Type = m_PingAttributes.Type;
+            m_Packet.Code = m_PingAttributes.Code;
 
-            // Setup raw socket 
-            Socket sock = CreateRawSocket(ipAddr.AddressFamily);
+            // Work out what our intial payload will be and add to packet
+            byte[] payload;
+            if (m_PingAttributes.ArtificalMessageSize != -1) {
+                payload = Helper.GenerateByteArray(m_PingAttributes.ArtificalMessageSize);
+            } else {
+                payload = Encoding.ASCII.GetBytes(m_PingAttributes.Message);
+            }
+            UpdatePacketMessage(payload);
 
-            // Helper function to set receive timeout (only if it's changing)
-            int appliedReceiveTimeout = 0;
-            void SetReceiveTimeout(int receiveTimeout) {
-                if (receiveTimeout != appliedReceiveTimeout) {
-                    sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, receiveTimeout);
-                    appliedReceiveTimeout = receiveTimeout;
+            Buffer.BlockCopy(BitConverter.GetBytes(m_SessionId), 0, m_Packet.Message, 0, 2); // Add identifier to ICMP message
+        }
+        private void UpdatePacketSequenceNumber(int sequence)
+        {
+            m_CurrentSequenceNumber = (ushort)sequence;
+            Buffer.BlockCopy(BitConverter.GetBytes(m_CurrentSequenceNumber), 0, m_Packet.Message, 2, 2);
+        }
+        private void UpdatePacketMessage(byte[] message)
+        {
+            // Copy into packet
+            // (NOTE: the offset is where the sequence number and packet identier are stored)
+            Buffer.BlockCopy(message, 0, m_Packet.Message, 4, message.Length);
+
+            // Update message size
+            // TOD: WATCH THIS, IF IT FAILS REMOVE CHECK
+            if (message.Length + 4 != m_PacketSize) {
+                m_Packet.MessageSize = message.Length + 4;
+                m_PacketSize = m_Packet.MessageSize + 4;
+            }
+        }
+        private void UpdatePacketChecksum()
+        {
+            m_Packet.Checksum = 0;
+            UInt16 chksm = m_Packet.GetChecksum();
+            m_Packet.Checksum = chksm;
+        }
+
+        public PingResults Send()
+        {
+            // Wipe any previous results 
+            m_PingResults = new PingResults();
+
+            Reset();
+
+            // Lookup host if specified
+            if (m_PingAttributes.InputtedAddress != "") {
+                AddressFamily family = m_PingAttributes.UseICMPv4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
+                m_PingAttributes.ResolvedAddress = Lookup.QueryDNS(m_PingAttributes.InputtedAddress, family);
+            }
+
+            Display.PingIntroMsg(m_PingAttributes);
+
+            // TODO: I think this part is bullshit, check later
+            if (Display.UseResolvedAddress) {
+                try {
+                    m_PingAttributes.InputtedAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(m_PingAttributes.ResolvedAddress), m_CancellationToken);
+                }
+                catch (OperationCanceledException) {
+                    return new PingResults();
+                }
+                if (m_PingAttributes.InputtedAddress == "") {
+                    // If reverse lookup fails just display whatever is in the address field
+                    m_PingAttributes.InputtedAddress = m_PingAttributes.ResolvedAddress;
                 }
             }
 
-            // Set socket options
-            sock.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.IpTimeToLive, attrs.Ttl);
-            sock.DontFragment = attrs.DontFragment;
-            sock.ReceiveBufferSize = attrs.RecieveBufferSize;
+            // Peroform ping operation
+            SendPacket();
 
-            // Create packet message payload
-            byte[] payload;
-            if (attrs.Size != -1) {
-                payload = Helper.GenerateByteArray(attrs.Size);
-            } else {
-                payload = Encoding.ASCII.GetBytes(attrs.Message);
+            return m_PingResults;
+        }
+        public PingResults Send(string address)
+        {
+            m_PingAttributes.InputtedAddress = address;
+            return Send();
+        }
+        public PingResults Send(PingAttributes attributes)
+        {
+            if (attributes != m_PingAttributes) {
+                // Replace attributes if they are different
+                m_PingAttributes = attributes;
+
+                // Setup everything again
+                Setup();
             }
 
-            // Construct our ICMP packet
-            packet.Type = attrs.Type;
-            packet.Code = attrs.Code;
-            Buffer.BlockCopy(BitConverter.GetBytes(m_SessionId), 0, packet.Message, 0, 2); // Add identifier to ICMP message
-            Buffer.BlockCopy(payload, 0, packet.Message, 4, payload.Length); // Add text into ICMP message
-            packet.MessageSize = payload.Length + 4;
-            packetSize = packet.MessageSize + 4;
+            return Send();
+        }
+
+        private void SendPacket()
+        {
+            byte[] receiveBuffer = new byte[m_PingAttributes.RecieveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
+            int bytesRead = 0;
 
             // Sending loop
-            for (int index = 1; attrs.Continous || index <= attrs.Count; index++) {
+            for (int index = 1; m_PingAttributes.Continous || index <= m_PingAttributes.Count; index++) {
 
                 if (index != 1) {
                     // Wait for set interval before sending again or cancel if requested
-                    if (m_CancellationToken.WaitHandle.WaitOne(attrs.Interval)) {
+                    if (m_CancellationToken.WaitHandle.WaitOne(m_PingAttributes.Interval)) {
                         break;
                     }
 
-                    // Generate random interval when RandomTimings flag is set
-                    if (attrs.RandomTiming) {
-                        attrs.Interval = Helper.RandomInt(5000, 100000);
+                    // Generate random interval when RandomTiming flag is set
+                    if (m_PingAttributes.RandomTiming) {
+                        m_PingAttributes.Interval = Helper.RandomInt(5000, 100000);
                     }
                 }
 
-                // Include sequence number in ping message
-                ushort sequenceNum = (ushort)index;
-                Buffer.BlockCopy(BitConverter.GetBytes(sequenceNum), 0, packet.Message, 2, 2);
-
-                // Fill ICMP message field
-                if (attrs.RandomMsg) {
-                    payload = Encoding.ASCII.GetBytes(Helper.RandomString());
-                    Buffer.BlockCopy(payload, 0, packet.Message, 4, payload.Length);
+                // Update packet before sending
+                UpdatePacketSequenceNumber(index);
+                if (m_PingAttributes.RandomMessage) {
+                    UpdatePacketMessage(Encoding.ASCII.GetBytes(Helper.RandomString()));
                 }
-
-                // Update packet checksum
-                packet.Checksum = 0;
-                UInt16 chksm = packet.GetChecksum();
-                packet.Checksum = chksm;
+                UpdatePacketChecksum();
 
                 try {
 
                     // Show request packet
                     if (Display.ShowRequests) {
-                        Display.RequestPacket(packet, Display.UseInputtedAddress | Display.UseResolvedAddress ? attrs.InputtedAddress : attrs.Address, index);
+                        Display.RequestPacket(m_Packet, Display.UseInputtedAddress | Display.UseResolvedAddress ? m_PingAttributes.InputtedAddress : m_PingAttributes.ResolvedAddress, index);
                     }
 
                     // If there were extra responses from a prior request, ignore them
-                    while (sock.Available != 0) {
-                        bytesRead = sock.Receive(receiveBuffer);
+                    while (m_Socket.Available != 0) {
+                        bytesRead = m_Socket.Receive(receiveBuffer);
                     }
 
                     // Send ping request
-                    sock.SendTo(packet.GetBytes(), packetSize, SocketFlags.None, iep); // Packet size = message field + 4 header bytes
+                    m_Socket.SendTo(m_Packet.GetBytes(), m_PacketSize, SocketFlags.None, m_RemoteEndpoint); // Packet size = message field + 4 header bytes
                     long requestTimestamp = Stopwatch.GetTimestamp();
-                    try { results.Sent++; }
-                    catch (OverflowException) { results.HasOverflowed = true; }
-                    
+                    m_PingResults.IncrementSentPackets();
+
                     // Just for artifically testing higher ping response times
                     if (m_Debug) {
                         Random rnd = new Random();
                         Thread.Sleep(rnd.Next(10, 400));
-                        m_Debug = false;
                         if (rnd.Next(3) == 1) { throw new SocketException(); }
                     }
 
-                    ICMP response;
-                    EndPoint responseEP = iep;
+                    // Try and recieve a packet
+                    ICMP response = null;
+                    EndPoint responseEP = m_RemoteEndpoint;
                     TimeSpan replyTime = TimeSpan.Zero;
-                    do {
-                        // Cancel if requested
-                        m_CancellationToken.ThrowIfCancellationRequested();
-
-                        // Set receive timeout, limited to 250ms so we don't block very long without checking for
-                        // cancellation. If the requested ping timeout is longer, we will wait some more in subsequent
-                        // loop iterations until the requested ping timeout is reached.
-                        int remainingTimeout = (int)Math.Ceiling(attrs.Timeout - replyTime.TotalMilliseconds);
-                        if (remainingTimeout <= 0) {
-                            throw new SocketException();
-                        }
-                        SetReceiveTimeout(Math.Min(remainingTimeout, 250));
-
-                        // Wait for response
-                        try {
-                            bytesRead = sock.ReceiveFrom(receiveBuffer, ref responseEP);
-                        } catch (SocketException) {
-                            bytesRead = 0;
-                        }
-                        replyTime = new TimeSpan(Helper.StopwatchToTimeSpanTicks(Stopwatch.GetTimestamp() - requestTimestamp));
-
-                        if (bytesRead == 0) {
-                            response = null;
-                        } else {
-                            // Store reply packet
-                            response = new ICMP(receiveBuffer, bytesRead);
-
-                            // If we sent an echo and receive a response with a different identifier or sequence
-                            // number, ignore it (it could correspond to an older request that timed out)
-                            if (packet.Type == 8 && response.Type == 0) {
-                                ushort responseSessionId = BitConverter.ToUInt16(response.Message, 0);
-                                ushort responseSequenceNum = BitConverter.ToUInt16(response.Message, 2);
-                                if (responseSessionId != m_SessionId || responseSequenceNum != sequenceNum) {
-                                    response = null;
-                                }
-                            }
-                        }
-                    } while (response == null);
+                    RecievePacket(ref response, ref responseEP, ref replyTime, ref bytesRead, requestTimestamp);
 
                     if (Display.ShowReplies) {
 
@@ -277,8 +302,9 @@ namespace PowerPing
 
                             // Resolve the ip and store as the response address
                             responseAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(responseIP), m_CancellationToken);
-                        } else if (Display.UseInputtedAddress) {
-                            responseAddress = attrs.InputtedAddress;
+                        }
+                        else if (Display.UseInputtedAddress) {
+                            responseAddress = m_PingAttributes.InputtedAddress;
                         }
 
                         Display.ReplyPacket(response, responseAddress, index, replyTime, bytesRead);
@@ -286,59 +312,101 @@ namespace PowerPing
                     }
 
                     // Store response info
-                    try { results.Received++; }
-                    catch (OverflowException) { results.HasOverflowed = true; }
-                    results.CountPacketType(response.Type);
-                    results.SaveResponseTime(replyTime.TotalMilliseconds);
-                    
-                    if (attrs.BeepLevel == 2) {
+                    m_PingResults.IncrementReceivedPackets();
+                    m_PingResults.CountPacketType(response.Type);
+                    m_PingResults.SaveResponseTime(replyTime.TotalMilliseconds);
+
+                    if (m_PingAttributes.BeepMode == 2) {
                         try { Console.Beep(); }
                         catch (Exception) { } // Silently continue if Console.Beep errors
                     }
-                } catch (IOException) {
+                }
+                catch (IOException) {
 
                     if (Display.ShowOutput) {
                         Display.Error("General transmit error");
                     }
-                    results.SaveResponseTime(-1);
-                    try { results.Lost++; }
-                    catch (OverflowException) { results.HasOverflowed = true; }
+                    m_PingResults.SaveResponseTime(-1);
+                    m_PingResults.IncrementLostPackets();
 
-                } catch (SocketException) {
+                }
+                catch (SocketException) {
 
                     Display.Timeout(index);
-                    if (attrs.BeepLevel == 1) {
+                    if (m_PingAttributes.BeepMode == 1) {
                         try { Console.Beep(); }
-                        catch (Exception) { results.HasOverflowed = true; }
+                        catch (Exception) { }
                     }
-                    results.SaveResponseTime(-1);
-                    try { results.Lost++; }
-                    catch (OverflowException) { results.HasOverflowed = true; }
+                    m_PingResults.SaveResponseTime(-1);
+                    m_PingResults.IncrementLostPackets();
 
-                } catch (OperationCanceledException) {
+                }
+                catch (OperationCanceledException) {
 
-                    results.ScanWasCanceled = true;
+                    m_PingResults.ScanWasCanceled = true;
                     break;
 
-                } catch (Exception) {
+                }
+                catch (Exception) {
 
                     if (Display.ShowOutput) {
                         Display.Error("General error occured");
                     }
-                    results.SaveResponseTime(-1);
-                    try { results.Lost++; }
-                    catch (OverflowException) { results.HasOverflowed = true; }
+                    m_PingResults.SaveResponseTime(-1);
+                    m_PingResults.IncrementLostPackets();
 
                 }
 
                 // Run callback (if provided) to notify of updated results
-                resultsUpdateCallback?.Invoke(results);
+                OnPingResultsUpdateCallback?.Invoke(m_PingResults);
             }
 
-            // Clean up
-            sock.Close();
+        }
+        private void RecievePacket(ref ICMP response, ref EndPoint responseEndPoint, ref TimeSpan replyTime, ref int bytesRead, long requestTimestamp)
+        {
+            byte[] receiveBuffer = new byte[m_PingAttributes.RecieveBufferSize];
 
-            return results;
+            // Wait for request
+            do {
+                // Cancel if requested
+                m_CancellationToken.ThrowIfCancellationRequested();
+
+                // Set receive timeout, limited to 250ms so we don't block very long without checking for
+                // cancellation. If the requested ping timeout is longer, we will wait some more in subsequent
+                // loop iterations until the requested ping timeout is reached.
+                int remainingTimeout = (int)Math.Ceiling(m_PingAttributes.Timeout - replyTime.TotalMilliseconds);
+                if (remainingTimeout <= 0) {
+                    throw new SocketException();
+                }
+                SetSocketReceiveTimeout(Math.Min(remainingTimeout, 250));
+
+                // Wait for response
+                try {
+                    bytesRead = m_Socket.ReceiveFrom(receiveBuffer, ref responseEndPoint);
+                }
+                catch (SocketException) {
+                    bytesRead = 0;
+                }
+                replyTime = new TimeSpan(Helper.StopwatchToTimeSpanTicks(Stopwatch.GetTimestamp() - requestTimestamp));
+
+                if (bytesRead == 0) {
+                    response = null;
+                }
+                else {
+                    // Store reply packet
+                    response = new ICMP(receiveBuffer, bytesRead);
+
+                    // If we sent an echo and receive a response with a different identifier or sequence
+                    // number, ignore it (it could correspond to an older request that timed out)
+                    if (m_Packet.Type == 8 && response.Type == 0) {
+                        ushort responseSessionId = BitConverter.ToUInt16(response.Message, 0);
+                        ushort responseSequenceNum = BitConverter.ToUInt16(response.Message, 2);
+                        if (responseSessionId != m_SessionId || responseSequenceNum != m_CurrentSequenceNumber) {
+                            response = null;
+                        }
+                    }
+                }
+            } while (response == null);
         }
     }
 }

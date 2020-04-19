@@ -47,7 +47,7 @@ namespace PowerPing
                                     Display.Message("Invalid beep level, please use a number between 0 & 2");
                                     throw new ArgumentFormatException();
                                 }
-                                attributes.BeepLevel = level;
+                                attributes.BeepMode = level;
                                 break;
                             case "/count":
                             case "-count":
@@ -143,11 +143,11 @@ namespace PowerPing
                             case "/4":
                             case "-4":
                             case "--4": // Force ping with IPv4
-                                if (attributes.ForceV6) {
+                                if (attributes.UseICMPv6) {
                                     // Reset IPv6 force if already set
-                                    attributes.ForceV6 = false;
+                                    attributes.UseICMPv6 = false;
                                 }
-                                attributes.ForceV4 = true;
+                                attributes.UseICMPv4 = true;
                                 break;
                             case "/ipv6":
                             case "-ipv6":
@@ -155,11 +155,11 @@ namespace PowerPing
                             case "/6":
                             case "-6":
                             case "--6": // Force ping with IPv6
-                                if (attributes.ForceV4) {
+                                if (attributes.UseICMPv4) {
                                     // Reset IPv4 force if already set
-                                    attributes.ForceV4 = false;
+                                    attributes.UseICMPv4 = false;
                                 }
-                                attributes.ForceV6 = true;
+                                attributes.UseICMPv6 = true;
                                 break;
                             case "/help":
                             case "-help":
@@ -266,7 +266,7 @@ namespace PowerPing
                             case "/rng":
                             case "-rng":
                             case "--rng":
-                                attributes.RandomMsg = true;
+                                attributes.RandomMessage = true;
                                 break;
                             case "/limit":
                             case "-limit":
@@ -371,7 +371,7 @@ namespace PowerPing
                                     case "7":
                                     case "random":
                                         attributes.RandomTiming = true;
-                                        attributes.RandomMsg = true;
+                                        attributes.RandomMessage = true;
                                         attributes.Interval = Helper.RandomInt(5000, 100000);
                                         attributes.Timeout = 15000;
                                         break;
@@ -451,7 +451,7 @@ namespace PowerPing
                             case "--s":
                                 int size = Convert.ToInt32(args[count + 1]);
                                 if (size < 100000) {
-                                    attributes.Size = size;
+                                    attributes.ArtificalMessageSize = size;
                                 } else {
                                     throw new ArgumentFormatException();
                                 }

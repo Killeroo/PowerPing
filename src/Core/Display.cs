@@ -537,16 +537,16 @@ Get location information for 84.23.12.4";
             // Construct string
             Console.WriteLine();
             Console.Write(INTRO_ADDR_TXT, attrs.InputtedAddress);
-            if (!String.Equals(attrs.InputtedAddress, attrs.Address)) {
+            if (!String.Equals(attrs.InputtedAddress, attrs.ResolvedAddress)) {
                 // Only show resolved address if inputted address and resolved address are different
-                Console.Write("[{0}] ", attrs.Address);
+                Console.Write("[{0}] ", attrs.ResolvedAddress);
             }
 
             if (!Short) { // Only show extra detail when not in Short mode
-                if (attrs.Size != -1) { 
+                if (attrs.ArtificalMessageSize != -1) { 
                     // If custom packet size has been specified, show that
                     Console.Write(INTRO_MSG, 
-                        attrs.Size.ToString(), 
+                        attrs.ArtificalMessageSize.ToString(), 
                         attrs.Type, 
                         attrs.Code, 
                         attrs.Ttl);
@@ -573,7 +573,7 @@ Get location information for 84.23.12.4";
         /// <summary>
         /// Display ICMP packet that have been sent
         /// </summary>
-        public static void RequestPacket(ICMP packet, String address, int index)
+        public static void RequestPacket(ICMP packet, string address, int index)
         {
             if (!Display.ShowOutput) {
                 return;
@@ -795,7 +795,7 @@ Get location information for 84.23.12.4";
             double percent = (double)results.Lost / results.Sent;
             percent = Math.Round(percent * 100, 2);
             Console.WriteLine();
-            Console.WriteLine(RESULTS_HEADER, attrs.Address);
+            Console.WriteLine(RESULTS_HEADER, attrs.ResolvedAddress);
 
             //   General: Sent [ 0 ], Recieved [ 0 ], Lost [ 0 ] (0% loss)
             Console.Write(RESULTS_GENERAL_TAG + RESULTS_SENT_TXT);
@@ -972,7 +972,7 @@ Get location information for 84.23.12.4";
         /// <summary>
         /// Display a general message
         /// </summary>
-        public static void Message(String msg, ConsoleColor color = ConsoleColor.DarkGray, bool newline = true)
+        public static void Message(string msg, ConsoleColor color = ConsoleColor.DarkGray, bool newline = true)
         {
             if (color == ConsoleColor.DarkGray) {
                 color = DefaultForegroundColor; // Use default foreground color if gray is being used

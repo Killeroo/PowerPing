@@ -28,6 +28,7 @@ SOFTWARE.
 
 using System;
 using System.Linq;
+using System.Net.Sockets;
 using System.Threading;
 
 namespace PowerPing
@@ -45,7 +46,7 @@ namespace PowerPing
         {
             // Local variables 
             PingAttributes attributes = new PingAttributes();
-            attributes.Address = "";
+            attributes.ResolvedAddress = "";
 
             // Setup console
             Display.DefaultForegroundColor = Console.ForegroundColor;
@@ -74,6 +75,9 @@ namespace PowerPing
                 }
             }
 
+            // Perform DNS lookup on inputted address
+            attributes.ResolvedAddress = Lookup.QueryDNS(attributes.InputtedAddress, attributes.UseICMPv4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+
             // Add Control C event handler 
             if (attributes.Operation != PingOperation.Whoami &&
                 attributes.Operation != PingOperation.Location &&
@@ -82,7 +86,7 @@ namespace PowerPing
             }
 
             // Select correct function using opMode 
-            Ping p = new Ping(m_CancellationTokenSource.Token);
+            Ping p = new Ping(attributes, m_CancellationTokenSource.Token);
             Graph g;
             switch (attributes.Operation) {
                 case PingOperation.Listen:
@@ -121,7 +125,7 @@ namespace PowerPing
                     break;
                 case PingOperation.Normal:
                     // Send ping normally
-                    p.Send(attributes);
+                    p.Send();
                     break;
                 default:
                     Helper.ErrorAndExit("Could not determine ping operation");
