@@ -121,6 +121,20 @@ Run-Test "Test `'symbols`' with argument and leading argument" "-sym 1 -c 1 8.8.
 Run-Test "Test `'symbols`' with invalid positive theme number" "-sym 1000 8.8.8.8" 0
 Run-Test "Test `'symbols`' with invalid negative theme number" "-sym -1000 8.8.8.8" 0
 Run-Test "Test `'symbols`' with valid theme number" "-sym 0 8.8.8.8" 0
+Run-Test "Test `'timestamp`' with no parameter at start" "-ts 8.8.8.8" 0
+Run-Test "Test `'timestamp`' with no parameter at end" "8.8.8.8 -ts" 0
+Run-Test "Test `'timestamp`' with valid parameter at start" "-ts utc 8.8.8.8" 0 
+Run-Test "Test `'timestamp`' with valid parameter at end" "8.8.8.8 -ts utc" 0 
+Run-Test "Test `'timestamp`' with invalid parameter at start" "-ts putc 8.8.8.8" 0 
+Run-Test "Test `'timestamp`' with invalid parameter at end" "8.8.8.8 -ts putc " 0 
+Run-Test "Test `'timestamp`' with no parameter and leading argument" "8.8.8.8 -ts -c 2" 0 
+Run-Test "Test `'fulltimestamp`' with no parameter at start" "-fts 8.8.8.8" 0
+Run-Test "Test `'fulltimestamp`' with no parameter at end" "8.8.8.8 -fts" 0
+Run-Test "Test `'fulltimestamp`' with valid parameter at start" "-fts utc 8.8.8.8" 0 
+Run-Test "Test `'fulltimestamp`' with valid parameter at end" "8.8.8.8 -fts utc" 0 
+Run-Test "Test `'fulltimestamp`' with invalid parameter at start" "-fts putc 8.8.8.8" 0 
+Run-Test "Test `'fulltimestamp`' with invalid parameter at end" "8.8.8.8 -fts putc " 0 
+Run-Test "Test `'fulltimestamp`' with no parameter and leading argument" "8.8.8.8 -fts -c 2" 0 
 
 Write-Host
 Write-Host "Address location tests"

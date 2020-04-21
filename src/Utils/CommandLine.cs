@@ -306,7 +306,10 @@ namespace PowerPing
                             case "/ts":
                             case "-ts":
                             case "--ts": // Display timestamp
-                                if (args[count + 1].ToLower() == "utc") {
+                                if (count + 1 >= args.Length 
+                                    || IsArgument(args[count + 1])) {
+                                    Display.ShowFullTimeStamp = true;
+                                } else if (args[count + 1].ToLower() == "utc") {
                                     Display.ShowtimeStampUTC = true;
                                 } else {
                                     Display.ShowTimeStamp = true;
@@ -318,7 +321,8 @@ namespace PowerPing
                             case "/fts":
                             case "-fts":
                             case "--fts": // Display timestamp with date
-                                if (count + 1 > args.Length) {
+                                if (count + 1 >= args.Length
+                                    || IsArgument(args[count + 1])) {
                                     Display.ShowFullTimeStamp = true;
                                 } else if (args[count + 1].ToLower() == "utc") {
                                     Display.ShowFullTimeStampUTC = true;
