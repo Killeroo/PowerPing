@@ -69,6 +69,58 @@ namespace PowerPing
             Cleanup();
         }
 
+        public PingResults Send(PingAttributes attributes)
+        {
+            if (attributes != m_PingAttributes) {
+                // Replace attributes if they are different
+                m_PingAttributes = attributes;
+
+                // Setup everything again
+                Setup();
+            }
+
+            return Send();
+        }
+        public PingResults Send(string address)
+        {
+            m_PingAttributes.InputtedAddress = address;
+            return Send();
+        }
+        public PingResults Send()
+        {
+            // Wipe any previous results 
+            m_PingResults = new PingResults();
+
+            Reset();
+
+            // Lookup host if specified
+            if (m_PingAttributes.InputtedAddress != "") {
+                AddressFamily family = m_PingAttributes.UseICMPv4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
+                m_PingAttributes.ResolvedAddress = Lookup.QueryDNS(m_PingAttributes.InputtedAddress, family);
+            }
+
+            Display.PingIntroMsg(m_PingAttributes);
+
+            // TODO: I think this part is bullshit, check later
+            if (Display.UseResolvedAddress) {
+                try {
+                    m_PingAttributes.InputtedAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(m_PingAttributes.ResolvedAddress), m_CancellationToken);
+                }
+                catch (OperationCanceledException) {
+                    return new PingResults();
+                }
+                if (m_PingAttributes.InputtedAddress == "") {
+                    // If reverse lookup fails just display whatever is in the address field
+                    m_PingAttributes.InputtedAddress = m_PingAttributes.ResolvedAddress;
+                }
+            }
+
+            // Peroform ping operation
+            SendPacket();
+
+            return m_PingResults;
+        }
+
         private void Setup()
         {
             CreateRawSocket();
@@ -123,7 +175,7 @@ namespace PowerPing
         {
             m_Socket.Ttl = (short)m_PingAttributes.Ttl;
             m_Socket.DontFragment = m_PingAttributes.DontFragment;
-            m_Socket.ReceiveBufferSize = m_PingAttributes.RecieveBufferSize;
+            m_Socket.ReceiveBufferSize = m_PingAttributes.ReceiveBufferSize;
         }
         private void CreateRemoteEndpoint()
         {
@@ -183,61 +235,9 @@ namespace PowerPing
             m_Packet.Checksum = chksm;
         }
 
-        public PingResults Send()
-        {
-            // Wipe any previous results 
-            m_PingResults = new PingResults();
-
-            Reset();
-
-            // Lookup host if specified
-            if (m_PingAttributes.InputtedAddress != "") {
-                AddressFamily family = m_PingAttributes.UseICMPv4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
-                m_PingAttributes.ResolvedAddress = Lookup.QueryDNS(m_PingAttributes.InputtedAddress, family);
-            }
-
-            Display.PingIntroMsg(m_PingAttributes);
-
-            // TODO: I think this part is bullshit, check later
-            if (Display.UseResolvedAddress) {
-                try {
-                    m_PingAttributes.InputtedAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(m_PingAttributes.ResolvedAddress), m_CancellationToken);
-                }
-                catch (OperationCanceledException) {
-                    return new PingResults();
-                }
-                if (m_PingAttributes.InputtedAddress == "") {
-                    // If reverse lookup fails just display whatever is in the address field
-                    m_PingAttributes.InputtedAddress = m_PingAttributes.ResolvedAddress;
-                }
-            }
-
-            // Peroform ping operation
-            SendPacket();
-
-            return m_PingResults;
-        }
-        public PingResults Send(string address)
-        {
-            m_PingAttributes.InputtedAddress = address;
-            return Send();
-        }
-        public PingResults Send(PingAttributes attributes)
-        {
-            if (attributes != m_PingAttributes) {
-                // Replace attributes if they are different
-                m_PingAttributes = attributes;
-
-                // Setup everything again
-                Setup();
-            }
-
-            return Send();
-        }
-
         private void SendPacket()
         {
-            byte[] receiveBuffer = new byte[m_PingAttributes.RecieveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
+            byte[] receiveBuffer = new byte[m_PingAttributes.ReceiveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
             int bytesRead = 0;
 
             // Sending loop
@@ -290,7 +290,7 @@ namespace PowerPing
                     ICMP response = null;
                     EndPoint responseEP = m_RemoteEndpoint;
                     TimeSpan replyTime = TimeSpan.Zero;
-                    RecievePacket(ref response, ref responseEP, ref replyTime, ref bytesRead, requestTimestamp);
+                    ReceivePacket(ref response, ref responseEP, ref replyTime, ref bytesRead, requestTimestamp);
 
                     if (Display.ShowReplies) {
 
@@ -362,9 +362,9 @@ namespace PowerPing
             }
 
         }
-        private void RecievePacket(ref ICMP response, ref EndPoint responseEndPoint, ref TimeSpan replyTime, ref int bytesRead, long requestTimestamp)
+        private void ReceivePacket(ref ICMP response, ref EndPoint responseEndPoint, ref TimeSpan replyTime, ref int bytesRead, long requestTimestamp)
         {
-            byte[] receiveBuffer = new byte[m_PingAttributes.RecieveBufferSize];
+            byte[] receiveBuffer = new byte[m_PingAttributes.ReceiveBufferSize];
 
             // Wait for request
             do {

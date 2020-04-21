@@ -426,7 +426,7 @@ namespace PowerPing
                             case "--rb":
                                 int recvbuff = Convert.ToInt32(args[count + 1]);
                                 if (recvbuff < 65000) {
-                                    attributes.RecieveBufferSize = recvbuff;
+                                    attributes.ReceiveBufferSize = recvbuff;
                                 } else {
                                     throw new ArgumentFormatException();
                                 }

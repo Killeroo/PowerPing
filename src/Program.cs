@@ -125,7 +125,8 @@ namespace PowerPing
                     break;
                 case PingOperation.Normal:
                     // Send ping normally
-                    p.Send();
+                    PingResults results = p.Send();
+                    Display.PingResults(attributes, results);
                     break;
                 default:
                     Helper.ErrorAndExit("Could not determine ping operation");

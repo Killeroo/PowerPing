@@ -51,8 +51,8 @@ namespace PowerPing
         public int Timeout { get; set; }                // Time (in milliseconds) before timeout occurs
         public int Count { get; set; }                  // Number of pings to send
         public int Ttl { get; set; }                    // IP packet Time to live (TTL) value (https://en.wikipedia.org/wiki/Time_to_live)
-        public int RecieveBufferSize { get; set; }      // Size of buffer used when recieving pings
-        public int ArtificalMessageSize { get; set; }   // Size to fill ICMP message to (using just empty bytes
+        public int ReceiveBufferSize { get; set; }      // Size of buffer used when receiving pings
+        public int ArtificalMessageSize { get; set; }   // Sets the ICMP message to be a specifed number of empty bytes 
         public byte Type { get; set; }                  // ICMP type field value (https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol#Control_messages)
         public byte Code { get; set; }                  // ICMP code field value (https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol#Control_messages)
 
@@ -81,7 +81,7 @@ namespace PowerPing
             Code = 0x00;
             ArtificalMessageSize = -1;
             BeepMode = 0;
-            RecieveBufferSize = 5096;
+            ReceiveBufferSize = 5096;
 
             // Default options
             Continous = false;
