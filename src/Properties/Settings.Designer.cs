@@ -34,5 +34,17 @@ namespace PowerPing.Properties {
                 this["RequireInput"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ShownInputPrompt {
+            get {
+                return ((bool)(this["ShownInputPrompt"]));
+            }
+            set {
+                this["ShownInputPrompt"] = value;
+            }
+        }
     }
 }

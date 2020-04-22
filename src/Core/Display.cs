@@ -866,6 +866,14 @@ Get location information for 84.23.12.4";
                 Console.WriteLine();
             }
 
+            if (Properties.Settings.Default.ShownInputPrompt == false) {
+                Display.Message(
+                "(NOTE: To stop PowerPing from closing too quickly (when opening in a new Administrator console) PowerPing will\n" +
+                "prompt for user input upon completion BY DEFAULT, you can disable this PERMENANTLY using the --noinput argument next time)\n",
+                ConsoleColor.Cyan);
+                Properties.Settings.Default.ShownInputPrompt = true;
+                Properties.Settings.Default.Save();
+            }
 
             Helper.WaitForUserInput();
         }
