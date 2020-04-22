@@ -118,7 +118,7 @@ namespace PowerPing
 
                     // Store results
                     results.CountPacketType(response.Type);
-                    results.Received++;
+                    results.IncrementReceivedPackets();
                 } catch (OperationCanceledException) {
                 } catch (SocketException) {
                     Display.Error("Could not read packet from socket");
