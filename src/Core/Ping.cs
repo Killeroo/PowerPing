@@ -84,20 +84,20 @@ namespace PowerPing
         public PingResults Send(string address)
         {
             m_PingAttributes.InputtedAddress = address;
+            m_PingAttributes.ResolvedAddress = ""; 
+
+            // If we get a new address not only do we have to force a lookup
+            // Do this by leaving ResolvedAddress blank, we also need to recreate the
+            // remove endpoint that is based on that returned address
+            ResolveAddress();
+            CreateRemoteEndpoint();
+
             return Send();
         }
         public PingResults Send()
         {
-            // Wipe any previous results 
-            m_PingResults = new PingResults();
-
+            // Reset some properties so they are readyfor pinging
             Reset();
-
-            // Lookup host if specified
-            if (m_PingAttributes.InputtedAddress != "") {
-                AddressFamily family = m_PingAttributes.UseICMPv4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
-                m_PingAttributes.ResolvedAddress = Lookup.QueryDNS(m_PingAttributes.InputtedAddress, family);
-            }
 
             Display.PingIntroMsg(m_PingAttributes);
 
@@ -125,6 +125,7 @@ namespace PowerPing
         {
             CreateRawSocket();
             SetupSocketOptions();
+            ResolveAddress();
             CreateRemoteEndpoint();
             ConstructPacket();
             UpdatePacketChecksum();
@@ -176,6 +177,14 @@ namespace PowerPing
             m_Socket.Ttl = (short)m_PingAttributes.Ttl;
             m_Socket.DontFragment = m_PingAttributes.DontFragment;
             m_Socket.ReceiveBufferSize = m_PingAttributes.ReceiveBufferSize;
+        }
+        private void ResolveAddress()
+        {
+            // If we have not been given a resolved address, perform dns query for inputted address
+            if (m_PingAttributes.ResolvedAddress == "") {
+                AddressFamily family = m_PingAttributes.UseICMPv4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
+                m_PingAttributes.ResolvedAddress = Lookup.QueryDNS(m_PingAttributes.InputtedAddress, family);
+            }
         }
         private void CreateRemoteEndpoint()
         {
