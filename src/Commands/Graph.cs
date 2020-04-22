@@ -58,6 +58,10 @@ namespace PowerPing
         private int m_StartScale = 5; // Stops graph from scaling in past its start scale
         private int m_Scale = 5;//50; // Our current yaxis graph scale 
 
+        // Limits refreshing display too quickly
+        // NOTE: The actual display update rate may be limited by the ping interval
+        RateLimiter displayUpdateLimiter = new RateLimiter(TimeSpan.FromMilliseconds(500));
+
         // Properties to use for normal and compact graph modes
         private int m_NormalLegendLeftPadding = 13;
         private int m_NormalYAxisLeftPadding = 11;
@@ -82,13 +86,14 @@ namespace PowerPing
         
         public Graph(string address, CancellationToken cancellationTkn)
         {
+            // Setup ping attributes
+            m_PingAttributes.InputtedAddress = address;
+            m_PingAttributes.Continous = true;
+
             m_CancellationToken = cancellationTkn;
-            m_Ping = new Ping(cancellationTkn);
+            m_Ping = new Ping(m_PingAttributes, cancellationTkn, OnPingResultsUpdateCallback);
             m_Scale = m_StartScale;
 
-            // Setup ping attributes
-            m_PingAttributes.InputtedAddress = Lookup.QueryDNS(address, System.Net.Sockets.AddressFamily.InterNetwork);
-            m_PingAttributes.Continous = true;
         }
 
         /// <summary>
@@ -107,54 +112,11 @@ namespace PowerPing
                 Setup();
             }
 
-            // Start drawing graph
-            Draw();
+            // Start pinging (initates update loop in OnPingResultsUpdateCallback)
+            m_Ping.Send();
 
             // Show cursor
             Console.CursorVisible = true;
-        }
-        /// <summary>
-        /// Stores graph drawing loop
-        /// </summary>
-        private void Draw()
-        {
-            // The actual display update rate may be limited by the ping interval
-            RateLimiter displayUpdateLimiter = new RateLimiter(TimeSpan.FromMilliseconds(500));
-
-            // This callback will run after each ping iteration
-            void ResultsUpdateCallback(PingResults r)
-            {
-                // Make sure we're not updating the display too frequently
-                if (!displayUpdateLimiter.RequestRun()) {
-                    return;
-                }
-
-                int scalePrevious = m_Scale;
-
-                // Reset position
-                Console.CursorTop = m_PlotStartY;
-                Console.CursorLeft = m_PlotStartX;
-
-                // Update labels
-                UpdateLegend(r);
-
-                // Get results from ping and add to graph
-                AddResponseToGraph(r.CurrTime);
-
-                // Draw graph columns
-                DrawColumns();
-
-                // Only draw the y axis labels if the scale has changed
-                if (scalePrevious != m_Scale) {
-                    DrawYAxisLabels();
-                }
-
-                Console.CursorTop = EndCursorPosY;
-                
-            }
-
-            // Start pinging
-            PingResults results = m_Ping.Send(m_PingAttributes, ResultsUpdateCallback);
         }
         ///<summary>
         /// Setup graph
@@ -208,6 +170,39 @@ namespace PowerPing
 
             // Reset cursor to starting position
             Console.SetCursorPosition(cursorPositionX, cursorPositionY);
+        }
+
+        // This callback will run after each ping iteration
+        // This is technically our main update loop for the graph
+        void OnPingResultsUpdateCallback(PingResults r)
+        {
+            // Make sure we're not updating the display too frequently
+            if (!displayUpdateLimiter.RequestRun()) {
+                return;
+            }
+
+            int scalePrevious = m_Scale;
+
+            // Reset position
+            Console.CursorTop = m_PlotStartY;
+            Console.CursorLeft = m_PlotStartX;
+
+            // Update labels
+            UpdateLegend(r);
+
+            // Get results from ping and add to graph
+            AddResponseToGraph(r.CurrTime);
+
+            // Draw graph columns
+            DrawColumns();
+
+            // Only draw the y axis labels if the scale has changed
+            if (scalePrevious != m_Scale) {
+                DrawYAxisLabels();
+            }
+
+            Console.CursorTop = EndCursorPosY;
+
         }
 
         /// <summary>
