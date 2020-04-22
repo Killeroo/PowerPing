@@ -72,7 +72,7 @@ namespace PowerPing
             // Default properties
             InputtedAddress = "";
             ResolvedAddress = "";
-            Message = "abcdefghijklmnopqrstuvyxyz";
+            Message = Helper.RandomString(26);
             Interval = 1000;
             Timeout = 3000;
             Count = 5;
