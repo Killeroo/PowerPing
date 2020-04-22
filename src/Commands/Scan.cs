@@ -53,7 +53,7 @@ namespace PowerPing
 
         public static void Start(string range, CancellationToken cancellationToken)
         {
-            Ping p = new Ping(cancellationToken);
+            Ping ping = null;//
             List<string> addresses = new List<string>();
             List<HostInformation> activeHosts = new List<HostInformation>();
             Stopwatch timer = new Stopwatch();
@@ -61,10 +61,14 @@ namespace PowerPing
 
             // Setup scan ping attributes
             PingAttributes attrs = new PingAttributes();
+            attrs.InputtedAddress = "127.0.0.1"; // False address to pass lookup (TODO: ew)
             attrs.Timeout = 500;
             attrs.Interval = 0;
             attrs.Count = 1;
             Display.ShowOutput = false;
+
+            // Setup ping object 
+            ping = new Ping(attrs, cancellationToken);
 
             // Get addresses to scan from range
             addresses = ParseRange(range);
@@ -80,17 +84,15 @@ namespace PowerPing
             try {
                 // Scan loop
                 foreach (string host in addresses) {
-                    // Update host
-                    attrs.Address = host;
 
                     // Send ping
-                    PingResults results = p.Send(attrs);
+                    PingResults results = ping.Send(host);
                     if (results.ScanWasCanceled) {
                         // Cancel was requested during scan
                         throw new OperationCanceledException();
                     }
                     scanned++;
-                    Display.ScanProgress(scanned, activeHosts.Count, addresses.Count, timer.Elapsed, range, attrs.Address);
+                    Display.ScanProgress(scanned, activeHosts.Count, addresses.Count, timer.Elapsed, range, attrs.ResolvedAddress);
 
                     if (results.Lost == 0 && results.ErrorPackets != 1) {
                         // If host is active, add to list
