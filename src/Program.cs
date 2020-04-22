@@ -44,9 +44,8 @@ namespace PowerPing
         /// <param name="args">Program arguments</param>
         static void Main(string[] args)
         {
-            // Local variables 
-            PingAttributes attributes = new PingAttributes();
-            attributes.ResolvedAddress = "";
+            // User inputted attributes
+            PingAttributes inputtedAttributes = new PingAttributes();
 
             // Setup console
             Display.DefaultForegroundColor = Console.ForegroundColor;
@@ -63,42 +62,42 @@ namespace PowerPing
             }
 
             // Parse command line arguments
-            if (!CommandLine.Parse(args, ref attributes)) {
+            if (!CommandLine.Parse(args, ref inputtedAttributes)) {
                 Helper.ErrorAndExit("Problem parsing arguments, use \"PowerPing /help\" or \"PowerPing /?\" for help.");
             }
 
             // Find address/host in arguments
-            if (attributes.Operation != PingOperation.Whoami &&
-                attributes.Operation != PingOperation.Listen) {
-                if (!CommandLine.FindAddress(args, ref attributes)) {
+            if (inputtedAttributes.Operation != PingOperation.Whoami &&
+                inputtedAttributes.Operation != PingOperation.Listen) {
+                if (!CommandLine.FindAddress(args, ref inputtedAttributes)) {
                     Helper.ErrorAndExit("Could not find correctly formatted address, please check and try again");
                 }
             }
 
             // Perform DNS lookup on inputted address
-            attributes.ResolvedAddress = Lookup.QueryDNS(attributes.InputtedAddress, attributes.UseICMPv4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+           // inputtedAttributes.ResolvedAddress = Lookup.QueryDNS(inputtedAttributes.InputtedAddress, inputtedAttributes.UseICMPv4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
             // Add Control C event handler 
-            if (attributes.Operation != PingOperation.Whoami &&
-                attributes.Operation != PingOperation.Location &&
-                attributes.Operation != PingOperation.Whois) { 
+            if (inputtedAttributes.Operation != PingOperation.Whoami &&
+                inputtedAttributes.Operation != PingOperation.Location &&
+                inputtedAttributes.Operation != PingOperation.Whois) { 
                 Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
             }
 
             // Select correct function using opMode 
-            Ping p = new Ping(attributes, m_CancellationTokenSource.Token);
+            Ping p;
             Graph g;
-            switch (attributes.Operation) {
+            switch (inputtedAttributes.Operation) {
                 case PingOperation.Listen:
                     // If we find an address then pass it to listen, otherwise start it without one
-                    if (CommandLine.FindAddress(args, ref attributes)) {
-                        Listen.Start(m_CancellationTokenSource.Token, attributes.InputtedAddress);
+                    if (CommandLine.FindAddress(args, ref inputtedAttributes)) {
+                        Listen.Start(m_CancellationTokenSource.Token, inputtedAttributes.InputtedAddress);
                     } else {
                         Listen.Start(m_CancellationTokenSource.Token);
                     }
                     break;
                 case PingOperation.Location:
-                    Console.WriteLine(Lookup.GetAddressLocationInfo(attributes.InputtedAddress, false));
+                    Console.WriteLine(Lookup.GetAddressLocationInfo(inputtedAttributes.InputtedAddress, false));
                     Helper.WaitForUserInput();
                     break;
                 case PingOperation.Whoami:
@@ -106,27 +105,28 @@ namespace PowerPing
                     Helper.WaitForUserInput();
                     break;
                 case PingOperation.Whois:
-                    Lookup.QueryWhoIs(attributes.InputtedAddress);
+                    Lookup.QueryWhoIs(inputtedAttributes.InputtedAddress);
                     break;
                 case PingOperation.Graph:
-                    g = new Graph(attributes.InputtedAddress, m_CancellationTokenSource.Token);
+                    g = new Graph(inputtedAttributes.InputtedAddress, m_CancellationTokenSource.Token);
                     g.Start();
                     break;
                 case PingOperation.CompactGraph:
-                    g = new Graph(attributes.InputtedAddress, m_CancellationTokenSource.Token);
+                    g = new Graph(inputtedAttributes.InputtedAddress, m_CancellationTokenSource.Token);
                     g.CompactGraph = true;
                     g.Start();
                     break;
                 case PingOperation.Flood:
-                    Flood.Start(attributes.InputtedAddress, m_CancellationTokenSource.Token);
+                    Flood.Start(inputtedAttributes.InputtedAddress, m_CancellationTokenSource.Token);
                     break;
                 case PingOperation.Scan:
-                    Scan.Start(attributes.InputtedAddress, m_CancellationTokenSource.Token);
+                    Scan.Start(inputtedAttributes.InputtedAddress, m_CancellationTokenSource.Token);
                     break;
                 case PingOperation.Normal:
                     // Send ping normally
+                    p = new Ping(inputtedAttributes, m_CancellationTokenSource.Token);
                     PingResults results = p.Send();
-                    Display.PingResults(attributes, results);
+                    Display.PingResults(inputtedAttributes, results);
                     break;
                 default:
                     Helper.ErrorAndExit("Could not determine ping operation");
