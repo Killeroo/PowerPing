@@ -92,6 +92,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\IPv4.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Core\Display.cs" />
     <Compile Include="Core\ICMP.cs" />

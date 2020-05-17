@@ -43,6 +43,7 @@ namespace PowerPing
     public class PingAttributes
     {
         // Properties
+        // CLEANUP: I don't like these 2 fields
         public string InputtedAddress { get; set; }     // Address as it was inputted by user 
         public string ResolvedAddress { get; set; }     // Resolved address (after lookup) the actual address ping is sent to
         public string SourceAddress { get; set; }       // Source address of IP packet (not implemented yet)

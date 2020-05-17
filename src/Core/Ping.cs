@@ -55,7 +55,7 @@ namespace PowerPing
 
         private static readonly ushort m_SessionId = Helper.GenerateSessionId();
 
-        public Ping(PingAttributes attributes, CancellationToken cancellationToken, Action<PingResults> resultsUpdateCallback = null) // On results update
+        public Ping(PingAttributes attributes, CancellationToken cancellationToken, Action<PingResults> resultsUpdateCallback = null) 
         {
             m_PingAttributes = attributes;
             m_PingResults = new PingResults();
@@ -101,7 +101,7 @@ namespace PowerPing
 
             Display.PingIntroMsg(m_PingAttributes);
 
-            // TODO: I think this part is bullshit, check later
+            // CLEANUP: I think this part is bullshit, check later
             if (Display.UseResolvedAddress) {
                 try {
                     m_PingAttributes.InputtedAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(m_PingAttributes.ResolvedAddress), m_CancellationToken);
@@ -403,6 +403,8 @@ namespace PowerPing
                 }
                 else {
                     // Store reply packet
+                    IPv4 header = new IPv4(receiveBuffer, bytesRead);
+                    Console.WriteLine(header.PrettyPrint());
                     response = new ICMP(receiveBuffer, bytesRead);
 
                     // If we sent an echo and receive a response with a different identifier or sequence

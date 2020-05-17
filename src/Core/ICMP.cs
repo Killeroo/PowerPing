@@ -42,6 +42,7 @@ namespace PowerPing
         public ICMP() { }
         public ICMP(byte[] data, int size)
         {
+            // Offset first 20 bytes which are the IPv4 header
             Type = data[20];
             Code = data[21];
             Checksum = BitConverter.ToUInt16(data, 22);
