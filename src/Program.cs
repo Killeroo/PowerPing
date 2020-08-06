@@ -135,7 +135,7 @@ namespace PowerPing
 
             // Reset console colour
             Display.ResetColor();
-            Console.CursorVisible = true;
+            try { Console.CursorVisible = true; } catch (Exception) { }
         }
 
         /// <summary>
