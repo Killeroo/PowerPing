@@ -245,8 +245,8 @@ namespace PowerPing
                                 Display.UseSymbols = true;
                                 Display.SetAsciiReplySymbolsTheme(0);
 
-                                // Check proceeding argument
-                                if (args.Length < count + 1) {
+                                // ignore proceeding argument or if is last argument
+                                if (args.Length < count + 1 || count + 1 == args.Length) {
                                     continue;
                                 }
                                 if (IsArgument(args[count + 1])
