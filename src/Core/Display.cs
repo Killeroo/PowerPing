@@ -256,8 +256,6 @@ Other:
     --version       [--v]            Shows version and build information
     --examples      [--ex]           Displays some example usage
 
-Type '--examples' for more
-
 Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=
 Find the project here [https://github.com/Killeroo/PowerPing]";
 
