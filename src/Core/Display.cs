@@ -40,7 +40,6 @@ namespace PowerPing
         // Properties
         public static bool Short { get; set; } = false;
         public static bool NoColor { get; set; } = false;
-        public static bool NoInput { get; set; } = false;
         public static bool UseSymbols { get; set; } = false;
         public static bool ShowOutput { get; set; } = true;
         public static bool ShowMessages { get; set; } = false;

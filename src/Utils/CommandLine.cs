@@ -202,8 +202,7 @@ namespace PowerPing
                             case "/noinput":
                             case "-noinput":
                             case "--noinput":// No input mode
-                                Display.NoInput = true;
-                                if (Properties.Settings.Default.RequireInput != true) {
+                                if (Properties.Settings.Default.RequireInput == true) {
                                     Display.Message(
                                     "(RequireInput is now permenantly OFF, you will no longer be prompted for user input anytime PowerPing is finished)",
                                     ConsoleColor.Cyan);
@@ -217,8 +216,7 @@ namespace PowerPing
                             case "/requireinput":
                             case "-requireinput":
                             case "--requireinput":
-                                Display.NoInput = false;
-                                if (Properties.Settings.Default.RequireInput != true) {
+                                if (Properties.Settings.Default.RequireInput == false) {
                                     Display.Message(
                                     "(RequireInput is now permenantly ON, from now on you will be prompted for user input whenever PowerPing is finished)",
                                     ConsoleColor.Cyan);
