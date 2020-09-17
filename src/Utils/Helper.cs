@@ -51,6 +51,11 @@ namespace PowerPing
         /// </summary>
         public static void WaitForUserInput()
         {
+            // Don't wait for output when the output of the program is being redirected 
+            // (to say a file or something)
+            if (Console.IsOutputRedirected)
+                return;
+
             // Only ask for user input if NoInput hasn't been set
             if (Properties.Settings.Default.RequireInput == false)
                 return;
