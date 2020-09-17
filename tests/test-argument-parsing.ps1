@@ -119,7 +119,7 @@ Run-Test "Test `'symbols`' with no arguments and leading argument, with address 
 Run-Test "Test `'symbols`' with no arguments and leading argument, with address at end" "8.8.8.8 -sym -c 1 " 0
 Run-Test "Test `'symbols`' with argument and leading argument" "-sym 1 -c 1 8.8.8.8" 0
 Run-Test "Test `'symbols`' with invalid positive theme number" "-sym 1000 8.8.8.8" 0
-Run-Test "Test `'symbols`' with invalid negative theme number" "-sym -1000 8.8.8.8" 0
+Run-Test "Test `'symbols`' with invalid negative theme number" "-sym -1000 8.8.8.8" 1
 Run-Test "Test `'symbols`' with valid theme number" "-sym 0 8.8.8.8" 0
 Run-Test "Test `'timestamp`' with no parameter at start" "-ts 8.8.8.8" 0
 Run-Test "Test `'timestamp`' with no parameter at end" "8.8.8.8 -ts" 0
