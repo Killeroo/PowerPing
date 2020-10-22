@@ -682,7 +682,7 @@ Get location information for 84.23.12.4";
             } else if (ShowFullTimeStampUTC) {
                 Console.Write(FULL_TIMESTAMP_LAYOUT,
                     DateTime.UtcNow.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern),
-                    DateTime.Now.ToString("HH:mm:ss.fff"));
+                    DateTime.UtcNow.ToString("HH:mm:ss.fff"));
             } else if (ShowTimeStamp) {
                 Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
             } else if (ShowtimeStampUTC) {
