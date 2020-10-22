@@ -82,6 +82,7 @@ namespace PowerPing
 
         // General messages
         const string TIMESTAMP_LAYOUT = " @ {0}";
+        const string FULL_TIMESTAMP_LAYOUT = " @ {0} {1}";
         const string TIMEOUT_TXT = "Request timed out.";
         const string TIMEOT_SEQ_TXT = " seq={0} ";
         const string ERROR_TXT = "ERROR: ";
@@ -675,9 +676,13 @@ Get location information for 84.23.12.4";
 
             // Display timestamp
             if (ShowFullTimeStamp) {
-                Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString(CultureInfo.CurrentCulture));
+                Console.Write(FULL_TIMESTAMP_LAYOUT, 
+                    DateTime.Now.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern),
+                    DateTime.Now.ToString("HH:mm:ss.fff"));
             } else if (ShowFullTimeStampUTC) {
-                Console.Write(TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString(CultureInfo.CurrentCulture));
+                Console.Write(FULL_TIMESTAMP_LAYOUT,
+                    DateTime.UtcNow.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern),
+                    DateTime.Now.ToString("HH:mm:ss.fff"));
             } else if (ShowTimeStamp) {
                 Console.Write(TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
             } else if (ShowtimeStampUTC) {
