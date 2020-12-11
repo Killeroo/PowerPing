@@ -577,6 +577,9 @@ namespace PowerPing
         /// Update graph legend text labels
         /// </summary>
         /// <param name="results"></param>
+        double lastAvg = 0;
+        double lastRes = 0;
+        int count = 0;
         private void UpdateLegend(PingResults results)
         {
             // save cursor location
@@ -610,7 +613,26 @@ namespace PowerPing
             Console.SetCursorPosition(m_RttLabelX, m_RttLabelY);
             Console.Write(blankLabel);
             Console.CursorLeft = Console.CursorLeft - 8;
-            Console.Write("{0:0.0}ms", results.CurrTime);
+            Console.Write("{0:0.0}ms (avg ", results.CurrTime);
+            double r = Math.Round(results.AvgTime, 1);
+            if (lastAvg < r) {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.Write("+");
+                if (results.CurrTime - lastRes > 20)
+                    Console.Write("+");
+            } else if (lastAvg > r) {
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                Console.Write("-");
+                if (lastRes - results.CurrTime > 20)
+                    Console.Write("-");
+            } else {
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.Write("~");
+            }
+            lastAvg = r;
+            lastRes = results.CurrTime;
+            Console.ResetColor();
+            Console.Write("{0:0.0}ms)", results.AvgTime);
 
             // Update time label
             Console.SetCursorPosition(m_TimeLabelX, m_TimeLabelY);
