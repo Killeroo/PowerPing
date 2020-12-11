@@ -559,8 +559,10 @@ namespace PowerPing
         /// <returns>Returns if the address was found or not</returns>
         public static bool FindAddress(string[] args, ref PingAttributes attributes)
         {
-            // Skip first argument, it's the name of the program
-            args = args.Skip(1).ToArray();
+            // Skip first argument, if it's the name of the program
+            // (this is a problematic line)
+            if (args.First().ToLower() == "powerping")
+                args = args.Skip(1).ToArray();
 
             // Look for valid scan address (slightly different format than normal address)
             if (attributes.Operation == PingOperation.Scan) {
