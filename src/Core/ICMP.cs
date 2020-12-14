@@ -40,14 +40,14 @@ namespace PowerPing
 
         // Constructors
         public ICMP() { }
-        public ICMP(byte[] data, int size)
+        public ICMP(byte[] data, int size, int offset = 20)
         {
             // Offset first 20 bytes which are the IPv4 header
-            Type = data[20];
-            Code = data[21];
-            Checksum = BitConverter.ToUInt16(data, 22);
-            MessageSize = size - 24;
-            Buffer.BlockCopy(data, 24, Message, 0, MessageSize);
+            Type = data[offset];
+            Code = data[offset + 1];
+            Checksum = BitConverter.ToUInt16(data, offset + 2);
+            MessageSize = size - (offset + 4);
+            Buffer.BlockCopy(data, (offset + 4), Message, 0, MessageSize);
         }
 
         /// <summary>
@@ -85,6 +85,11 @@ namespace PowerPing
             chksm += (chksm >> 16);
 
             return (UInt16)(~chksm);
+        }
+
+        public string PrettyPrint()
+        {
+            return $"Type={Type.ToString()} Code={Code.ToString()} Checksum={Checksum} MessageSize={MessageSize}";
         }
     }
 

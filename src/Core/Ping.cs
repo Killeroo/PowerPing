@@ -402,9 +402,17 @@ namespace PowerPing
                     response = null;
                 }
                 else {
-                    // Store reply packet
                     IPv4 header = new IPv4(receiveBuffer, bytesRead);
+                    ICMP ping = new ICMP(header.Data, header.TotalLength - header.HeaderLength, 0);
+                    header.GetBytes();
+                    Console.BackgroundColor = ConsoleColor.Red;
+                    Console.ForegroundColor = ConsoleColor.Black;
                     Console.WriteLine(header.PrettyPrint());
+                    Console.BackgroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine(ping.PrettyPrint());
+                    Console.ResetColor();
+
+                    // Store reply packet
                     response = new ICMP(receiveBuffer, bytesRead);
 
                     // If we sent an echo and receive a response with a different identifier or sequence
