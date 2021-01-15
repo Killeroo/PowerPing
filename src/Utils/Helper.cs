@@ -49,7 +49,7 @@ namespace PowerPing
         /// <summary>
         /// Pause program and wait for user input
         /// </summary>
-        public static void WaitForUserInput()
+        public static void WaitForUserInput(bool exiting = true)
         {
             // Don't wait for output when the output of the program is being redirected 
             // (to say a file or something)
@@ -60,7 +60,7 @@ namespace PowerPing
             if (Properties.Settings.Default.RequireInput == false)
                 return;
 
-            Console.Write("Press any key to continue...");
+            Console.Write("Press any key to {0}...", exiting ? "exit" : "continue");
             Console.WriteLine();
 
             // Work around if readkey isnt supported

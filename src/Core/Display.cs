@@ -257,7 +257,8 @@ Other:
     --examples      [--ex]           Displays some example usage
 
 Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=
-Find the project here [https://github.com/Killeroo/PowerPing]";
+Find the project here [https://github.com/Killeroo/PowerPing]
+";
 
         const string EXAMPLE_MSG_PAGE_1 =
 @"
