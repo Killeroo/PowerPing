@@ -57,6 +57,8 @@ namespace PowerPing
         private int m_LegendLeftPadding = 16;
         private int m_StartScale = 5; // Stops graph from scaling in past its start scale
         private int m_Scale = 5;//50; // Our current yaxis graph scale 
+        private double lastAvg = 0;
+        private double lastRes = 0;
 
         // Limits refreshing display too quickly
         // NOTE: The actual display update rate may be limited by the ping interval
@@ -584,9 +586,6 @@ namespace PowerPing
         /// Update graph legend text labels
         /// </summary>
         /// <param name="results"></param>
-        double lastAvg = 0;
-        double lastRes = 0;
-        int count = 0;
         private void UpdateLegend(PingResults results)
         {
             // save cursor location
