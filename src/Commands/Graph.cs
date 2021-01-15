@@ -82,6 +82,7 @@ namespace PowerPing
         private int m_FailLabelX, m_FailLabelY;
         private int m_RttLabelX, m_RttLabelY;
         private int m_TimeLabelX, m_TimeLabelY;
+        private int m_AvgLabelX, m_AvgLabelY;
         private int m_yAxisStart;
         
         public Graph(string address, CancellationToken cancellationTkn)
@@ -437,6 +438,12 @@ namespace PowerPing
             Console.Write("           Received: ");
             m_RecvLabelX = Console.CursorLeft;
             m_RecvLabelY = Console.CursorTop;
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write("           Average: ");
+            m_AvgLabelX = Console.CursorLeft;
+            m_AvgLabelY = Console.CursorTop;
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Gray;
 
@@ -603,6 +610,32 @@ namespace PowerPing
             Console.CursorLeft = Console.CursorLeft - 8;
             Console.Write(results.Received);
 
+            // Update average label
+            Console.SetCursorPosition(m_AvgLabelX, m_AvgLabelY);
+            Console.Write(blankLabel);
+            Console.CursorLeft = Console.CursorLeft - 8;
+            double r = Math.Round(results.AvgTime, 1);
+            if (lastAvg < r) {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.Write("+");
+                if (results.CurrTime - lastRes > 20)
+                    Console.Write("+");
+            }
+            else if (lastAvg > r) {
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                Console.Write("-");
+                if (lastRes - results.CurrTime > 20)
+                    Console.Write("-");
+            }
+            else {
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.Write("~");
+            }
+            lastAvg = r;
+            lastRes = results.CurrTime;
+            Console.ResetColor();
+            Console.Write("{0:0.0}ms", results.AvgTime);
+
             // Update fail label
             Console.SetCursorPosition(m_FailLabelX, m_FailLabelY);
             Console.Write(blankLabel);
@@ -613,26 +646,7 @@ namespace PowerPing
             Console.SetCursorPosition(m_RttLabelX, m_RttLabelY);
             Console.Write(blankLabel);
             Console.CursorLeft = Console.CursorLeft - 8;
-            Console.Write("{0:0.0}ms (avg ", results.CurrTime);
-            double r = Math.Round(results.AvgTime, 1);
-            if (lastAvg < r) {
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.Write("+");
-                if (results.CurrTime - lastRes > 20)
-                    Console.Write("+");
-            } else if (lastAvg > r) {
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
-                Console.Write("-");
-                if (lastRes - results.CurrTime > 20)
-                    Console.Write("-");
-            } else {
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.Write("~");
-            }
-            lastAvg = r;
-            lastRes = results.CurrTime;
-            Console.ResetColor();
-            Console.Write("{0:0.0}ms)", results.AvgTime);
+            Console.Write("{0:0.0}ms", results.CurrTime);
 
             // Update time label
             Console.SetCursorPosition(m_TimeLabelX, m_TimeLabelY);
