@@ -134,7 +134,13 @@ Run-Test "Test `'fulltimestamp`' with valid parameter at start" "-fts utc 8.8.8.
 Run-Test "Test `'fulltimestamp`' with valid parameter at end" "8.8.8.8 -fts utc" 0 
 Run-Test "Test `'fulltimestamp`' with invalid parameter at start" "-fts putc 8.8.8.8" 0 
 Run-Test "Test `'fulltimestamp`' with invalid parameter at end" "8.8.8.8 -fts putc " 0 
-Run-Test "Test `'fulltimestamp`' with no parameter and leading argument" "8.8.8.8 -fts -c 2" 0 
+Run-Test "Test `'fulltimestamp`' with no parameter and leading argument" "8.8.8.8 -fts -c 2" 0
+Run-Test "Test `'beep`' with no parameter at end" "8.8.8.8 -beep" 0 
+Run-Test "Test `'beep`' with no parameter at start" "-beep 8.8.8.8" 0 
+Run-Test "Test `'beep`' with parameter at end" "8.8.8.8 -beep 2" 0
+Run-Test "Test `'beep`' with parameter at start" "-beep 2 8.8.8.8" 0
+Run-Test "Test `'beep`' with invalid parameter at end" "8.8.8.8 -beep 3" 1
+Run-Test "Test `'beep`' with invalid parameter at start" "-beep 3 8.8.8.8" 1    
 
 Write-Host
 Write-Host "Address location tests"

@@ -66,8 +66,20 @@ namespace PowerPing
                             case "/b":
                             case "-b":
                             case "--b":
+                                attributes.BeepMode = 1;
+
+                                // ignore proceeding argument or if is last argument
+                                if (args.Length < count + 1 || count + 1 == args.Length) {
+                                    continue;
+                                }
+                                if (IsArgument(args[count + 1])
+                                    || args[count + 1].Contains(".")) {
+                                    continue;
+                                }
+
                                 int level = Convert.ToInt32(args[count + 1]);
-                                if (level > 2) {
+
+                                if (level > 2 || level < 1) {
                                     Display.Message("Invalid beep level, please use a number between 0 & 2");
                                     throw new ArgumentFormatException();
                                 }
