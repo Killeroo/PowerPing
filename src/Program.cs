@@ -151,6 +151,9 @@ namespace PowerPing
 
             // Request currently running job to finish up
             m_CancellationTokenSource.Cancel();
+
+            // Reset colour on exit
+            Console.ResetColor();
         }
     }
 }
