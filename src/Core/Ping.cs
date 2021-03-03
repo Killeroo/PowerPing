@@ -48,7 +48,7 @@ namespace PowerPing
         private int m_PacketSize = 0;
         private IPEndPoint m_RemoteEndpoint = null;
         private readonly CancellationToken m_CancellationToken;
-        private bool m_Debug = false;
+        private bool m_Debug = true;
 
         private ushort m_CurrentSequenceNumber = 0;
         private int m_CurrentReceiveTimeout = 0;

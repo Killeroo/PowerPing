@@ -158,19 +158,20 @@ namespace PowerPing
             // Set cursor position to start of plot
             Console.SetCursorPosition(m_PlotStartX, m_yAxisStart);//m_PlotStartY);
 
-            string blankRow = new string(' ', m_xAxisLength);
+            string padding = new string(' ', m_PlotStartX);
+            string blankRow = padding + new string(' ', m_xAxisLength);
             string bottomRow = new string('─', m_xAxisLength);
 
             for (int x = 0; x <= m_yAxisLength; x++) { //21; x++) {
                 // Draw black spaces
-                Console.Write(blankRow);
-                Console.CursorLeft = m_PlotStartX;
-                Console.CursorTop = m_PlotStartY - x;
+                Console.WriteLine(blankRow);
+                //Console.CursorLeft = m_PlotStartX;
+                //Console.CursorTop = m_PlotStartY - x;
             }
 
             // Draw bottom row
             Console.CursorTop = m_PlotStartY;
-            Console.Write(bottomRow);
+            Console.WriteLine(bottomRow);
 
             // Reset cursor to starting position
             Console.SetCursorPosition(cursorPositionX, cursorPositionY);
@@ -275,6 +276,7 @@ namespace PowerPing
             }
         }
 
+        List<int> count = new List<int>();
         /// <summary>
         /// Draw all graph coloums/bars
         /// </summary>
@@ -282,9 +284,29 @@ namespace PowerPing
         {
             // Clear columns space before drawing
             Clear();
-            
+
+            List<string[]> columns = new List<string[]>();
+            foreach (var response in m_ResponseTimes) {
+                columns.Add(CreateColumn(response));
+            }
+
+            Console.CursorTop = 5;
+            for (int x = 16; x > 0; x--) {
+                string test = "";
+                Console.CursorLeft = m_yAxisLeftPadding;
+                for (int i = 0; i < columns.Count; i++) {
+                    if (x >= columns[i].Length)
+                        test += " ";
+                    else
+                        test += columns[i][x];
+                }
+                Console.WriteLine(test);
+            }
+            return;
+
+
             for (int x = 0; x < m_ResponseTimes.Count; x++) {
-                
+
                 // This causes us to draw a continous lower line of red when we are continously timing out
                 // Instead of always drawing big red lines, we draw them at either end of the continous zone
                 // I think it will just look nicer, it will cause slightly hackier code but oh well
@@ -311,7 +333,9 @@ namespace PowerPing
                     drawTimeoutSegment = true;
                 }
 
-                DrawSingleColumn(CreateColumn(m_ResponseTimes[x]), current, timeout, drawTimeoutSegment);
+                var c = CreateColumn(m_ResponseTimes[x]);
+                DrawSingleColumn(c, current, timeout, drawTimeoutSegment);
+                count.Add(c.Length);
 
                 Console.CursorLeft++; 
             }
