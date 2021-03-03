@@ -54,10 +54,13 @@ if ([reflection.assemblyname]::GetAssemblyName($powerping_x86_location).Processo
 } 
 
 ## Run test scripts
+Write-Host
 $test_argument_parsing_result = & "$scriptPath\tests\test-argument-parsing.ps1"
+Write-Host
 $test_lookup_functions_result = & "$scriptPath\tests\test-lookup-functions.ps1" | select -Last 1
 & "$scriptPath\tests\test-core-functions.ps1"
 
+Write-Host
 Write-Host "============ test results ============" -ForegroundColor Yellow
 work-out-test-result "test-argument-parsing.ps1" $test_argument_parsing_result 
 work-out-test-result "test-lookup-functions.ps1" $test_lookup_functions_result

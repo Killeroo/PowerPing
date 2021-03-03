@@ -90,27 +90,40 @@ Run-Test "Test full url" "https://en.wikipedia.org/w/index.php?search=harimau&ti
 Write-Host
 Write-Host "Test arguments"
 Write-Host "----------------------"
+Run-Test "Test `'count`' with full argument" "-count 1 8.8.8.8" 0
+Run-Test "Test `'count`' with short argument" "-c 1 8.8.8.8" 0
 Run-Test "Test `'count`' with parameter" "-c 1 8.8.8.8" 0
 Run-Test "Test `'count`' with missing address" "-c 1" 1
 Run-Test "Test `'count`' with empty parameter" "-c 8.8.8.8" 1
 Run-Test "Test `'count`' with invalid positive parameter" "-c 100000000000000000000000000000000000000000000000000000000000000000000000000000000000 8.8.8.8" 1
 Run-Test "Test `'count`' with invalid negative parameter" "-c -1 8.8.8.8" 1
+Run-Test "Test `'limit`' with full argument" "-limit 1 8.8.8.8" 0
+Run-Test "Test `'limit`' with short argument" "-l 1 8.8.8.8" 0
 Run-Test "Test `'limit`' with paramater" "-l 1 8.8.8.8" 0
 Run-Test "Test `'limit`' with missing address" "-l 1" 1
 Run-Test "Test `'limit`' with empty parameter" "-l 8.8.8.8" 1
 Run-Test "Test `'limit`' with invalid positive parameter" "-l 4 8.8.8.8" 1
 Run-Test "Test `'limit`' with invalid negative parameter" "-l -1 8.8.8.8" 1
+Run-Test "Test `'decimals`' with full argument" "-decimals 1 8.8.8.8" 0
+Run-Test "Test `'decimals`' with short argument" "-dp 1 8.8.8.8" 0
 Run-Test "Test `'decimals`' with parameter" "-dp 1 8.8.8.8" 0
 Run-Test "Test `'decimals`' with missing address" "-dp 1" 1
 Run-Test "Test `'decimals`' with empty argument" "-dp" 1
 Run-Test "Test `'decimals`' with empty parameter" "-dp 8.8.8.8" 1
 Run-Test "Test `'decimals`' with invalid positive parameter" "-dp 4 8.8.8.8" 1
 Run-Test "Test `'decimals`' with invalid negative parameter" "-dp -1 8.8.8.8" 1
-Run-Test "Test `'timing`' with parameter" "-ti 4 8.8.8.8" 0
+Run-Test "Test `'timing`' with full argument" "-timing 4 8.8.8.8" 0
+Run-Test "Test `'timing`' with short argument" "-ti 4 8.8.8.8" 0
+Run-Test "Test `'timing`' with numeric parameter" "-ti 4 8.8.8.8" 0
+Run-Test "Test `'timing`' with string parameter" "-ti polite 8.8.8.8" 0
+Run-Test "Test `'timing`' with string parameter in speech marks" "-ti `"polite`" 8.8.8.8" 0
 Run-Test "Test `'timing`' with missing address" "-ti 4" 1
 Run-Test "Test `'timing`' with empty argument" "-ti 8.8.8.8" 1
-Run-Test "Test `'timing`' with invalid positive parameter" "-ti 8 8.8.8.8" 1
-Run-Test "Test `'timing`' with invalid negative parameter" "-ti -1 8.8.8.8" 1
+Run-Test "Test `'timing`' with invalid string parameter" "-ti blahblah 8.8.8.8" 1
+Run-Test "Test `'timing`' with invalid positive numeric parameter" "-ti 8 8.8.8.8" 1
+Run-Test "Test `'timing`' with invalid negative numeric parameter" "-ti -1 8.8.8.8" 1
+Run-Test "Test `'symbols`' with full argument" "-symbols 8.8.8.8" 0
+Run-Test "Test `'symbols`' with short argument" "-sym 8.8.8.8" 0
 Run-Test "Test `'symbols`' with no arguments, and address at end" "-sym 8.8.8.8" 0
 Run-Test "Test `'symbols`' with no arguments, and address at start" "8.8.8.8 -sym" 0
 Run-Test "Test `'symbols`' with arguments, and address at end" "-sym 1 8.8.8.8" 0
@@ -118,9 +131,12 @@ Run-Test "Test `'symbols`' with arguments, and address at start" "8.8.8.8 -sym 1
 Run-Test "Test `'symbols`' with no arguments and leading argument, with address at start" "-sym -c 1 8.8.8.8" 0
 Run-Test "Test `'symbols`' with no arguments and leading argument, with address at end" "8.8.8.8 -sym -c 1 " 0
 Run-Test "Test `'symbols`' with argument and leading argument" "-sym 1 -c 1 8.8.8.8" 0
-Run-Test "Test `'symbols`' with invalid positive theme number" "-sym 1000 8.8.8.8" 0
+Run-Test "Test `'symbols`' with missing address" "-sym 1" 1
+Run-Test "Test `'symbols`' with invalid positive theme number" "-sym 1000 8.8.8.8" 1
 Run-Test "Test `'symbols`' with invalid negative theme number" "-sym -1000 8.8.8.8" 1
 Run-Test "Test `'symbols`' with valid theme number" "-sym 0 8.8.8.8" 0
+Run-Test "Test `'timestamp`' with full argument" "-timestamp 8.8.8.8" 0
+Run-Test "Test `'timestamp`' with short argument" "-ts 8.8.8.8" 0
 Run-Test "Test `'timestamp`' with no parameter at start" "-ts 8.8.8.8" 0
 Run-Test "Test `'timestamp`' with no parameter at end" "8.8.8.8 -ts" 0
 Run-Test "Test `'timestamp`' with valid parameter at start" "-ts utc 8.8.8.8" 0 
@@ -128,19 +144,31 @@ Run-Test "Test `'timestamp`' with valid parameter at end" "8.8.8.8 -ts utc" 0
 Run-Test "Test `'timestamp`' with invalid parameter at start" "-ts putc 8.8.8.8" 0 
 Run-Test "Test `'timestamp`' with invalid parameter at end" "8.8.8.8 -ts putc " 0 
 Run-Test "Test `'timestamp`' with no parameter and leading argument" "8.8.8.8 -ts -c 2" 0 
+Run-Test "Test `'timestamp`' with missing address" "-ts utc" 1 
+Run-Test "Test `'fulltimestamp`' with full argument" "-fulltimestamp 8.8.8.8" 0
+Run-Test "Test `'fulltimestamp`' with short argument" "-fts 8.8.8.8" 0
+Run-Test "Test `'fulltimestamp`' with no parameter at start" "-fts 8.8.8.8" 0
 Run-Test "Test `'fulltimestamp`' with no parameter at start" "-fts 8.8.8.8" 0
 Run-Test "Test `'fulltimestamp`' with no parameter at end" "8.8.8.8 -fts" 0
 Run-Test "Test `'fulltimestamp`' with valid parameter at start" "-fts utc 8.8.8.8" 0 
 Run-Test "Test `'fulltimestamp`' with valid parameter at end" "8.8.8.8 -fts utc" 0 
-Run-Test "Test `'fulltimestamp`' with invalid parameter at start" "-fts putc 8.8.8.8" 0 
-Run-Test "Test `'fulltimestamp`' with invalid parameter at end" "8.8.8.8 -fts putc " 0 
+Run-Test "Test `'fulltimestamp`' with invalid parameter at start" "-fts putc 8.8.8.8" 1 
+Run-Test "Test `'fulltimestamp`' with invalid parameter at end" "8.8.8.8 -fts putc " 1
 Run-Test "Test `'fulltimestamp`' with no parameter and leading argument" "8.8.8.8 -fts -c 2" 0
+Run-Test "Test `'fulltimestamp`' with missing address" "-fts utc" 1
+Run-Test "Test `'beep`' with full timestamp" "8.8.8.8 -beep" 0 
+Run-Test "Test `'beep`' with short timestamp" "8.8.8.8 -b" 0 
+Run-Test "Test `'beep`' with no parameter at end" "8.8.8.8 -beep" 0 
 Run-Test "Test `'beep`' with no parameter at end" "8.8.8.8 -beep" 0 
 Run-Test "Test `'beep`' with no parameter at start" "-beep 8.8.8.8" 0 
 Run-Test "Test `'beep`' with parameter at end" "8.8.8.8 -beep 2" 0
 Run-Test "Test `'beep`' with parameter at start" "-beep 2 8.8.8.8" 0
+Run-Test "Test `'beep`' with no parameter and leading argument" "8.8.8.8 -b -c 2" 0
+Run-Test "Test `'beep`' with missing address" "-b 2" 1
 Run-Test "Test `'beep`' with invalid parameter at end" "8.8.8.8 -beep 3" 1
-Run-Test "Test `'beep`' with invalid parameter at start" "-beep 3 8.8.8.8" 1    
+Run-Test "Test `'beep`' with invalid parameter at start" "-beep 3 8.8.8.8" 1 
+Run-Test "Test `'beep`' with invalid positive parameter" "-b 100000000000000000000000000000000000000000000000000000000000000000000000000000000000 8.8.8.8" 1
+Run-Test "Test `'beep`' with invalid negative parameter" "-b -1 8.8.8.8" 1   
 
 Write-Host
 Write-Host "Address location tests"
