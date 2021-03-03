@@ -85,6 +85,7 @@ namespace PowerPing
         private int m_RttLabelX, m_RttLabelY;
         private int m_TimeLabelX, m_TimeLabelY;
         private int m_AvgLabelX, m_AvgLabelY;
+        private int m_PeakLabelX, m_PeakLabelY;
         private int m_yAxisStart;
         
         public Graph(string address, CancellationToken cancellationTkn)
@@ -449,7 +450,7 @@ namespace PowerPing
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Gray;
 
-            Console.Write(leftPadding + "     RTT: ");
+            Console.Write(leftPadding + " Current: ");
             m_RttLabelX = Console.CursorLeft;
             m_RttLabelY = Console.CursorTop;
 
@@ -457,9 +458,15 @@ namespace PowerPing
             Console.Write("               Lost: ");
             m_FailLabelX = Console.CursorLeft;
             m_FailLabelY = Console.CursorTop;
-            Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Gray;
-            
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("              Peak: ");
+            m_PeakLabelX = Console.CursorLeft;
+            m_PeakLabelY = Console.CursorTop;
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine();
+
             Console.Write(leftPadding + " Time Elapsed: ");
             m_TimeLabelX = Console.CursorLeft;
             m_TimeLabelY = Console.CursorTop;
@@ -612,7 +619,7 @@ namespace PowerPing
             // Update average label
             Console.SetCursorPosition(m_AvgLabelX, m_AvgLabelY);
             Console.Write(new string(' ', 15));
-            Console.CursorLeft = Console.CursorLeft - 8;
+            Console.CursorLeft = Console.CursorLeft - 15;
             double r = Math.Round(results.AvgTime, 1);
             if (lastAvg < r) {
                 Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -640,6 +647,17 @@ namespace PowerPing
             Console.Write(blankLabel);
             Console.CursorLeft = Console.CursorLeft - 8;
             Console.Write(results.Lost);
+
+            // Update peak label
+            Console.SetCursorPosition(m_PeakLabelX, m_PeakLabelY);
+            Console.Write(new string(' ', 15));
+            Console.CursorLeft = Console.CursorLeft - 15;
+            List<double> noTimeoutResponses = new List<double>();
+            noTimeoutResponses.AddRange(m_ResponseTimes);
+            noTimeoutResponses.RemoveAll(x => x == 0d);
+            Console.Write("{0}ms",
+                m_ResponseTimes.Count > 0 && noTimeoutResponses.Count > 0 ? Math.Round(noTimeoutResponses.Max(), 1) : 0);
+
 
             // Update RTT label
             Console.SetCursorPosition(m_RttLabelX, m_RttLabelY);
