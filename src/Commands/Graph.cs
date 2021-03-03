@@ -611,7 +611,7 @@ namespace PowerPing
 
             // Update average label
             Console.SetCursorPosition(m_AvgLabelX, m_AvgLabelY);
-            Console.Write(blankLabel);
+            Console.Write(new string(' ', 15));
             Console.CursorLeft = Console.CursorLeft - 8;
             double r = Math.Round(results.AvgTime, 1);
             if (lastAvg < r) {
