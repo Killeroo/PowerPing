@@ -302,6 +302,7 @@ namespace PowerPing
                         test += " ";
                     else
                         test += columns[i][x];
+
                 }
 
                 if (alternating)
@@ -366,7 +367,7 @@ namespace PowerPing
                             }
                             else {
                                 sections[currentIndex] += piece;
-                                currentIndex++;
+                                //currentIndex++;
                             }
                             
                             timeoutSection = !timeoutSection;
