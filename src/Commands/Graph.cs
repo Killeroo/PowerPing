@@ -162,10 +162,12 @@ namespace PowerPing
             string blankRow = padding + new string(' ', m_xAxisLength);
             string bottomRow = new string('─', m_xAxisLength);
 
+            //Console.CursorTop = m_PlotStartY;
+
             for (int x = 0; x <= m_yAxisLength; x++) { //21; x++) {
                 // Draw black spaces
                 Console.WriteLine(blankRow);
-                //Console.CursorLeft = m_PlotStartX;
+                Console.CursorLeft = m_PlotStartX;
                 //Console.CursorTop = m_PlotStartY - x;
             }
 
@@ -284,24 +286,120 @@ namespace PowerPing
         {
             // Clear columns space before drawing
             Clear();
-
+            
             List<string[]> columns = new List<string[]>();
             foreach (var response in m_ResponseTimes) {
                 columns.Add(CreateColumn(response));
             }
 
-            Console.CursorTop = 5;
-            for (int x = 16; x > 0; x--) {
+            bool alternating = true;
+            Console.CursorTop = 1;
+            for (int x = m_yAxisLength; x > 0; x--) {
                 string test = "";
-                Console.CursorLeft = m_yAxisLeftPadding;
+                Console.CursorLeft = m_PlotStartX;// m_yAxisLeftPadding;
                 for (int i = 0; i < columns.Count; i++) {
                     if (x >= columns[i].Length)
                         test += " ";
                     else
                         test += columns[i][x];
                 }
+
+                if (alternating)
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                else
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.WriteLine(test);
+                alternating = !alternating;
             }
+
+            Console.ResetColor();
+            
+
+            List<string[]> timeoutColumns = new List<string[]>();
+            bool startTimeout = false;
+            for (int i = 0; i < m_ResponseTimes.Count; i++) { //foreach (var response in m_ResponseTimes) {
+                string[] column = new string[m_yAxisLength + 1];
+                if (m_ResponseTimes[i] == 0) {
+                    for (int x = 0; x < column.Length; x++) {
+                        column[x] = "|";
+                    }
+                    column[0] = "┴";
+                    
+                } else {
+                    string tempChar = "#";
+                    
+
+                    for (int x = 0; x < column.Length; x++) {
+                        column[x] = tempChar;
+                    }
+                    column[0] = tempChar;
+                }
+                timeoutColumns.Add(column);
+            }
+
+            Console.CursorTop = 1;
+            List<int> offsets = new List<int>();
+            List<string> sections = new List<string>();
+            for (int y = m_yAxisLength; y > 0; y--) {
+
+                //Console.CursorLeft = m_PlotStartX;// m_yAxisLeftPadding;
+
+                string test = "";
+                int offset = m_PlotStartX;
+                int currentIndex = 0;
+                bool timeoutSection = false;
+                for (int x = 0; x < timeoutColumns.Count; x++) {
+                    if (y >= timeoutColumns[x].Length) {
+                        test += " ";
+                    } else {
+                        offset++;
+
+                        string piece = timeoutColumns[x][y];
+                        if (piece == "#") {
+                            continue;
+                        } else if (piece == "|" || piece == "┴") {
+                            test += piece;
+
+                            if (!timeoutSection) {
+                                offsets.Add(offset);
+                                sections.Add(piece);
+                            }
+                            else {
+                                sections[currentIndex] += piece;
+                                currentIndex++;
+                            }
+                            
+                            timeoutSection = !timeoutSection;
+                        } else if (piece == " ") {
+                            //test += piece;
+                            sections[currentIndex] += piece;
+                        }
+
+
+                        //if (x == timeoutColumns.Count) {
+                        //    sections.Add(test);
+                        //    test = "";
+                        //}
+                    }
+                }
+
+                Console.ForegroundColor = ConsoleColor.Red;
+                //int currentOffset = m_PlotStartX;
+                for (int j = 0; j < offsets.Count; j++) {
+                    //currentOffset += offsets[j];// + 1;
+                    Console.CursorLeft = offsets[j] - 1;//currentOffset;// - offsets.Count;// m_PlotStartX + offsets[j] + 1;
+                    Console.Write(sections[j]);
+                    //currentOffset += sections[j].Length;
+                }
+
+                Console.CursorLeft = m_PlotStartX;
+                Console.WriteLine();
+                Console.ResetColor();
+
+                offsets.Clear();
+                sections.Clear();
+            }
+
             return;
 
 
@@ -369,9 +467,9 @@ namespace PowerPing
                 // If no reply dont draw column
                 string[] timeoutBar = new string[m_yAxisLength + 1];
                 for (int x = 0; x < timeoutBar.Length; x++) {
-                    timeoutBar[x] = "|";
+                    timeoutBar[x] = " ";// "|";
                 }
-                timeoutBar[0] = "┴";
+                timeoutBar[0] = " ";//"┴";
                 return timeoutBar;
             }
 
