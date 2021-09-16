@@ -1,0 +1,7 @@
+beep with no argument
+flood doesnt work
+
+graph flicker
+graph not fill screen
+graph break when console buffer is big enough
+graph scale is fucked
