@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Threading;
+using System.Linq;
 
 namespace PowerPing 
 {
@@ -41,6 +42,8 @@ namespace PowerPing
     /// </summary>
     static class Scan 
     {
+        private const int THREAD_COUNT = 20;
+
         /// <summary>
         /// Used to store information on hosts found in scan
         /// </summary>
@@ -51,60 +54,113 @@ namespace PowerPing
             public double ResponseTime { get; set; }
         }
 
+        private static volatile bool canceled = false;
+
         public static void Start(string range, CancellationToken cancellationToken)
         {
-            Ping ping = null;//
             List<string> addresses = new List<string>();
             List<HostInformation> activeHosts = new List<HostInformation>();
             Stopwatch timer = new Stopwatch();
-            int scanned = 0;
 
-            // Setup scan ping attributes
-            PingAttributes attrs = new PingAttributes();
-            attrs.InputtedAddress = "127.0.0.1"; // False address to pass lookup (TODO: ew)
-            attrs.Timeout = 500;
-            attrs.Interval = 0;
-            attrs.Count = 1;
             Display.ShowOutput = false;
-
-            // Setup ping object 
-            ping = new Ping(attrs, cancellationToken);
+            
 
             // Get addresses to scan from range
             addresses = ParseRange(range);
 
-            // TODO: In order to speed this up we need the following steps:
-            /*
-             * 1) Divide the address list by the number of threads we will us
-             * 2) New thread method w/ mutable active hosts list
-             * 3) Some way of updating the UI (resultsUpdateCallback?)
-             */
+            // Setup addresses and threads
+            var splitAddresses = Helper.PartitionList(addresses, THREAD_COUNT);
+            Thread[] threads = new Thread[THREAD_COUNT];
+            object lockObject = new object();
+            int scanned = 0;
 
+            // Run the threads
             timer.Start();
-            try {
-                // Scan loop
-                foreach (string host in addresses) {
+            for (int i = 0; i < THREAD_COUNT; i++) {
+                List<string> addrs = splitAddresses[i];
+                threads[i] = new Thread(() => {
 
-                    // Send ping
-                    PingResults results = ping.Send(host);
-                    if (results.ScanWasCanceled) {
-                        // Cancel was requested during scan
-                        throw new OperationCanceledException();
-                    }
-                    scanned++;
-                    Display.ScanProgress(scanned, activeHosts.Count, addresses.Count, timer.Elapsed, range, attrs.ResolvedAddress);
+                    PingAttributes attrs = new PingAttributes();
+                    attrs.InputtedAddress = "127.0.0.1"; 
+                    attrs.Timeout = 500;
+                    attrs.Interval = 0;
+                    attrs.Count = 1;
 
-                    if (results.Lost == 0 && results.ErrorPackets != 1) {
-                        // If host is active, add to list
-                        activeHosts.Add(new HostInformation {
-                            Address = host,
-                            HostName = "",
-                            ResponseTime = results.CurrTime
-                        });
+                    Ping ping = new Ping(attrs, cancellationToken);
+                    
+                    try {
+                        foreach (string host in addrs) {
+
+                            // Send ping
+                            PingResults results = ping.Send(host);
+                            if (results.ScanWasCanceled) {
+                                // Cancel was requested during scan
+                                throw new OperationCanceledException();
+                            }
+
+                            Interlocked.Increment(ref scanned);
+
+                            if (results.Lost == 0 && results.ErrorPackets != 1) {
+                                // If host is active, add to list
+                                lock (lockObject) {
+                                    activeHosts.Add(new HostInformation {
+                                        Address = host,
+                                        HostName = "",
+                                        ResponseTime = results.CurrTime
+                                    });
+                                }
+                            }
+                        }
+                    } catch (OperationCanceledException) {
+                        canceled = true;
                     }
-                }
+                });
+
+                threads[i].IsBackground = true;
+                threads[i].Start();
             }
-            catch (OperationCanceledException) { }
+
+            // Wait for all threads to exit
+            int lastSent = 0 , pingsPerSecond = 0;
+            int lastSpeedCheck = 0;
+            while (threads.Where(x => x.IsAlive).ToList().Count > 0) {
+                int count = 0;
+                lock (lockObject) {
+                    count = activeHosts.Count;
+                }
+                
+                if (lastSpeedCheck == 5) {
+                    pingsPerSecond = Math.Abs((scanned - lastSent));
+                    lastSent = scanned;
+                    lastSpeedCheck = 0;
+                }
+                Display.ScanProgress(
+                    scanned, 
+                    activeHosts.Count, 
+                    addresses.Count,
+                    pingsPerSecond,
+                    timer.Elapsed, 
+                    range);
+
+                lastSpeedCheck++;
+                Thread.Sleep(200);
+            }
+
+            // Display one last time so the bar actually completes 
+            // (scan could have completed while the main thread was sleeping)
+            Display.ScanProgress(
+                scanned,
+                activeHosts.Count,
+                addresses.Count,
+                pingsPerSecond,
+                timer.Elapsed,
+                range);
+
+            // Exit out when the operation has been canceled
+            if (canceled) {
+                Display.ScanResults(scanned, false, activeHosts);
+                return;
+            }
 
             // Lookup host's name
             Console.WriteLine();

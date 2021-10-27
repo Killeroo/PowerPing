@@ -31,6 +31,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
+using System.Collections.Generic;
 
 namespace PowerPing
 {
@@ -277,6 +278,41 @@ namespace PowerPing
                 catch (Exception) { } // We just want to blanket catch any exception and silently continue
 
             }
+
+        }
+
+        /// <summary>
+        /// Split list into x equally sized lists 
+        /// </summary>
+        /// <source>https://stackoverflow.com/a/3893011</source>
+        public static List<T>[] PartitionList<T>(List<T> list, int partitionCount)
+        {
+            if (list == null)
+                throw new ArgumentNullException();
+
+            if (partitionCount < 1)
+                throw new ArgumentOutOfRangeException();
+
+            List<T>[] partitions = new List<T>[partitionCount];
+
+            int maxSize = (int)Math.Ceiling((double)(list.Count / (double)partitionCount));
+            int currentOffset = 0;
+
+            for (int i = 0; i < partitions.Length; i++) 
+            {
+                partitions[i] = new List<T>();
+                for (int j = currentOffset; j < currentOffset + maxSize; j++) 
+                {
+                    if (j >= list.Count)
+                        break;
+
+                    partitions[i].Add(list[j]);
+                }
+
+                currentOffset += maxSize;
+            }
+
+            return partitions;
 
         }
 

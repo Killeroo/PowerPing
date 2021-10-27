@@ -114,9 +114,8 @@ namespace PowerPing
         const string REPLY_TIME_TXT = " time=";
 
         // Scan messages
-        const string SCAN_RANGE_TXT = "Scanning range [ {0} ] ";
-        const string SCAN_HOSTS_TXT = " Sent: {0} Found Hosts: {1}";
-        const string SCAN_CUR_ADDR_TXT = " Pinging ";
+        const string SCAN_RANGE_TXT = "Scanning range [ {0} ]...";
+        const string SCAN_HOSTS_TXT = " Found Hosts: {1} Sent: {0} ({2} Pings Per Second) ";
         const string SCAN_RESULT_MSG = "Scan complete. {0} addresses scanned. {1} hosts active:";
         const string SCAN_RESULT_ENTRY = "-- {0} [{1:0.0}ms] [{2}]";
         const string SCAN_CONNECTOR_CHAR = "|";
@@ -471,7 +470,6 @@ Get location information for 84.23.12.4";
         private static CursorPosition ppsPos = new CursorPosition(0, 0);
         private static CursorPosition progBarPos = new CursorPosition(0, 0);
         private static CursorPosition scanInfoPos = new CursorPosition(0, 0);
-        private static CursorPosition curAddrPos = new CursorPosition(0, 0);
         private static CursorPosition scanTimePos = new CursorPosition(0, 0);
         private static CursorPosition perComplPos = new CursorPosition(0, 0);
 
@@ -711,7 +709,7 @@ Get location information for 84.23.12.4";
         /// <summary>
         /// Display results of scan
         /// </summary>
-        public static void ScanProgress(int scanned, int found, int total, TimeSpan curTime, string range, string curAddr = "---.---.---.---")
+        public static void ScanProgress(int scanned, int found, int total, int pingsPerSecond, TimeSpan curTime, string range)
         {
             // Check if cursor position is already set
             if (progBarPos.Left != 0) {
@@ -721,14 +719,10 @@ Get location information for 84.23.12.4";
                 Console.CursorVisible = false;
 
                 // Update labels
-                curAddrPos.SetToPosition();
-                Console.WriteLine(new String(' ', 20));
                 scanInfoPos.SetToPosition();
-                Console.WriteLine(SCAN_HOSTS_TXT, scanned, found);
+                Console.WriteLine(SCAN_HOSTS_TXT, scanned, found, pingsPerSecond);
                 scanTimePos.SetToPosition();
                 Console.Write("{0:hh\\:mm\\:ss}", curTime);
-                curAddrPos.SetToPosition();
-                Console.Write(curAddr);
                 progBarPos.SetToPosition();
                 double s = scanned;
                 double tot = total;
@@ -744,9 +738,6 @@ Get location information for 84.23.12.4";
 
                 // Setup labels
                 Console.WriteLine(SCAN_RANGE_TXT, range);
-                Console.Write(SCAN_CUR_ADDR_TXT);
-                curAddrPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
-                Console.WriteLine(curAddr);
                 scanInfoPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.WriteLine();
                 Console.Write(" ");
