@@ -137,15 +137,23 @@ namespace PowerPing
                             Console.WriteLine(i);
                         }
 
-                        for (int i = 0; i < addresses.Count; i++) {
-                            pingThreads[i] = new Thread(() => {
+                        int count = 0;
+                        foreach (string addr in addresses) {
+
+                            pingThreads[count] = new Thread(() => {
                                 PingAttributes attrs = new PingAttributes(inputtedAttributes);
-                                attrs.InputtedAddress = addresses[i];
+                                attrs.InputtedAddress = addr;
                                 Ping pp = new Ping(attrs, m_CancellationTokenSource.Token);
                                 PingResults results = pp.Send();
                                 Display.PingResults(attrs, results);
                             });
-                            pingThreads[i].Start();
+                            pingThreads[count].Start();
+
+                            count++;
+                        }
+
+                        for (int i = 0; i < addresses.Count; i++) {
+
                         }
 
                     }
