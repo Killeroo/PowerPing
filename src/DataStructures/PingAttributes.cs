@@ -92,6 +92,30 @@ namespace PowerPing
             RandomTiming = false;
             Operation = PingOperation.Normal;
         }
+
+        public PingAttributes(PingAttributes attributes)
+        {
+            InputtedAddress = attributes.InputtedAddress;
+            ResolvedAddress = attributes.ResolvedAddress;
+            Message = attributes.Message;
+            Interval = attributes.Interval;
+            Timeout = attributes.Timeout;
+            Count = attributes.Count;
+            Ttl = attributes.Ttl;
+            Type = attributes.Type;
+            Code = attributes.Code;
+            ArtificalMessageSize = attributes.ArtificalMessageSize;
+            BeepMode = attributes.BeepMode;
+            ReceiveBufferSize = attributes.ReceiveBufferSize;
+
+            Continous = attributes.Continous;
+            UseICMPv4 = attributes.UseICMPv4;
+            UseICMPv6 = attributes.UseICMPv6;
+            RandomMessage = attributes.RandomMessage;
+            DontFragment = attributes.DontFragment;
+            RandomTiming = attributes.RandomTiming;
+            Operation = attributes.Operation;
+        }
     }
 
 }

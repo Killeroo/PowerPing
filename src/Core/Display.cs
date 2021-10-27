@@ -28,6 +28,7 @@ using System.Text;
 using System.Linq;
 using System.Globalization;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace PowerPing
 {
@@ -58,6 +59,9 @@ namespace PowerPing
         public static int DecimalPlaces { get; set; } = 1;
         public static ConsoleColor DefaultForegroundColor { get; set; }
         public static ConsoleColor DefaultBackgroundColor { get; set; }
+        public static bool MultiThreaded { get; set; } = false;
+
+        private static object writelockObject = new object();
 
         // Stores console cursor position, used for updating text at position
         private struct CursorPosition
@@ -532,6 +536,10 @@ Get location information for 84.23.12.4";
                 return;
             }
 
+            if (MultiThreaded) {
+                Monitor.Enter(writelockObject);
+            }
+
             // Construct string
             Console.WriteLine();
             Console.Write(INTRO_ADDR_TXT, attrs.InputtedAddress);
@@ -560,6 +568,10 @@ Get location information for 84.23.12.4";
 
             // Print string
             Console.WriteLine(":");
+
+            if (MultiThreaded) {
+                Monitor.Exit(writelockObject);
+            }
         }
         /// <summary>
         /// Display initial listening message
@@ -575,6 +587,10 @@ Get location information for 84.23.12.4";
         {
             if (!Display.ShowOutput) {
                 return;
+            }
+
+            if (MultiThreaded) {
+                Monitor.Enter(writelockObject);
             }
 
             // Show shortened info
@@ -602,6 +618,10 @@ Get location information for 84.23.12.4";
             // End line
             Console.WriteLine();
 
+            if (MultiThreaded) {
+                Monitor.Exit(writelockObject);
+            }
+
         }
         /// <summary>
         /// Display information about reply ping packet
@@ -614,6 +634,10 @@ Get location information for 84.23.12.4";
         {
             if (!Display.ShowOutput) {
                 return;
+            }
+
+            if (MultiThreaded) {
+                Monitor.Enter(writelockObject);
             }
 
             // If drawing symbols
@@ -691,6 +715,10 @@ Get location information for 84.23.12.4";
 
 	        // End line
 	        Console.WriteLine();
+
+            if (MultiThreaded) {
+                Monitor.Exit(writelockObject);
+            }
 
         }
         /// <summary>
@@ -784,6 +812,10 @@ Get location information for 84.23.12.4";
                 return;
             }
 
+            if (MultiThreaded) {
+                Monitor.Enter(writelockObject);
+            }
+
             ResetColor();
 
             // Display stats
@@ -870,6 +902,10 @@ Get location information for 84.23.12.4";
                 Properties.Settings.Default.Save();
             }
 
+            if (MultiThreaded) {
+                Monitor.Exit(writelockObject);
+            }
+
             Helper.WaitForUserInput();
         }
         /// <summary>
@@ -924,6 +960,10 @@ Get location information for 84.23.12.4";
                 return;
             }
 
+            if (MultiThreaded) {
+                Monitor.Enter(writelockObject);
+            }
+
             // If drawing symbols
             if (UseSymbols) {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -957,6 +997,10 @@ Get location information for 84.23.12.4";
             // Make double sure we dont get the red line bug
             ResetColor();
             Console.WriteLine();
+
+            if (MultiThreaded) {
+                Monitor.Exit(writelockObject);
+            }
         }
         /// <summary>
         /// Display error message

@@ -24,6 +24,7 @@ SOFTWARE.
 
 using System;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace PowerPing 
 {
@@ -585,6 +586,22 @@ namespace PowerPing
                 return false;
             }
             return true;
+        }
+
+        public static List<string> FindAddresses(string[] args)
+        {
+            List<string> addresses = new List<string>();
+            foreach (string arg in args) {
+                if (Helper.IsIPv4Address(arg)) {
+                    addresses.Add(arg);
+                }
+
+                if (Helper.IsURL(arg)) {
+                    addresses.Add(arg);
+                }
+            }
+
+            return addresses;
         }
 
         /// <summary>

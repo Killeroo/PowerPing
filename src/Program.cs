@@ -123,10 +123,34 @@ namespace PowerPing
                     Scan.Start(inputtedAttributes.InputtedAddress, m_CancellationTokenSource.Token);
                     break;
                 case PingOperation.Normal:
-                    // Send ping normally
-                    p = new Ping(inputtedAttributes, m_CancellationTokenSource.Token);
-                    PingResults results = p.Send();
-                    Display.PingResults(inputtedAttributes, results);
+                    var addresses = CommandLine.FindAddresses(args);
+                    if (addresses.Count == 1) {
+                        // Send ping normally
+                        p = new Ping(inputtedAttributes, m_CancellationTokenSource.Token);
+                        PingResults results = p.Send();
+                        Display.PingResults(inputtedAttributes, results);
+                    } else {
+                        Thread[] pingThreads = new Thread[addresses.Count];
+                        Display.MultiThreaded = true;
+                        
+                        for (int i = 0; i < 2; i++) {
+                            Console.WriteLine(i);
+                        }
+
+                        for (int i = 0; i < addresses.Count; i++) {
+                            pingThreads[i] = new Thread(() => {
+                                PingAttributes attrs = new PingAttributes(inputtedAttributes);
+                                attrs.InputtedAddress = addresses[i];
+                                Ping pp = new Ping(attrs, m_CancellationTokenSource.Token);
+                                PingResults results = pp.Send();
+                                Display.PingResults(attrs, results);
+                            });
+                            pingThreads[i].Start();
+                        }
+
+                    }
+
+
                     break;
                 default:
                     Helper.ErrorAndExit("Could not determine ping operation");
