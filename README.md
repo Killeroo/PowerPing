@@ -82,7 +82,6 @@ _Future features:_
     Others:
         --help       [--?]               Displays this help message
         --version    [--v]               Shows version and build information
-        --examples   [--ex]              Shows example usage
 
 ## Example usage:
      powerping 8.8.8.8                    -     Send ping to google DNS with default values (3000ms timeout, 5 pings)

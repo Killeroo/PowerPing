@@ -234,7 +234,6 @@ Modes:
 Other:
     --help          [--?]            Displays this help message
     --version       [--v]            Shows version and build information
-    --examples      [--ex]           Displays some example usage
 
 Written by Matthew Carney [matthewcarney64@gmail.com] =^-^=
 Find the project here [https://github.com/Killeroo/PowerPing]
@@ -476,21 +475,6 @@ Get location information for 84.23.12.4";
             Console.WriteLine(HELP_MSG);
 
             Helper.CheckRecentVersion();
-        }
-        /// <summary>
-        /// Displays example powerping usage
-        /// </summary>
-        public static void Examples()
-        {
-            Console.WriteLine(EXAMPLE_MSG_PAGE_1);
-            Console.WriteLine("Press enter to continue...");
-            Console.ReadLine();
-
-            Console.WriteLine(EXAMPLE_MSG_PAGE_2);
-            Console.WriteLine("Press enter to continue...");
-            Console.ReadLine();
-
-            Console.WriteLine(EXAMPLE_MSG_PAGE_3);
         }
         /// <summary>
         /// Display Initial ping message to screen, declaring simple info about the ping

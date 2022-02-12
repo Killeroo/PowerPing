@@ -208,15 +208,6 @@ namespace PowerPing
 
                                 Environment.Exit(0);
                                 break;
-                            case "/examples":
-                            case "-examples":
-                            case "--examples":
-                            case "/ex":
-                            case "-ex":
-                            case "--ex": // Displays examples
-                                Display.Examples();
-                                Environment.Exit(0); // Exit after displaying examples
-                                break;
                             case "/shorthand":
                             case "-shorthand":
                             case "--shorthand":
