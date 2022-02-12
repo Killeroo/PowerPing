@@ -56,6 +56,7 @@ namespace PowerPing
         public static bool ShowChecksum { get; set; } = false;
         public static bool UseInputtedAddress { get; set; } = false;
         public static bool UseResolvedAddress { get; set; } = false;
+        public static bool RequireInput { get; set; } = false;
         public static int DecimalPlaces { get; set; } = 1;
         public static ConsoleColor DefaultForegroundColor { get; set; }
         public static ConsoleColor DefaultBackgroundColor { get; set; }
@@ -233,15 +234,9 @@ Display Arguments:
     --resolve       [--res]          Resolve hostname of response address from DNS
     --inputaddr     [--ia]           Show input address instead of revolved IP address
     --checksum      [--chk]          Display checksum of packet
+    --requireinput  [--ri]           Always ask for user input upon completion 
     --limit         [--l]   number   Limits output to just replies(1), requests(2) or summary(3)
     --decimals      [--dp]  number   Num of decimal places to use (0 to 3)
-
-Input Arguments: 
-    --noinput       [--ni]           Don't ever ask for user input upon finishing
-    --requireinput  [--ri]           Always ask for user input upon completion 
-                                     (NOTE: These settings persist between runs so only need
-                                      to be used once. However, they will function the same 
-                                      if used in every command.)
 
 Modes:
     --scan          [--sc]  address  Network scanning, specify range ""127.0.0.1-55""
@@ -482,16 +477,12 @@ Get location information for 84.23.12.4";
         /// <summary>
         /// Displays current version number and build date
         /// </summary>
-        public static void Version(bool date = false)
+        public static void Version()
         {
-            Version v = Assembly.GetExecutingAssembly().GetName().Version;
-            DateTime buildInfo = Assembly.GetExecutingAssembly().GetLinkerTime();
-            string version = Assembly.GetExecutingAssembly().GetName().Name + " v" + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ") ";
-            string buildTime = buildInfo.Day + "/" + buildInfo.Month + "/" + buildInfo.Year + " " + buildInfo.TimeOfDay;
+            string assemblyVersion = Helper.GetVersionString();
+            string assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
 
-            // Write version
-            Console.WriteLine(version + (date ? "[Built " + buildTime + "]" : ""));
-            
+            Console.WriteLine(assemblyName + " " + assemblyVersion);
         }
         /// <summary>
         /// Displays help message
@@ -499,14 +490,10 @@ Get location information for 84.23.12.4";
         public static void Help()
         {
             // Print help message
-            Version v = Assembly.GetExecutingAssembly().GetName().Version;
-            DateTime buildInfo = Assembly.GetExecutingAssembly().GetLinkerTime();
-            string version = Assembly.GetExecutingAssembly().GetName().Name + " v" + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ") ";
-            Console.WriteLine(version);
+            Console.WriteLine(Assembly.GetExecutingAssembly().GetName().Name + " " + Helper.GetVersionString());
             Console.WriteLine(HELP_MSG);
 
             Helper.CheckRecentVersion();
-
         }
         /// <summary>
         /// Displays example powerping usage
@@ -522,8 +509,6 @@ Get location information for 84.23.12.4";
             Console.ReadLine();
 
             Console.WriteLine(EXAMPLE_MSG_PAGE_3);
-
-            Helper.WaitForUserInput();
         }
         /// <summary>
         /// Display Initial ping message to screen, declaring simple info about the ping
@@ -800,7 +785,10 @@ Get location information for 84.23.12.4";
             }
             Console.WriteLine();
 
-            Helper.WaitForUserInput();
+            if (Display.RequireInput)
+            {
+                Helper.WaitForUserInput();
+            }
         }
         /// <summary>
         /// Displays statistics for a ping object
@@ -893,20 +881,14 @@ Get location information for 84.23.12.4";
                 Console.WriteLine();
             }
 
-            if (Properties.Settings.Default.ShownInputPrompt == false) {
-                Display.Message(
-                "(NOTE: To stop PowerPing from closing too quickly (when opening in a new Administrator console) PowerPing will\n" +
-                "prompt for user input upon completion BY DEFAULT, you can disable this PERMENANTLY using the --noinput argument next time)\n",
-                ConsoleColor.Cyan);
-                Properties.Settings.Default.ShownInputPrompt = true;
-                Properties.Settings.Default.Save();
-            }
-
             if (MultiThreaded) {
                 Monitor.Exit(writelockObject);
             }
 
-            Helper.WaitForUserInput();
+            if (Display.RequireInput)
+            {
+                Helper.WaitForUserInput();
+            }
         }
         /// <summary>
         /// Displays and updates results of an ICMP flood

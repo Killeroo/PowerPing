@@ -50,18 +50,14 @@ namespace PowerPing
         /// <summary>
         /// Pause program and wait for user input
         /// </summary>
-        public static void WaitForUserInput(bool exiting = true)
+        public static void WaitForUserInput()
         {
             // Don't wait for output when the output of the program is being redirected 
             // (to say a file or something)
             if (Console.IsOutputRedirected)
                 return;
 
-            // Only ask for user input if NoInput hasn't been set
-            if (Properties.Settings.Default.RequireInput == false)
-                return;
-
-            Console.Write("Press any key to {0}...", exiting ? "exit" : "continue");
+            Console.Write("Press any key to continue...");
             Console.WriteLine();
 
             // Work around if readkey isnt supported
@@ -77,7 +73,11 @@ namespace PowerPing
         public static void ErrorAndExit(string msg)
         {
             Display.Error(msg);
-            WaitForUserInput();
+
+            if (Display.RequireInput)
+            {
+                Helper.WaitForUserInput();
+            }
 
             Environment.Exit(1);
         }
@@ -161,26 +161,27 @@ namespace PowerPing
         /// <returns></returns>
         public static DateTime GetLinkerTime(this Assembly assembly, TimeZoneInfo target = null)
         {
-            var filePath = assembly.Location;
-            const int c_PeHeaderOffset = 60;
-            const int c_LinkerTimestampOffset = 8;
+            //var filePath = assembly.Location;
+            //const int c_PeHeaderOffset = 60;
+            //const int c_LinkerTimestampOffset = 8;
 
-            var buffer = new byte[2048];
+            //var buffer = new byte[2048];
 
-            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read)) {
-                stream.Read(buffer, 0, 2048);
-            }
+            //using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read)) {
+            //    stream.Read(buffer, 0, 2048);
+            //}
 
-            var offset = BitConverter.ToInt32(buffer, c_PeHeaderOffset);
-            var secondsSince1970 = BitConverter.ToInt32(buffer, offset + c_LinkerTimestampOffset);
-            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            //var offset = BitConverter.ToInt32(buffer, c_PeHeaderOffset);
+            //var secondsSince1970 = BitConverter.ToInt32(buffer, offset + c_LinkerTimestampOffset);
+            //var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-            var linkTimeUtc = epoch.AddSeconds(secondsSince1970);
+            //var linkTimeUtc = epoch.AddSeconds(secondsSince1970);
 
-            var tz = target ?? TimeZoneInfo.Local;
-            var localTime = TimeZoneInfo.ConvertTimeFromUtc(linkTimeUtc, tz);
+            //var tz = target ?? TimeZoneInfo.Local;
+            //var localTime = TimeZoneInfo.ConvertTimeFromUtc(linkTimeUtc, tz);
 
-            return localTime;
+            //return localTime;
+            return new DateTime();
         }
 
         /// <summary>
@@ -324,6 +325,27 @@ namespace PowerPing
         public static long TimeSpanToStopwatchTicks(long timeSpanTicks)
         {
             return (long)(timeSpanTicks * m_TimeSpanToStopwatchTicksScale);
+        }
+
+        /// <summary>
+        /// Gets the version this assembly
+        /// </summary>
+        /// <returns></returns>
+        public static string GetVersionString()
+        {
+            string version = "";
+            Version? v = Assembly.GetExecutingAssembly().GetName().Version;
+
+            if (v != null)
+            {
+                version = "v" + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ") ";
+            }
+            else
+            {
+                version = "";
+            }
+
+            return version;
         }
     }
 }

@@ -15,7 +15,7 @@ copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NOriNFRINGEMENT. IN NO EVENT SHALL THE
+FITNESS FOR A PARTICULAR PURPOSE AND NO INFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -49,25 +49,9 @@ namespace PowerPing
                 // Check for any input arguments first because some of the arguments can early out the program before the
                 // arguments get set.
                 if (args.Contains("/ri") || args.Contains("-ri") || args.Contains("--ri") ||
-                    args.Contains("/noinput") || args.Contains("-noinput") || args.Contains("--noinput")) {
-                    if (Properties.Settings.Default.RequireInput == true) {
-                        Display.Message(
-                        "(RequireInput is now permenantly OFF, you will no longer be prompted for user input anytime PowerPing is firished)",
-                        ConsoleColor.Cyan);
-                    }
-                    Properties.Settings.Default.RequireInput = false;
-                    Properties.Settings.Default.Save();
-                }
-
-                if (args.Contains("/ri") || args.Contains("-ri") || args.Contains("--ri") ||
-                    args.Contains("/requireinput") || args.Contains("-requireinput") || args.Contains("--requireinput")) {
-                    if (Properties.Settings.Default.RequireInput == false) {
-                        Display.Message(
-                        "(RequireInput is now permenantly ON, from now on you will be prompted for user input whenever PowerPing is finished)",
-                        ConsoleColor.Cyan);
-                    }
-                    Properties.Settings.Default.RequireInput = true;
-                    Properties.Settings.Default.Save();
+                    args.Contains("/requireinput") || args.Contains("-requireinput") || args.Contains("--requireinput"))
+                {
+                    Display.RequireInput = true;
                 }
 
                 checked {
@@ -82,9 +66,12 @@ namespace PowerPing
                             case "/v":
                             case "-v":
                             case "--v":
-                                Display.Version(true);
+                                Display.Version();
                                 Helper.CheckRecentVersion();
-                                Helper.WaitForUserInput();
+                                if (Display.RequireInput)
+                                {
+                                    Helper.WaitForUserInput();
+                                }
                                 Environment.Exit(0);
                                 break;
                             case "/beep":
@@ -120,12 +107,12 @@ namespace PowerPing
                             case "--c": // Ping count
                                 attributes.Count = Convert.ToInt32(args[count + 1]);
                                 break;
-                            case "/infirite":
-                            case "-infirite":
-                            case "--infirite":
+                            case "/infiite":
+                            case "-infinite":
+                            case "--infinite":
                             case "/t":
                             case "-t":
-                            case "--t": // Infiritely send
+                            case "--t": // Infinitely send
                                 attributes.Continous = true;
                                 break;
                             case "/timeout":
@@ -231,7 +218,12 @@ namespace PowerPing
                             case "-?":
                             case "--?": // Display help message
                                 Display.Help();
-                                Helper.WaitForUserInput();
+
+                                if (Display.RequireInput)
+                                {
+                                    Helper.WaitForUserInput();
+                                }
+
                                 Environment.Exit(0);
                                 break;
                             case "/examples":

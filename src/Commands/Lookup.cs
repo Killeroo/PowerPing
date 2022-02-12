@@ -214,8 +214,6 @@ namespace PowerPing
             Display.Message(" DONE", ConsoleColor.Yellow);
             Console.WriteLine(result);
             Display.Message("WHOIS LOOKUP FOR [" + address + "] COMPLETE.", ConsoleColor.Yellow);
-
-            Helper.WaitForUserInput();
         }
 
         /// <summary>

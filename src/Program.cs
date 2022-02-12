@@ -57,7 +57,6 @@ namespace PowerPing
             // Check if no arguments
             if (args.Length == 0) {
                 Display.Help();
-                Helper.WaitForUserInput();
                 return;
             }
 
@@ -98,11 +97,17 @@ namespace PowerPing
                     break;
                 case PingOperation.Location:
                     Console.WriteLine(Lookup.GetAddressLocationInfo(inputtedAttributes.InputtedAddress, false));
-                    Helper.WaitForUserInput();
+                    if (Display.RequireInput)
+                    {
+                        Helper.WaitForUserInput();
+                    }
                     break;
                 case PingOperation.Whoami:
                     Console.WriteLine(Lookup.GetAddressLocationInfo("", true));
-                    Helper.WaitForUserInput();
+                    if (Display.RequireInput)
+                    {
+                        Helper.WaitForUserInput();
+                    }
                     break;
                 case PingOperation.Whois:
                     Lookup.QueryWhoIs(inputtedAttributes.InputtedAddress);
