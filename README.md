@@ -2,7 +2,7 @@
 
 [![](https://img.shields.io/badge/stable%20version-1.4.0-brightgreen.svg)](https://github.com/Killeroo/PowerPing/releases) 
 
-Small improved command line ICMP ping program lovingly inspired by windows and linux, written in C#.
+Small improved command line ICMP ping program.
 
 ![alt text](https://user-images.githubusercontent.com/9999745/74611062-8ad7e800-50f0-11ea-880c-17b7a76a0bab.png "PowerPing in action")
 
@@ -63,15 +63,9 @@ _Future features:_
         --resolve       [--res]          Resolve hostname of response address from DNS
         --inputaddr     [--ia]           Show input address instead of revolved one
         --checksum      [--chk]          Display checksum of packet
+        --requireinput  [--ri]           Always ask for user input upon completion 
         --limit         [--l]   number   Limits output to just replies (1), requests (2) or summary(3)
         --decimals      [--dp]  number   Num of decimal places to use (0 to 3)
-
-    Input Options: 
-        --noinput       [--ni]           Don't ask for user input upon completion 
-        --requireinput  [--ri]           Always ask for user input upon completion 
-                                         (NOTE: These settings persist between runs so only need
-                                          to be used once. However, they will function the same 
-                                          if used in every command.)
 
     Modes:
         --scan          [--sc]  address  Network scanning, specify range "127.0.0.1-55"
@@ -106,7 +100,7 @@ _Future features:_
 
 License under the MIT License:
 
-Copyright (c) 2020 Matthew Carney <matthewcarney64@gmail.com>
+Copyright (c) 2022 Matthew Carney <matthewcarney64@gmail.com>
 
 ### Note: 
 **Requires _Elevated Rights (Admininstrator)_ to Run (more info [here](https://github.com/Killeroo/PowerPing/issues/110))**
