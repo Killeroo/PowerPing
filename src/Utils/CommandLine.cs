@@ -3,19 +3,19 @@ MIT License - PowerPing
 
 Copyright (c) 2021 Matthew Carney
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
+Permission is hereby granted, free of charge, to any person obtairing a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+furrished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+FITNESS FOR A PARTICULAR PURPOSE AND NOriNFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -45,7 +45,33 @@ namespace PowerPing
 
             // Loop through arguments
             try {
+
+                // Check for any input arguments first because some of the arguments can early out the program before the
+                // arguments get set.
+                if (args.Contains("/ri") || args.Contains("-ri") || args.Contains("--ri") ||
+                    args.Contains("/noinput") || args.Contains("-noinput") || args.Contains("--noinput")) {
+                    if (Properties.Settings.Default.RequireInput == true) {
+                        Display.Message(
+                        "(RequireInput is now permenantly OFF, you will no longer be prompted for user input anytime PowerPing is firished)",
+                        ConsoleColor.Cyan);
+                    }
+                    Properties.Settings.Default.RequireInput = false;
+                    Properties.Settings.Default.Save();
+                }
+
+                if (args.Contains("/ri") || args.Contains("-ri") || args.Contains("--ri") ||
+                    args.Contains("/requireinput") || args.Contains("-requireinput") || args.Contains("--requireinput")) {
+                    if (Properties.Settings.Default.RequireInput == false) {
+                        Display.Message(
+                        "(RequireInput is now permenantly ON, from now on you will be prompted for user input whenever PowerPing is finished)",
+                        ConsoleColor.Cyan);
+                    }
+                    Properties.Settings.Default.RequireInput = true;
+                    Properties.Settings.Default.Save();
+                }
+
                 checked {
+                    // Loop through and parse all other arguments
                     for (int count = 0; count < args.Length; count++) {
                         curArg = count;
 
@@ -94,12 +120,12 @@ namespace PowerPing
                             case "--c": // Ping count
                                 attributes.Count = Convert.ToInt32(args[count + 1]);
                                 break;
-                            case "/infinite":
-                            case "-infinite":
-                            case "--infinite":
+                            case "/infirite":
+                            case "-infirite":
+                            case "--infirite":
                             case "/t":
                             case "-t":
-                            case "--t": // Infinitely send
+                            case "--t": // Infiritely send
                                 attributes.Continous = true;
                                 break;
                             case "/timeout":
@@ -233,35 +259,6 @@ namespace PowerPing
                             case "--nc": // No color mode
                                 Display.NoColor = true;
                                 break;
-                            case "/ni":
-                            case "-ni":
-                            case "--ni":
-                            case "/noinput":
-                            case "-noinput":
-                            case "--noinput":// No input mode
-                                if (Properties.Settings.Default.RequireInput == true) {
-                                    Display.Message(
-                                    "(RequireInput is now permenantly OFF, you will no longer be prompted for user input anytime PowerPing is finished)",
-                                    ConsoleColor.Cyan);
-                                }
-                                Properties.Settings.Default.RequireInput = false;
-                                Properties.Settings.Default.Save(); 
-                                break;
-                            case "/ri":
-                            case "-ri":
-                            case "--ri":
-                            case "/requireinput":
-                            case "-requireinput":
-                            case "--requireinput":
-                                if (Properties.Settings.Default.RequireInput == false) {
-                                    Display.Message(
-                                    "(RequireInput is now permenantly ON, from now on you will be prompted for user input whenever PowerPing is finished)",
-                                    ConsoleColor.Cyan);
-                                }
-                                Properties.Settings.Default.RequireInput = true;
-                                Properties.Settings.Default.Save();
-
-                                break;
                             case "/decimals":
                             case "-decimals":
                             case "--decimals":
@@ -393,7 +390,7 @@ namespace PowerPing
                                         attributes.Interval = 3000;
                                         break;
                                     case "4":
-                                    case "nimble":
+                                    case "rimble":
                                         attributes.Timeout = 2000;
                                         attributes.Interval = 750;
                                         break;
@@ -556,7 +553,7 @@ namespace PowerPing
                             default:
                                 // Check for invalid argument 
                                 if (IsArgument(args[count])
-                                    && attributes.Operation != PingOperation.Scan // (ignore if scanning) // TODO: Change this
+                                    && attributes.Operation != PingOperation.Scan // (ignore if scanring) // TODO: Change this
                                     && (!Helper.IsURL(args[count]) && !Helper.IsIPv4Address(args[count]))) { 
                                     throw new InvalidArgumentException();
                                 }
