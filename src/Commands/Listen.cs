@@ -73,7 +73,7 @@ namespace PowerPing
             try {
                 hostAddress = Dns.GetHostEntry(Dns.GetHostName());
             } catch (Exception e) {
-                Display.Error($"Could not fetch local addresses ({e.GetType().ToString().Split('.').Last()})");
+                ConsoleDisplay.Error($"Could not fetch local addresses ({e.GetType().ToString().Split('.').Last()})");
             }
 
             // Only get IPv4 address
@@ -101,11 +101,11 @@ namespace PowerPing
                 listeningSocket.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 }); // Set SIO_RCVALL flag to socket IO control
                 listeningSocket.ReceiveBufferSize = bufferSize;
             } catch (Exception e) {
-                Display.Error($"Exception occured while trying to create listening socket for {address.ToString()} ({e.GetType().ToString().Split('.').Last()})");
+                ConsoleDisplay.Error($"Exception occured while trying to create listening socket for {address.ToString()} ({e.GetType().ToString().Split('.').Last()})");
                 return;
             }
 
-            Display.ListenIntroMsg(address.ToString());
+            ConsoleDisplay.ListenIntroMsg(address.ToString());
 
             // Listening loop
             while (true)
@@ -120,14 +120,14 @@ namespace PowerPing
                     ICMP response = new ICMP(buffer, bytesRead);
 
                     // Display captured packet
-                    Display.CapturedPacket(address.ToString(), response, remoteEndPoint.ToString(), DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead);
+                    ConsoleDisplay.CapturedPacket(address.ToString(), response, remoteEndPoint.ToString(), DateTime.Now.ToString("h:mm:ss.ff tt"), bytesRead);
 
                     // Store results
                     results.CountPacketType(response.Type);
                     results.IncrementReceivedPackets();
                 } catch (OperationCanceledException) {
                 } catch (SocketException) {
-                    Display.Error("Could not read packet from socket");
+                    ConsoleDisplay.Error("Could not read packet from socket");
                 }
             }
 

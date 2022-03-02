@@ -15,13 +15,13 @@ namespace PowerPing
     /// 
     /// Sends a high volume of ICMP pings to a given address
     /// </summary>
-    static class Flood
+    public class Flood : IPingMessageHandler
     {
         private static RateLimiter displayUpdateLimiter = new RateLimiter(TimeSpan.FromMilliseconds(500));
         private static ulong previousPingsSent = 0;
         private static string m_Address = "";
 
-        public static void Start(string address, CancellationToken cancellationToken)
+        public void Start(string address, CancellationToken cancellationToken)
         {
             PingAttributes attrs = new PingAttributes();
             m_Address = address;
@@ -36,21 +36,16 @@ namespace PowerPing
             // TODO: Option for 'heavy' flood with bloated packet sizes
             attrs.Continous = true;
             
-            Ping p = new Ping(attrs, cancellationToken, ResultsUpdateCallback);
-
-            // Disable output for faster speeds
-            Display.ShowOutput = false;
+            Ping p = new Ping(attrs, cancellationToken, this);
 
             // Start flooding
             PingResults results = p.Send();
 
-            // Display results
-            Display.ShowOutput = true;
-            Display.PingResults(attrs, results);
+            ConsoleDisplay.PingResults(attrs, results);
         }
 
         // This callback will run after each ping iteration
-        private static void ResultsUpdateCallback(PingResults r)
+        public void OnResultsUpdate(PingResults r)
         {
             // Make sure we're not updating the display too frequently
             if (!displayUpdateLimiter.RequestRun()) {
@@ -65,8 +60,14 @@ namespace PowerPing
             previousPingsSent = r.Sent;
 
             // Update results text
-            Display.FloodProgress(r.Sent, (ulong)Math.Round(pingsPerSecond), m_Address);
+            ConsoleDisplay.FloodProgress(r.Sent, (ulong)Math.Round(pingsPerSecond), m_Address);
         }
 
+        public void OnError(string message, Exception e = null, bool fatal = false) { }
+        public void OnFinish(PingResults results) { }
+        public void OnReply(PingReply response) { }
+        public void OnRequest(PingRequest request) { }
+        public void OnStart(PingAttributes attributes) { }
+        public void OnTimeout(PingTimeout timeout) { }
     }
 }

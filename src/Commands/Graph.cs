@@ -77,7 +77,7 @@ namespace PowerPing
             m_PingAttributes.Continous = true;
 
             m_CancellationToken = cancellationTkn;
-            m_Ping = new Ping(m_PingAttributes, cancellationTkn, OnPingResultsUpdateCallback);
+            m_Ping = new Ping(m_PingAttributes, cancellationTkn, null, OnPingResultsUpdateCallback);
             m_Scale = m_StartScale;
 
         }
@@ -87,8 +87,6 @@ namespace PowerPing
         /// </summary>
         public void Start()
         {
-            // Disable output
-            Display.ShowOutput = false;
 
             // Hide cursor
             Console.CursorVisible = false;

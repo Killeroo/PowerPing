@@ -178,24 +178,24 @@ namespace PowerPing
             if (keyword == "" || tld == "") {
                 Helper.ErrorAndExit("Incorrectly formatted address, please check format and try again");
             }
-            Display.Message("WHOIS [" + address + "]:", ConsoleColor.Yellow);
+            ConsoleDisplay.Message("WHOIS [" + address + "]:", ConsoleColor.Yellow);
 
             // Find appropriate whois for the tld
-            Display.Message("QUERYING [" + ROOT_WHOIS_SERVER + "] FOR TLD [" + tld + "]:", ConsoleColor.Yellow, false);
+            ConsoleDisplay.Message("QUERYING [" + ROOT_WHOIS_SERVER + "] FOR TLD [" + tld + "]:", ConsoleColor.Yellow, false);
             string whoisRoot = PerformWhoIsLookup(ROOT_WHOIS_SERVER, tld);
-            Display.Message(" DONE", ConsoleColor.Yellow);
+            ConsoleDisplay.Message(" DONE", ConsoleColor.Yellow);
             if (full) {
                 Console.WriteLine(whoisRoot);
             }
             whoisRoot = whoisRoot.Remove(0, whoisRoot.IndexOf("whois:", StringComparison.Ordinal) + 6).TrimStart();
             whoisRoot = whoisRoot.Substring(0, whoisRoot.IndexOf('\r'));
-            Display.Message("QUERYING [" + whoisRoot + "] FOR DOMAIN [" + address + "]:", ConsoleColor.Yellow, false);
+            ConsoleDisplay.Message("QUERYING [" + whoisRoot + "] FOR DOMAIN [" + address + "]:", ConsoleColor.Yellow, false);
 
             // Next query resulting whois for the domain
             string result = PerformWhoIsLookup(whoisRoot, address);
-            Display.Message(" DONE", ConsoleColor.Yellow);
+            ConsoleDisplay.Message(" DONE", ConsoleColor.Yellow);
             Console.WriteLine(result);
-            Display.Message("WHOIS LOOKUP FOR [" + address + "] COMPLETE.", ConsoleColor.Yellow);
+            ConsoleDisplay.Message("WHOIS LOOKUP FOR [" + address + "] COMPLETE.", ConsoleColor.Yellow);
         }
 
         /// <summary>

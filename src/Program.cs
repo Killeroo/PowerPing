@@ -22,26 +22,24 @@ namespace PowerPing
         /// <param name="args">Program arguments</param>
         static void Main(string[] args)
         {
-            // User inputted attributes
             PingAttributes inputtedAttributes = new PingAttributes();
-
-            // Setup console
-            Display.DefaultForegroundColor = Console.ForegroundColor;
-            Display.DefaultBackgroundColor = Console.BackgroundColor;
+            DisplayConfiguration displayConfiguration = new DisplayConfiguration();
 
             // Show current version info
             //Display.Version();
 
             // Check if no arguments
             if (args.Length == 0) {
-                Display.Help();
+                ConsoleDisplay.Help();
                 return;
             }
 
             // Parse command line arguments
-            if (!CommandLine.Parse(args, ref inputtedAttributes)) {
+            if (!CommandLine.Parse(args, ref inputtedAttributes, ref displayConfiguration)) {
                 Helper.ErrorAndExit("Problem parsing arguments, use \"PowerPing /help\" or \"PowerPing /?\" for help.");
             }
+
+            Helper.RequireInput = displayConfiguration.RequireInput;
 
             // Find address/host in arguments
             if (inputtedAttributes.Operation != PingOperation.Whoami &&
@@ -61,6 +59,12 @@ namespace PowerPing
                 Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
             }
 
+            // Set configuration
+            ConsoleDisplay.Configuration = displayConfiguration;
+
+            // Add handler to display ping events
+            ConsoleMessageHandler consoleHandler = new ConsoleMessageHandler(displayConfiguration, m_CancellationTokenSource.Token);
+            
             // Select correct function using opMode 
             Ping p;
             Graph g;
@@ -75,14 +79,14 @@ namespace PowerPing
                     break;
                 case PingOperation.Location:
                     Console.WriteLine(Lookup.GetAddressLocationInfo(inputtedAttributes.InputtedAddress, false));
-                    if (Display.RequireInput)
+                    if (displayConfiguration.RequireInput)
                     {
                         Helper.WaitForUserInput();
                     }
                     break;
                 case PingOperation.Whoami:
                     Console.WriteLine(Lookup.GetAddressLocationInfo("", true));
-                    if (Display.RequireInput)
+                    if (displayConfiguration.RequireInput)
                     {
                         Helper.WaitForUserInput();
                     }
@@ -100,7 +104,8 @@ namespace PowerPing
                     g.Start();
                     break;
                 case PingOperation.Flood:
-                    Flood.Start(inputtedAttributes.InputtedAddress, m_CancellationTokenSource.Token);
+                    Flood f = new Flood();
+                    f.Start(inputtedAttributes.InputtedAddress, m_CancellationTokenSource.Token);
                     break;
                 case PingOperation.Scan:
                     Scan.Start(inputtedAttributes.InputtedAddress, m_CancellationTokenSource.Token);
@@ -109,12 +114,11 @@ namespace PowerPing
                     var addresses = CommandLine.FindAddresses(args);
                     if (addresses.Count == 1) {
                         // Send ping normally
-                        p = new Ping(inputtedAttributes, m_CancellationTokenSource.Token);
+                        p = new Ping(inputtedAttributes, m_CancellationTokenSource.Token, consoleHandler);
                         PingResults results = p.Send();
-                        Display.PingResults(inputtedAttributes, results);
                     } else {
                         Thread[] pingThreads = new Thread[addresses.Count];
-                        Display.MultiThreaded = true;
+                        ConsoleDisplay.MultiThreaded = true;
                         
                         for (int i = 0; i < 2; i++) {
                             Console.WriteLine(i);
@@ -128,7 +132,6 @@ namespace PowerPing
                                 attrs.InputtedAddress = addr;
                                 Ping pp = new Ping(attrs, m_CancellationTokenSource.Token);
                                 PingResults results = pp.Send();
-                                Display.PingResults(attrs, results);
                             });
                             pingThreads[count].Start();
 
@@ -149,7 +152,7 @@ namespace PowerPing
             }
 
             // Reset console colour
-            Display.ResetColor();
+            ConsoleDisplay.ResetColor();
             try { Console.CursorVisible = true; } catch (Exception) { }
         }
 

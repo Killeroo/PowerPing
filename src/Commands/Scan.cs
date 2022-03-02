@@ -44,9 +44,6 @@ namespace PowerPing
             List<HostInformation> activeHosts = new List<HostInformation>();
             Stopwatch timer = new Stopwatch();
 
-            Display.ShowOutput = false;
-            
-
             // Get addresses to scan from range
             addresses = ParseRange(range);
 
@@ -68,7 +65,7 @@ namespace PowerPing
                     attrs.Interval = 0;
                     attrs.Count = 1;
 
-                    Ping ping = new Ping(attrs, cancellationToken);
+                    Ping ping = new Ping(attrs, cancellationToken, null);
                     
                     try {
                         foreach (string host in addrs) {
@@ -116,7 +113,7 @@ namespace PowerPing
                     lastSent = scanned;
                     lastSpeedCheck = 0;
                 }
-                Display.ScanProgress(
+                ConsoleDisplay.ScanProgress(
                     scanned, 
                     activeHosts.Count, 
                     addresses.Count,
@@ -130,7 +127,7 @@ namespace PowerPing
 
             // Display one last time so the bar actually completes 
             // (scan could have completed while the main thread was sleeping)
-            Display.ScanProgress(
+            ConsoleDisplay.ScanProgress(
                 scanned,
                 activeHosts.Count,
                 addresses.Count,
@@ -140,7 +137,7 @@ namespace PowerPing
 
             // Exit out when the operation has been canceled
             if (canceled) {
-                Display.ScanResults(scanned, false, activeHosts);
+                ConsoleDisplay.ScanResults(scanned, false, activeHosts);
                 return;
             }
 
@@ -155,7 +152,7 @@ namespace PowerPing
             Console.WriteLine("                                    ");
             Console.CursorTop--;
 
-            Display.ScanResults(scanned, !cancellationToken.IsCancellationRequested, activeHosts);
+            ConsoleDisplay.ScanResults(scanned, !cancellationToken.IsCancellationRequested, activeHosts);
         }
 
         /// <summary>

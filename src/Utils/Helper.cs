@@ -22,9 +22,12 @@ namespace PowerPing
     /// </summary>
     public static class Helper
     {
+        public static bool RequireInput = false;
+
         private static readonly string m_IPv4Regex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}";
         private static readonly string m_UrlRegex = @"[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?";
         private static readonly string m_ValidScanRangeRegex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\-|$)){5}";
+        private static readonly string m_GithubReleaseVersionRegex = @"""(tag_name)"":""((\\""|[^""])*)""";
 
         private static readonly double m_StopwatchToTimeSpanTicksScale = (double)TimeSpan.TicksPerSecond / Stopwatch.Frequency;
         private static readonly double m_TimeSpanToStopwatchTicksScale = (double)Stopwatch.Frequency / TimeSpan.TicksPerSecond;
@@ -54,13 +57,21 @@ namespace PowerPing
         /// <param name="pause">Wait for user input before exitingt</param>
         public static void ErrorAndExit(string msg)
         {
-            Display.Error(msg);
+            ConsoleDisplay.Error(msg);
 
-            if (Display.RequireInput)
+            if (RequireInput)
             {
                 Helper.WaitForUserInput();
             }
 
+            Environment.Exit(1);
+        }
+
+        /// <summary>
+        /// Exits the application with an error code
+        /// </summary>
+        public static void ExitWithError()
+        {
             Environment.Exit(1);
         }
 
@@ -208,7 +219,7 @@ namespace PowerPing
                         $"http://api.github.com/repos/killeroo/powerping/releases/latest");
 
                     // Extract version from returned json
-                    Regex regex = new Regex(@"""(tag_name)"":""((\\""|[^""])*)""");
+                    Regex regex = new Regex(m_GithubReleaseVersionRegex);
                     Match result = regex.Match(jsonResult);
                     if (result.Success) {
                         string matchString = result.Value;

@@ -11,7 +11,7 @@ namespace PowerPing
     /// <summary>
     /// ICMP class, for creating Internet Control Message Protocol (ICMP) packet objects 
     /// </summary>
-    class ICMP
+    public class ICMP
     {
         // Packet attributes
         public byte Type;

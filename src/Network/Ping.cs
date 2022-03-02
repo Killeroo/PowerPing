@@ -17,13 +17,14 @@ using System.Linq;
 namespace PowerPing
 {
     /// <summary>
-    /// Ping Class, used for constructing and sending ICMP packets.
+    /// Ping Class, used for constructing and sending ICMP data over a network.
     /// </summary>
     class Ping {
         public Action<PingResults> OnPingResultsUpdateCallback = null;
 
-        private PingAttributes m_PingAttributes = null;
-        private PingResults m_PingResults = null;
+        private PingAttributes m_Attributes = null;
+        private PingResults m_Results = null;
+        private IPingMessageHandler m_MessageProcessor = null;
 
         private Socket m_Socket = null;
         private ICMP m_Packet = null;
@@ -32,16 +33,25 @@ namespace PowerPing
         private readonly CancellationToken m_CancellationToken;
         private bool m_Debug = false;
 
+        private PingRequest m_RequestMessage = new();
+        private PingReply m_ResponseMessage = new();
+        private PingTimeout m_TimeoutMessage = new();
+
         private ushort m_CurrentSequenceNumber = 0;
         private int m_CurrentReceiveTimeout = 0;
 
         private static readonly ushort m_SessionId = Helper.GenerateSessionId();
 
-        public Ping(PingAttributes attributes, CancellationToken cancellationToken, Action<PingResults> resultsUpdateCallback = null) // On results update
+        public Ping(
+            PingAttributes attributes, 
+            CancellationToken cancellationToken, 
+            IPingMessageHandler callbacks = null,
+            Action<PingResults> resultsUpdateCallback = null) // On results update
         {
-            m_PingAttributes = attributes;
-            m_PingResults = new PingResults();
+            m_Attributes = attributes;
+            m_Results = new PingResults();
             m_CancellationToken = cancellationToken;
+            m_MessageProcessor = callbacks;
             OnPingResultsUpdateCallback = resultsUpdateCallback;
 
             Setup();
@@ -53,9 +63,9 @@ namespace PowerPing
 
         public PingResults Send(PingAttributes attributes)
         {
-            if (attributes != m_PingAttributes) {
+            if (attributes != m_Attributes) {
                 // Replace attributes if they are different
-                m_PingAttributes = attributes;
+                m_Attributes = attributes;
 
                 // Setup everything again
                 Setup();
@@ -65,8 +75,8 @@ namespace PowerPing
         }
         public PingResults Send(string address)
         {
-            m_PingAttributes.InputtedAddress = address;
-            m_PingAttributes.ResolvedAddress = ""; 
+            m_Attributes.InputtedAddress = address;
+            m_Attributes.ResolvedAddress = ""; 
 
             // If we get a new address not only do we have to force a lookup
             // Do this by leaving ResolvedAddress blank, we also need to recreate the
@@ -78,29 +88,13 @@ namespace PowerPing
         }
         public PingResults Send()
         {
-            // Reset some properties so they are readyfor pinging
+            // Reset some properties so they are ready for pinging
             Reset();
 
-            Display.PingIntroMsg(m_PingAttributes);
-
-            // TODO: I think this part is bullshit, check later
-            if (Display.UseResolvedAddress) {
-                try {
-                    m_PingAttributes.InputtedAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(m_PingAttributes.ResolvedAddress), m_CancellationToken);
-                }
-                catch (OperationCanceledException) {
-                    return new PingResults();
-                }
-                if (m_PingAttributes.InputtedAddress == "") {
-                    // If reverse lookup fails just display whatever is in the address field
-                    m_PingAttributes.InputtedAddress = m_PingAttributes.ResolvedAddress;
-                }
-            }
-
-            // Peroform ping operation
+            // Perform ping operation
             SendPacket();
 
-            return m_PingResults;
+            return m_Results;
         }
 
         private void Setup()
@@ -117,8 +111,8 @@ namespace PowerPing
             // On deconstruction
             m_Socket.Close();
             m_Packet = null;
-            m_PingAttributes = null;
-            m_PingResults = null;
+            m_Attributes = null;
+            m_Results = null;
             OnPingResultsUpdateCallback = null;
         }
         private void Reset()
@@ -127,7 +121,7 @@ namespace PowerPing
             m_CurrentReceiveTimeout = 0;
 
             // Wipe any previous results 
-            m_PingResults = new PingResults();
+            m_Results = new PingResults();
         }
 
         private void CreateRawSocket()
@@ -135,7 +129,7 @@ namespace PowerPing
             // Determine what address family we are using
             AddressFamily family;
             ProtocolType protocol;
-            if (m_PingAttributes.UseICMPv4) {
+            if (m_Attributes.UseICMPv4) {
                 family = AddressFamily.InterNetwork;
                 protocol = ProtocolType.Icmp;
             }
@@ -148,30 +142,33 @@ namespace PowerPing
             try {
                 m_Socket = new Socket(family, SocketType.Raw, protocol);
             }
-            catch (SocketException) {
-                Display.Message("PowerPing uses raw sockets which require Administrative rights to create." + Environment.NewLine +
-                                "(You can find more info at https://github.com/Killeroo/PowerPing/issues/110)", ConsoleColor.Cyan);
-                Helper.ErrorAndExit("Socket cannot be created, make sure you are running as an Administrator and try again.");
+            catch (SocketException e) {
+                m_MessageProcessor?.OnError(
+                    "PowerPing uses raw sockets which require Administrative rights to create." + Environment.NewLine +
+                    "(You can find more info at https://github.com/Killeroo/PowerPing/issues/110)" + Environment.NewLine +
+                    "Make sure you are running as an Administrator and try again.",
+                    e,
+                    true);
             }
         }
         private void SetupSocketOptions()
         {
-            m_Socket.Ttl = (short)m_PingAttributes.Ttl;
-            m_Socket.DontFragment = m_PingAttributes.DontFragment;
-            m_Socket.ReceiveBufferSize = m_PingAttributes.ReceiveBufferSize;
+            m_Socket.Ttl = (short)m_Attributes.Ttl;
+            m_Socket.DontFragment = m_Attributes.DontFragment;
+            m_Socket.ReceiveBufferSize = m_Attributes.ReceiveBufferSize;
         }
         private void ResolveAddress()
         {
             // If we have not been given a resolved address, perform dns query for inputted address
-            if (m_PingAttributes.ResolvedAddress == "") {
-                AddressFamily family = m_PingAttributes.UseICMPv4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
-                m_PingAttributes.ResolvedAddress = Lookup.QueryDNS(m_PingAttributes.InputtedAddress, family);
+            if (m_Attributes.ResolvedAddress == "") {
+                AddressFamily family = m_Attributes.UseICMPv4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
+                m_Attributes.ResolvedAddress = Lookup.QueryDNS(m_Attributes.InputtedAddress, family);
             }
         }
         private void CreateRemoteEndpoint()
         {
             // Convert our resolved address
-            IPAddress addr = IPAddress.Parse(m_PingAttributes.ResolvedAddress);
+            IPAddress addr = IPAddress.Parse(m_Attributes.ResolvedAddress);
 
             // Create the endpoint we are going to recieve from
             m_RemoteEndpoint = new IPEndPoint(addr, 0);
@@ -187,15 +184,15 @@ namespace PowerPing
         private void ConstructPacket()
         {
             m_Packet = new ICMP();
-            m_Packet.Type = m_PingAttributes.Type;
-            m_Packet.Code = m_PingAttributes.Code;
+            m_Packet.Type = m_Attributes.Type;
+            m_Packet.Code = m_Attributes.Code;
 
             // Work out what our intial payload will be and add to packet
             byte[] payload;
-            if (m_PingAttributes.ArtificalMessageSize != -1) {
-                payload = Helper.GenerateByteArray(m_PingAttributes.ArtificalMessageSize);
+            if (m_Attributes.ArtificalMessageSize != -1) {
+                payload = Helper.GenerateByteArray(m_Attributes.ArtificalMessageSize);
             } else {
-                payload = Encoding.ASCII.GetBytes(m_PingAttributes.Message);
+                payload = Encoding.ASCII.GetBytes(m_Attributes.Message);
             }
             UpdatePacketMessage(payload);
 
@@ -213,7 +210,6 @@ namespace PowerPing
             Buffer.BlockCopy(message, 0, m_Packet.Message, 4, message.Length);
 
             // Update message size
-            // TOD: WATCH THIS, IF IT FAILS REMOVE CHECK
             if (message.Length + 4 != m_PacketSize) {
                 m_Packet.MessageSize = message.Length + 4;
                 m_PacketSize = m_Packet.MessageSize + 4;
@@ -228,38 +224,34 @@ namespace PowerPing
 
         private void SendPacket()
         {
-            byte[] receiveBuffer = new byte[m_PingAttributes.ReceiveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
+            byte[] receiveBuffer = new byte[m_Attributes.ReceiveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
             int bytesRead = 0;
 
+            m_MessageProcessor?.OnStart(m_Attributes);
+
             // Sending loop
-            for (int index = 1; m_PingAttributes.Continous || index <= m_PingAttributes.Count; index++) {
+            for (int index = 1; m_Attributes.Continous || index <= m_Attributes.Count; index++) {
 
                 if (index != 1) {
                     // Wait for set interval before sending again or cancel if requested
-                    if (m_CancellationToken.WaitHandle.WaitOne(m_PingAttributes.Interval)) {
+                    if (m_CancellationToken.WaitHandle.WaitOne(m_Attributes.Interval)) {
                         break;
                     }
 
                     // Generate random interval when RandomTiming flag is set
-                    if (m_PingAttributes.RandomTiming) {
-                        m_PingAttributes.Interval = Helper.RandomInt(5000, 100000);
+                    if (m_Attributes.RandomTiming) {
+                        m_Attributes.Interval = Helper.RandomInt(5000, 100000);
                     }
                 }
 
                 // Update packet before sending
                 UpdatePacketSequenceNumber(index);
-                if (m_PingAttributes.RandomMessage) {
+                if (m_Attributes.RandomMessage) {
                     UpdatePacketMessage(Encoding.ASCII.GetBytes(Helper.RandomString()));
                 }
                 UpdatePacketChecksum();
 
                 try {
-
-                    // Show request packet
-                    if (Display.ShowRequests) {
-                        Display.RequestPacket(m_Packet, Display.UseInputtedAddress | Display.UseResolvedAddress ? m_PingAttributes.InputtedAddress : m_PingAttributes.ResolvedAddress, index);
-                    }
-
                     // If there were extra responses from a prior request, ignore them
                     while (m_Socket.Available != 0) {
                         bytesRead = m_Socket.Receive(receiveBuffer);
@@ -268,7 +260,14 @@ namespace PowerPing
                     // Send ping request
                     m_Socket.SendTo(m_Packet.GetBytes(), m_PacketSize, SocketFlags.None, m_RemoteEndpoint); // Packet size = message field + 4 header bytes
                     long requestTimestamp = Stopwatch.GetTimestamp();
-                    m_PingResults.IncrementSentPackets();
+                    m_Results.IncrementSentPackets();
+
+                    // Raise message on request sent
+                    m_RequestMessage.Timestamp = DateTime.Now;
+                    m_RequestMessage.SequenceNumber = index;
+                    m_RequestMessage.Packet = m_Packet;
+                    m_RequestMessage.Destination = m_RemoteEndpoint;
+                    m_MessageProcessor?.OnRequest(m_RequestMessage);
 
                     // Just for artifically testing higher ping response times
                     if (m_Debug) {
@@ -283,79 +282,48 @@ namespace PowerPing
                     TimeSpan replyTime = TimeSpan.Zero;
                     ReceivePacket(ref response, ref responseEP, ref replyTime, ref bytesRead, requestTimestamp);
 
-                    if (Display.ShowReplies) {
-
-                        // Determine what form the response address is going to be displayed in
-                        string responseAddress = responseEP.ToString();
-                        if (Display.UseResolvedAddress) {
-                            // Returned address normally have port at the end (eg 8.8.8.8:0) so we need to remove that before trying to query the DNS 
-                            string responseIP = responseEP.ToString().Split(':')[0];
-
-                            // Resolve the ip and store as the response address
-                            responseAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(responseIP), m_CancellationToken);
-                        }
-                        else if (Display.UseInputtedAddress) {
-                            responseAddress = m_PingAttributes.InputtedAddress;
-                        }
-
-                        Display.ReplyPacket(response, responseAddress, index, replyTime, bytesRead);
-
-                    }
-
                     // Store response info
-                    m_PingResults.IncrementReceivedPackets();
-                    m_PingResults.CountPacketType(response.Type);
-                    m_PingResults.SaveResponseTime(replyTime.TotalMilliseconds);
-
-                    if (m_PingAttributes.BeepMode == 2) {
-                        try { Console.Beep(); }
-                        catch (Exception) { } // Silently continue if Console.Beep errors
-                    }
+                    m_Results.IncrementReceivedPackets();
+                    m_Results.CountPacketType(response.Type);
+                    m_Results.SaveResponseTime(replyTime.TotalMilliseconds);
                 }
-                catch (IOException) {
+                catch (IOException) {    
+                    m_MessageProcessor?.OnError("General transmit error");
 
-                    if (Display.ShowOutput) {
-                        Display.Error("General transmit error");
-                    }
-                    m_PingResults.SaveResponseTime(-1);
-                    m_PingResults.IncrementLostPackets();
-
+                    m_Results.SaveResponseTime(-1);
+                    m_Results.IncrementLostPackets();
                 }
                 catch (SocketException) {
+                    m_TimeoutMessage.Timestamp = DateTime.Now;
+                    m_TimeoutMessage.SequenceNumber = index;
+                    m_TimeoutMessage.Endpoint = m_RemoteEndpoint;
+                    m_MessageProcessor?.OnTimeout(m_TimeoutMessage);
 
-                    Display.Timeout(index);
-                    if (m_PingAttributes.BeepMode == 1) {
-                        try { Console.Beep(); }
-                        catch (Exception) { }
-                    }
-                    m_PingResults.SaveResponseTime(-1);
-                    m_PingResults.IncrementLostPackets();
-
+                    m_Results.SaveResponseTime(-1);
+                    m_Results.IncrementLostPackets();
                 }
                 catch (OperationCanceledException) {
 
-                    m_PingResults.ScanWasCanceled = true;
+                    m_Results.ScanWasCanceled = true;
                     break;
-
                 }
-                catch (Exception) {
+                catch (Exception e) {
+                    m_MessageProcessor?.OnError("General error occured", e);
 
-                    if (Display.ShowOutput) {
-                        Display.Error("General error occured");
-                    }
-                    m_PingResults.SaveResponseTime(-1);
-                    m_PingResults.IncrementLostPackets();
-
+                    m_Results.SaveResponseTime(-1);
+                    m_Results.IncrementLostPackets();
                 }
 
                 // Run callback (if provided) to notify of updated results
-                OnPingResultsUpdateCallback?.Invoke(m_PingResults);
+                OnPingResultsUpdateCallback?.Invoke(m_Results);
+                m_MessageProcessor?.OnResultsUpdate(m_Results);
             }
 
+            m_MessageProcessor?.OnFinish(m_Results);
         }
         private void ReceivePacket(ref ICMP response, ref EndPoint responseEndPoint, ref TimeSpan replyTime, ref int bytesRead, long requestTimestamp)
         {
-            byte[] receiveBuffer = new byte[m_PingAttributes.ReceiveBufferSize];
+            byte[] receiveBuffer = new byte[m_Attributes.ReceiveBufferSize];
 
             // Wait for request
             do {
@@ -365,7 +333,7 @@ namespace PowerPing
                 // Set receive timeout, limited to 250ms so we don't block very long without checking for
                 // cancellation. If the requested ping timeout is longer, we will wait some more in subsequent
                 // loop iterations until the requested ping timeout is reached.
-                int remainingTimeout = (int)Math.Ceiling(m_PingAttributes.Timeout - replyTime.TotalMilliseconds);
+                int remainingTimeout = (int)Math.Ceiling(m_Attributes.Timeout - replyTime.TotalMilliseconds);
                 if (remainingTimeout <= 0) {
                     throw new SocketException();
                 }
@@ -398,6 +366,15 @@ namespace PowerPing
                     }
                 }
             } while (response == null);
+
+            // Raise message on response
+            m_ResponseMessage.Packet = response;
+            m_ResponseMessage.Endpoint = responseEndPoint as IPEndPoint;
+            m_ResponseMessage.Timestamp = DateTime.Now;
+            m_ResponseMessage.SequenceNumber = m_CurrentSequenceNumber;
+            m_ResponseMessage.BytesRead = bytesRead;
+            m_ResponseMessage.RoundTripTime = replyTime;
+            m_MessageProcessor?.OnReply(m_ResponseMessage);
         }
     }
 }
