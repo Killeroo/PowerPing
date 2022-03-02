@@ -22,13 +22,6 @@ namespace PowerPing
     {
         public static DisplayConfiguration Configuration { get; set; }  
 
-        // Properties
-        public ConsoleColor DefaultForegroundColor { get; set; }
-        public ConsoleColor DefaultBackgroundColor { get; set; }
-        public static bool MultiThreaded { get; set; } = false;
-
-        private static object writelockObject = new object();
-
         // Stores console cursor position, used for updating text at position
         private struct CursorPosition
         {
@@ -168,10 +161,6 @@ namespace PowerPing
                 return;
             }
 
-            if (MultiThreaded) {
-                Monitor.Enter(writelockObject);
-            }
-
             // Construct string
             Console.WriteLine();
             Console.Write(ProgramStrings.INTRO_ADDR_TXT, attrs.InputtedAddress);
@@ -200,10 +189,6 @@ namespace PowerPing
 
             // Print string
             Console.WriteLine(":");
-
-            if (MultiThreaded) {
-                Monitor.Exit(writelockObject);
-            }
         }
         /// <summary>
         /// Display initial listening message
@@ -219,10 +204,6 @@ namespace PowerPing
         {
             if (!Configuration.ShowOutput) {
                 return;
-            }
-
-            if (MultiThreaded) {
-                Monitor.Enter(writelockObject);
             }
 
             // Show shortened info
@@ -261,10 +242,6 @@ namespace PowerPing
         {
             if (!Configuration.ShowOutput) {
                 return;
-            }
-
-            if (MultiThreaded) {
-                Monitor.Enter(writelockObject);
             }
 
             // If drawing symbols
@@ -342,11 +319,6 @@ namespace PowerPing
 
 	        // End line
 	        Console.WriteLine();
-
-            if (MultiThreaded) {
-                Monitor.Exit(writelockObject);
-            }
-
         }
         /// <summary>
         /// Display information about a captured packet
@@ -446,10 +418,6 @@ namespace PowerPing
                 return;
             }
 
-            if (MultiThreaded) {
-                Monitor.Enter(writelockObject);
-            }
-
             ResetColor();
 
             // Display stats
@@ -527,10 +495,6 @@ namespace PowerPing
                 Console.WriteLine();
             }
 
-            if (MultiThreaded) {
-                Monitor.Exit(writelockObject);
-            }
-
             if (Configuration.RequireInput)
             {
                 Helper.WaitForUserInput();
@@ -588,10 +552,6 @@ namespace PowerPing
                 return;
             }
 
-            if (MultiThreaded) {
-                Monitor.Enter(writelockObject);
-            }
-
             // If drawing symbols
             if (Configuration.UseSymbols) {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -625,10 +585,6 @@ namespace PowerPing
             // Make double sure we dont get the red line bug
             ResetColor();
             Console.WriteLine();
-
-            if (MultiThreaded) {
-                Monitor.Exit(writelockObject);
-            }
         }
         /// <summary>
         /// Display error message
