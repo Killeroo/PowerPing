@@ -22,12 +22,12 @@ namespace PowerPing
         public int EndCursorPosY { get; set; } = 0; // Position to move cursor to when graph exits
 
         // Local variable declaration
-        private readonly CancellationToken m_CancellationToken;
-
+        private readonly CancellationToken _cancellationToken;
         private readonly Ping _ping;
         private readonly PingAttributes _pingAttributes = new PingAttributes();
         private readonly List<string[]> _columns = new List<string[]>();
         private readonly List<double> _responseTimes = new List<double>();
+
         private bool _isGraphSetup = false;
         private int _yAxisLength = 20;
         private int _xAxisLength = 40;
@@ -69,7 +69,7 @@ namespace PowerPing
             _pingAttributes.InputtedAddress = address;
             _pingAttributes.Continous = true;
 
-            m_CancellationToken = cancellationTkn;
+            _cancellationToken = cancellationTkn;
             _ping = new Ping(_pingAttributes, cancellationTkn);
             _ping.OnResultsUpdate += OnPingResultsUpdateCallback;
             _scale = _startScale;
