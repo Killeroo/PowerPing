@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PowerPing
 {
-    public class ConsoleMessageHandler //: IPingMessageHandler
+    public class ConsoleMessageHandler 
     {
         public DisplayConfiguration DisplayConfig = new DisplayConfiguration();
         public PingAttributes Attributes = new PingAttributes();

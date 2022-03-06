@@ -65,7 +65,7 @@ namespace PowerPing
                     attrs.Interval = 0;
                     attrs.Count = 1;
 
-                    Ping ping = new Ping(attrs, cancellationToken, null);
+                    Ping ping = new Ping(attrs, cancellationToken);
                     
                     try {
                         foreach (string host in addrs) {
