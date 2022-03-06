@@ -19,8 +19,6 @@ namespace PowerPing
         private const string BOTTOM_BAR_BLOCK_CHAR = "▀";
 
         // Properties
-        public bool CompactGraph { get; set; } = false;
-
         public int EndCursorPosY { get; set; } = 0; // Position to move cursor to when graph exits
 
         // Local variable declaration
@@ -44,15 +42,11 @@ namespace PowerPing
         // NOTE: The actual display update rate may be limited by the ping interval
         private readonly RateLimiter _displayUpdateLimiter = new RateLimiter(TimeSpan.FromMilliseconds(500));
 
-        // Properties to use for normal and compact graph modes
+        // Graph positioning and properties
         private readonly int _normalLegendLeftPadding = 13;
         private readonly int _normalYAxisLeftPadding = 11;
         private readonly int _normalYAxisLength = 20;
         private readonly int _normalXAxisLength = 70;
-        private readonly int _compactLegendLeftPadding = 2;
-        private readonly int _compactYAxisLeftPadding = 5;
-        private readonly int _compactYAxisLength = 10;
-        private readonly int _compactXAxisLength = 30;
 
         // Location of graph plotting space
         private int _plotStartX;
@@ -107,21 +101,11 @@ namespace PowerPing
         /// </summary>
         private void Setup()
         {
-            // Setup graph properties based on graph type
-            if (CompactGraph)
-            {
-                _yAxisLength = _compactYAxisLength;
-                _xAxisLength = _compactXAxisLength;
-                _legendLeftPadding = _compactLegendLeftPadding;
-                _yAxisLeftPadding = _compactYAxisLeftPadding;
-            }
-            else
-            {
-                _yAxisLength = _normalYAxisLength;
-                _xAxisLength = _normalXAxisLength;
-                _legendLeftPadding = _normalLegendLeftPadding;
-                _yAxisLeftPadding = _normalYAxisLeftPadding;
-            }
+            // Setup graph properties 
+            _yAxisLength = _normalYAxisLength;
+            _xAxisLength = _normalXAxisLength;
+            _legendLeftPadding = _normalLegendLeftPadding;
+            _yAxisLeftPadding = _normalYAxisLeftPadding;
 
             CheckAndResizeGraph();
             DrawBackground();
@@ -606,19 +590,15 @@ namespace PowerPing
             }
 
             // Draw name of y axis
-            // (Don't bother in compact mode, to save space)
-            if (!CompactGraph)
-            {
-                Console.CursorTop = _yAxisStart + maxLines / 2;
-                Console.CursorLeft = 1;
-                Console.WriteLine("Round");
-                Console.CursorLeft = 2;
-                Console.WriteLine("Trip");
-                Console.CursorLeft = 2;
-                Console.WriteLine("Time");
-                Console.CursorLeft = 2;
-                Console.WriteLine("(MS)");
-            }
+            Console.CursorTop = _yAxisStart + maxLines / 2;
+            Console.CursorLeft = 1;
+            Console.WriteLine("Round");
+            Console.CursorLeft = 2;
+            Console.WriteLine("Trip");
+            Console.CursorLeft = 2;
+            Console.WriteLine("Time");
+            Console.CursorLeft = 2;
+            Console.WriteLine("(MS)");
 
             // Reset cursor position
             Console.CursorLeft = leftStart;

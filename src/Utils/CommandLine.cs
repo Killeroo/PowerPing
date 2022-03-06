@@ -568,15 +568,6 @@ namespace PowerPing
                                 attributes.Operation = PingOperation.Graph;
                                 break;
 
-                            case "/compact":
-                            case "-compact":
-                            case "--compact":
-                            case "/cg":
-                            case "-cg":
-                            case "--cg": // Compact graph view
-                                attributes.Operation = PingOperation.CompactGraph;
-                                break;
-
                             case "/flood":
                             case "-flood":
                             case "--flood":

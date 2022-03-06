@@ -72,7 +72,6 @@ _Future features:_
                                          (listen command without address will listen on all local network adapters)
         --flood         [--fl]  address  Send high volume of pings to address
         --graph         [--g]   address  Graph view
-        --compact       [--cg]  address  Compact graph view
         --location      [--loc] address  Location info for an address
         --listen        [--li]  address  Listen for ICMP packets on an address
         --listen        [--li]           Listen for ICMP packets on all local network adapters

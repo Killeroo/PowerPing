@@ -73,8 +73,7 @@ namespace PowerPing
                 case PingOperation.Location: RunLocationOperation(parsedAttributes.InputtedAddress); break;
                 case PingOperation.Whoami: RunWhoAmIOperation(); break;
                 case PingOperation.Whois: RunWhoisOperation(parsedAttributes.InputtedAddress); break;
-                case PingOperation.Graph: RunGraphOperation(parsedAttributes.InputtedAddress, false, _cancellationTokenSource.Token); break;
-                case PingOperation.CompactGraph: RunGraphOperation(parsedAttributes.InputtedAddress, true, _cancellationTokenSource.Token); break;
+                case PingOperation.Graph: RunGraphOperation(parsedAttributes.InputtedAddress, _cancellationTokenSource.Token); break;
                 case PingOperation.Flood: RunFloodOperation(parsedAttributes.InputtedAddress, _cancellationTokenSource.Token); break;
                 case PingOperation.Scan: RunScanOperation(parsedAttributes.InputtedAddress, _cancellationTokenSource.Token); break;
                 case PingOperation.Normal: RunNormalPingOperation(parsedAttributes, consoleHandler, _cancellationTokenSource.Token); break;
@@ -131,14 +130,9 @@ namespace PowerPing
             f.Start(address, cancellationToken);
         }
 
-        private static void RunGraphOperation(
-            string address,
-            bool compact,
-            CancellationToken cancellationToken)
+        private static void RunGraphOperation(string address, CancellationToken cancellationToken)
         {
             Graph g = new Graph(address, cancellationToken);
-
-            g.CompactGraph = compact;
 
             g.Start();
         }

@@ -137,7 +137,6 @@ Modes:
     --scan          [--sc]  address  Network scanning, specify range ""127.0.0.1-55""
     --flood         [--fl]  address  Send high volume of pings to address
     --graph         [--g]   address  Graph view
-    --compact       [--cg]  address  Compact graph view
     --location      [--loc] address  Location info for an address
     --listen        [--li]  address  Listen for ICMP packets on specific address
     --listen        [--li]           Listen for ICMP packets on all local network adapters

@@ -13,7 +13,6 @@ namespace PowerPing
         Listen,
         Scan,
         Graph,
-        CompactGraph,
         Location,
         Whoami,
         Whois
