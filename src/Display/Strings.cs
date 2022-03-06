@@ -12,7 +12,7 @@ namespace PowerPing
         public const string TIMESTAMP_LAYOUT = " @ {0}";
         public const string FULL_TIMESTAMP_LAYOUT = " @ {0} {1}";
         public const string TIMEOUT_TXT = "Request timed out.";
-        public const string TIMEOUT_SEQ_TXT = " seq={0} ";
+        public const string TIMEOUT_SEQ_TXT = " seq={0}";
         public const string ERROR_TXT = "ERROR: ";
 
         // Intro messages
