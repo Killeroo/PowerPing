@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PowerPing
 {
-    public class ConsoleMessageHandler : IPingMessageHandler
+    public class ConsoleMessageHandler //: IPingMessageHandler
     {
         public DisplayConfiguration DisplayConfig = new DisplayConfiguration();
         public PingAttributes Attributes = new PingAttributes();
@@ -20,11 +20,11 @@ namespace PowerPing
             Token = token;
         }
 
-        public void OnError(string message, Exception e = null, bool fatal = false)
+        public void OnError((string message, Exception e, bool fatal) obj)
         {
-            string errorText = (e != null ? $"{message} ({e.GetType().Name})" : message);
+            string errorText = (obj.e != null ? $"{obj.message} ({obj.e.GetType().Name})" : obj.message);
 
-            if (fatal)
+            if (obj.fatal)
             {
                 ConsoleDisplay.Fatal(errorText);
                 

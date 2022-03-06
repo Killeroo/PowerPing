@@ -19,12 +19,18 @@ namespace PowerPing
     /// <summary>
     /// Ping Class, used for constructing and sending ICMP data over a network.
     /// </summary>
-    class Ping {
-        public Action<PingResults> OnPingResultsUpdateCallback = null;
+    class Ping 
+    {
+        public Action<PingRequest> ?OnRequest = null;
+        public Action<PingReply> ?OnReply = null;
+        public Action<PingResults> ?OnResultsUpdate = null;
+        public Action<PingTimeout> ?OnTimeout = null;
+        public Action<PingAttributes> ?OnStart = null;
+        public Action<PingResults>? OnFinish = null;
+        public Action<(string message, Exception e, bool fatal)> ?OnError = null;
 
         private PingAttributes m_Attributes = null;
         private PingResults m_Results = null;
-        private IPingMessageHandler m_MessageProcessor = null;
 
         private Socket m_Socket = null;
         private ICMP m_Packet = null;
@@ -44,15 +50,11 @@ namespace PowerPing
 
         public Ping(
             PingAttributes attributes, 
-            CancellationToken cancellationToken, 
-            IPingMessageHandler callbacks = null,
-            Action<PingResults> resultsUpdateCallback = null) // On results update
+            CancellationToken cancellationToken) 
         {
             m_Attributes = attributes;
             m_Results = new PingResults();
             m_CancellationToken = cancellationToken;
-            m_MessageProcessor = callbacks;
-            OnPingResultsUpdateCallback = resultsUpdateCallback;
 
             Setup();
         }
@@ -113,7 +115,7 @@ namespace PowerPing
             m_Packet = null;
             m_Attributes = null;
             m_Results = null;
-            OnPingResultsUpdateCallback = null;
+            OnResultsUpdate = null;
         }
         private void Reset()
         {
@@ -143,12 +145,12 @@ namespace PowerPing
                 m_Socket = new Socket(family, SocketType.Raw, protocol);
             }
             catch (SocketException e) {
-                m_MessageProcessor?.OnError(
+                OnError?.Invoke((
                     "PowerPing uses raw sockets which require Administrative rights to create." + Environment.NewLine +
                     "(You can find more info at https://github.com/Killeroo/PowerPing/issues/110)" + Environment.NewLine +
                     "Make sure you are running as an Administrator and try again.",
                     e,
-                    true);
+                    true));
             }
         }
         private void SetupSocketOptions()
@@ -227,7 +229,7 @@ namespace PowerPing
             byte[] receiveBuffer = new byte[m_Attributes.ReceiveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
             int bytesRead = 0;
 
-            m_MessageProcessor?.OnStart(m_Attributes);
+            OnStart?.Invoke(m_Attributes);
 
             // Sending loop
             for (int index = 1; m_Attributes.Continous || index <= m_Attributes.Count; index++) {
@@ -267,7 +269,7 @@ namespace PowerPing
                     m_RequestMessage.SequenceNumber = index;
                     m_RequestMessage.Packet = m_Packet;
                     m_RequestMessage.Destination = m_RemoteEndpoint;
-                    m_MessageProcessor?.OnRequest(m_RequestMessage);
+                    OnRequest?.Invoke(m_RequestMessage);
 
                     // Just for artifically testing higher ping response times
                     if (m_Debug) {
@@ -287,8 +289,8 @@ namespace PowerPing
                     m_Results.CountPacketType(response.Type);
                     m_Results.SaveResponseTime(replyTime.TotalMilliseconds);
                 }
-                catch (IOException) {    
-                    m_MessageProcessor?.OnError("General transmit error");
+                catch (IOException e) {    
+                    OnError?.Invoke(("General transmit error", e, false));
 
                     m_Results.SaveResponseTime(-1);
                     m_Results.IncrementLostPackets();
@@ -297,7 +299,7 @@ namespace PowerPing
                     m_TimeoutMessage.Timestamp = DateTime.Now;
                     m_TimeoutMessage.SequenceNumber = index;
                     m_TimeoutMessage.Endpoint = m_RemoteEndpoint;
-                    m_MessageProcessor?.OnTimeout(m_TimeoutMessage);
+                    OnTimeout?.Invoke(m_TimeoutMessage);
 
                     m_Results.SaveResponseTime(-1);
                     m_Results.IncrementLostPackets();
@@ -308,18 +310,17 @@ namespace PowerPing
                     break;
                 }
                 catch (Exception e) {
-                    m_MessageProcessor?.OnError("General error occured", e);
+                    OnError?.Invoke(("General error occured", e, false));
 
                     m_Results.SaveResponseTime(-1);
                     m_Results.IncrementLostPackets();
                 }
 
                 // Run callback (if provided) to notify of updated results
-                OnPingResultsUpdateCallback?.Invoke(m_Results);
-                m_MessageProcessor?.OnResultsUpdate(m_Results);
+                OnResultsUpdate?.Invoke(m_Results);
             }
 
-            m_MessageProcessor?.OnFinish(m_Results);
+            OnFinish?.Invoke(m_Results);
         }
         private void ReceivePacket(ref ICMP response, ref EndPoint responseEndPoint, ref TimeSpan replyTime, ref int bytesRead, long requestTimestamp)
         {
@@ -374,7 +375,7 @@ namespace PowerPing
             m_ResponseMessage.SequenceNumber = m_CurrentSequenceNumber;
             m_ResponseMessage.BytesRead = bytesRead;
             m_ResponseMessage.RoundTripTime = replyTime;
-            m_MessageProcessor?.OnReply(m_ResponseMessage);
+            OnReply?.Invoke(m_ResponseMessage);
         }
     }
 }

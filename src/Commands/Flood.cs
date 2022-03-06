@@ -15,11 +15,12 @@ namespace PowerPing
     /// 
     /// Sends a high volume of ICMP pings to a given address
     /// </summary>
-    public class Flood : IPingMessageHandler
+    public class Flood
     {
         private static RateLimiter displayUpdateLimiter = new RateLimiter(TimeSpan.FromMilliseconds(500));
         private static ulong previousPingsSent = 0;
         private static string m_Address = "";
+
 
         public void Start(string address, CancellationToken cancellationToken)
         {
@@ -36,7 +37,9 @@ namespace PowerPing
             // TODO: Option for 'heavy' flood with bloated packet sizes
             attrs.Continous = true;
             
-            Ping p = new Ping(attrs, cancellationToken, this);
+            // Setup ping object
+            Ping p = new Ping(attrs, cancellationToken);
+            p.OnResultsUpdate += OnResultsUpdate;
 
             // Start flooding
             PingResults results = p.Send();
@@ -62,12 +65,5 @@ namespace PowerPing
             // Update results text
             ConsoleDisplay.FloodProgress(r.Sent, (ulong)Math.Round(pingsPerSecond), m_Address);
         }
-
-        public void OnError(string message, Exception e = null, bool fatal = false) { }
-        public void OnFinish(PingResults results) { }
-        public void OnReply(PingReply response) { }
-        public void OnRequest(PingRequest request) { }
-        public void OnStart(PingAttributes attributes) { }
-        public void OnTimeout(PingTimeout timeout) { }
     }
 }
