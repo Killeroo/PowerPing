@@ -1,24 +1,19 @@
 ﻿/**************************************************************************
  * PowerPing - Advanced command line ping tool
  * Copyright (c) 2022 Matthew Carney [matthewcarney64@gmail.com]
- * https://github.com/Killeroo/PowerPing 
+ * https://github.com/Killeroo/PowerPing
  *************************************************************************/
 
-using System;
 using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using System.Security.Cryptography;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Net;
-using System.Collections.Generic;
+using System.Reflection;
+using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 namespace PowerPing
 {
     /// <summary>
-    /// Class for miscellaneous methods 
+    /// Class for miscellaneous methods
     /// </summary>
     public static class Helper
     {
@@ -37,7 +32,7 @@ namespace PowerPing
         /// </summary>
         public static void WaitForUserInput()
         {
-            // Don't wait for output when the output of the program is being redirected 
+            // Don't wait for output when the output of the program is being redirected
             // (to say a file or something)
             if (Console.IsOutputRedirected)
                 return;
@@ -97,12 +92,12 @@ namespace PowerPing
         {
             string result;
 
-            using (RandomNumberGenerator rng = new RNGCryptoServiceProvider()) {
+            using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
+            {
                 byte[] rngToken = new byte[len + 1];
                 rng.GetBytes(rngToken);
-               
+
                 result = Convert.ToBase64String(rngToken);
-                
             }
 
             // Remove '=' from end of string
@@ -119,7 +114,8 @@ namespace PowerPing
         {
             int result;
 
-            using (RandomNumberGenerator rng = new RNGCryptoServiceProvider()) {
+            using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
+            {
                 byte[] rngToken = new byte[4];
                 rng.GetBytes(rngToken);
 
@@ -138,7 +134,8 @@ namespace PowerPing
         public static byte[] GenerateByteArray(int size)
         {
             byte[] array = new byte[size];
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < size; i++)
+            {
                 array[i] = 0x00;
             }
 
@@ -221,12 +218,14 @@ namespace PowerPing
                     // Extract version from returned json
                     Regex regex = new Regex(_githubReleaseVersionRegex);
                     Match result = regex.Match(jsonResult);
-                    if (result.Success) {
+                    if (result.Success)
+                    {
                         string matchString = result.Value;
                         Version theirVersion = new Version(matchString.Split(':')[1].Replace("\"", string.Empty).Replace("v", string.Empty));
                         Version ourVersion = Assembly.GetExecutingAssembly().GetName().Version;
-                        
-                        if (theirVersion > ourVersion) {
+
+                        if (theirVersion > ourVersion)
+                        {
                             Console.WriteLine();
                             Console.WriteLine("=========================================================");
                             Console.WriteLine("A new version of PowerPing is available ({0})", theirVersion);
@@ -235,16 +234,13 @@ namespace PowerPing
                             Console.WriteLine();
                         }
                     }
-
                 }
                 catch (Exception) { } // We just want to blanket catch any exception and silently continue
-
             }
-
         }
 
         /// <summary>
-        /// Split list into x equally sized lists 
+        /// Split list into x equally sized lists
         /// </summary>
         /// <source>https://stackoverflow.com/a/3893011</source>
         public static List<T>[] PartitionList<T>(List<T> list, int partitionCount)
@@ -260,10 +256,10 @@ namespace PowerPing
             int maxSize = (int)Math.Ceiling((double)(list.Count / (double)partitionCount));
             int currentOffset = 0;
 
-            for (int i = 0; i < partitions.Length; i++) 
+            for (int i = 0; i < partitions.Length; i++)
             {
                 partitions[i] = new List<T>();
-                for (int j = currentOffset; j < currentOffset + maxSize; j++) 
+                for (int j = currentOffset; j < currentOffset + maxSize; j++)
                 {
                     if (j >= list.Count)
                         break;
@@ -275,7 +271,6 @@ namespace PowerPing
             }
 
             return partitions;
-
         }
 
         public static long StopwatchToTimeSpanTicks(long stopwatchTicks)
