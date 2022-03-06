@@ -4,15 +4,11 @@
  * https://github.com/Killeroo/PowerPing
  *************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 
-namespace PowerPing 
-{        
+namespace PowerPing
+{
     /// <summary>
     /// Listens for all ICMPv4 activity on localhost.
     ///
@@ -21,41 +17,48 @@ namespace PowerPing
     /// ICMP packets. Runs until ctrl-c or exit
     /// </summary>
     /// <source>https://stackoverflow.com/a/9174392</source>
-    static class Listen 
+    internal static class Listen
     {
-        private static Thread[] listenThreads;
+        private static Thread[]? _listenThreads;
 
         public static void Start(CancellationToken cancellationToken, string address = "")
         {
             IPAddress[] addresses = new IPAddress[0];
 
-            if (address == "") {
+            if (address == "")
+            {
                 // If no address is given then listen on all local addresses
                 addresses = GetLocalAddresses();
-                if (addresses == null) {
+                if (addresses == null)
+                {
                     return;
                 }
-            } else {
+            }
+            else
+            {
                 // Otherwise just listen on the address we are given
                 addresses = new IPAddress[] { IPAddress.Parse(address) };
             }
 
             // Start a listening thread for each ipv4 local address
             int size = addresses.Length;
-            listenThreads = new Thread[size];
+            _listenThreads = new Thread[size];
             for (int x = 0; x < addresses.Length; x++)
             {
                 int index = x;
-                listenThreads[index] = new Thread(() => {
+                _listenThreads[index] = new Thread(() =>
+                {
                     ListenForICMPOnAddress(addresses[index]);
                 });
-                listenThreads[index].IsBackground = true;
-                listenThreads[index].Start();
+                _listenThreads[index].IsBackground = true;
+                _listenThreads[index].Start();
             }
 
             // Wait for cancellation signal
-            while(true) {
-                if (cancellationToken.IsCancellationRequested) {
+            while (true)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
                     return;
                 }
                 Thread.Sleep(50);
@@ -70,16 +73,21 @@ namespace PowerPing
             IPHostEntry hostAddress = null;
 
             // Get all addresses assocatied with this computer
-            try {
+            try
+            {
                 hostAddress = Dns.GetHostEntry(Dns.GetHostName());
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 ConsoleDisplay.Error($"Could not fetch local addresses ({e.GetType().ToString().Split('.').Last()})");
             }
 
             // Only get IPv4 address
             List<IPAddress> addresses = new List<IPAddress>();
-            foreach (IPAddress address in hostAddress.AddressList) {
-                if (address.AddressFamily == AddressFamily.InterNetwork) {
+            foreach (IPAddress address in hostAddress.AddressList)
+            {
+                if (address.AddressFamily == AddressFamily.InterNetwork)
+                {
                     addresses.Add(address);
                 }
             }
@@ -100,7 +108,9 @@ namespace PowerPing
                 listeningSocket.Bind(new IPEndPoint(address, 0));
                 listeningSocket.IOControl(IOControlCode.ReceiveAll, new byte[] { 1, 0, 0, 0 }, new byte[] { 1, 0, 0, 0 }); // Set SIO_RCVALL flag to socket IO control
                 listeningSocket.ReceiveBufferSize = bufferSize;
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 ConsoleDisplay.Error($"Exception occured while trying to create listening socket for {address.ToString()} ({e.GetType().ToString().Split('.').Last()})");
                 return;
             }
@@ -112,8 +122,8 @@ namespace PowerPing
             {
                 byte[] buffer = new byte[bufferSize];
 
-
-                try {
+                try
+                {
                     // Recieve any incoming ICMPv4 packets
                     EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
                     int bytesRead = listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint);
@@ -125,18 +135,17 @@ namespace PowerPing
                     // Store results
                     results.CountPacketType(response.Type);
                     results.IncrementReceivedPackets();
-                } catch (OperationCanceledException) {
-                } catch (SocketException) {
+                }
+                catch (OperationCanceledException)
+                {
+                }
+                catch (SocketException)
+                {
                     ConsoleDisplay.Error("Could not read packet from socket");
                 }
             }
 
-
-
             listeningSocket.Close();
-
         }
-
-
     }
 }

@@ -158,7 +158,8 @@ Find the project here [https://github.com/Killeroo/PowerPing]
     internal static class ICMPStrings
     {
         // ICMP packet types
-        public static readonly string[] PacketTypes = new[] {
+        public static readonly string[] PacketTypes = new[] 
+        {
             "ECHO REPLY", /* 0 */
             "[1] UNASSIGNED [RESV]", /* 1 */ 
             "[2] UNASSIGNED [RESV]", /* 2 */
@@ -205,7 +206,8 @@ Find the project here [https://github.com/Killeroo/PowerPing]
         };
 
         // Type specific code values
-        public static readonly string[] DestinationUnreachableCodeValues = new[] {
+        public static readonly string[] DestinationUnreachableCodeValues = new[] 
+        {
             "NETWORK UNREACHABLE",
             "HOST UNREACHABLE",
             "PROTOCOL UNREACHABLE",
@@ -220,17 +222,20 @@ Find the project here [https://github.com/Killeroo/PowerPing]
             "NETWORK UNREACHABLE FOR ICMP",
             "HOST UNREACHABLE FOR ICMP"
         };
-        public static readonly string[] RedirectCodeValues = new[] {
+        public static readonly string[] RedirectCodeValues = new[] 
+        {
             "REDIRECT FOR THE NETWORK",
             "REDIRECT FOR THE HOST",
             "REDIRECT FOR THE TOS & NETWORK",
             "REDIRECT FOR THE TOS & HOST"
         };
-        public static readonly string[] TimeExceedCodeValues = new[] {
+        public static readonly string[] TimeExceedCodeValues = new[] 
+        {
             "TTL EXPIRED IN TRANSIT",
             "FRAGMENT REASSEMBLY TIME EXCEEDED"
         };
-        public static readonly string[] BadParameterCodeValues = new[] {
+        public static readonly string[] BadParameterCodeValues = new[] 
+        {
             "IP HEADER POINTER INDICATES ERROR",
             "IP HEADER MISSING AN OPTION",
             "BAD IP HEADER LENGTH"

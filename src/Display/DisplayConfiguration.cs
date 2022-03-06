@@ -4,8 +4,6 @@
  * https://github.com/Killeroo/PowerPing
  *************************************************************************/
 
-using System;
-
 namespace PowerPing
 {
     public class DisplayConfiguration

@@ -4,12 +4,10 @@
  * https://github.com/Killeroo/PowerPing
  *************************************************************************/
 
-using System;
-
 namespace PowerPing
 {
     /// <summary>
-    /// ICMP class, for creating Internet Control Message Protocol (ICMP) packet objects 
+    /// ICMP class, for creating Internet Control Message Protocol (ICMP) packet objects
     /// </summary>
     public class ICMP
     {
@@ -22,6 +20,7 @@ namespace PowerPing
 
         // Constructors
         public ICMP() { }
+
         public ICMP(byte[] data, int size)
         {
             Type = data[20];
@@ -57,7 +56,8 @@ namespace PowerPing
             int packetSize = MessageSize + 8;
             int index = 0;
 
-            while (index < packetSize) {
+            while (index < packetSize)
+            {
                 chksm += Convert.ToUInt32(BitConverter.ToUInt16(data, index));
                 index += 2;
             }
@@ -68,5 +68,4 @@ namespace PowerPing
             return (UInt16)(~chksm);
         }
     }
-
 }

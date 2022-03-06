@@ -1,27 +1,22 @@
 ﻿/**************************************************************************
  * PowerPing - Advanced command line ping tool
  * Copyright (c) 2022 Matthew Carney [matthewcarney64@gmail.com]
- * https://github.com/Killeroo/PowerPing 
+ * https://github.com/Killeroo/PowerPing
  *************************************************************************/
-
-using System;
-using System.Linq;
-using System.Net.Sockets;
-using System.Threading;
 
 namespace PowerPing
 {
-    static class Program
+    internal static class Program
     {
-        private static readonly CancellationTokenSource m_CancellationTokenSource = new CancellationTokenSource();
-        private static DisplayConfiguration m_DisplayConfiguration = new DisplayConfiguration();
+        private static readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private static DisplayConfiguration _displayConfiguration = new DisplayConfiguration();
 
         /// <summary>
         /// Main entry point of PowerPing
         /// Parses arguments and runs operations
         /// </summary>
         /// <param name="args">Program arguments</param>
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             PingAttributes parsedAttributes = new PingAttributes();
 
@@ -29,54 +24,59 @@ namespace PowerPing
             //Display.Version();
 
             // Check if no arguments
-            if (args.Length == 0) {
+            if (args.Length == 0)
+            {
                 ConsoleDisplay.Help();
                 return;
             }
 
             // Parse command line arguments
-            if (!CommandLine.Parse(args, ref parsedAttributes, ref m_DisplayConfiguration)) {
+            if (!CommandLine.Parse(args, ref parsedAttributes, ref _displayConfiguration))
+            {
                 Helper.ErrorAndExit("Problem parsing arguments, use \"PowerPing /help\" or \"PowerPing /?\" for help.");
             }
 
-            Helper.RequireInput = m_DisplayConfiguration.RequireInput;
+            Helper.RequireInput = _displayConfiguration.RequireInput;
 
             // Find address/host in arguments
             if (parsedAttributes.Operation != PingOperation.Whoami &&
-                parsedAttributes.Operation != PingOperation.Listen) {
-                if (!CommandLine.FindAddress(args, ref parsedAttributes)) {
+                parsedAttributes.Operation != PingOperation.Listen)
+            {
+                if (!CommandLine.FindAddress(args, ref parsedAttributes))
+                {
                     Helper.ErrorAndExit("Could not find correctly formatted address, please check and try again");
                 }
             }
 
             // Perform DNS lookup on inputted address
-           // inputtedAttributes.ResolvedAddress = Lookup.QueryDNS(inputtedAttributes.InputtedAddress, inputtedAttributes.UseICMPv4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
+            // inputtedAttributes.ResolvedAddress = Lookup.QueryDNS(inputtedAttributes.InputtedAddress, inputtedAttributes.UseICMPv4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6);
 
-            // Add Control C event handler 
+            // Add Control C event handler
             if (parsedAttributes.Operation != PingOperation.Whoami &&
                 parsedAttributes.Operation != PingOperation.Location &&
-                parsedAttributes.Operation != PingOperation.Whois) { 
+                parsedAttributes.Operation != PingOperation.Whois)
+            {
                 Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
             }
 
             // Set configuration
-            ConsoleDisplay.Configuration = m_DisplayConfiguration;
+            ConsoleDisplay.Configuration = _displayConfiguration;
 
             // Add handler to display ping events
-            ConsoleMessageHandler consoleHandler = new ConsoleMessageHandler(m_DisplayConfiguration, m_CancellationTokenSource.Token);
-            
-            // Select correct function using opMode 
-            switch (parsedAttributes.Operation) 
+            ConsoleMessageHandler consoleHandler = new ConsoleMessageHandler(_displayConfiguration, _cancellationTokenSource.Token);
+
+            // Select correct function using opMode
+            switch (parsedAttributes.Operation)
             {
                 case PingOperation.Listen: RunListenOperation(args, parsedAttributes); break;
                 case PingOperation.Location: RunLocationOperation(parsedAttributes.InputtedAddress); break;
                 case PingOperation.Whoami: RunWhoAmIOperation(); break;
                 case PingOperation.Whois: RunWhoisOperation(parsedAttributes.InputtedAddress); break;
-                case PingOperation.Graph: RunGraphOperation(parsedAttributes.InputtedAddress, false, m_CancellationTokenSource.Token); break;
-                case PingOperation.CompactGraph: RunGraphOperation(parsedAttributes.InputtedAddress, true, m_CancellationTokenSource.Token); break;
-                case PingOperation.Flood: RunFloodOperation(parsedAttributes.InputtedAddress, m_CancellationTokenSource.Token); break;
-                case PingOperation.Scan: RunScanOperation(parsedAttributes.InputtedAddress, m_CancellationTokenSource.Token); break;
-                case PingOperation.Normal: RunNormalPingOperation(parsedAttributes, consoleHandler, m_CancellationTokenSource.Token); break; 
+                case PingOperation.Graph: RunGraphOperation(parsedAttributes.InputtedAddress, false, _cancellationTokenSource.Token); break;
+                case PingOperation.CompactGraph: RunGraphOperation(parsedAttributes.InputtedAddress, true, _cancellationTokenSource.Token); break;
+                case PingOperation.Flood: RunFloodOperation(parsedAttributes.InputtedAddress, _cancellationTokenSource.Token); break;
+                case PingOperation.Scan: RunScanOperation(parsedAttributes.InputtedAddress, _cancellationTokenSource.Token); break;
+                case PingOperation.Normal: RunNormalPingOperation(parsedAttributes, consoleHandler, _cancellationTokenSource.Token); break;
 
                 default:
                     Helper.ErrorAndExit("Could not determine ping operation");
@@ -100,14 +100,14 @@ namespace PowerPing
             args.Cancel = true;
 
             // Request currently running job to finish up
-            m_CancellationTokenSource.Cancel();
+            _cancellationTokenSource.Cancel();
 
             // Reset colour on exit
             Console.ResetColor();
         }
 
         private static void RunNormalPingOperation(
-            PingAttributes attributes, 
+            PingAttributes attributes,
             ConsoleMessageHandler handler,
             CancellationToken cancellationToken)
         {
@@ -118,7 +118,7 @@ namespace PowerPing
             p.OnTimeout += handler.OnTimeout;
             p.OnRequest += handler.OnRequest;
             p.OnReply += handler.OnReply;
-            p.OnError += handler.OnError; 
+            p.OnError += handler.OnError;
 
             p.Send();
         }
@@ -146,7 +146,7 @@ namespace PowerPing
         {
             Lookup.QueryWhoIs(address);
 
-            if (m_DisplayConfiguration.RequireInput)
+            if (_displayConfiguration.RequireInput)
             {
                 Helper.WaitForUserInput();
             }
@@ -155,7 +155,7 @@ namespace PowerPing
         private static void RunWhoAmIOperation()
         {
             Console.WriteLine(Lookup.GetAddressLocationInfo("", true));
-            if (m_DisplayConfiguration.RequireInput)
+            if (_displayConfiguration.RequireInput)
             {
                 Helper.WaitForUserInput();
             }
@@ -166,18 +166,18 @@ namespace PowerPing
             // If we find an address then pass it to listen, otherwise start it without one
             if (CommandLine.FindAddress(args, ref attributes))
             {
-                Listen.Start(m_CancellationTokenSource.Token, attributes.InputtedAddress);
+                Listen.Start(_cancellationTokenSource.Token, attributes.InputtedAddress);
             }
             else
             {
-                Listen.Start(m_CancellationTokenSource.Token);
+                Listen.Start(_cancellationTokenSource.Token);
             }
         }
 
         private static void RunLocationOperation(string address)
         {
             Console.WriteLine(Lookup.GetAddressLocationInfo(address, false));
-            if (m_DisplayConfiguration.RequireInput)
+            if (_displayConfiguration.RequireInput)
             {
                 Helper.WaitForUserInput();
             }

@@ -24,13 +24,13 @@ namespace PowerPing
     {
         public static bool RequireInput = false;
 
-        private static readonly string m_IPv4Regex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}";
-        private static readonly string m_UrlRegex = @"[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?";
-        private static readonly string m_ValidScanRangeRegex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\-|$)){5}";
-        private static readonly string m_GithubReleaseVersionRegex = @"""(tag_name)"":""((\\""|[^""])*)""";
+        private static readonly string _ipv4Regex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}";
+        private static readonly string _urlRegex = @"[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?";
+        private static readonly string _validScanRangeRegex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\-|$)){5}";
+        private static readonly string _githubReleaseVersionRegex = @"""(tag_name)"":""((\\""|[^""])*)""";
 
-        private static readonly double m_StopwatchToTimeSpanTicksScale = (double)TimeSpan.TicksPerSecond / Stopwatch.Frequency;
-        private static readonly double m_TimeSpanToStopwatchTicksScale = (double)Stopwatch.Frequency / TimeSpan.TicksPerSecond;
+        private static readonly double _stopwatchToTimeSpanTicksScale = (double)TimeSpan.TicksPerSecond / Stopwatch.Frequency;
+        private static readonly double _timeSpanToStopwatchTicksScale = (double)Stopwatch.Frequency / TimeSpan.TicksPerSecond;
 
         /// <summary>
         /// Pause program and wait for user input
@@ -152,7 +152,7 @@ namespace PowerPing
         /// <returns></returns>
         public static bool IsIPv4Address(string address)
         {
-            return Regex.Match(address, m_IPv4Regex).Success;
+            return Regex.Match(address, _ipv4Regex).Success;
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace PowerPing
         /// <returns></returns>
         public static bool IsURL(string url)
         {
-            return Regex.Match(url, m_UrlRegex).Success;
+            return Regex.Match(url, _urlRegex).Success;
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace PowerPing
         /// TODO: Allow for scan range to specified in any segment
         public static bool IsValidScanRange(string range)
         {
-            return Regex.Match(range, m_ValidScanRangeRegex).Success;
+            return Regex.Match(range, _validScanRangeRegex).Success;
         }
 
         /// <summary>
@@ -219,7 +219,7 @@ namespace PowerPing
                         $"http://api.github.com/repos/killeroo/powerping/releases/latest");
 
                     // Extract version from returned json
-                    Regex regex = new Regex(m_GithubReleaseVersionRegex);
+                    Regex regex = new Regex(_githubReleaseVersionRegex);
                     Match result = regex.Match(jsonResult);
                     if (result.Success) {
                         string matchString = result.Value;
@@ -280,12 +280,12 @@ namespace PowerPing
 
         public static long StopwatchToTimeSpanTicks(long stopwatchTicks)
         {
-            return (long)(stopwatchTicks * m_StopwatchToTimeSpanTicksScale);
+            return (long)(stopwatchTicks * _stopwatchToTimeSpanTicksScale);
         }
 
         public static long TimeSpanToStopwatchTicks(long timeSpanTicks)
         {
-            return (long)(timeSpanTicks * m_TimeSpanToStopwatchTicksScale);
+            return (long)(timeSpanTicks * _timeSpanToStopwatchTicksScale);
         }
 
         /// <summary>

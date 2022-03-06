@@ -22,7 +22,7 @@ namespace PowerPing
     /// Range should be in format 192.0.0.1-255, where - denotes the range
     /// This can be specified at any octlet of the address (192.0.1-100.1.255)
     /// </summary>
-    static class Scan 
+    public static class Scan 
     {
         private const int THREAD_COUNT = 20;
 
@@ -36,7 +36,7 @@ namespace PowerPing
             public double ResponseTime { get; set; }
         }
 
-        private static volatile bool canceled = false;
+        private static volatile bool _cancelled = false;
 
         public static void Start(string range, CancellationToken cancellationToken)
         {
@@ -91,7 +91,7 @@ namespace PowerPing
                             }
                         }
                     } catch (OperationCanceledException) {
-                        canceled = true;
+                        _cancelled = true;
                     }
                 });
 
@@ -136,7 +136,7 @@ namespace PowerPing
                 range);
 
             // Exit out when the operation has been canceled
-            if (canceled) {
+            if (_cancelled) {
                 ConsoleDisplay.ScanResults(scanned, false, activeHosts);
                 return;
             }

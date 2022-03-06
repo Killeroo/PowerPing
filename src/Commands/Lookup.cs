@@ -1,17 +1,14 @@
 ﻿/**************************************************************************
  * PowerPing - Advanced command line ping tool
  * Copyright (c) 2022 Matthew Carney [matthewcarney64@gmail.com]
- * https://github.com/Killeroo/PowerPing 
+ * https://github.com/Killeroo/PowerPing
  *************************************************************************/
 
-using System;
-using System.Xml;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.IO;
-using System.Linq;
 using System.Text;
+using System.Xml;
 
 namespace PowerPing
 {
@@ -26,13 +23,14 @@ namespace PowerPing
         /// <summary>
         /// Returns the local IP address
         /// </summary>
-        /// <bug>There is a currently a bug where the address of a VM interface can be used 
+        /// <bug>There is a currently a bug where the address of a VM interface can be used
         /// instead of the actual local address</bug>
         /// <returns>IP address string, if no address found then returns a null</returns>
         public static string GetLocalAddress()
         {
             // If not connected to a network return null
-            if (!NetworkInterface.GetIsNetworkAvailable()) {
+            if (!NetworkInterface.GetIsNetworkAvailable())
+            {
                 return string.Empty;
             }
 
@@ -40,9 +38,11 @@ namespace PowerPing
             IPHostEntry hostAddress = Dns.GetHostEntry(Dns.GetHostName());
 
             // Loop through each associated address
-            foreach (IPAddress address in hostAddress.AddressList) {
+            foreach (IPAddress address in hostAddress.AddressList)
+            {
                 // If address is IPv4
-                if (address.AddressFamily == AddressFamily.InterNetwork) {
+                if (address.AddressFamily == AddressFamily.InterNetwork)
+                {
                     return address.ToString();
                 }
             }
@@ -59,44 +59,54 @@ namespace PowerPing
         {
             string result = "";
 
-            try {
-
-                using (WebClient objClient = new WebClient()) {
-
+            try
+            {
+                using (WebClient objClient = new WebClient())
+                {
                     string key = "";
 
                     // Download xml data for address
                     string downloadedText = objClient.DownloadString(
                         $"http://api.ipstack.com/{addr}?access_key={key}&output=xml");
-                    
+
                     // Load xml file into object
                     XmlDocument xmlDoc = new XmlDocument();
                     xmlDoc.LoadXml(downloadedText);
                     XmlNodeList elements = (xmlDoc.DocumentElement).ChildNodes;
 
-                    if (elements == null) {
+                    if (elements == null)
+                    {
                         throw new Exception();
                     }
 
                     // Print it out
-                    if (detailed) {
-                        foreach (XmlElement element in elements) {
-                            if (element.Name != "location") {
+                    if (detailed)
+                    {
+                        foreach (XmlElement element in elements)
+                        {
+                            if (element.Name != "location")
+                            {
                                 result += element.Name + ": " + (element.InnerText == "" ? "N/A" : element.InnerText) + Environment.NewLine;
                             }
                         }
-                    } else {
+                    }
+                    else
+                    {
                         result += "[";
-                        if (elements[7].InnerText != "") {
+                        if (elements[7].InnerText != "")
+                        {
                             result += elements[7].InnerText + ", ";
                         }
-                        if (elements[4].InnerText != "") {
+                        if (elements[4].InnerText != "")
+                        {
                             result += elements[4].InnerText;
                         }
                         result += "]";
                     }
                 }
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 result = "[Location unavaliable]";
             }
 
@@ -114,28 +124,35 @@ namespace PowerPing
             IPAddress ipAddr = null;
 
             // Check address format
-            if (Uri.CheckHostName(address) == UriHostNameType.Unknown) {
+            if (Uri.CheckHostName(address) == UriHostNameType.Unknown)
+            {
                 Helper.ErrorAndExit("PowerPing could not resolve host [" + address + "] " + Environment.NewLine + "Check address and try again.");
             }
 
             // Only resolve address if not already in IP address format
-            if (IPAddress.TryParse(address, out ipAddr)) {
+            if (IPAddress.TryParse(address, out ipAddr))
+            {
                 return ipAddr.ToString();
             }
 
-            try {
+            try
+            {
                 // Query DNS for host address
-                foreach (IPAddress a in Dns.GetHostEntry(address).AddressList) {
+                foreach (IPAddress a in Dns.GetHostEntry(address).AddressList)
+                {
                     // Run through addresses until we find one that matches the family we are forcing
-                    if (a.AddressFamily == af) {
+                    if (a.AddressFamily == af)
+                    {
                         ipAddr = a;
                         break;
                     }
                 }
-            } catch (Exception) { } // Silently continue on lookup error
+            }
+            catch (Exception) { } // Silently continue on lookup error
 
             // If no address resolved then exit
-            if (ipAddr == null) {
+            if (ipAddr == null)
+            {
                 Helper.ErrorAndExit("PowerPing could not find host [" + address + "] " + Environment.NewLine + "Check address and try again.");
             }
 
@@ -153,11 +170,13 @@ namespace PowerPing
         {
             string alias = "";
 
-            try {
+            try
+            {
                 IPAddress hostAddr = IPAddress.Parse(address);
                 IPHostEntry hostInfo = Dns.GetHostEntry(hostAddr);
                 alias = hostInfo.HostName;
-            } catch (Exception) { } // Silently continue on lookup error
+            }
+            catch (Exception) { } // Silently continue on lookup error
 
             return alias;
         }
@@ -175,7 +194,8 @@ namespace PowerPing
             string tld = address.Split('.').Last();
 
             // Quick sanity check before we proceed
-            if (keyword == "" || tld == "") {
+            if (keyword == "" || tld == "")
+            {
                 Helper.ErrorAndExit("Incorrectly formatted address, please check format and try again");
             }
             ConsoleDisplay.Message("WHOIS [" + address + "]:", ConsoleColor.Yellow);
@@ -184,7 +204,8 @@ namespace PowerPing
             ConsoleDisplay.Message("QUERYING [" + ROOT_WHOIS_SERVER + "] FOR TLD [" + tld + "]:", ConsoleColor.Yellow, false);
             string whoisRoot = PerformWhoIsLookup(ROOT_WHOIS_SERVER, tld);
             ConsoleDisplay.Message(" DONE", ConsoleColor.Yellow);
-            if (full) {
+            if (full)
+            {
                 Console.WriteLine(whoisRoot);
             }
             whoisRoot = whoisRoot.Remove(0, whoisRoot.IndexOf("whois:", StringComparison.Ordinal) + 6).TrimStart();
@@ -211,11 +232,12 @@ namespace PowerPing
             StringBuilder result = new StringBuilder();
 
             // Connect to whois server
-            try {
+            try
+            {
                 using (TcpClient whoisClient = new TcpClient(whoisServer, 43))
                 using (NetworkStream netStream = whoisClient.GetStream())
-                using (BufferedStream bufferStream = new BufferedStream(netStream)) {
-
+                using (BufferedStream bufferStream = new BufferedStream(netStream))
+                {
                     // Write request to server
                     StreamWriter sw = new StreamWriter(bufferStream);
                     sw.WriteLine(query);
@@ -226,7 +248,9 @@ namespace PowerPing
                     while (!sr.EndOfStream)
                         result.AppendLine(sr.ReadLine());
                 }
-            } catch (SocketException) {
+            }
+            catch (SocketException)
+            {
                 result.AppendLine("SocketException: Connection to host failed");
             }
 

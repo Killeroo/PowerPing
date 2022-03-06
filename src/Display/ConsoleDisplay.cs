@@ -4,13 +4,9 @@
  * https://github.com/Killeroo/PowerPing
  *************************************************************************/
 
-using System;
+using System.Globalization;
 using System.Reflection;
 using System.Text;
-using System.Linq;
-using System.Globalization;
-using System.Collections.Generic;
-using System.Threading;
 
 namespace PowerPing
 {
@@ -18,9 +14,9 @@ namespace PowerPing
     /// Display class, responsible for displaying all output from PowerPing
     /// (except for graph output) designed for console output (and also stdio)
     /// </summary>
-    class ConsoleDisplay
+    internal class ConsoleDisplay
     {
-        public static DisplayConfiguration Configuration { get; set; }  
+        public static DisplayConfiguration? Configuration { get; set; }
 
         // Stores console cursor position, used for updating text at position
         private struct CursorPosition
@@ -49,10 +45,11 @@ namespace PowerPing
             public string GreaterThan500;
             public string Timeout;
         };
-        private static ASCIIReplySymbols ReplySymbols;
+
+        private static ASCIIReplySymbols _replySymbols;
 
         // Packet type colours
-        private static ConsoleColor[] typeColors = new[] {
+        private static ConsoleColor[] _typeColors = new[] {
             ConsoleColor.Green, /* 0 */
             ConsoleColor.White, /* 1 */
             ConsoleColor.White, /* 2 */
@@ -61,7 +58,7 @@ namespace PowerPing
             ConsoleColor.Blue, /* 5 */
             ConsoleColor.Yellow, /* 6 */
             ConsoleColor.White, /* 7 */
-            ConsoleColor.Cyan, /* 8 */ 
+            ConsoleColor.Cyan, /* 8 */
             ConsoleColor.DarkCyan, /* 9 */
             ConsoleColor.Cyan, /* 10 */
             ConsoleColor.Red, /* 11 */
@@ -82,7 +79,7 @@ namespace PowerPing
             ConsoleColor.White, /* 26 */
             ConsoleColor.White, /* 27 */
             ConsoleColor.White, /* 28 */
-            ConsoleColor.White, /* 29 */ 
+            ConsoleColor.White, /* 29 */
             ConsoleColor.Yellow, /* 30 */
             ConsoleColor.Yellow, /* 31 */
             ConsoleColor.Yellow, /* 32 */
@@ -98,36 +95,36 @@ namespace PowerPing
             ConsoleColor.White /* 41 */
         };
 
+        #region Cursor position variables
+
+        private static CursorPosition _sentPos = new CursorPosition(0, 0);
+        private static CursorPosition _ppsPos = new CursorPosition(0, 0);
+        private static CursorPosition _progBarPos = new CursorPosition(0, 0);
+        private static CursorPosition _scanInfoPos = new CursorPosition(0, 0);
+        private static CursorPosition _scanTimePos = new CursorPosition(0, 0);
+        private static CursorPosition _perComplPos = new CursorPosition(0, 0);
+
+        #endregion Cursor position variables
+
         public static void SetAsciiReplySymbolsTheme(int theme)
         {
             if (theme == 0)
             {
-                ReplySymbols.LessThan100 = ProgramStrings.REPLY_LT_100_MS_SYMBOL_1;
-                ReplySymbols.LessThan250 = ProgramStrings.REPLY_LT_250_MS_SYMBOL_1;
-                ReplySymbols.LessThan500 = ProgramStrings.REPLY_LT_500_MS_SYMBOL_1;
-                ReplySymbols.GreaterThan500 = ProgramStrings.REPLY_GT_500_MS_SYMBOL_1;
-                ReplySymbols.Timeout = ProgramStrings.REPLY_TIMEOUT_SYMBOL_1;
+                _replySymbols.LessThan100 = ProgramStrings.REPLY_LT_100_MS_SYMBOL_1;
+                _replySymbols.LessThan250 = ProgramStrings.REPLY_LT_250_MS_SYMBOL_1;
+                _replySymbols.LessThan500 = ProgramStrings.REPLY_LT_500_MS_SYMBOL_1;
+                _replySymbols.GreaterThan500 = ProgramStrings.REPLY_GT_500_MS_SYMBOL_1;
+                _replySymbols.Timeout = ProgramStrings.REPLY_TIMEOUT_SYMBOL_1;
             }
             else
             {
-                ReplySymbols.LessThan100 = ProgramStrings.REPLY_LT_100_MS_SYMBOL_2;
-                ReplySymbols.LessThan250 = ProgramStrings.REPLY_LT_250_MS_SYMBOL_2;
-                ReplySymbols.LessThan500 = ProgramStrings.REPLY_LT_500_MS_SYMBOL_2;
-                ReplySymbols.GreaterThan500 = ProgramStrings.REPLY_GT_500_MS_SYMBOL_2;
-                ReplySymbols.Timeout = ProgramStrings.REPLY_TIMEOUT_SYMBOL_2;
+                _replySymbols.LessThan100 = ProgramStrings.REPLY_LT_100_MS_SYMBOL_2;
+                _replySymbols.LessThan250 = ProgramStrings.REPLY_LT_250_MS_SYMBOL_2;
+                _replySymbols.LessThan500 = ProgramStrings.REPLY_LT_500_MS_SYMBOL_2;
+                _replySymbols.GreaterThan500 = ProgramStrings.REPLY_GT_500_MS_SYMBOL_2;
+                _replySymbols.Timeout = ProgramStrings.REPLY_TIMEOUT_SYMBOL_2;
             }
         }
-
-        #region Cursor position variables
-
-        private static CursorPosition sentPos = new CursorPosition(0, 0);
-        private static CursorPosition ppsPos = new CursorPosition(0, 0);
-        private static CursorPosition progBarPos = new CursorPosition(0, 0);
-        private static CursorPosition scanInfoPos = new CursorPosition(0, 0);
-        private static CursorPosition scanTimePos = new CursorPosition(0, 0);
-        private static CursorPosition perComplPos = new CursorPosition(0, 0);
-
-        #endregion
 
         /// <summary>
         /// Displays current version number and build date
@@ -139,6 +136,7 @@ namespace PowerPing
 
             Console.WriteLine(assemblyName + " " + assemblyVersion);
         }
+
         /// <summary>
         /// Displays help message
         /// </summary>
@@ -150,6 +148,7 @@ namespace PowerPing
 
             Helper.CheckRecentVersion();
         }
+
         /// <summary>
         /// Display Initial ping message to screen, declaring simple info about the ping
         /// </summary>
@@ -157,32 +156,38 @@ namespace PowerPing
         /// <param name="ping">Ping object</param>
         public static void PingIntroMsg(PingAttributes attrs)
         {
-            if (!Configuration.ShowOutput || !Configuration.ShowIntro) {
+            if (!Configuration.ShowOutput || !Configuration.ShowIntro)
+            {
                 return;
             }
 
             // Construct string
             Console.WriteLine();
             Console.Write(ProgramStrings.INTRO_ADDR_TXT, attrs.InputtedAddress);
-            if (!String.Equals(attrs.InputtedAddress, attrs.ResolvedAddress)) {
+            if (!String.Equals(attrs.InputtedAddress, attrs.ResolvedAddress))
+            {
                 // Only show resolved address if inputted address and resolved address are different
                 Console.Write("[{0}] ", attrs.ResolvedAddress);
             }
 
-            if (!Configuration.Short) { // Only show extra detail when not in Configuration.Short mode
-                if (attrs.ArtificalMessageSize != -1) { 
+            if (!Configuration.Short)
+            { // Only show extra detail when not in Configuration.Short mode
+                if (attrs.ArtificalMessageSize != -1)
+                {
                     // If custom packet size has been specified, show that
-                    Console.Write(ProgramStrings.INTRO_MSG, 
-                        attrs.ArtificalMessageSize.ToString(), 
-                        attrs.Type, 
-                        attrs.Code, 
+                    Console.Write(ProgramStrings.INTRO_MSG,
+                        attrs.ArtificalMessageSize.ToString(),
+                        attrs.Type,
+                        attrs.Code,
                         attrs.Ttl);
-                } else {
+                }
+                else
+                {
                     // Else show how big the string is in bytes
-                    Console.Write(ProgramStrings.INTRO_MSG, 
-                        ASCIIEncoding.ASCII.GetByteCount(attrs.Message), 
-                        attrs.Type, 
-                        attrs.Code, 
+                    Console.Write(ProgramStrings.INTRO_MSG,
+                        ASCIIEncoding.ASCII.GetByteCount(attrs.Message),
+                        attrs.Type,
+                        attrs.Code,
                         attrs.Ttl);
                 }
             }
@@ -190,6 +195,7 @@ namespace PowerPing
             // Print string
             Console.WriteLine(":");
         }
+
         /// <summary>
         /// Display initial listening message
         /// </summary>
@@ -197,19 +203,24 @@ namespace PowerPing
         {
             Console.WriteLine(ProgramStrings.LISTEN_INTRO_MSG, address);
         }
+
         /// <summary>
         /// Display ICMP packet that have been sent
         /// </summary>
         public static void RequestPacket(ICMP packet, string address, int index)
         {
-            if (!Configuration.ShowOutput) {
+            if (!Configuration.ShowOutput)
+            {
                 return;
             }
 
             // Show shortened info
-            if (Configuration.Short) {
+            if (Configuration.Short)
+            {
                 Console.Write(ProgramStrings.REQUEST_MSG_SHORT, address);
-            } else {
+            }
+            else
+            {
                 Console.Write(ProgramStrings.REQUEST_MSG, address, index, packet.GetBytes().Length);
             }
 
@@ -218,19 +229,27 @@ namespace PowerPing
             Console.Write(ProgramStrings.REQUEST_CODE_TXT, packet.Code);
 
             // Display timestamp
-            if (Configuration.ShowFullTimeStamp) {
+            if (Configuration.ShowFullTimeStamp)
+            {
                 Console.Write(ProgramStrings.TIMESTAMP_LAYOUT, DateTime.Now.ToString(CultureInfo.CurrentCulture));
-            } else if (Configuration.ShowFullTimeStampUTC) {
+            }
+            else if (Configuration.ShowFullTimeStampUTC)
+            {
                 Console.Write(ProgramStrings.TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString(CultureInfo.CurrentCulture));
-            } else if (Configuration.ShowTimeStamp) {
+            }
+            else if (Configuration.ShowTimeStamp)
+            {
                 Console.Write(ProgramStrings.TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
-            } else if (Configuration.ShowtimeStampUTC) {
+            }
+            else if (Configuration.ShowtimeStampUTC)
+            {
                 Console.Write(ProgramStrings.TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString("HH:mm:ss"));
             }
 
             // End line
             Console.WriteLine();
         }
+
         /// <summary>
         /// Display information about reply ping packet
         /// </summary>
@@ -240,37 +259,52 @@ namespace PowerPing
         /// <param name="replyTime">Time taken before reply received in milliseconds</param>
         public static void ReplyPacket(ICMP packet, string address, int index, TimeSpan replyTime, int bytesRead)
         {
-            if (!Configuration.ShowOutput) {
+            if (!Configuration.ShowOutput)
+            {
                 return;
             }
 
             // If drawing symbols
-            if (Configuration.UseSymbols) {
-                if (packet.Type == 0x00) {
-                    if (replyTime <= TimeSpan.FromMilliseconds(100)) {
+            if (Configuration.UseSymbols)
+            {
+                if (packet.Type == 0x00)
+                {
+                    if (replyTime <= TimeSpan.FromMilliseconds(100))
+                    {
                         Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Write(ReplySymbols.LessThan100);
-                    } else if (replyTime <= TimeSpan.FromMilliseconds(250)) {
+                        Console.Write(_replySymbols.LessThan100);
+                    }
+                    else if (replyTime <= TimeSpan.FromMilliseconds(250))
+                    {
                         Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.Write(ReplySymbols.LessThan250);
-                    } else if (replyTime <= TimeSpan.FromMilliseconds(500)) {
+                        Console.Write(_replySymbols.LessThan250);
+                    }
+                    else if (replyTime <= TimeSpan.FromMilliseconds(500))
+                    {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write(ReplySymbols.LessThan500);
-                    } else {
+                        Console.Write(_replySymbols.LessThan500);
+                    }
+                    else
+                    {
                         Console.ForegroundColor = ConsoleColor.Magenta;
-                        Console.Write(ReplySymbols.GreaterThan500);
+                        Console.Write(_replySymbols.GreaterThan500);
                     }
                     ResetColor();
-                } else {
+                }
+                else
+                {
                     Timeout(0);
                 }
                 return;
             }
 
             // Show shortened info
-            if (Configuration.Short) {
+            if (Configuration.Short)
+            {
                 Console.Write(ProgramStrings.REPLY_MSG_SHORT, address);
-            } else {
+            }
+            else
+            {
                 Console.Write(ProgramStrings.REPLY_MSG, address, index, bytesRead);
             }
 
@@ -278,19 +312,26 @@ namespace PowerPing
             PacketType(packet);
 
             // Display ICMP message (if specified)
-            if (Configuration.ShowMessages) {
+            if (Configuration.ShowMessages)
+            {
                 string messageWithoutHeader = Encoding.ASCII.GetString(packet.Message, 4, packet.Message.Length - 4);
                 Console.Write(ProgramStrings.REPLY_MSG_TXT, new string(messageWithoutHeader.Where(c => !char.IsControl(c)).ToArray()));
             }
 
             // Print coloured time segment
             Console.Write(ProgramStrings.REPLY_TIME_TXT);
-            if (!Configuration.NoColor) {
-                if (replyTime <= TimeSpan.FromMilliseconds(100)) {
+            if (!Configuration.NoColor)
+            {
+                if (replyTime <= TimeSpan.FromMilliseconds(100))
+                {
                     Console.ForegroundColor = ConsoleColor.Green;
-                } else if (replyTime <= TimeSpan.FromMilliseconds(500)) {
+                }
+                else if (replyTime <= TimeSpan.FromMilliseconds(500))
+                {
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                } else {
+                }
+                else
+                {
                     Console.ForegroundColor = ConsoleColor.Red;
                 }
             }
@@ -298,85 +339,95 @@ namespace PowerPing
             ResetColor();
 
             // Display checksum
-            if (Configuration.ShowChecksum) {
+            if (Configuration.ShowChecksum)
+            {
                 Console.Write(ProgramStrings.REPLY_CHKSM_TXT, packet.Checksum);
             }
 
             // Display timestamp
-            if (Configuration.ShowFullTimeStamp) {
-                Console.Write(ProgramStrings.FULL_TIMESTAMP_LAYOUT, 
+            if (Configuration.ShowFullTimeStamp)
+            {
+                Console.Write(ProgramStrings.FULL_TIMESTAMP_LAYOUT,
                     DateTime.Now.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern),
                     DateTime.Now.ToString("HH:mm:ss.fff"));
-            } else if (Configuration.ShowFullTimeStampUTC) {
+            }
+            else if (Configuration.ShowFullTimeStampUTC)
+            {
                 Console.Write(ProgramStrings.FULL_TIMESTAMP_LAYOUT,
                     DateTime.UtcNow.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern),
                     DateTime.UtcNow.ToString("HH:mm:ss.fff"));
-            } else if (Configuration.ShowTimeStamp) {
+            }
+            else if (Configuration.ShowTimeStamp)
+            {
                 Console.Write(ProgramStrings.TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
-            } else if (Configuration.ShowtimeStampUTC) {
+            }
+            else if (Configuration.ShowtimeStampUTC)
+            {
                 Console.Write(ProgramStrings.TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString("HH:mm:ss"));
             }
 
-	        // End line
-	        Console.WriteLine();
+            // End line
+            Console.WriteLine();
         }
+
         /// <summary>
         /// Display information about a captured packet
         /// </summary>
         public static void CapturedPacket(string localAddress, ICMP packet, string remoteAddress, string timeReceived, int bytesRead)
         {
             // Display captured packet
-            Console.BackgroundColor = packet.Type > typeColors.Length ? ConsoleColor.Black : typeColors[packet.Type];
+            Console.BackgroundColor = packet.Type > _typeColors.Length ? ConsoleColor.Black : _typeColors[packet.Type];
             Console.ForegroundColor = ConsoleColor.Black;
             Console.WriteLine(ProgramStrings.CAPTURED_PACKET_MSG, timeReceived, bytesRead, remoteAddress, packet.Type, packet.Code, localAddress);
 
             // Reset console colours
             ResetColor();
         }
+
         /// <summary>
         /// Display results of scan
         /// </summary>
         public static void ScanProgress(int scanned, int found, int total, int pingsPerSecond, TimeSpan curTime, string range)
         {
             // Check if cursor position is already set
-            if (progBarPos.Left != 0) {
-
+            if (_progBarPos.Left != 0)
+            {
                 // Store original cursor position
                 CursorPosition originalPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.CursorVisible = false;
 
                 // Update labels
-                scanInfoPos.SetToPosition();
+                _scanInfoPos.SetToPosition();
                 Console.WriteLine(ProgramStrings.SCAN_HOSTS_TXT, scanned, found, pingsPerSecond);
-                scanTimePos.SetToPosition();
+                _scanTimePos.SetToPosition();
                 Console.Write("{0:hh\\:mm\\:ss}", curTime);
-                progBarPos.SetToPosition();
+                _progBarPos.SetToPosition();
                 double s = scanned;
                 double tot = total;
                 double blockPercent = (s / tot) * 30;
                 Console.WriteLine(new String('=', Convert.ToInt32(blockPercent)) + ">");
-                perComplPos.SetToPosition();
+                _perComplPos.SetToPosition();
                 Console.WriteLine("{0}%", Math.Round((s / tot) * 100, 0));
 
                 // Reset to original cursor position
                 Console.SetCursorPosition(originalPos.Left, originalPos.Top);
-
-            } else {
-
+            }
+            else
+            {
                 // Setup labels
                 Console.WriteLine(ProgramStrings.SCAN_RANGE_TXT, range);
-                scanInfoPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                _scanInfoPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.WriteLine();
                 Console.Write(" ");
-                scanTimePos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                _scanTimePos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.Write("00:00:00 [");
-                progBarPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                _progBarPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.Write("                               ] ");
-                perComplPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
+                _perComplPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.WriteLine();
             }
-            
         }
+
         public static void ScanResults(int scanned, bool ranToEnd, List<Scan.HostInformation> hosts)
         {
             Console.CursorVisible = true;
@@ -389,15 +440,17 @@ namespace PowerPing
             Console.Write(" addresses scanned. ");
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write(hosts.Count);
-            Console.ResetColor();   
+            Console.ResetColor();
             Console.WriteLine(" hosts found.");
-            if (hosts.Count != 0) {
-                for (int i = 0; i < hosts.Count; i++) {
+            if (hosts.Count != 0)
+            {
+                for (int i = 0; i < hosts.Count; i++)
+                {
                     Scan.HostInformation entry = hosts[i];
                     Console.WriteLine(
-                        (i == hosts.Count - 1 ? ProgramStrings.SCAN_END_CHAR : ProgramStrings.SCAN_CONNECTOR_CHAR) + ProgramStrings.SCAN_RESULT_ENTRY, 
-                        entry.Address, 
-                        entry.ResponseTime, 
+                        (i == hosts.Count - 1 ? ProgramStrings.SCAN_END_CHAR : ProgramStrings.SCAN_CONNECTOR_CHAR) + ProgramStrings.SCAN_RESULT_ENTRY,
+                        entry.Address,
+                        entry.ResponseTime,
                         entry.HostName != "" ? entry.HostName : "UNAVAILABLE");
                 }
             }
@@ -408,13 +461,15 @@ namespace PowerPing
                 Helper.WaitForUserInput();
             }
         }
+
         /// <summary>
         /// Displays statistics for a ping object
         /// </summary>
         /// <param name="ping"> </param>
         public static void PingResults(PingAttributes attrs, PingResults results)
         {
-            if (!Configuration.ShowOutput || !Configuration.ShowSummary) {
+            if (!Configuration.ShowOutput || !Configuration.ShowSummary)
+            {
                 return;
             }
 
@@ -428,25 +483,34 @@ namespace PowerPing
 
             //   General: Sent [ 0 ], Recieved [ 0 ], Lost [ 0 ] (0% loss)
             Console.Write(ProgramStrings.RESULTS_GENERAL_TAG + ProgramStrings.RESULTS_SENT_TXT);
-            if (Configuration.NoColor) {
+            if (Configuration.NoColor)
+            {
                 Console.Write(ProgramStrings.RESULTS_INFO_BOX, results.Sent);
-            } else {
+            }
+            else
+            {
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.Write(ProgramStrings.RESULTS_INFO_BOX, results.Sent);
                 ResetColor();
             }
             Console.Write(ProgramStrings.RESULTS_RECV_TXT);
-            if (Configuration.NoColor) {
+            if (Configuration.NoColor)
+            {
                 Console.Write(ProgramStrings.RESULTS_INFO_BOX, results.Received);
-            } else {
+            }
+            else
+            {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write(ProgramStrings.RESULTS_INFO_BOX, results.Received);
                 ResetColor();
             }
             Console.Write(ProgramStrings.RESULTS_LOST_TXT);
-            if (Configuration.NoColor) {
+            if (Configuration.NoColor)
+            {
                 Console.Write(ProgramStrings.RESULTS_INFO_BOX, results.Lost);
-            } else {
+            }
+            else
+            {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Write(ProgramStrings.RESULTS_INFO_BOX, results.Lost);
                 ResetColor();
@@ -459,25 +523,34 @@ namespace PowerPing
             //     Types: Good [ 0 ], Errors [ 0 ], Unknown [ 0 ]
             Console.Write(ProgramStrings.RESULTS_TYPES_TAG);
             Console.Write(ProgramStrings.RESULTS_PKT_GOOD);
-            if (Configuration.NoColor) {
+            if (Configuration.NoColor)
+            {
                 Console.Write(ProgramStrings.RESULTS_INFO_BOX, results.GoodPackets);
-            } else {
+            }
+            else
+            {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write(ProgramStrings.RESULTS_INFO_BOX, results.GoodPackets);
                 ResetColor();
             }
             Console.Write(ProgramStrings.RESULTS_PKT_ERR);
-            if (Configuration.NoColor) {
+            if (Configuration.NoColor)
+            {
                 Console.Write(ProgramStrings.RESULTS_INFO_BOX, results.GoodPackets);
-            } else {
+            }
+            else
+            {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Write(ProgramStrings.RESULTS_INFO_BOX, results.ErrorPackets);
                 ResetColor();
             }
             Console.Write(ProgramStrings.RESULTS_PKT_UKN);
-            if (Configuration.NoColor) {
+            if (Configuration.NoColor)
+            {
                 Console.Write(ProgramStrings.RESULTS_INFO_BOX, results.GoodPackets);
-            } else {
+            }
+            else
+            {
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine(ProgramStrings.RESULTS_INFO_BOX, results.OtherPackets);
                 ResetColor();
@@ -490,7 +563,8 @@ namespace PowerPing
             Console.WriteLine(ProgramStrings.RESULTS_RUNTIME_TXT, results.TotalRunTime);
             Console.WriteLine();
 
-            if (results.HasOverflowed) {
+            if (results.HasOverflowed)
+            {
                 Console.WriteLine(ProgramStrings.RESULTS_OVERFLOW_MSG);
                 Console.WriteLine();
             }
@@ -500,6 +574,7 @@ namespace PowerPing
                 Helper.WaitForUserInput();
             }
         }
+
         /// <summary>
         /// Displays and updates results of an ICMP flood
         /// </summary>
@@ -507,78 +582,91 @@ namespace PowerPing
         public static void FloodProgress(ulong totalPings, ulong pingsPerSecond, string target)
         {
             // Check if labels have already been drawn
-            if (sentPos.Left > 0) { 
-
+            if (_sentPos.Left > 0)
+            {
                 // Store original cursor position
                 CursorPosition originalPos = new CursorPosition(Console.CursorLeft, Console.CursorTop);
                 Console.CursorVisible = false;
 
                 // Update labels
-                Console.SetCursorPosition(sentPos.Left, sentPos.Top);
+                Console.SetCursorPosition(_sentPos.Left, _sentPos.Top);
                 Console.Write(totalPings);
-                Console.SetCursorPosition(ppsPos.Left, ppsPos.Top);
+                Console.SetCursorPosition(_ppsPos.Left, _ppsPos.Top);
                 Console.Write("          "); // Blank first
-                Console.SetCursorPosition(ppsPos.Left, ppsPos.Top);
+                Console.SetCursorPosition(_ppsPos.Left, _ppsPos.Top);
                 Console.Write(pingsPerSecond);
                 // Reset to original cursor position
                 Console.SetCursorPosition(originalPos.Left, originalPos.Top);
                 Console.CursorVisible = true;
-
-            } else {
-
+            }
+            else
+            {
                 // Draw labels
                 Console.WriteLine(ProgramStrings.FLOOD_INTO_TXT, target);
                 Console.Write(ProgramStrings.FLOOD_SEND_TXT);
-                sentPos.Left = Console.CursorLeft;
-                sentPos.Top = Console.CursorTop;
+                _sentPos.Left = Console.CursorLeft;
+                _sentPos.Top = Console.CursorTop;
                 Console.WriteLine("0");
                 Console.Write(ProgramStrings.FLOOD_PPS_TXT);
-                ppsPos.Left = Console.CursorLeft;
-                ppsPos.Top = Console.CursorTop;
+                _ppsPos.Left = Console.CursorLeft;
+                _ppsPos.Top = Console.CursorTop;
                 Console.WriteLine();
                 Console.WriteLine(ProgramStrings.FLOOD_EXIT_TXT);
             }
         }
+
         public static void ListenResults(PingResults results)
         {
             throw new NotImplementedException();
         }
+
         /// <summary>
         /// Display Timeout message
         /// </summary>
         public static void Timeout(int seq)
         {
-            if (!Configuration.ShowOutput || !Configuration.ShowTimeouts) {
+            if (!Configuration.ShowOutput || !Configuration.ShowTimeouts)
+            {
                 return;
             }
 
             // If drawing symbols
-            if (Configuration.UseSymbols) {
+            if (Configuration.UseSymbols)
+            {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write(ReplySymbols.Timeout);
+                Console.Write(_replySymbols.Timeout);
                 ResetColor();
                 return;
             }
 
-            if (!Configuration.NoColor) {
+            if (!Configuration.NoColor)
+            {
                 Console.BackgroundColor = ConsoleColor.DarkRed;
                 Console.ForegroundColor = ConsoleColor.Black;
             }
             Console.Write(ProgramStrings.TIMEOUT_TXT);
 
             // Configuration.Short hand
-            if (!Configuration.Short) {
+            if (!Configuration.Short)
+            {
                 Console.Write(ProgramStrings.TIMEOUT_SEQ_TXT, seq);
             }
 
             // Display timestamp
-            if (Configuration.ShowFullTimeStamp) {
+            if (Configuration.ShowFullTimeStamp)
+            {
                 Console.Write(ProgramStrings.TIMESTAMP_LAYOUT, DateTime.Now.ToString(CultureInfo.CurrentCulture));
-            } else if (Configuration.ShowFullTimeStampUTC) {
+            }
+            else if (Configuration.ShowFullTimeStampUTC)
+            {
                 Console.Write(ProgramStrings.TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString(CultureInfo.CurrentCulture));
-            } else if (Configuration.ShowTimeStamp) {
+            }
+            else if (Configuration.ShowTimeStamp)
+            {
                 Console.Write(ProgramStrings.TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
-            } else if (Configuration.ShowtimeStampUTC) {
+            }
+            else if (Configuration.ShowtimeStampUTC)
+            {
                 Console.Write(ProgramStrings.TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString("HH:mm:ss"));
             }
 
@@ -586,6 +674,7 @@ namespace PowerPing
             ResetColor();
             Console.WriteLine();
         }
+
         /// <summary>
         /// Display error message
         /// </summary>
@@ -600,6 +689,7 @@ namespace PowerPing
             // Reset console colours
             ResetColor();
         }
+
         public static void Fatal(string errMsg)
         {
             Console.ForegroundColor = ConsoleColor.Red;
@@ -608,47 +698,59 @@ namespace PowerPing
 
             ResetColor();
         }
+
         /// <summary>
         /// Display a general message
         /// </summary>
         public static void Message(string msg, ConsoleColor color = ConsoleColor.DarkGray, bool newline = true)
         {
-            if (color == ConsoleColor.DarkGray) {
+            if (color == ConsoleColor.DarkGray)
+            {
                 Console.ResetColor(); // Use default foreground color if gray is being used
             }
 
             Console.ForegroundColor = color;
 
-            if (newline) {
+            if (newline)
+            {
                 Console.WriteLine(msg);
-            } else {
+            }
+            else
+            {
                 Console.Write(msg);
             }
 
             ResetColor();
         }
+
         public static void PacketType(ICMP packet)
         {
             // Apply colour rules
-            if (!Configuration.NoColor) {
-                Console.BackgroundColor = packet.Type > typeColors.Length ? ConsoleColor.White : typeColors[packet.Type];
+            if (!Configuration.NoColor)
+            {
+                Console.BackgroundColor = packet.Type > _typeColors.Length ? ConsoleColor.White : _typeColors[packet.Type];
                 Console.ForegroundColor = ConsoleColor.Black;
             }
 
             // Print packet type
-            switch (packet.Type) {
+            switch (packet.Type)
+            {
                 case 3:
                     Console.Write(packet.Code > ICMPStrings.DestinationUnreachableCodeValues.Length ? ICMPStrings.PacketTypes[packet.Type] : ICMPStrings.DestinationUnreachableCodeValues[packet.Code]);
                     break;
+
                 case 5:
                     Console.Write(packet.Code > ICMPStrings.RedirectCodeValues.Length ? ICMPStrings.PacketTypes[packet.Type] : ICMPStrings.RedirectCodeValues[packet.Code]);
                     break;
+
                 case 11:
                     Console.Write(packet.Code > ICMPStrings.TimeExceedCodeValues.Length ? ICMPStrings.PacketTypes[packet.Type] : ICMPStrings.TimeExceedCodeValues[packet.Code]);
                     break;
+
                 case 12:
                     Console.Write(packet.Code > ICMPStrings.BadParameterCodeValues.Length ? ICMPStrings.PacketTypes[packet.Type] : ICMPStrings.BadParameterCodeValues[packet.Code]);
                     break;
+
                 default:
                     Console.Write(packet.Type > ICMPStrings.PacketTypes.Length ? "[" + packet.Type + "] UNASSIGNED " : ICMPStrings.PacketTypes[packet.Type]);
                     break;

@@ -4,8 +4,6 @@
  * https://github.com/Killeroo/PowerPing
  * ************************************************************************/
 
-using System;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace PowerPing
@@ -16,8 +14,8 @@ namespace PowerPing
     public class PingResults
     {
         // Properties
-        public DateTime StartTime { get; private set; }                             // Time operation started at 
-        public TimeSpan TotalRunTime { get { return m_OperationTimer.Elapsed; } }   // Total ping operation runtime
+        public DateTime StartTime { get; private set; }                             // Time operation started at
+        public TimeSpan TotalRunTime { get { return _operationTimer.Elapsed; } }   // Total ping operation runtime
         public ulong Sent { get; private set; }                                     // Number of sent ping packets
         public ulong Received { get; private set; }                                 // Number of received packets
         public ulong Lost { get; private set; }                                     // Amount of lost packets
@@ -31,8 +29,8 @@ namespace PowerPing
         public bool HasOverflowed { get; set; }                                     // Specifies if any of the results have overflowed
         public bool ScanWasCanceled { get; set; }                                   // Whether the scan was canceled early
 
-        private readonly Stopwatch m_OperationTimer = new Stopwatch();              // Used to time total time spent doing operation
-        private double m_ResponseTimeSum = 0;                                       // Sum of all reply times (used to work out general average 
+        private readonly Stopwatch _operationTimer = new Stopwatch();              // Used to time total time spent doing operation
+        private double _responseTimeSum = 0;                                       // Sum of all reply times (used to work out general average
 
         public PingResults()
         {
@@ -54,75 +52,99 @@ namespace PowerPing
             StartTime = DateTime.Now;
 
             // Start timing operation
-            m_OperationTimer.Start();
+            _operationTimer.Start();
         }
 
         public void SaveResponseTime(double time)
         {
-            if (time == -1f) {
+            if (time == -1f)
+            {
                 CurrTime = 0;
                 return;
             }
 
             // BUG: Converting from long to double might be causing precisson loss
             // Check response time against current max and min
-            if (time > MaxTime) {
+            if (time > MaxTime)
+            {
                 MaxTime = time;
             }
 
-            if (time < MinTime || MinTime == 0) {
+            if (time < MinTime || MinTime == 0)
+            {
                 MinTime = time;
             }
 
-            try {
+            try
+            {
                 // Work out average
-                m_ResponseTimeSum += time;
-                AvgTime = m_ResponseTimeSum / Received; // Avg = Total / Count
-            } catch (OverflowException) {
+                _responseTimeSum += time;
+                AvgTime = _responseTimeSum / Received; // Avg = Total / Count
+            }
+            catch (OverflowException)
+            {
                 HasOverflowed = true;
             }
             CurrTime = time;
         }
+
         public void CountPacketType(int type)
         {
             try
             {
-                if (type == 0) {
+                if (type == 0)
+                {
                     GoodPackets++;
-                } else if (type == 3 || type == 4 || type == 5 || type == 11) {
+                }
+                else if (type == 3 || type == 4 || type == 5 || type == 11)
+                {
                     ErrorPackets++;
-                } else {
+                }
+                else
+                {
                     OtherPackets++;
                 }
-            } catch (OverflowException) {
+            }
+            catch (OverflowException)
+            {
                 HasOverflowed = true;
             }
         }
 
         public void IncrementSentPackets()
         {
-            try {
+            try
+            {
                 Sent++;
-            } catch (OverflowException) {
+            }
+            catch (OverflowException)
+            {
                 HasOverflowed = true;
             }
         }
+
         public void IncrementReceivedPackets()
         {
-            try {
+            try
+            {
                 Received++;
-            } catch (OverflowException) {
+            }
+            catch (OverflowException)
+            {
                 HasOverflowed = true;
             }
         }
+
         public void IncrementLostPackets()
         {
-            try {
+            try
+            {
                 Lost++;
-            } catch (OverflowException) {
+            }
+            catch (OverflowException)
+            {
                 HasOverflowed = true;
             }
         }
     }
-
 }

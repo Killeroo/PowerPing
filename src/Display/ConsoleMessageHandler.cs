@@ -1,14 +1,6 @@
-﻿using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PowerPing
+﻿namespace PowerPing
 {
-    public class ConsoleMessageHandler 
+    public class ConsoleMessageHandler
     {
         public DisplayConfiguration DisplayConfig = new DisplayConfiguration();
         public PingAttributes Attributes = new PingAttributes();
@@ -27,9 +19,9 @@ namespace PowerPing
             if (obj.fatal)
             {
                 ConsoleDisplay.Fatal(errorText);
-                
+
                 // Exit on fatal error
-                Helper.ExitWithError();    
+                Helper.ExitWithError();
             }
             else
             {
@@ -48,7 +40,7 @@ namespace PowerPing
             string responseAddress = response.Endpoint.ToString();
             if (DisplayConfig.UseResolvedAddress)
             {
-                // Returned address normally have port at the end (eg 8.8.8.8:0) so we need to remove that before trying to query the DNS 
+                // Returned address normally have port at the end (eg 8.8.8.8:0) so we need to remove that before trying to query the DNS
                 string responseIP = responseAddress.ToString().Split(':')[0];
 
                 // Resolve the ip and store as the response address
@@ -78,20 +70,18 @@ namespace PowerPing
             if (DisplayConfig.ShowRequests)
             {
                 ConsoleDisplay.RequestPacket(
-                    request.Packet, 
-                    (DisplayConfig.UseInputtedAddress | DisplayConfig.UseResolvedAddress ? Attributes.InputtedAddress : Attributes.ResolvedAddress), 
+                    request.Packet,
+                    (DisplayConfig.UseInputtedAddress | DisplayConfig.UseResolvedAddress ? Attributes.InputtedAddress : Attributes.ResolvedAddress),
                     request.SequenceNumber);
             }
         }
 
         public void OnResultsUpdate(PingResults results)
         {
-            
         }
 
         public void OnStart(PingAttributes attributes)
         {
-
             // TODO: I think this part is bullshit, check later
             if (DisplayConfig.UseResolvedAddress)
             {

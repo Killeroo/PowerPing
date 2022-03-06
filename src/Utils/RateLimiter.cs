@@ -1,10 +1,9 @@
 ﻿/**************************************************************************
  * PowerPing - Advanced command line ping tool
  * Copyright (c) 2022 Matthew Carney [matthewcarney64@gmail.com]
- * https://github.com/Killeroo/PowerPing 
+ * https://github.com/Killeroo/PowerPing
  *************************************************************************/
 
-using System;
 using System.Diagnostics;
 
 namespace PowerPing
@@ -16,23 +15,24 @@ namespace PowerPing
     /// </summary>
     public class RateLimiter
     {
-        private readonly long m_MinimumRunIntervalTicks;
-        private long m_LastRunTimestamp;
+        private readonly long _minimumRunIntervalTicks;
+        private long _lastRunTimestamp;
 
         public TimeSpan ElapsedSinceLastRun { get; private set; }
 
         public RateLimiter(TimeSpan minimumRunInterval)
         {
-            m_MinimumRunIntervalTicks = Helper.TimeSpanToStopwatchTicks(minimumRunInterval.Ticks);
+            _minimumRunIntervalTicks = Helper.TimeSpanToStopwatchTicks(minimumRunInterval.Ticks);
         }
 
         public bool RequestRun()
         {
             long currentTimestamp = Stopwatch.GetTimestamp();
-            long elapsed = m_LastRunTimestamp == 0 ? 0 : (currentTimestamp - m_LastRunTimestamp); // Will be 0 on first call to this method
-            if (elapsed == 0 || elapsed >= m_MinimumRunIntervalTicks) {
+            long elapsed = _lastRunTimestamp == 0 ? 0 : (currentTimestamp - _lastRunTimestamp); // Will be 0 on first call to this method
+            if (elapsed == 0 || elapsed >= _minimumRunIntervalTicks)
+            {
                 ElapsedSinceLastRun = new TimeSpan(Helper.StopwatchToTimeSpanTicks(elapsed));
-                m_LastRunTimestamp = currentTimestamp;
+                _lastRunTimestamp = currentTimestamp;
                 return true;
             }
             return false;
