@@ -61,6 +61,7 @@ namespace PowerPing
 
             // Set configuration
             ConsoleDisplay.Configuration = _displayConfiguration;
+            ConsoleDisplay.CancellationToken = _cancellationTokenSource.Token;
 
             // Add handler to display ping events
             ConsoleMessageHandler consoleHandler = new ConsoleMessageHandler(_displayConfiguration, _cancellationTokenSource.Token);

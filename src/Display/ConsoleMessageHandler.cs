@@ -14,18 +14,16 @@
 
         public void OnError((string message, Exception e, bool fatal) obj)
         {
-            string errorText = (obj.e != null ? $"{obj.message} ({obj.e.GetType().Name})" : obj.message);
-
             if (obj.fatal)
             {
-                ConsoleDisplay.Fatal(errorText);
+                ConsoleDisplay.Fatal(obj.message, obj.e);
 
                 // Exit on fatal error
                 Helper.ExitWithError();
             }
             else
             {
-                ConsoleDisplay.Error(errorText);
+                ConsoleDisplay.Error(obj.message, obj.e);
             }
         }
 
@@ -37,6 +35,7 @@
         public void OnReply(PingReply response)
         {
             // Determine what form the response address is going to be displayed in
+            // TODO: Move this when lookup refactor is done
             string responseAddress = response.Endpoint.ToString();
             if (DisplayConfig.UseResolvedAddress)
             {
@@ -50,6 +49,7 @@
             {
                 responseAddress = Attributes.InputtedAddress;
             }
+
 
             ConsoleDisplay.ReplyPacket(
                 response.Packet,
@@ -67,37 +67,14 @@
 
         public void OnRequest(PingRequest request)
         {
-            if (DisplayConfig.ShowRequests)
-            {
-                ConsoleDisplay.RequestPacket(
-                    request.Packet,
-                    (DisplayConfig.UseInputtedAddress | DisplayConfig.UseResolvedAddress ? Attributes.InputtedAddress : Attributes.ResolvedAddress),
-                    request.SequenceNumber);
-            }
-        }
-
-        public void OnResultsUpdate(PingResults results)
-        {
+            ConsoleDisplay.RequestPacket(
+                request.Packet,
+                (DisplayConfig.UseInputtedAddress | DisplayConfig.UseResolvedAddress ? Attributes.InputtedAddress : Attributes.ResolvedAddress),
+                request.SequenceNumber);
         }
 
         public void OnStart(PingAttributes attributes)
         {
-            // TODO: I think this part is bullshit, check later
-            if (DisplayConfig.UseResolvedAddress)
-            {
-                try
-                {
-                    Attributes.InputtedAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(Attributes.ResolvedAddress), Token);
-                }
-                catch (OperationCanceledException) { }
-
-                if (Attributes.InputtedAddress == "")
-                {
-                    // If reverse lookup fails just display whatever is in the address field
-                    Attributes.InputtedAddress = Attributes.ResolvedAddress;
-                }
-            }
-
             ConsoleDisplay.PingIntroMsg(Attributes);
         }
 

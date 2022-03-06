@@ -11,12 +11,13 @@ using System.Text;
 namespace PowerPing
 {
     /// <summary>
-    /// Display class, responsible for displaying all output from PowerPing
-    /// (except for graph output) designed for console output (and also stdio)
+    /// Display class, responsible for displaying all console output from PowerPing
+    /// (except for graph output)
     /// </summary>
     internal class ConsoleDisplay
     {
         public static DisplayConfiguration? Configuration { get; set; }
+        public static CancellationToken CancellationToken { get; set; }
 
         // Stores console cursor position, used for updating text at position
         private struct CursorPosition
@@ -161,6 +162,22 @@ namespace PowerPing
                 return;
             }
 
+            // TODO: I think this part is bullshit, check later
+            if (Configuration.UseResolvedAddress)
+            {
+                try
+                {
+                    attrs.InputtedAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(attrs.ResolvedAddress), CancellationToken);
+                }
+                catch (OperationCanceledException) { }
+
+                if (attrs.InputtedAddress == "")
+                {
+                    // If reverse lookup fails just display whatever is in the address field
+                    attrs.InputtedAddress = attrs.ResolvedAddress;
+                }
+            }
+
             // Construct string
             Console.WriteLine();
             Console.Write(ProgramStrings.INTRO_ADDR_TXT, attrs.InputtedAddress);
@@ -209,7 +226,7 @@ namespace PowerPing
         /// </summary>
         public static void RequestPacket(ICMP packet, string address, int index)
         {
-            if (!Configuration.ShowOutput)
+            if (!Configuration.ShowOutput || !Configuration.ShowRequests)
             {
                 return;
             }
@@ -679,22 +696,24 @@ namespace PowerPing
         /// Display error message
         /// </summary>
         /// <param name="errMsg">Error message to display</param>
-        public static void Error(string errMsg)
+        public static void Error(string errMsg, Exception e = null)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
+            string errorText = (e != null ? $"{errMsg} ({e.GetType().Name})" : errMsg);
 
             // Write error message
-            Console.WriteLine(errMsg);
+            Console.WriteLine(errorText);
 
             // Reset console colours
             ResetColor();
         }
 
-        public static void Fatal(string errMsg)
+        public static void Fatal(string errMsg, Exception e = null)
         {
             Console.ForegroundColor = ConsoleColor.Red;
+            string errorText = (e != null ? $"{errMsg} ({e.GetType().Name})" : errMsg);
 
-            Console.WriteLine(errMsg);
+            Console.WriteLine(errorText);
 
             ResetColor();
         }
