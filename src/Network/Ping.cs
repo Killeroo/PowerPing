@@ -22,7 +22,7 @@ namespace PowerPing
         public Action<PingTimeout>? OnTimeout = null;
         public Action<PingAttributes>? OnStart = null;
         public Action<PingResults>? OnFinish = null;
-        public Action<(string message, Exception e, bool fatal)>? OnError = null;
+        public Action<PingError>? OnError = null;
 
         private PingAttributes _attributes = null;
         private PingResults _results = null;
@@ -37,6 +37,7 @@ namespace PowerPing
         private PingRequest _requestMessage = new();
         private PingReply _responseMessage = new();
         private PingTimeout _timeoutMessage = new();
+        private PingError _errorMesssage = new();
 
         private ushort _currentSequenceNumber = 0;
         private int _currentReceiveTimeout = 0;
@@ -150,12 +151,19 @@ namespace PowerPing
             }
             catch (SocketException e)
             {
-                OnError?.Invoke((
-                    "PowerPing uses raw sockets which require Administrative rights to create." + Environment.NewLine +
-                    "(You can find more info at https://github.com/Killeroo/PowerPing/issues/110)" + Environment.NewLine +
-                    "Make sure you are running as an Administrator and try again.",
-                    e,
-                    true));
+                if (OnError != null)
+                {
+                    _errorMesssage.Message =
+                        "PowerPing uses raw sockets which require Administrative rights to create." + Environment.NewLine +
+                        "(You can find more info at https://github.com/Killeroo/PowerPing/issues/110)" + Environment.NewLine +
+                        "Make sure you are running as an Administrator and try again.";
+                    _errorMesssage.Exception = e;
+                    _errorMesssage.Timestamp = DateTime.Now;
+                    _errorMesssage.Fatal = true;
+
+                    OnError.Invoke(_errorMesssage);
+                }
+
             }
         }
 
@@ -289,11 +297,15 @@ namespace PowerPing
                     _results.IncrementSentPackets();
 
                     // Raise message on request sent
-                    _requestMessage.Timestamp = DateTime.Now;
-                    _requestMessage.SequenceNumber = index;
-                    _requestMessage.Packet = _packet;
-                    _requestMessage.Destination = _remoteEndpoint;
-                    OnRequest?.Invoke(_requestMessage);
+                    if (OnRequest != null)
+                    {
+                        _requestMessage.Timestamp = DateTime.Now;
+                        _requestMessage.SequenceNumber = index;
+                        _requestMessage.Packet = _packet;
+                        _requestMessage.Destination = _remoteEndpoint;
+
+                        OnRequest.Invoke(_requestMessage);
+                    }
 
                     // Just for artifically testing higher ping response times
                     if (_debug)
@@ -316,17 +328,29 @@ namespace PowerPing
                 }
                 catch (IOException e)
                 {
-                    OnError?.Invoke(("General transmit error", e, false));
+                    if (OnError != null)
+                    {
+                        _errorMesssage.Message = "General transmit error";
+                        _errorMesssage.Exception = e;
+                        _errorMesssage.Timestamp = DateTime.Now;
+                        _errorMesssage.Fatal = false;
+
+                        OnError.Invoke(_errorMesssage);
+                    }
 
                     _results.SaveResponseTime(-1);
                     _results.IncrementLostPackets();
                 }
                 catch (SocketException)
                 {
-                    _timeoutMessage.Timestamp = DateTime.Now;
-                    _timeoutMessage.SequenceNumber = index;
-                    _timeoutMessage.Endpoint = _remoteEndpoint;
-                    OnTimeout?.Invoke(_timeoutMessage);
+                    if (OnTimeout != null)
+                    {
+                        _timeoutMessage.Timestamp = DateTime.Now;
+                        _timeoutMessage.SequenceNumber = index;
+                        _timeoutMessage.Endpoint = _remoteEndpoint;
+
+                        OnTimeout.Invoke(_timeoutMessage);
+                    }
 
                     _results.SaveResponseTime(-1);
                     _results.IncrementLostPackets();
@@ -338,7 +362,15 @@ namespace PowerPing
                 }
                 catch (Exception e)
                 {
-                    OnError?.Invoke(("General error occured", e, false));
+                    if (OnError != null)
+                    {
+                        _errorMesssage.Message = "General error occured";
+                        _errorMesssage.Exception = e;
+                        _errorMesssage.Timestamp = DateTime.Now;
+                        _errorMesssage.Fatal = false;
+
+                        OnError.Invoke(_errorMesssage);
+                    }
 
                     _results.SaveResponseTime(-1);
                     _results.IncrementLostPackets();
@@ -406,13 +438,17 @@ namespace PowerPing
             } while (response == null);
 
             // Raise message on response
-            _responseMessage.Packet = response;
-            _responseMessage.Endpoint = responseEndPoint as IPEndPoint;
-            _responseMessage.Timestamp = DateTime.Now;
-            _responseMessage.SequenceNumber = _currentSequenceNumber;
-            _responseMessage.BytesRead = bytesRead;
-            _responseMessage.RoundTripTime = replyTime;
-            OnReply?.Invoke(_responseMessage);
+            if (OnReply != null)
+            {
+                _responseMessage.Packet = response;
+                _responseMessage.Endpoint = responseEndPoint as IPEndPoint;
+                _responseMessage.Timestamp = DateTime.Now;
+                _responseMessage.SequenceNumber = _currentSequenceNumber;
+                _responseMessage.BytesRead = bytesRead;
+                _responseMessage.RoundTripTime = replyTime;
+
+                OnReply.Invoke(_responseMessage);
+            }
         }
     }
 }

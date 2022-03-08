@@ -8,8 +8,10 @@ namespace PowerPing
 {
     internal static class Program
     {
-        private static readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-        private static DisplayConfiguration _displayConfiguration = new DisplayConfiguration();
+        private static readonly CancellationTokenSource _cancellationTokenSource = new ();
+        private static DisplayConfiguration _displayConfiguration = new ();
+        private static LogMessageHandler _logMessageHandler = null;
+        private static ConsoleMessageHandler _consoleMessageHandler = null;
 
         /// <summary>
         /// Main entry point of PowerPing
@@ -64,7 +66,7 @@ namespace PowerPing
             ConsoleDisplay.CancellationToken = _cancellationTokenSource.Token;
 
             // Add handler to display ping events
-            ConsoleMessageHandler consoleHandler = new ConsoleMessageHandler(_displayConfiguration, _cancellationTokenSource.Token);
+            _consoleMessageHandler = new ConsoleMessageHandler(_displayConfiguration, _cancellationTokenSource.Token);
 
             // Select correct function using opMode
             switch (parsedAttributes.Operation)
@@ -76,7 +78,7 @@ namespace PowerPing
                 case PingOperation.Graph: RunGraphOperation(parsedAttributes.InputtedAddress, _cancellationTokenSource.Token); break;
                 case PingOperation.Flood: RunFloodOperation(parsedAttributes.InputtedAddress, _cancellationTokenSource.Token); break;
                 case PingOperation.Scan: RunScanOperation(parsedAttributes.InputtedAddress, _cancellationTokenSource.Token); break;
-                case PingOperation.Normal: RunNormalPingOperation(parsedAttributes, consoleHandler, _cancellationTokenSource.Token); break;
+                case PingOperation.Normal: RunNormalPingOperation(parsedAttributes, _cancellationTokenSource.Token); break;
 
                 default:
                     Helper.ErrorAndExit("Could not determine ping operation");
@@ -108,18 +110,31 @@ namespace PowerPing
 
         private static void RunNormalPingOperation(
             PingAttributes attributes,
-            ConsoleMessageHandler handler,
             CancellationToken cancellationToken)
         {
             Ping p = new Ping(attributes, cancellationToken);
 
-            p.OnStart += handler.OnStart;
-            p.OnFinish += handler.OnFinish;
-            p.OnTimeout += handler.OnTimeout;
-            p.OnRequest += handler.OnRequest;
-            p.OnReply += handler.OnReply;
-            p.OnError += handler.OnError;
+            if (attributes.EnableLogging)
+            {
+                // Add callbacks for logging to a file
+                // These need to be first.. so they get run first
+                p.OnStart += _logMessageHandler.OnStart;
+                p.OnFinish += _logMessageHandler.OnFinish;
+                p.OnTimeout += _logMessageHandler.OnTimeout;
+                p.OnRequest += _logMessageHandler.OnRequest;
+                p.OnReply += _logMessageHandler.OnReply;
+                p.OnError += _logMessageHandler.OnError;
+            }
 
+            // Add callbacks for console display
+            p.OnStart += _consoleMessageHandler.OnStart;
+            p.OnFinish += _consoleMessageHandler.OnFinish;
+            p.OnTimeout += _consoleMessageHandler.OnTimeout;
+            p.OnRequest += _consoleMessageHandler.OnRequest;
+            p.OnReply += _consoleMessageHandler.OnReply;
+            p.OnError += _consoleMessageHandler.OnError;
+
+            // Send the pings!
             p.Send();
         }
 

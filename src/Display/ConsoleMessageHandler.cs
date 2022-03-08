@@ -12,18 +12,18 @@
             Token = token;
         }
 
-        public void OnError((string message, Exception e, bool fatal) obj)
+        public void OnError(PingError error)
         {
-            if (obj.fatal)
+            if (error.Fatal)
             {
-                ConsoleDisplay.Fatal(obj.message, obj.e);
+                ConsoleDisplay.Fatal(error.Message, error.Exception);
 
                 // Exit on fatal error
                 Helper.ExitWithError();
             }
             else
             {
-                ConsoleDisplay.Error(obj.message, obj.e);
+                ConsoleDisplay.Error(error.Message, error.Exception);
             }
         }
 
@@ -49,7 +49,6 @@
             {
                 responseAddress = Attributes.InputtedAddress;
             }
-
 
             ConsoleDisplay.ReplyPacket(
                 response.Packet,
