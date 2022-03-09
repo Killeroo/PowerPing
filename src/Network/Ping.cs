@@ -426,6 +426,20 @@ namespace PowerPing
                     // Store reply packet
                     response = new ICMP(receiveBuffer, bytesRead);
 
+                    if (_debug)
+                    {
+                        // Print out parsed IPv4 header data
+                        IPv4 header = new IPv4(receiveBuffer, bytesRead);
+                        ICMP ping = new ICMP(header.Data, header.TotalLength - header.HeaderLength, 0);
+                        header.GetBytes();
+                        Console.BackgroundColor = ConsoleColor.Red;
+                        Console.ForegroundColor = ConsoleColor.Black;
+                        Console.WriteLine(header.PrettyPrint());
+                        Console.BackgroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine(ping.PrettyPrint());
+                        Console.ResetColor();
+                    }
+
                     // If we sent an echo and receive a response with a different identifier or sequence
                     // number, ignore it (it could correspond to an older request that timed out)
                     if (_packet.Type == 8 && response.Type == 0)
