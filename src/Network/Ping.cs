@@ -304,6 +304,7 @@ namespace PowerPing
                         _requestMessage.SequenceNumber = index;
                         _requestMessage.Packet = _packet;
                         _requestMessage.Destination = _remoteEndpoint;
+                        _requestMessage.PacketSize = _packetSize;
 
                         OnRequest.Invoke(_requestMessage);
                     }
