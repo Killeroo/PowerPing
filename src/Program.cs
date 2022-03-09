@@ -103,6 +103,9 @@ namespace PowerPing
 
             // Request currently running job to finish up
             _cancellationTokenSource.Cancel();
+                
+            // Kill log handler if it was running
+            _logMessageHandler?.Dispose();
 
             // Reset colour on exit
             Console.ResetColor();
@@ -116,6 +119,8 @@ namespace PowerPing
 
             if (attributes.EnableLogging)
             {
+                _logMessageHandler = new LogMessageHandler(attributes.LogFilename, _displayConfiguration);
+
                 // Add callbacks for logging to a file
                 // These need to be first.. so they get run first
                 p.OnStart += _logMessageHandler.OnStart;

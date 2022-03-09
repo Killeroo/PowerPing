@@ -79,8 +79,9 @@ _Future features:_
         --whoami                         Location info for current host
 
     Others:
-        --help       [--?]               Displays this help message
-        --version    [--v]               Shows version and build information
+        --log           [--f]   path     Logs the ping output to a file 
+        --help          [--?]            Displays this help message
+        --version       [--v]            Shows version and build information
 
 ## Example usage:
      powerping 8.8.8.8                    -     Send ping to google DNS with default values (3000ms timeout, 5 pings)

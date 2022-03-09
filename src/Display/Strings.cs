@@ -144,6 +144,7 @@ Modes:
     --whoami                         Location info for current host
 
 Other:
+    --log           [--f]   path     Logs ping output to a file (path is optional)
     --help          [--?]            Displays this help message
     --version       [--v]            Shows version and build information
 

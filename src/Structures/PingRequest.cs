@@ -15,5 +15,6 @@ namespace PowerPing
         public ICMP Packet;
         public DateTime Timestamp;
         public int SequenceNumber;
+        public int PacketSize;
     }
 }

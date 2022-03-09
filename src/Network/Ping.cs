@@ -256,6 +256,7 @@ namespace PowerPing
             int bytesRead = 0;
 
             OnStart?.Invoke(_attributes);
+            _results.Start();
 
             // Sending loop
             for (int index = 1; _attributes.Continous || index <= _attributes.Count; index++)
@@ -380,6 +381,7 @@ namespace PowerPing
                 OnResultsUpdate?.Invoke(_results);
             }
 
+            _results.Stop();
             OnFinish?.Invoke(_results);
         }
 

@@ -512,6 +512,16 @@ namespace PowerPing
                                 attributes.DontFragment = true;
                                 break;
 
+                            case "/log":
+                            case "-log":
+                            case "--log":
+                            case "/f":
+                            case "-f":
+                            case "--f":
+                                attributes.EnableLogging = true;
+                                attributes.LogFilename = LogFile.GenerateLogFileName();
+                                break;
+
                             case "/size":
                             case "-size":
                             case "--size":

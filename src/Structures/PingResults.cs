@@ -15,7 +15,8 @@ namespace PowerPing
     {
         // Properties
         public DateTime StartTime { get; private set; }                             // Time operation started at
-        public TimeSpan TotalRunTime { get { return _operationTimer.Elapsed; } }   // Total ping operation runtime
+        public DateTime EndTime { get; private set; }                               // Time operation finished    
+        public TimeSpan TotalRunTime { get { return _operationTimer.Elapsed; } }    // Total ping operation runtime
         public ulong Sent { get; private set; }                                     // Number of sent ping packets
         public ulong Received { get; private set; }                                 // Number of received packets
         public ulong Lost { get; private set; }                                     // Amount of lost packets
@@ -47,12 +48,22 @@ namespace PowerPing
             OtherPackets = 0;
 
             HasOverflowed = false;
+        }
 
+        public void Start()
+        {
             // Get local start time
             StartTime = DateTime.Now;
 
             // Start timing operation
             _operationTimer.Start();
+        }
+
+        public void Stop()
+        {
+            EndTime = DateTime.Now;
+
+            _operationTimer.Stop();
         }
 
         public void SaveResponseTime(double time)
