@@ -4,8 +4,6 @@
  * https://github.com/Killeroo/PowerPing
  *************************************************************************/
 
-using System;
-using System.IO;
 using System.Text;
 
 namespace PowerPing
@@ -22,8 +20,7 @@ namespace PowerPing
             _filePath = logPath;
 
             Create(logPath);
-
-;        }
+        }
 
         public void Create(string path)
         {
@@ -51,7 +48,6 @@ namespace PowerPing
                 }
                 catch (Exception ex)
                 {
-
                     ConsoleDisplay.Error($"Error writing to log file ({_filePath})", ex);
                 }
             }
