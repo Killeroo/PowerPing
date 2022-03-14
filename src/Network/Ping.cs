@@ -33,7 +33,7 @@ namespace PowerPing
         private IPEndPoint _remoteEndpoint = null;
         private readonly CancellationToken _cancellationToken;
 
-        private bool _debug = true;
+        private bool _debugIpHeader = false;
         private bool _debugTimings = false;
 
         private PingRequest _requestMessage = new();
@@ -428,7 +428,7 @@ namespace PowerPing
                     // Store reply packet
                     response = new ICMP(receiveBuffer, bytesRead);
 
-                    if (_debug)
+                    if (_debugIpHeader)
                     {
                         // Print out parsed IPv4 header data
                         IPv4 header = new IPv4(receiveBuffer, bytesRead);
