@@ -62,7 +62,6 @@ namespace PowerPing
         {
             if (_fileStream != null && _fileStream.CanWrite)
             {
-                Console.WriteLine(line);
                 _fileStream.Write(_asciiEncoder.GetBytes(line + Environment.NewLine));
 
                 try
