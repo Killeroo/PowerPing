@@ -32,7 +32,9 @@ namespace PowerPing
         private int _packetSize = 0;
         private IPEndPoint _remoteEndpoint = null;
         private readonly CancellationToken _cancellationToken;
-        private bool _debug = false;
+
+        private bool _debug = true;
+        private bool _debugTimings = false;
 
         private PingRequest _requestMessage = new();
         private PingReply _responseMessage = new();
@@ -310,7 +312,7 @@ namespace PowerPing
                     }
 
                     // Just for artifically testing higher ping response times
-                    if (_debug)
+                    if (_debugTimings)
                     {
                         Random rnd = new Random();
                         Thread.Sleep(rnd.Next(10, 400));
@@ -435,7 +437,10 @@ namespace PowerPing
                         Console.BackgroundColor = ConsoleColor.Red;
                         Console.ForegroundColor = ConsoleColor.Black;
                         Console.WriteLine(header.PrettyPrint());
+                        Console.ResetColor();
+
                         Console.BackgroundColor = ConsoleColor.Yellow;
+                        Console.ForegroundColor = ConsoleColor.Black;
                         Console.WriteLine(ping.PrettyPrint());
                         Console.ResetColor();
                     }
