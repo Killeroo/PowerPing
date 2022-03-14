@@ -46,7 +46,7 @@ namespace PowerPing
         public bool DontFragment { get; set; }          // Sets the IP head Don't Fragment flag
         public bool RandomTiming { get; set; }          // Use random send interval between pings
         public bool EnableLogging { get; set; }         // Log results to a file
-        public string LogFilename { get; set; }         // File to log file to
+        public string LogFilePath { get; set; }         // File to log file to
 
         public PingOperation Operation { get; set; }    // Current ping operation being performed
 

@@ -54,7 +54,7 @@ namespace PowerPing
                 $"dont_fragment={attributes.DontFragment} " +
                 $"random_timing={attributes.RandomTiming} " +
                 $"enable_logging={attributes.EnableLogging} " +
-                $"log_filename={attributes.LogFilename}");
+                $"log_filename={attributes.LogFilePath}");
         }
 
         internal void OnFinish(PingResults results)

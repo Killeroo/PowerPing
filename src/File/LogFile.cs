@@ -22,15 +22,38 @@ namespace PowerPing
             Create(logPath);
         }
 
-        public void Create(string path)
+        public void Create(string filePath)
         {
+            string? path = "";
             try
             {
-                _fileStream = File.Create(path);
+                if (filePath.Contains(Path.DirectorySeparatorChar))
+                {
+                    // Check the directory we want to write to exits
+                    path = Path.GetDirectoryName(filePath);
+                    if (path != null && !Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                ConsoleDisplay.Error($"Cannot create file at {path} changing to {Directory.GetCurrentDirectory()}", e);
+
+                // Change file to be written to current directory
+                // when we can't create our first directory choice
+                filePath = Path.Combine(Directory.GetCurrentDirectory(), Path.GetFileName(filePath)); 
+            }
+
+            try
+            {
+                // Create the file
+                _fileStream = File.Create(filePath);
             }
             catch (Exception ex)
             {
-                ConsoleDisplay.Error($"Cannot write to log file ({path})", ex);
+                ConsoleDisplay.Error($"Cannot write to log file ({filePath})", ex);
                 _fileStream = null;
             }
         }
@@ -58,9 +81,35 @@ namespace PowerPing
             _fileStream?.Close();
         }
 
-        public static string GenerateLogFileName()
+        public static string SetupPath(string inputtedPath, string address)
         {
-            return "test.txt";
+            if (string.IsNullOrEmpty(inputtedPath))
+            {
+                // Generate a filename if we were given nothing
+                inputtedPath = LogFile.GenerateFileName(address);
+            }
+
+            if (!Path.HasExtension(inputtedPath))
+            {
+                // Add a file to any path that we were given
+                inputtedPath = Path.Combine(inputtedPath, LogFile.GenerateFileName(address));
+            }
+
+            return Helper.CheckForDuplicateFile(inputtedPath);
         }
+
+        public static string GenerateFileName(string address)
+        {
+            DateTime logCreationTime = DateTime.Now;
+
+            return string.Format("PowerPing_{0}_{1}{2}{3}_{4}{5}.txt",
+                address,
+                logCreationTime.Year,
+                logCreationTime.Month,
+                logCreationTime.Day,
+                logCreationTime.Hour,
+                logCreationTime.Minute);
+        }
+
     }
 }

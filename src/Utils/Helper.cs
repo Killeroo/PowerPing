@@ -303,5 +303,39 @@ namespace PowerPing
 
             return version;
         }
+
+        /// <summary>
+        /// Checks if the file path already exists, if so then a (1) is added the end of the filename
+        /// </summary>
+        /// <param name="filepath"></param>
+        /// <returns></returns>
+        public static string CheckForDuplicateFile(string filepath)
+        {
+            string filename = Path.GetFileNameWithoutExtension(filepath);
+            string extension = Path.GetExtension(filepath);
+
+            string? outDir = Path.GetDirectoryName(filepath);
+            string path = string.IsNullOrEmpty(outDir) ? Path.GetPathRoot(filepath) : outDir;
+
+            string currentFilePath = filepath;
+            bool goodFilename = false;
+            int counter = 0;
+
+            // Loop through possible names till we find one that doesn't already exist
+            while (goodFilename == false)
+            {
+                if (File.Exists(currentFilePath))
+                {
+                    counter++;
+                    currentFilePath = Path.Combine(path, $"{filename}({counter}){extension}");
+                }
+                else
+                {
+                    goodFilename = true;
+                }
+            }
+
+            return currentFilePath;
+        }
     }
 }

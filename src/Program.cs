@@ -119,7 +119,11 @@ namespace PowerPing
 
             if (attributes.EnableLogging)
             {
-                _logMessageHandler = new LogMessageHandler(attributes.LogFilename, _displayConfiguration);
+                // Setup the path we are going to save the log to
+                // (generate the name if needed)
+                attributes.LogFilePath = LogFile.SetupPath(attributes.LogFilePath, attributes.InputtedAddress);
+
+                _logMessageHandler = new LogMessageHandler(attributes.LogFilePath, _displayConfiguration);
 
                 // Add callbacks for logging to a file
                 // These need to be first.. so they get run first

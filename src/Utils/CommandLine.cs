@@ -519,7 +519,17 @@ namespace PowerPing
                             case "-f":
                             case "--f":
                                 attributes.EnableLogging = true;
-                                attributes.LogFilename = LogFile.GenerateLogFileName();
+
+                                if (count + 1 >= args.Length
+                                    || IsArgument(args[count + 1]))
+                                {
+                                    attributes.LogFilePath = "";
+                                }
+                                else
+                                {
+                                    attributes.LogFilePath = args[count + 1];
+                                }
+
                                 break;
 
                             case "/size":
