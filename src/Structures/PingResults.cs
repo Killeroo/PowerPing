@@ -89,7 +89,7 @@ namespace PowerPing
             try
             {
                 // Work out average
-                _responseTimeSum += time;
+                _responseTimeSum = checked(_responseTimeSum + time);
                 AvgTime = _responseTimeSum / Received; // Avg = Total / Count
             }
             catch (OverflowException)
@@ -105,15 +105,15 @@ namespace PowerPing
             {
                 if (type == 0)
                 {
-                    GoodPackets++;
+                    GoodPackets = checked(GoodPackets + 1);
                 }
                 else if (type == 3 || type == 4 || type == 5 || type == 11)
                 {
-                    ErrorPackets++;
+                    ErrorPackets = checked(ErrorPackets + 1);
                 }
                 else
                 {
-                    OtherPackets++;
+                    OtherPackets = checked(OtherPackets + 1);
                 }
             }
             catch (OverflowException)
@@ -126,7 +126,7 @@ namespace PowerPing
         {
             try
             {
-                Sent++;
+                Sent = checked(Sent + 1);
             }
             catch (OverflowException)
             {
@@ -138,7 +138,7 @@ namespace PowerPing
         {
             try
             {
-                Received++;
+                Received = checked(Received + 1);
             }
             catch (OverflowException)
             {
@@ -150,7 +150,7 @@ namespace PowerPing
         {
             try
             {
-                Lost++;
+                Lost = checked(Lost + 1);
             }
             catch (OverflowException)
             {

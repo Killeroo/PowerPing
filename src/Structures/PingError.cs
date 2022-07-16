@@ -1,8 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿/**************************************************************************
+ * PowerPing - Advanced command line ping tool
+ * Copyright (c) 2022 Matthew Carney [matthewcarney64@gmail.com]
+ * https://github.com/Killeroo/PowerPing
+ * ************************************************************************/
+
+using System;
 
 namespace PowerPing
 {
