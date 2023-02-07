@@ -74,7 +74,10 @@
 
         public void OnStart(PingAttributes attributes)
         {
-            ConsoleDisplay.PingIntroMsg(Attributes);
+            // Cache the PingAttributes at this point as Ping has modified the inputted and resolved addresses
+            Attributes = attributes;
+
+            ConsoleDisplay.PingIntroMsg(attributes);
         }
 
         public void OnTimeout(PingTimeout timeout)
