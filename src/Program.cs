@@ -195,7 +195,7 @@ namespace PowerPing
 
         private static void RunLocationOperation(string address)
         {
-            Console.WriteLine(Lookup.GetAddressLocationInfo(address, false));
+            Console.WriteLine(Lookup.GetAddressLocationInfo(address, true));
             if (_displayConfiguration.RequireInput)
             {
                 Helper.WaitForUserInput();
