@@ -258,7 +258,7 @@ namespace PowerPing
             {
                 Console.Write(ProgramStrings.TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
             }
-            else if (Configuration.ShowtimeStampUTC)
+            else if (Configuration.ShowTimeStampUTC)
             {
                 Console.Write(ProgramStrings.TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString("HH:mm:ss"));
             }
@@ -378,7 +378,7 @@ namespace PowerPing
             {
                 Console.Write(ProgramStrings.TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
             }
-            else if (Configuration.ShowtimeStampUTC)
+            else if (Configuration.ShowTimeStampUTC)
             {
                 Console.Write(ProgramStrings.TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString("HH:mm:ss"));
             }
@@ -682,7 +682,7 @@ namespace PowerPing
             {
                 Console.Write(ProgramStrings.TIMESTAMP_LAYOUT, DateTime.Now.ToString("HH:mm:ss"));
             }
-            else if (Configuration.ShowtimeStampUTC)
+            else if (Configuration.ShowTimeStampUTC)
             {
                 Console.Write(ProgramStrings.TIMESTAMP_LAYOUT, DateTime.UtcNow.ToString("HH:mm:ss"));
             }

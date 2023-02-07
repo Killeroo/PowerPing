@@ -14,7 +14,7 @@ namespace PowerPing
         public bool ShowOutput { get; set; } = true;
         public bool ShowMessages { get; set; } = false;
         public bool ShowTimeStamp { get; set; } = false;
-        public bool ShowtimeStampUTC { get; set; } = false;
+        public bool ShowTimeStampUTC { get; set; } = false;
         public bool ShowFullTimeStamp { get; set; } = false;
         public bool ShowFullTimeStampUTC { get; set; } = false;
         public bool ShowTimeouts { get; set; } = true;

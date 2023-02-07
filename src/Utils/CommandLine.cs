@@ -342,11 +342,11 @@ namespace PowerPing
                                 if (count + 1 >= args.Length
                                     || IsArgument(args[count + 1]))
                                 {
-                                    displayConfig.ShowFullTimeStamp = true;
+                                    displayConfig.ShowTimeStamp = true;
                                 }
                                 else if (args[count + 1].ToLower() == "utc")
                                 {
-                                    displayConfig.ShowtimeStampUTC = true;
+                                    displayConfig.ShowTimeStampUTC = true;
                                 }
                                 else
                                 {
