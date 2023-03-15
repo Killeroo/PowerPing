@@ -102,7 +102,7 @@ License under the MIT License:
 Copyright (c) 2022 Matthew Carney <matthewcarney64@gmail.com>
 
 ### Note: 
-**Requires _Elevated Rights (Admininstrator)_ to Run (more info [here](https://github.com/Killeroo/PowerPing/issues/110))**
+**Requires _Elevated Rights (Administrator)_ to Run (more info [here](https://github.com/Killeroo/PowerPing/issues/110))**
 
 ## Screenshots
 
