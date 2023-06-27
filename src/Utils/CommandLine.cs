@@ -177,9 +177,9 @@ namespace PowerPing
                                 attributes.Code = Convert.ToByte(args[count + 1]);
                                 break;
 
-                            case "/displayConfigmsg":
-                            case "-displayConfigmsg":
-                            case "--displayConfigmsg":
+                            case "/displaymsg":
+                            case "-displaymsg":
+                            case "--displaymsg":
                             case "/dm":
                             case "-dm":
                             case "--dm": // displayConfig packet message
