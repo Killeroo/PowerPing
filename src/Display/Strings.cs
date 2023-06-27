@@ -55,7 +55,7 @@ namespace PowerPing
         public const string RESULTS_TIMES_TAG = "     Times: ";
         public const string RESULTS_TYPES_TAG = "     Types: ";
         public const string RESULTS_SENT_TXT = "Sent ";
-        public const string RESULTS_RECV_TXT = ", Recieved ";
+        public const string RESULTS_RECV_TXT = ", Received ";
         public const string RESULTS_LOST_TXT = ", Lost ";
         public const string RESULTS_PERCENT_LOST_TXT = " ({0}% loss)";
         public const string RESULTS_PKT_GOOD = "Good ";

@@ -498,7 +498,7 @@ namespace PowerPing
             Console.WriteLine();
             Console.WriteLine(ProgramStrings.RESULTS_HEADER, attrs.ResolvedAddress);
 
-            //   General: Sent [ 0 ], Recieved [ 0 ], Lost [ 0 ] (0% loss)
+            //   General: Sent [ 0 ], Received [ 0 ], Lost [ 0 ] (0% loss)
             Console.Write(ProgramStrings.RESULTS_GENERAL_TAG + ProgramStrings.RESULTS_SENT_TXT);
             if (Configuration.NoColor)
             {
