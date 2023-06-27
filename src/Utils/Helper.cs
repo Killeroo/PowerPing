@@ -90,15 +90,9 @@ namespace PowerPing
         /// <returns></returns>
         public static String RandomString(int len = 11)
         {
-            string result;
-
-            using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
-            {
-                byte[] rngToken = new byte[len + 1];
-                rng.GetBytes(rngToken);
-
-                result = Convert.ToBase64String(rngToken);
-            }
+            RandomNumberGenerator.Create();
+            byte[] randomBytes = RandomNumberGenerator.GetBytes(len);
+            string result = Convert.ToBase64String(randomBytes);
 
             // Remove '=' from end of string
             return result.Remove(result.Length - 1);
