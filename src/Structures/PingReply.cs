@@ -12,7 +12,7 @@ namespace PowerPing
     public struct PingReply
     {
         public ICMP Packet;
-        public IPEndPoint Endpoint;
+        public string EndpointAddress;
         public DateTime Timestamp;
         public int SequenceNumber;
         public TimeSpan RoundTripTime;

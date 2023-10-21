@@ -24,13 +24,13 @@ namespace PowerPing
         public Action<PingResults>? OnFinish = null;
         public Action<PingError>? OnError = null;
 
-        private PingAttributes _attributes = null;
-        private PingResults _results = null;
+        private PingAttributes _attributes = new();
+        private PingResults _results = new();
 
-        private Socket _socket = null;
-        private ICMP _packet = null;
+        private Socket? _socket = null;
+        private ICMP? _packet = null;
         private int _packetSize = 0;
-        private IPEndPoint _remoteEndpoint = null;
+        private IPEndPoint? _remoteEndpoint = null;
         private readonly CancellationToken _cancellationToken;
 
         private bool _debugIpHeader = false;
@@ -51,7 +51,6 @@ namespace PowerPing
             CancellationToken cancellationToken)
         {
             _attributes = attributes;
-            _results = new PingResults();
             _cancellationToken = cancellationToken;
 
             Setup();
@@ -114,10 +113,10 @@ namespace PowerPing
         private void Cleanup()
         {
             // On deconstruction
-            _socket.Close();
+            _socket?.Close();
             _packet = null;
-            _attributes = null;
-            _results = null;
+            _attributes.ResetToDefaultValues();
+            _results.Reset();
             OnResultsUpdate = null;
         }
 
@@ -164,6 +163,9 @@ namespace PowerPing
                     _errorMesssage.Fatal = true;
 
                     OnError.Invoke(_errorMesssage);
+
+                    // Exit on fatal error
+                    Helper.ExitWithError();
                 }
 
             }
@@ -171,6 +173,11 @@ namespace PowerPing
 
         private void SetupSocketOptions()
         {
+            if (_socket == null)
+            {
+                return;
+            }
+
             _socket.Ttl = (short)_attributes.Ttl;
             _socket.DontFragment = _attributes.DontFragment;
             _socket.ReceiveBufferSize = _attributes.ReceiveBufferSize;
@@ -197,6 +204,11 @@ namespace PowerPing
 
         private void SetSocketReceiveTimeout(int timeout)
         {
+            if (_socket == null)
+            {
+                return;
+            }
+
             if (timeout != _currentReceiveTimeout)
             {
                 _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, timeout);
@@ -227,12 +239,22 @@ namespace PowerPing
 
         private void UpdatePacketSequenceNumber(int sequence)
         {
+            if (_packet == null) 
+            {
+                return;
+            }
+
             _currentSequenceNumber = (ushort)sequence;
             Buffer.BlockCopy(BitConverter.GetBytes(_currentSequenceNumber), 0, _packet.Message, 2, 2);
         }
 
         private void UpdatePacketMessage(byte[] message)
         {
+            if (_packet == null)
+            {
+                return;
+            }
+
             // Copy into packet
             // (NOTE: the offset is where the sequence number and packet identier are stored)
             Buffer.BlockCopy(message, 0, _packet.Message, 4, message.Length);
@@ -247,6 +269,11 @@ namespace PowerPing
 
         private void UpdatePacketChecksum()
         {
+            if (_packet == null)
+            {
+                return;
+            }
+
             _packet.Checksum = 0;
             UInt16 chksm = _packet.GetChecksum();
             _packet.Checksum = chksm;
@@ -254,6 +281,11 @@ namespace PowerPing
 
         private void SendPacket()
         {
+            if (_remoteEndpoint == null || _socket == null || _packet == null)
+            {
+                return;
+            }
+
             byte[] receiveBuffer = new byte[_attributes.ReceiveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
             int bytesRead = 0;
 
@@ -320,7 +352,7 @@ namespace PowerPing
                     }
 
                     // Try and recieve a packet
-                    ICMP response = null;
+                    ICMP response = ICMP.EmptyPacket;
                     EndPoint responseEP = _remoteEndpoint;
                     TimeSpan replyTime = TimeSpan.Zero;
                     ReceivePacket(ref response, ref responseEP, ref replyTime, ref bytesRead, requestTimestamp);
@@ -361,7 +393,7 @@ namespace PowerPing
                 }
                 catch (OperationCanceledException)
                 {
-                    _results.ScanWasCanceled = true;
+                    _results.ScanWasCancelled = true;
                     break;
                 }
                 catch (Exception e)
@@ -390,6 +422,11 @@ namespace PowerPing
 
         private void ReceivePacket(ref ICMP response, ref EndPoint responseEndPoint, ref TimeSpan replyTime, ref int bytesRead, long requestTimestamp)
         {
+            if (_socket == null || _packet == null)
+            {
+                return;
+            }
+
             byte[] receiveBuffer = new byte[_attributes.ReceiveBufferSize];
 
             // Wait for request
@@ -419,11 +456,7 @@ namespace PowerPing
                 }
                 replyTime = new TimeSpan(Helper.StopwatchToTimeSpanTicks(Stopwatch.GetTimestamp() - requestTimestamp));
 
-                if (bytesRead == 0)
-                {
-                    response = null;
-                }
-                else
+                if (bytesRead != 0)
                 {
                     // Store reply packet
                     response = new ICMP(receiveBuffer, bytesRead);
@@ -431,18 +464,22 @@ namespace PowerPing
                     if (_debugIpHeader)
                     {
                         // Print out parsed IPv4 header data
-                        IPv4 header = new IPv4(receiveBuffer, bytesRead);
-                        ICMP ping = new ICMP(header.Data, header.TotalLength - header.HeaderLength, 0);
-                        header.GetBytes();
-                        Console.BackgroundColor = ConsoleColor.Red;
-                        Console.ForegroundColor = ConsoleColor.Black;
-                        Console.WriteLine(header.PrettyPrint());
-                        Console.ResetColor();
+                        IPv4 header = new(receiveBuffer, bytesRead);
+                        if (header.Data != null)
+                        {
+                            ICMP ping = new(header.Data, header.TotalLength - header.HeaderLength, 0);
 
-                        Console.BackgroundColor = ConsoleColor.Yellow;
-                        Console.ForegroundColor = ConsoleColor.Black;
-                        Console.WriteLine(ping.PrettyPrint());
-                        Console.ResetColor();
+                            header.GetBytes();
+                            Console.BackgroundColor = ConsoleColor.Red;
+                            Console.ForegroundColor = ConsoleColor.Black;
+                            Console.WriteLine(header.PrettyPrint());
+                            Console.ResetColor();
+
+                            Console.BackgroundColor = ConsoleColor.Yellow;
+                            Console.ForegroundColor = ConsoleColor.Black;
+                            Console.WriteLine(ping.PrettyPrint());
+                            Console.ResetColor();
+                        }
                     }
 
                     // If we sent an echo and receive a response with a different identifier or sequence
@@ -453,17 +490,17 @@ namespace PowerPing
                         ushort responseSequenceNum = BitConverter.ToUInt16(response.Message, 2);
                         if (responseSessionId != _sessionId || responseSequenceNum != _currentSequenceNumber)
                         {
-                            response = null;
+                            response = ICMP.EmptyPacket;
                         }
                     }
                 }
-            } while (response == null);
+            } while (response == ICMP.EmptyPacket);
 
             // Raise message on response
             if (OnReply != null)
             {
                 _responseMessage.Packet = response;
-                _responseMessage.Endpoint = responseEndPoint as IPEndPoint;
+                _responseMessage.EndpointAddress = responseEndPoint.ToString() ?? string.Empty;
                 _responseMessage.Timestamp = DateTime.Now;
                 _responseMessage.SequenceNumber = _currentSequenceNumber;
                 _responseMessage.BytesRead = bytesRead;

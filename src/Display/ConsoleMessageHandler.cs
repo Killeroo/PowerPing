@@ -2,13 +2,14 @@
 {
     public class ConsoleMessageHandler
     {
-        public DisplayConfiguration DisplayConfig = new DisplayConfiguration();
-        public PingAttributes Attributes = new PingAttributes();
-        public CancellationToken Token = new CancellationToken();
+        public DisplayConfiguration DisplayConfig = new();
+        public PingAttributes Attributes = new();
+        public CancellationToken Token = new();
 
         public ConsoleMessageHandler(DisplayConfiguration config, CancellationToken token)
         {
-            DisplayConfig = config;
+            Attributes = new();
+            DisplayConfig = config ?? new DisplayConfiguration();
             Token = token;
         }
 
@@ -17,9 +18,6 @@
             if (error.Fatal)
             {
                 ConsoleDisplay.Fatal(error.Message, error.Exception);
-
-                // Exit on fatal error
-                Helper.ExitWithError();
             }
             else
             {
@@ -36,18 +34,22 @@
         {
             // Determine what form the response address is going to be displayed in
             // TODO: Move this when lookup refactor is done
-            string responseAddress = response.Endpoint.ToString();
-            if (DisplayConfig.UseResolvedAddress)
+            string responseAddress = response.EndpointAddress;
+            if (responseAddress == string.Empty || DisplayConfig.UseInputtedAddress)
             {
+                if (Attributes != null && Attributes.InputtedAddress != null)
+                {
+                    responseAddress = Attributes.InputtedAddress;
+                }
+            }
+            else if (DisplayConfig.UseResolvedAddress)
+            {
+
                 // Returned address normally have port at the end (eg 8.8.8.8:0) so we need to remove that before trying to query the DNS
-                string responseIP = responseAddress.ToString().Split(':')[0];
+                string responseIP = responseAddress.Split(':')[0];
 
                 // Resolve the ip and store as the response address
                 responseAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(responseIP), Token);
-            }
-            else if (DisplayConfig.UseInputtedAddress)
-            {
-                responseAddress = Attributes.InputtedAddress;
             }
 
             ConsoleDisplay.ReplyPacket(
@@ -57,7 +59,7 @@
                 response.RoundTripTime,
                 response.BytesRead);
 
-            if (Attributes.BeepMode == 2)
+            if (Attributes != null && Attributes.BeepMode == 2)
             {
                 try { Console.Beep(); }
                 catch (Exception) { } // Silently continue if Console.Beep errors

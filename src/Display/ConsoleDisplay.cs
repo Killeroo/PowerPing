@@ -16,7 +16,7 @@ namespace PowerPing
     /// </summary>
     internal class ConsoleDisplay
     {
-        public static DisplayConfiguration? Configuration { get; set; }
+        public static DisplayConfiguration Configuration { get; set; } = new DisplayConfiguration();
         public static CancellationToken CancellationToken { get; set; }
 
         // Stores console cursor position, used for updating text at position
@@ -133,7 +133,7 @@ namespace PowerPing
         public static void Version()
         {
             string assemblyVersion = Helper.GetVersionString();
-            string assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+            string assemblyName = Assembly.GetExecutingAssembly().GetName().Name ?? string.Empty;
 
             Console.WriteLine(assemblyName + " " + assemblyVersion);
         }
@@ -146,8 +146,6 @@ namespace PowerPing
             // Print help message
             Console.WriteLine(Assembly.GetExecutingAssembly().GetName().Name + " " + Helper.GetVersionString());
             Console.WriteLine(ProgramStrings.HELP_MSG);
-
-            Helper.CheckRecentVersion();
         }
 
         /// <summary>
@@ -696,7 +694,7 @@ namespace PowerPing
         /// Display error message
         /// </summary>
         /// <param name="errMsg">Error message to display</param>
-        public static void Error(string errMsg, Exception e = null)
+        public static void Error(string errMsg, Exception e)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             string errorText = (e != null ? $"{errMsg} ({e.GetType().Name})" : errMsg);
@@ -708,7 +706,22 @@ namespace PowerPing
             ResetColor();
         }
 
-        public static void Fatal(string errMsg, Exception e = null)
+        /// <summary>
+        /// Display error message
+        /// </summary>
+        /// <param name="errMsg">Error message to display</param>
+        public static void Error(string errMsg)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+
+            // Write error message
+            Console.WriteLine(errMsg);
+
+            // Reset console colours
+            ResetColor();
+        }
+
+        public static void Fatal(string errMsg, Exception e)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             string errorText = (e != null ? $"{errMsg} ({e.GetType().Name})" : errMsg);

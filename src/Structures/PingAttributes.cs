@@ -52,9 +52,49 @@ namespace PowerPing
 
         public PingAttributes()
         {
+            // Analyser complains about these not being null even though they are set in ResetToDefaultValues (sigh...)
+            InputtedAddress = string.Empty;
+            ResolvedAddress = string.Empty;
+            SourceAddress = string.Empty;
+            LogFilePath = string.Empty;
+            Message = Helper.RandomString(26);
+
+            ResetToDefaultValues();
+        }
+
+        public PingAttributes(PingAttributes attributes)
+        {
+            InputtedAddress = attributes.InputtedAddress;
+            ResolvedAddress = attributes.ResolvedAddress;
+            SourceAddress = attributes.SourceAddress;
+            Message = attributes.Message;
+            LogFilePath = attributes.LogFilePath;
+            Interval = attributes.Interval;
+            Timeout = attributes.Timeout;
+            Count = attributes.Count;
+            Ttl = attributes.Ttl;
+            Type = attributes.Type;
+            Code = attributes.Code;
+            ArtificalMessageSize = attributes.ArtificalMessageSize;
+            BeepMode = attributes.BeepMode;
+            ReceiveBufferSize = attributes.ReceiveBufferSize;
+
+            Continous = attributes.Continous;
+            UseICMPv4 = attributes.UseICMPv4;
+            UseICMPv6 = attributes.UseICMPv6;
+            RandomMessage = attributes.RandomMessage;
+            DontFragment = attributes.DontFragment;
+            RandomTiming = attributes.RandomTiming;
+            Operation = attributes.Operation;
+        }
+
+        public void ResetToDefaultValues()
+        {
             // Default properties
-            InputtedAddress = "";
-            ResolvedAddress = "";
+            InputtedAddress = string.Empty;
+            ResolvedAddress = string.Empty;
+            SourceAddress = string.Empty;
+            LogFilePath = string.Empty;
             Message = Helper.RandomString(26);
             Interval = 1000;
             Timeout = 3000;
@@ -74,30 +114,7 @@ namespace PowerPing
             DontFragment = false;
             RandomTiming = false;
             Operation = PingOperation.Normal;
-        }
-
-        public PingAttributes(PingAttributes attributes)
-        {
-            InputtedAddress = attributes.InputtedAddress;
-            ResolvedAddress = attributes.ResolvedAddress;
-            Message = attributes.Message;
-            Interval = attributes.Interval;
-            Timeout = attributes.Timeout;
-            Count = attributes.Count;
-            Ttl = attributes.Ttl;
-            Type = attributes.Type;
-            Code = attributes.Code;
-            ArtificalMessageSize = attributes.ArtificalMessageSize;
-            BeepMode = attributes.BeepMode;
-            ReceiveBufferSize = attributes.ReceiveBufferSize;
-
-            Continous = attributes.Continous;
-            UseICMPv4 = attributes.UseICMPv4;
-            UseICMPv6 = attributes.UseICMPv6;
-            RandomMessage = attributes.RandomMessage;
-            DontFragment = attributes.DontFragment;
-            RandomTiming = attributes.RandomTiming;
-            Operation = attributes.Operation;
+            LogFilePath = string.Empty;
         }
     }
 

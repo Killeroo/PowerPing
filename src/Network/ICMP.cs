@@ -11,6 +11,15 @@ namespace PowerPing
     /// </summary>
     public class ICMP
     {
+        public static readonly ICMP EmptyPacket = new()
+        {
+            Type = 0,
+            Code = 0,
+            Checksum = 0,
+            MessageSize = 0,
+            Message = new byte[1024],
+        };
+
         // Packet attributes
         public byte Type;
         public byte Code;

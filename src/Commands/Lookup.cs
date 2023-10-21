@@ -7,7 +7,9 @@
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Xml;
 
 namespace PowerPing
@@ -57,6 +59,39 @@ namespace PowerPing
         /// <param name="detailed">Display detailed or simplified location info</param>
         public static string GetAddressLocationInfo(string addr, bool detailed)
         {
+            //using (HttpClient webClient = new())
+            //{
+            //    try
+            //    {
+            //        string jsonResult = string.Empty;
+            //        webClient.DefaultRequestHeaders.Add("User-Agent", "PowerPing (version_check)");
+            //        webClient.BaseAddress = new Uri(@"http://api.github.com/repos/killeroo/powerping/releases/latest");
+            //        webClient.GetStringAsync(jsonResult).GetAwaiter().GetResult();
+
+            //        Dictionary<string, string>? jsonTable = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonResult);
+
+            //        // Extract version from returned json
+            //        if (jsonTable.ContainsKey("tag_name"))
+            //        {
+            //            string matchString = jsonTable["tag_name"];
+            //            Version theirVersion = new(matchString.Split(':')[1].Replace("\"", string.Empty).Replace("v", string.Empty));
+            //            Version? ourVersion = Assembly.GetExecutingAssembly().GetName().Version;
+
+            //            if (theirVersion > ourVersion)
+            //            {
+            //                Console.WriteLine();
+            //                Console.WriteLine("=========================================================");
+            //                Console.WriteLine("A new version of PowerPing is available ({0})", theirVersion);
+            //                Console.WriteLine("Download the new version at: {0}", @"https://github.com/killeroo/powerping/releases/latest");
+            //                Console.WriteLine("=========================================================");
+            //                Console.WriteLine();
+            //            }
+            //        }
+            //    }
+            //    catch (Exception) { } // We just want to blanket catch any exception and silently continue
+            //}
+
+
             string result = "";
 
             try
@@ -70,7 +105,7 @@ namespace PowerPing
                         $"http://api.ipstack.com/{addr}?access_key={key}&output=xml");
 
                     // Load xml file into object
-                    XmlDocument xmlDoc = new XmlDocument();
+                    XmlDocument xmlDoc = new();
                     xmlDoc.LoadXml(downloadedText);
                     XmlNodeList elements = (xmlDoc.DocumentElement).ChildNodes;
 
@@ -121,7 +156,7 @@ namespace PowerPing
         /// <returns></returns>
         public static string QueryDNS(string address, AddressFamily af)
         {
-            IPAddress ipAddr = null;
+            IPAddress? ipAddr;
 
             // Check address format
             if (Uri.CheckHostName(address) == UriHostNameType.Unknown)
@@ -154,9 +189,12 @@ namespace PowerPing
             if (ipAddr == null)
             {
                 Helper.ErrorAndExit("PowerPing could not find host [" + address + "] " + Environment.NewLine + "Check address and try again.");
+                return string.Empty;
             }
-
-            return ipAddr.ToString();
+            else
+            {
+                return ipAddr.ToString();
+            }
         }
 
         /// <summary>

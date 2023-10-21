@@ -10,8 +10,8 @@ namespace PowerPing
     {
         private static readonly CancellationTokenSource _cancellationTokenSource = new ();
         private static DisplayConfiguration _displayConfiguration = new ();
-        private static LogMessageHandler _logMessageHandler = null;
-        private static ConsoleMessageHandler _consoleMessageHandler = null;
+        private static LogMessageHandler? _logMessageHandler = null;
+        private static ConsoleMessageHandler? _consoleMessageHandler = null;
 
         /// <summary>
         /// Main entry point of PowerPing
@@ -65,12 +65,11 @@ namespace PowerPing
             ConsoleDisplay.Configuration = _displayConfiguration;
             ConsoleDisplay.CancellationToken = _cancellationTokenSource.Token;
 
-            // Add handler to display ping events
-            _consoleMessageHandler = new ConsoleMessageHandler(_displayConfiguration, _cancellationTokenSource.Token);
 
             // Select correct function using opMode
             switch (parsedAttributes.Operation)
             {
+#pragma warning disable CS8604 // InputtedAddress has to be equal to something so disable null reference warning for this.
                 case PingOperation.Listen: RunListenOperation(args, parsedAttributes); break;
                 case PingOperation.Location: RunLocationOperation(parsedAttributes.InputtedAddress); break;
                 case PingOperation.Whoami: RunWhoAmIOperation(); break;
@@ -79,6 +78,7 @@ namespace PowerPing
                 case PingOperation.Flood: RunFloodOperation(parsedAttributes.InputtedAddress, _cancellationTokenSource.Token); break;
                 case PingOperation.Scan: RunScanOperation(parsedAttributes.InputtedAddress, _cancellationTokenSource.Token); break;
                 case PingOperation.Normal: RunNormalPingOperation(parsedAttributes, _cancellationTokenSource.Token); break;
+#pragma warning restore CS8604 // Possible null reference argument.
 
                 default:
                     Helper.ErrorAndExit("Could not determine ping operation");
@@ -96,7 +96,7 @@ namespace PowerPing
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args"></param>
-        private static void ExitHandler(object sender, ConsoleCancelEventArgs args)
+        private static void ExitHandler(object? sender, ConsoleCancelEventArgs args)
         {
             // Cancel termination
             args.Cancel = true;
@@ -115,6 +115,11 @@ namespace PowerPing
             PingAttributes attributes,
             CancellationToken cancellationToken)
         {
+            if (attributes == null)
+            {
+                return;
+            }
+
             Ping p = new Ping(attributes, cancellationToken);
 
             if (attributes.EnableLogging)
@@ -134,6 +139,9 @@ namespace PowerPing
                 p.OnReply += _logMessageHandler.OnReply;
                 p.OnError += _logMessageHandler.OnError;
             }
+
+            // Add handler to display ping events
+            _consoleMessageHandler = new ConsoleMessageHandler(_displayConfiguration, _cancellationTokenSource.Token);
 
             // Add callbacks for console display
             p.OnStart += _consoleMessageHandler.OnStart;

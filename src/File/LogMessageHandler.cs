@@ -106,7 +106,7 @@ namespace PowerPing
             _logFile.Append($"[{_destinationAddress}] " +
                 $"[{reply.Timestamp.ToString(DATETIME_STRING_FORMAT)}] " +
                 $"[REPLY] " +
-                $"endpoint={reply.Endpoint.ToString()} " +
+                $"endpoint={reply.EndpointAddress} " +
                 $"seq={reply.SequenceNumber} " +
                 $"bytes={reply.BytesRead} " +
                 $"type={reply.Packet.Type} " +

@@ -28,14 +28,19 @@ namespace PowerPing
         public ulong GoodPackets { get; private set; }                              // Number of good replies received
         public ulong OtherPackets { get; private set; }                             // Number of other packet types received
         public bool HasOverflowed { get; set; }                                     // Specifies if any of the results have overflowed
-        public bool ScanWasCanceled { get; set; }                                   // Whether the scan was canceled early
+        public bool ScanWasCancelled { get; set; }                                   // Whether the scan was canceled early
 
         private readonly Stopwatch _operationTimer = new Stopwatch();              // Used to time total time spent doing operation
         private double _responseTimeSum = 0;                                       // Sum of all reply times (used to work out general average
 
-        public PingResults()
+        public PingResults() => Reset();
+
+        public void Reset()
         {
             // Default properties
+            StartTime = DateTime.MinValue;
+            EndTime = DateTime.MinValue;
+
             Sent = 0;
             Received = 0;
             Lost = 0;
@@ -48,6 +53,7 @@ namespace PowerPing
             OtherPackets = 0;
 
             HasOverflowed = false;
+            ScanWasCancelled = false;
         }
 
         public void Start()

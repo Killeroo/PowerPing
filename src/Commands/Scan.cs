@@ -34,23 +34,29 @@ namespace PowerPing
             public string Address { get; set; }
             public string HostName { get; set; }
             public double ResponseTime { get; set; }
+
+            public HostInformation()
+            {
+                Address = string.Empty;
+                HostName = string.Empty;
+            } 
         }
 
         private static volatile bool _cancelled = false;
 
         public static void Start(string range, CancellationToken cancellationToken)
         {
-            List<string> addresses = new List<string>();
-            List<HostInformation> activeHosts = new List<HostInformation>();
-            Stopwatch timer = new Stopwatch();
+            List<string> addresses = new();
+            List<HostInformation> activeHosts = new();
+            Stopwatch timer = new();
 
             // Get addresses to scan from range
             addresses = ParseRange(range);
 
             // Setup addresses and threads
-            var splitAddresses = Helper.PartitionList(addresses, THREAD_COUNT);
+            List<string>[] splitAddresses = Helper.PartitionList(addresses, THREAD_COUNT);
             Thread[] threads = new Thread[THREAD_COUNT];
-            object lockObject = new object();
+            object lockObject = new();
             int scanned = 0;
 
             // Run the threads
@@ -72,7 +78,7 @@ namespace PowerPing
 
                             // Send ping
                             PingResults results = ping.Send(host);
-                            if (results.ScanWasCanceled) {
+                            if (results.ScanWasCancelled) {
                                 // Cancel was requested during scan
                                 throw new OperationCanceledException();
                             }

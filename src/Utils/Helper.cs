@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace PowerPing
@@ -22,7 +23,6 @@ namespace PowerPing
         private static readonly string _ipv4Regex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}";
         private static readonly string _urlRegex = @"[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?";
         private static readonly string _validScanRangeRegex = @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\-|$)){5}";
-        private static readonly string _githubReleaseVersionRegex = @"""(tag_name)"":""((\\""|[^""])*)""";
 
         private static readonly double _stopwatchToTimeSpanTicksScale = (double)TimeSpan.TicksPerSecond / Stopwatch.Frequency;
         private static readonly double _timeSpanToStopwatchTicksScale = (double)Stopwatch.Frequency / TimeSpan.TicksPerSecond;
@@ -86,7 +86,6 @@ namespace PowerPing
         /// Produces cryprographically secure string of specified length
         /// </summary>
         /// <param name="len"></param>
-        /// <source>https://stackoverflow.com/a/1668371</source>
         /// <returns></returns>
         public static String RandomString(int len = 11)
         {
@@ -102,21 +101,10 @@ namespace PowerPing
         /// Produces cryprographically secure int of specified length
         /// </summary>
         /// <param name="len"></param>
-        /// <source>http://www.vcskicks.com/code-snippet/rng-int.php</source>
         /// <returns></returns>
         public static int RandomInt(int min, int max)
         {
-            int result;
-
-            using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
-            {
-                byte[] rngToken = new byte[4];
-                rng.GetBytes(rngToken);
-
-                result = BitConverter.ToInt32(rngToken, 0);
-            }
-
-            return new Random(result).Next(min, max);
+            return RandomNumberGenerator.GetInt32(min, max);
         }
 
         /// <summary>
@@ -189,48 +177,6 @@ namespace PowerPing
         {
             uint n = (uint)Process.GetCurrentProcess().Id;
             return (ushort)(n ^ (n >> 16));
-        }
-
-        /// <summary>
-        /// Checks github api for latest release of PowerPing against current assembly version
-        /// Prints message to update if newer version has been released.
-        /// </summary>
-        /// <returns></returns>
-        public static void CheckRecentVersion()
-        {
-            using (var webClient = new System.Net.WebClient())
-            {
-                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072; // TLS 1.2
-                webClient.Headers["User-Agent"] = "PowerPing (version_check)"; // Need to specif a valid user agent for github api: https://stackoverflow.com/a/39912696
-
-                try
-                {
-                    // Fetch latest release info from github api
-                    string jsonResult = webClient.DownloadString(
-                        $"http://api.github.com/repos/killeroo/powerping/releases/latest");
-
-                    // Extract version from returned json
-                    Regex regex = new Regex(_githubReleaseVersionRegex);
-                    Match result = regex.Match(jsonResult);
-                    if (result.Success)
-                    {
-                        string matchString = result.Value;
-                        Version theirVersion = new Version(matchString.Split(':')[1].Replace("\"", string.Empty).Replace("v", string.Empty));
-                        Version ourVersion = Assembly.GetExecutingAssembly().GetName().Version;
-
-                        if (theirVersion > ourVersion)
-                        {
-                            Console.WriteLine();
-                            Console.WriteLine("=========================================================");
-                            Console.WriteLine("A new version of PowerPing is available ({0})", theirVersion);
-                            Console.WriteLine("Download the new version at: {0}", @"https://github.com/killeroo/powerping/releases/latest");
-                            Console.WriteLine("=========================================================");
-                            Console.WriteLine();
-                        }
-                    }
-                }
-                catch (Exception) { } // We just want to blanket catch any exception and silently continue
-            }
         }
 
         /// <summary>
@@ -309,7 +255,7 @@ namespace PowerPing
             string extension = Path.GetExtension(filepath);
 
             string? outDir = Path.GetDirectoryName(filepath);
-            string path = string.IsNullOrEmpty(outDir) ? Path.GetPathRoot(filepath) : outDir;
+            string? path = string.IsNullOrEmpty(outDir) ? Path.GetPathRoot(filepath) : outDir;
 
             string currentFilePath = filepath;
             bool goodFilename = false;
@@ -321,7 +267,7 @@ namespace PowerPing
                 if (File.Exists(currentFilePath))
                 {
                     counter++;
-                    currentFilePath = Path.Combine(path, $"{filename}({counter}){extension}");
+                    currentFilePath = Path.Combine(path ?? string.Empty, $"{filename}({counter}){extension}");
                 }
                 else
                 {

@@ -25,7 +25,12 @@ namespace PowerPing
         public byte[] Data;
 
         // Constructors
-        public IPv4() { }
+        public IPv4() 
+        {
+            Source = IPAddress.Any;
+            Destination = IPAddress.Any;
+            Data = new byte[4];
+        }
 
         public IPv4(byte[] data, int size)
         {
@@ -64,7 +69,9 @@ namespace PowerPing
 
         public byte[] GetBytes()
         {
-            byte[] payload = new byte[HeaderLength + Data.Length];
+            int dataLength = Data != null ? Data.Length : 0;
+
+            byte[] payload = new byte[HeaderLength + dataLength];
             Buffer.BlockCopy(BitConverter.GetBytes((byte)(Version << 4) | HeaderLength), 0, payload, 0, 1); // TODO: divide length by 4, Shift 4 bits to right, OR (basically copy) the other 4 bits into where the version was
             Buffer.BlockCopy(BitConverter.GetBytes(IPAddress.HostToNetworkOrder(TypeOfService)), 0, payload, 1, 1);
             Buffer.BlockCopy(BitConverter.GetBytes(IPAddress.HostToNetworkOrder(TotalLength)), 0, payload, 2, 2);

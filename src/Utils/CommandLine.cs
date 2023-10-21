@@ -48,7 +48,6 @@ namespace PowerPing
                             case "-v":
                             case "--v":
                                 ConsoleDisplay.Version();
-                                Helper.CheckRecentVersion();
                                 if (displayConfig.RequireInput)
                                 {
                                     Helper.WaitForUserInput();
