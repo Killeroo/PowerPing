@@ -13,6 +13,8 @@ namespace PowerPing
         private static LogMessageHandler? _logMessageHandler = null;
         private static ConsoleMessageHandler? _consoleMessageHandler = null;
 
+        public const bool BETA = false;
+
         /// <summary>
         /// Main entry point of PowerPing
         /// Parses arguments and runs operations

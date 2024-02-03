@@ -234,7 +234,7 @@ namespace PowerPing
 
             if (v != null)
             {
-                version = "v" + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ") ";
+                version = "v" + v.Major + "." + v.Minor + "." + v.Build + " (r" + v.Revision + ") " + (Program.BETA ? "[BETA]" : "");
             }
             else
             {
