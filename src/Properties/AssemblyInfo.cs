@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Matthew Carney")]
 [assembly: AssemblyProduct("PowerPing")]
-[assembly: AssemblyCopyright("Copyright © Matthew Carney 2023")]
+[assembly: AssemblyCopyright("Copyright © Matthew Carney 2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -1,6 +1,6 @@
 ﻿/**************************************************************************
  * PowerPing - Advanced command line ping tool
- * Copyright (c) 2023 Matthew Carney [matthewcarney64@gmail.com]
+ * Copyright (c) 2024 Matthew Carney [matthewcarney64@gmail.com]
  * https://github.com/Killeroo/PowerPing
  *************************************************************************/
 
