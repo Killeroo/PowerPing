@@ -6,7 +6,7 @@ $script_path = (split-path -parent $MyInvocation.MyCommand.Definition)
 # Locate x64 assembly and load into powershell
 # TODO: Test x86 arch as well?
 $seperator = [IO.Path]::DirectorySeparatorChar
-$powerping_x64_location = (split-path -parent $MyInvocation.MyCommand.Definition).ToString() + "\build\x64\PowerPing.exe"
+$powerping_x64_location = (split-path -parent $MyInvocation.MyCommand.Definition).ToString() + "\src\bin\Release\net6.0\PowerPing.exe"
 $powerping_x64_location = $powerping_x64_location.replace($seperator + "tests" + $seperator, $seperator)
 [Reflection.Assembly]::LoadFile($powerping_x64_location)
 

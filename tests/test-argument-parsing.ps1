@@ -7,12 +7,12 @@ $script_path = (split-path -parent $MyInvocation.MyCommand.Definition)
 # TODO: Need a way to test different argument characters
 
 # Executable locations
-$powerping_x64_location = (split-path -parent $MyInvocation.MyCommand.Definition).ToString() + "\build\x64\PowerPing.exe"
-$powerping_x86_location = (split-path -parent $MyInvocation.MyCommand.Definition).ToString() + "\build\x86\PowerPing.exe"
+$powerping_x64_location = (split-path -parent $MyInvocation.MyCommand.Definition).ToString() + "\src\bin\Release\net6.0\PowerPing.exe"
+# $powerping_x86_location = (split-path -parent $MyInvocation.MyCommand.Definition).ToString() + "\build\x86\PowerPing.exe"
 
 # Remove tests directoy from the path
 $seperator = [IO.Path]::DirectorySeparatorChar
-$powerping_x86_location = $powerping_x86_location.replace($seperator + "tests" + $seperator, $seperator)
+# $powerping_x86_location = $powerping_x86_location.replace($seperator + "tests" + $seperator, $seperator)
 $powerping_x64_location = $powerping_x64_location.replace($seperator + "tests" + $seperator, $seperator)
 
 # Structure to store test results
@@ -33,24 +33,24 @@ function Run-Test($description, $arguments, [int]$returnCode)
     $stats.TestsPerformed += 1
     $Result = Start-Process -FilePath $powerping_x64_location -ArgumentList ($arguments) -PassThru -Wait
     if($Result.ExitCode -eq $returnCode) {
-        Write-Host(" ==== Test passed ===== ") -NoNewline -ForegroundColor Green
+        Write-Host(" ==== Test passed ===== ") -ForegroundColor Green
         $stats.TestsPassed += 1
     } else {
-        Write-Host(" --- Test Failed --- ") -NoNewline -ForegroundColor Red 
+        Write-Host(" --- Test Failed --- ") -ForegroundColor Red 
         $stats.TestsFailed += 1
     }
 
-    Write-Host("[x86]") -NoNewline -ForegroundColor Yellow
-    $stats.TestsPerformed += 1
-    $Result = Start-Process -FilePath $powerping_x86_location -ArgumentList ($arguments) -PassThru -Wait
-    if($Result.ExitCode -eq $returnCode) {
-        Write-Host(" ==== Test passed =====") -ForegroundColor Green
-        $stats.TestsPassed += 1
-    } else {
-        Write-Host(" --- Test Failed ---") -ForegroundColor Red 
-        $stats.TestsFailed += 1
-        $global:FailedTestDescriptions += $description
-    }
+    # Write-Host("[x86]") -NoNewline -ForegroundColor Yellow
+    # $stats.TestsPerformed += 1
+    # $Result = Start-Process -FilePath $powerping_x86_location -ArgumentList ($arguments) -PassThru -Wait
+    # if($Result.ExitCode -eq $returnCode) {
+    #     Write-Host(" ==== Test passed =====") -ForegroundColor Green
+    #     $stats.TestsPassed += 1
+    # } else {
+    #     Write-Host(" --- Test Failed ---") -ForegroundColor Red 
+    #     $stats.TestsFailed += 1
+    #     $global:FailedTestDescriptions += $description
+    # }
 }
 
 Write-Host
