@@ -11,6 +11,8 @@ namespace PowerPing
     /// </summary>
     public class ICMP
     {
+        private const int kIcmpHeaderSize = 4;
+
         public static readonly ICMP EmptyPacket = new()
         {
             Type = 0,
@@ -20,12 +22,13 @@ namespace PowerPing
             Message = new byte[1024],
         };
 
-        // Packet attributes
+        // Packet header
         public byte Type;
         public byte Code;
         public UInt16 Checksum;
-        public int MessageSize;
         public byte[] Message = new byte[1024];
+
+        public int MessageSize;
 
         // Constructors
         public ICMP() { }
@@ -34,8 +37,8 @@ namespace PowerPing
             Type = data[offset];
             Code = data[offset + 1];
             Checksum = BitConverter.ToUInt16(data, offset + 2);
-            MessageSize = size - (offset + 4);
-            Buffer.BlockCopy(data, (offset + 4), Message, 0, MessageSize);
+            MessageSize = size - (offset + kIcmpHeaderSize);
+            Buffer.BlockCopy(data, (offset + kIcmpHeaderSize), Message, 0, MessageSize);
         }
 
         /// <summary>
@@ -44,29 +47,35 @@ namespace PowerPing
         /// <returns>Packet in byte array</returns>
         public byte[] GetBytes()
         {
-            byte[] data = new byte[MessageSize + 9]; // TODO: here we assume packet size, this is probably causing message clip
+            byte[] data = new byte[MessageSize + kIcmpHeaderSize];
             Buffer.BlockCopy(BitConverter.GetBytes(Type), 0, data, 0, 1);
             Buffer.BlockCopy(BitConverter.GetBytes(Code), 0, data, 1, 1);
             Buffer.BlockCopy(BitConverter.GetBytes(Checksum), 0, data, 2, 2);
-            Buffer.BlockCopy(Message, 0, data, 4, MessageSize);
+            Buffer.BlockCopy(Message, 0, data, kIcmpHeaderSize, MessageSize);
             return data;
         }
 
         /// <summary>
-        /// Calculate checksum of packet
+        /// Calculate checksum of packet using internet checksum (16bit one's compliment checksum)
         /// </summary>
         /// <returns>Packet checksum</returns>
         public UInt16 GetChecksum()
         {
             UInt32 chksm = 0;
-
             byte[] data = GetBytes();
-            int packetSize = MessageSize + 8;
+            int packetSize = MessageSize + kIcmpHeaderSize;
             int index = 0;
 
             while (index < packetSize)
             {
-                chksm += Convert.ToUInt32(BitConverter.ToUInt16(data, index));
+                if (index + 2 > packetSize)
+                {
+                    chksm += data[index];
+                }
+                else
+                {
+                    chksm += (uint)BitConverter.ToUInt16(data, index);
+                }
                 index += 2;
             }
 
