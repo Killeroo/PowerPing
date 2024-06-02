@@ -105,9 +105,6 @@ namespace PowerPing
 
             // Request currently running job to finish up
             _cancellationTokenSource.Cancel();
-                
-            // Kill log handler if it was running
-            _logMessageHandler?.Dispose();
 
             // Reset colour on exit
             Console.ResetColor();
