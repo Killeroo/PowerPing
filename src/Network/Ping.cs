@@ -234,7 +234,8 @@ namespace PowerPing
             }
             UpdatePacketMessage(payload);
 
-            Buffer.BlockCopy(BitConverter.GetBytes(_sessionId), 0, _packet.Message, 0, 2); // Add identifier to ICMP message
+            // Add identifier to ICMP message
+            Buffer.BlockCopy(BitConverter.GetBytes(_sessionId), 0, _packet.Message, 0, 2); 
         }
 
         private void UpdatePacketSequenceNumber(int sequence)
@@ -250,20 +251,31 @@ namespace PowerPing
 
         private void UpdatePacketMessage(byte[] message)
         {
+            const int kIcmpIdAndSequenceSize = 4;
+
             if (_packet == null)
             {
                 return;
             }
 
+            // Increase size of packet message if we need to
+            if (message.Length + kIcmpIdAndSequenceSize > _packet.Message.Length)
+            {
+                byte[] newPacketData = new byte[message.Length + kIcmpIdAndSequenceSize];
+
+                // Copy over id and sequence number
+                Buffer.BlockCopy(_packet.Message, 0, newPacketData, 0, kIcmpIdAndSequenceSize);
+                _packet.Message = newPacketData;
+            }
+
             // Copy into packet
-            // (NOTE: the offset is where the sequence number and packet identier are stored)
-            Buffer.BlockCopy(message, 0, _packet.Message, 4, message.Length);
+            Buffer.BlockCopy(message, 0, _packet.Message, kIcmpIdAndSequenceSize, message.Length);
 
             // Update message size
-            if (message.Length + 4 != _packetSize)
+            if (message.Length + kIcmpIdAndSequenceSize != _packetSize)
             {
-                _packet.MessageSize = message.Length + 4;
-                _packetSize = _packet.MessageSize + 4;
+                _packet.MessageSize = message.Length + kIcmpIdAndSequenceSize;
+                _packetSize = _packet.MessageSize + kIcmpIdAndSequenceSize;
             }
         }
 
@@ -286,7 +298,7 @@ namespace PowerPing
                 return;
             }
 
-            byte[] receiveBuffer = new byte[_attributes.ReceiveBufferSize]; // Ipv4Header.length + IcmpHeader.length + attrs.recievebuffersize
+            byte[] receiveBuffer = new byte[20 /* Ipv4 header length */ + 4 /* ICMP header length */ + _packet.MessageSize + _attributes.ReceiveBufferSize];
             int bytesRead = 0;
 
             OnStart?.Invoke(_attributes);

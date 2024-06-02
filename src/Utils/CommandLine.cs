@@ -483,12 +483,13 @@ namespace PowerPing
                             case "-rb":
                             case "--rb":
                                 int recvbuff = Convert.ToInt32(args[count + 1]);
-                                if (recvbuff < 65000)
+                                if (recvbuff < 65535)
                                 {
                                     attributes.ReceiveBufferSize = recvbuff;
                                 }
                                 else
                                 {
+                                    ConsoleDisplay.Message("Recieve buffer cannot exceed max IPv4 packet size of 65,535 bytes.", ConsoleColor.Yellow);
                                     throw new ArgumentFormatException();
                                 }
                                 break;
@@ -538,12 +539,13 @@ namespace PowerPing
                             case "-s":
                             case "--s":
                                 int size = Convert.ToInt32(args[count + 1]);
-                                if (size < 100000)
+                                if (size <= 65535 /* Max IPv4 size */ - 20 /* IPv4 header size */  - 4 /* ICMP header */ - 2 /* Our ICMP id and Sequence number */ )
                                 {
                                     attributes.ArtificalMessageSize = size;
                                 }
                                 else
                                 {
+                                    ConsoleDisplay.Message("Size argument cannot exceed max ICMP packet size of 65,509 bytes.", ConsoleColor.Yellow);
                                     throw new ArgumentFormatException();
                                 }
                                 break;
