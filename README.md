@@ -66,6 +66,9 @@ _Future features:_
         --requireinput  [--ri]           Always ask for user input upon completion 
         --limit         [--l]   number   Limits output to just replies (1), requests (2) or summary(3)
         --decimals      [--dp]  number   Num of decimal places to use (0 to 3)
+        --low                   number   Defines the low response time threshold (which times are coloured green)
+        --mid                   number   Defines the mid response time threshold (which times are coloured yellow)
+        --high                  number   Defines the high response time threshold (which times are coloured red)
 
     Modes:
         --scan          [--sc]  address  Network scanning, specify range "127.0.0.1-55"

@@ -27,5 +27,9 @@ namespace PowerPing
         public bool UseResolvedAddress { get; set; } = false;
         public bool RequireInput { get; set; } = false;
         public int DecimalPlaces { get; set; } = 1;
+
+        public int LowPingThreshold { get; set;} = 100;
+        public int MidPingThreshold { get; set; } = 250;
+        public int HighPingThreshold { get; set; } = 500;
     }
 }

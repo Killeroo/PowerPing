@@ -550,6 +550,24 @@ namespace PowerPing
                                 }
                                 break;
 
+                            case "/high":
+                            case "-high":
+                            case "--high":
+                                displayConfig.HighPingThreshold = Convert.ToInt32(args[count + 1]);
+                                break;
+
+                            case "/mid":
+                            case "-mid":
+                            case "--mid":
+                                displayConfig.MidPingThreshold = Convert.ToInt32(args[count + 1]);
+                                break;
+
+                            case "/low":
+                            case "-low":
+                            case "--low":
+                                displayConfig.LowPingThreshold = Convert.ToInt32(args[count + 1]);
+                                break;
+
                             case "/whois":
                             case "-whois":
                             case "--whois": // Whois lookup

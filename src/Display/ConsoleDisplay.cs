@@ -40,10 +40,10 @@ namespace PowerPing
 
         private struct ASCIIReplySymbols
         {
-            public string LessThan100;
-            public string LessThan250;
-            public string LessThan500;
-            public string GreaterThan500;
+            public string LowResponseTime;
+            public string MidResponseTime;
+            public string HighResponseTime;
+            public string ExtremeResponseTime;
             public string Timeout;
         };
 
@@ -111,18 +111,18 @@ namespace PowerPing
         {
             if (theme == 0)
             {
-                _replySymbols.LessThan100 = ProgramStrings.REPLY_LT_100_MS_SYMBOL_1;
-                _replySymbols.LessThan250 = ProgramStrings.REPLY_LT_250_MS_SYMBOL_1;
-                _replySymbols.LessThan500 = ProgramStrings.REPLY_LT_500_MS_SYMBOL_1;
-                _replySymbols.GreaterThan500 = ProgramStrings.REPLY_GT_500_MS_SYMBOL_1;
+                _replySymbols.LowResponseTime = ProgramStrings.REPLY_LT_100_MS_SYMBOL_1;
+                _replySymbols.MidResponseTime = ProgramStrings.REPLY_LT_250_MS_SYMBOL_1;
+                _replySymbols.HighResponseTime = ProgramStrings.REPLY_LT_500_MS_SYMBOL_1;
+                _replySymbols.ExtremeResponseTime = ProgramStrings.REPLY_GT_500_MS_SYMBOL_1;
                 _replySymbols.Timeout = ProgramStrings.REPLY_TIMEOUT_SYMBOL_1;
             }
             else
             {
-                _replySymbols.LessThan100 = ProgramStrings.REPLY_LT_100_MS_SYMBOL_2;
-                _replySymbols.LessThan250 = ProgramStrings.REPLY_LT_250_MS_SYMBOL_2;
-                _replySymbols.LessThan500 = ProgramStrings.REPLY_LT_500_MS_SYMBOL_2;
-                _replySymbols.GreaterThan500 = ProgramStrings.REPLY_GT_500_MS_SYMBOL_2;
+                _replySymbols.LowResponseTime = ProgramStrings.REPLY_LT_100_MS_SYMBOL_2;
+                _replySymbols.MidResponseTime = ProgramStrings.REPLY_LT_250_MS_SYMBOL_2;
+                _replySymbols.HighResponseTime = ProgramStrings.REPLY_LT_500_MS_SYMBOL_2;
+                _replySymbols.ExtremeResponseTime = ProgramStrings.REPLY_GT_500_MS_SYMBOL_2;
                 _replySymbols.Timeout = ProgramStrings.REPLY_TIMEOUT_SYMBOL_2;
             }
         }
@@ -284,25 +284,25 @@ namespace PowerPing
             {
                 if (packet.Type == 0x00)
                 {
-                    if (replyTime <= TimeSpan.FromMilliseconds(100))
+                    if (replyTime <= TimeSpan.FromMilliseconds(Configuration.LowPingThreshold))
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Write(_replySymbols.LessThan100);
+                        Console.Write(_replySymbols.LowResponseTime);
                     }
-                    else if (replyTime <= TimeSpan.FromMilliseconds(250))
+                    else if (replyTime <= TimeSpan.FromMilliseconds(Configuration.MidPingThreshold))
                     {
                         Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.Write(_replySymbols.LessThan250);
+                        Console.Write(_replySymbols.MidResponseTime);
                     }
-                    else if (replyTime <= TimeSpan.FromMilliseconds(500))
+                    else if (replyTime <= TimeSpan.FromMilliseconds(Configuration.HighPingThreshold))
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write(_replySymbols.LessThan500);
+                        Console.Write(_replySymbols.HighResponseTime);
                     }
                     else
                     {
                         Console.ForegroundColor = ConsoleColor.Magenta;
-                        Console.Write(_replySymbols.GreaterThan500);
+                        Console.Write(_replySymbols.ExtremeResponseTime);
                     }
                     ResetColor();
                 }
@@ -337,11 +337,11 @@ namespace PowerPing
             Console.Write(ProgramStrings.REPLY_TIME_TXT);
             if (!Configuration.NoColor)
             {
-                if (replyTime <= TimeSpan.FromMilliseconds(100))
+                if (replyTime <= TimeSpan.FromMilliseconds(Configuration.LowPingThreshold))
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                 }
-                else if (replyTime <= TimeSpan.FromMilliseconds(500))
+                else if (replyTime <= TimeSpan.FromMilliseconds(Configuration.HighPingThreshold))
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
                 }
