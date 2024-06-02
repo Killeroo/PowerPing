@@ -60,6 +60,7 @@
                 responseAddress,
                 response.SequenceNumber,
                 response.RoundTripTime,
+                response.TimeToLive,
                 response.BytesRead);
             
             if (Attributes != null && 

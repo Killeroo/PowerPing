@@ -272,7 +272,7 @@ namespace PowerPing
         /// <param name="address">Reply address</param>
         /// <param name="index">Sequence number</param>
         /// <param name="replyTime">Time taken before reply received in milliseconds</param>
-        public static void ReplyPacket(ICMP packet, string address, int index, TimeSpan replyTime, int bytesRead)
+        public static void ReplyPacket(ICMP packet, string address, int index, TimeSpan replyTime, int timeToLive, int bytesRead)
         {
             if (!Configuration.ShowOutput)
             {
@@ -332,6 +332,9 @@ namespace PowerPing
                 string messageWithoutHeader = Encoding.ASCII.GetString(packet.Message, 4, packet.Message.Length - 4);
                 Console.Write(ProgramStrings.REPLY_MSG_TXT, new string(messageWithoutHeader.Where(c => !char.IsControl(c)).ToArray()));
             }
+
+            // Print ttl segment
+            Console.Write(ProgramStrings.REPLY_TTL_TXT, timeToLive);
 
             // Print coloured time segment
             Console.Write(ProgramStrings.REPLY_TIME_TXT);

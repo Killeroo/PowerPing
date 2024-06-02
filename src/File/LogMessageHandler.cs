@@ -111,6 +111,7 @@ namespace PowerPing
                 $"bytes={reply.BytesRead} " +
                 $"type={reply.Packet.Type} " +
                 $"code={reply.Packet.Code} " +
+                $"ttl={reply.TimeToLive}" +
                 $"time={reply.RoundTripTime.TotalMilliseconds}ms");
         }
 

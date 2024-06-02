@@ -16,6 +16,7 @@ namespace PowerPing
         public DateTime Timestamp;
         public int SequenceNumber;
         public TimeSpan RoundTripTime;
+        public int TimeToLive;
         public int BytesRead;
     }
 }

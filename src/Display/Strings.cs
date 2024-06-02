@@ -38,6 +38,7 @@ namespace PowerPing
         public const string REPLY_MSG = "Reply from: {0} seq={1} bytes={2} type=";
         public const string REPLY_MSG_SHORT = "Reply from: {0} type=";
         public const string REPLY_MSG_TXT = " msg=\"{0}\"";
+        public const string REPLY_TTL_TXT = " TTL={0}";
         public const string REPLY_CHKSM_TXT = " chksm={0}";
         public const string REPLY_TIME_TXT = " time=";
 

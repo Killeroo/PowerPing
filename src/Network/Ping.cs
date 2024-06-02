@@ -440,6 +440,7 @@ namespace PowerPing
             }
 
             byte[] receiveBuffer = new byte[_attributes.ReceiveBufferSize];
+            int ttl = 0;
 
             // Wait for request
             do
@@ -470,18 +471,22 @@ namespace PowerPing
 
                 if (bytesRead != 0)
                 {
+                    // Parse outter IPv4 header
+                    IPv4 header = new IPv4(receiveBuffer, bytesRead);
+                    ttl = header.TimeToLive;
+
                     // Store reply packet
-                    response = new ICMP(receiveBuffer, bytesRead);
+                    response = new ICMP(receiveBuffer, bytesRead, header.HeaderLength);
 
                     if (_debugIpHeader)
                     {
                         // Print out parsed IPv4 header data
-                        IPv4 header = new(receiveBuffer, bytesRead);
-                        if (header.Data != null)
+                        IPv4 ipheader = new(receiveBuffer, bytesRead);
+                        if (ipheader.Data != null)
                         {
-                            ICMP ping = new(header.Data, header.TotalLength - header.HeaderLength, 0);
+                            ICMP ping = new(ipheader.Data, ipheader.TotalLength - ipheader.HeaderLength, 0);
 
-                            header.GetBytes();
+                            ipheader.GetBytes();
                             Console.BackgroundColor = ConsoleColor.Red;
                             Console.ForegroundColor = ConsoleColor.Black;
                             Console.WriteLine(header.PrettyPrint());
@@ -517,6 +522,7 @@ namespace PowerPing
                 _responseMessage.SequenceNumber = _currentSequenceNumber;
                 _responseMessage.BytesRead = bytesRead;
                 _responseMessage.RoundTripTime = replyTime;
+                _responseMessage.TimeToLive = ttl;
 
                 OnReply.Invoke(_responseMessage);
             }
