@@ -44,9 +44,12 @@
             }
             else if (DisplayConfig.UseResolvedAddress)
             {
-
-                // Returned address normally have port at the end (eg 8.8.8.8:0) so we need to remove that before trying to query the DNS
-                string responseIP = responseAddress.Split(':')[0];
+                string responseIP = responseAddress;
+                if (responseAddress.Contains(':'))
+                {
+                    // Returned address normally have port at the end (eg 8.8.8.8:0) so we need to remove that before trying to query the DNS
+                    responseIP = responseAddress.Split(':')[0];
+                }
 
                 // Resolve the ip and store as the response address
                 responseAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(responseIP), Token);
@@ -58,8 +61,10 @@
                 response.SequenceNumber,
                 response.RoundTripTime,
                 response.BytesRead);
-
-            if (Attributes != null && Attributes.BeepMode == 2)
+            
+            if (Attributes != null && 
+                ((Attributes.BeepMode == 2 /* Beep on success */ && response.Packet.Type != 3 /* Host Unreachable packet */ ) ||
+                (Attributes.BeepMode == 1 /* Beep on error */ && response.Packet.Type == 3)))
             {
                 try { Console.Beep(); }
                 catch (Exception) { } // Silently continue if Console.Beep errors

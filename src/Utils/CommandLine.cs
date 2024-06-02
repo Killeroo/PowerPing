@@ -489,7 +489,7 @@ namespace PowerPing
                                 }
                                 else
                                 {
-                                    ConsoleDisplay.Message("Recieve buffer cannot exceed max IPv4 packet size of 65,535 bytes.", ConsoleColor.Yellow);
+                                    ConsoleDisplay.Message("Receive buffer cannot exceed max IPv4 packet size of 65,535 bytes.", ConsoleColor.Yellow);
                                     throw new ArgumentFormatException();
                                 }
                                 break;
