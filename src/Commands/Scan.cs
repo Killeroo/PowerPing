@@ -183,8 +183,10 @@ namespace PowerPing
                 return;
             }
 
-            // Lookup host's name
-            ConsoleDisplay.Message("Looking up host names...");
+            if (ConsoleDisplay.Configuration.ShowOutput) 
+                ConsoleDisplay.Message("Looking up host names...");
+
+            // Lookup host names
             foreach (HostInformation host in activeHosts) 
             {
                 string hostName = Helper.RunWithCancellationToken(() => Lookup.QueryHost(host.Address), cancellationToken);
