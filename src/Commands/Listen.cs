@@ -139,7 +139,8 @@ namespace PowerPing
                     // Recieve any incoming ICMPv4 packets
                     EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
                     int bytesRead = listeningSocket.ReceiveFrom(buffer, ref remoteEndPoint);
-                    ICMP response = new(buffer, bytesRead);
+                    IPv4 ipHeader = new IPv4(buffer, bytesRead);
+                    ICMP response = new(buffer, bytesRead, ipHeader.HeaderLength);
                     string remoteEndPointIp = remoteEndPoint.ToString() ?? string.Empty;
 
                     // Display captured packet
