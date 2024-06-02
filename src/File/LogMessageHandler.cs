@@ -53,7 +53,7 @@ namespace PowerPing
                 $"random_message={attributes.RandomMessage} " +
                 $"dont_fragment={attributes.DontFragment} " +
                 $"random_timing={attributes.RandomTiming} " +
-                $"enable_logging={attributes.EnableLogging} " +
+                $"enable_logging={attributes.EnableFileLogging} " +
                 $"log_filename={attributes.LogFilePath}");
         }
 
@@ -121,6 +121,25 @@ namespace PowerPing
                 $"[ERROR] " +
                 $"message={error.Message} " +
                 $"error={error.Exception.GetType().Name} ");
+        }
+
+        internal void OnScanFinished(Scan.ResultsEvent results)
+        {
+            _logFile.Append($"[SCAN] " +
+                $"[{DateTime.Now.ToString(DATETIME_STRING_FORMAT)}] " +
+                $"Scan {(results.RanToEnd ? "complete" : "aborted")}. {results.Scanned} addresses pinged, {results.Hosts.Count} hosts found.");
+
+            if (results.Hosts.Count > 0)
+            {
+                _logFile.Append("[SCAN] Found Hosts:");
+
+                string hostsList = "";
+                for (int i = 0; i < results.Hosts.Count; i++)
+                {
+                    hostsList += string.Format("[{0}] time={1}ms name={2}" + Environment.NewLine, results.Hosts[i].Address, results.Hosts[i].ResponseTime, results.Hosts[i].HostName != "" ? results.Hosts[i].HostName : "UNAVAILABLE");
+                }
+                _logFile.Append(hostsList);
+            }
         }
 
         public void Dispose()

@@ -518,7 +518,7 @@ namespace PowerPing
                             case "/f":
                             case "-f":
                             case "--f":
-                                attributes.EnableLogging = true;
+                                attributes.EnableFileLogging = true;
 
                                 if (count + 1 >= args.Length
                                     || IsArgument(args[count + 1]))

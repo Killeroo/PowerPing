@@ -78,7 +78,7 @@ namespace PowerPing
                 case PingOperation.Whois: RunWhoisOperation(parsedAttributes.InputtedAddress); break;
                 case PingOperation.Graph: RunGraphOperation(parsedAttributes.InputtedAddress, _cancellationTokenSource.Token); break;
                 case PingOperation.Flood: RunFloodOperation(parsedAttributes.InputtedAddress, _cancellationTokenSource.Token); break;
-                case PingOperation.Scan: RunScanOperation(parsedAttributes.InputtedAddress, _cancellationTokenSource.Token); break;
+                case PingOperation.Scan: RunScanOperation(parsedAttributes, _cancellationTokenSource.Token); break;
                 case PingOperation.Normal: RunNormalPingOperation(parsedAttributes, _cancellationTokenSource.Token); break;
 #pragma warning restore CS8604 // Possible null reference argument.
 
@@ -124,12 +124,11 @@ namespace PowerPing
 
             Ping p = new Ping(attributes, cancellationToken);
 
-            if (attributes.EnableLogging)
+            if (attributes.EnableFileLogging)
             {
                 // Setup the path we are going to save the log to
                 // (generate the name if needed)
                 attributes.LogFilePath = LogFile.SetupPath(attributes.LogFilePath, attributes.InputtedAddress);
-
                 _logMessageHandler = new LogMessageHandler(attributes.LogFilePath, _displayConfiguration);
 
                 // Add callbacks for logging to a file
@@ -212,9 +211,22 @@ namespace PowerPing
             }
         }
 
-        private static void RunScanOperation(string address, CancellationToken cancellationToken)
+        private static void RunScanOperation(PingAttributes attributes, CancellationToken cancellationToken)
         {
-            Scan.Start(address, cancellationToken);
+            if (attributes.EnableFileLogging)
+            {
+                attributes.LogFilePath = LogFile.SetupPath(attributes.LogFilePath, attributes.InputtedAddress);
+                _logMessageHandler = new LogMessageHandler(attributes.LogFilePath, _displayConfiguration);
+
+                Scan.OnScanFinished += _logMessageHandler.OnScanFinished;
+            }
+
+            // Add callbacks for console display
+            _consoleMessageHandler = new ConsoleMessageHandler(_displayConfiguration, _cancellationTokenSource.Token);
+            Scan.OnScanProgress += _consoleMessageHandler.OnScanProgress;
+            Scan.OnScanFinished += _consoleMessageHandler.OnScanFinished;
+
+            Scan.Start(attributes.InputtedAddress, cancellationToken);
         }
     }
 }

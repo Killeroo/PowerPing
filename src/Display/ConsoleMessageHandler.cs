@@ -97,5 +97,21 @@
                 catch (Exception) { }
             }
         }
+
+        internal void OnScanProgress(Scan.ProgressEvent progress)
+        {
+            ConsoleDisplay.ScanProgress(
+                progress.Scanned,
+                progress.Found,
+                progress.Total,
+                progress.PingsPerSecond,
+                progress.CurrentTimestamp,
+                progress.Range);
+        }
+
+        internal void OnScanFinished(Scan.ResultsEvent results)
+        {
+            ConsoleDisplay.ScanResults(results.Scanned, results.RanToEnd, results.Hosts);
+        }
     }
 }

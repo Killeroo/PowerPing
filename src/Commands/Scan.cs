@@ -24,7 +24,27 @@ namespace PowerPing
     /// </summary>
     public static class Scan 
     {
+        public static Action<ProgressEvent>? OnScanProgress = null;
+        public static Action<ResultsEvent>? OnScanFinished = null;
+
         private const int THREAD_COUNT = 20;
+
+        public struct ProgressEvent
+        {
+            public int Scanned;
+            public int Found;
+            public int Total;
+            public int PingsPerSecond;
+            public TimeSpan CurrentTimestamp;
+            public string Range;
+        }
+
+        public struct ResultsEvent
+        {
+            public int Scanned;
+            public bool RanToEnd;
+            public List<HostInformation> Hosts;
+        }
 
         /// <summary>
         /// Used to store information on hosts found in scan
@@ -108,6 +128,7 @@ namespace PowerPing
             // Wait for all threads to exit
             int lastSent = 0 , pingsPerSecond = 0;
             int lastSpeedCheck = 0;
+            ProgressEvent progress;
             while (threads.Where(x => x.IsAlive).ToList().Count > 0) {
                 int count = 0;
                 lock (lockObject) {
@@ -119,46 +140,66 @@ namespace PowerPing
                     lastSent = scanned;
                     lastSpeedCheck = 0;
                 }
-                ConsoleDisplay.ScanProgress(
-                    scanned, 
-                    activeHosts.Count, 
-                    addresses.Count,
-                    pingsPerSecond,
-                    timer.Elapsed, 
-                    range);
+
+                if (OnScanProgress != null)
+                {
+                    progress.Scanned = scanned;
+                    progress.Found = activeHosts.Count;
+                    progress.Total = addresses.Count;
+                    progress.PingsPerSecond = pingsPerSecond;
+                    progress.CurrentTimestamp = timer.Elapsed;
+                    progress.Range = range;
+
+                    OnScanProgress(progress);
+                }
 
                 lastSpeedCheck++;
                 Thread.Sleep(200);
             }
 
-            // Display one last time so the bar actually completes 
-            // (scan could have completed while the main thread was sleeping)
-            ConsoleDisplay.ScanProgress(
-                scanned,
-                activeHosts.Count,
-                addresses.Count,
-                pingsPerSecond,
-                timer.Elapsed,
-                range);
+            if (OnScanProgress != null)
+            {
+                progress.Scanned = scanned;
+                progress.Found = activeHosts.Count;
+                progress.Total = addresses.Count;
+                progress.PingsPerSecond = pingsPerSecond;
+                progress.CurrentTimestamp = timer.Elapsed;
+                progress.Range = range;
+
+                // Display one last time so the bar actually completes 
+                // (scan could have completed while the main thread was sleeping)
+                OnScanProgress(progress);
+            }
 
             // Exit out when the operation has been canceled
-            if (_cancelled) {
-                ConsoleDisplay.ScanResults(scanned, false, activeHosts);
+            if (_cancelled && OnScanFinished != null) 
+            {
+                ResultsEvent results;
+                results.RanToEnd = false;
+                results.Scanned = scanned;
+                results.Hosts = activeHosts;
+
+                OnScanFinished(results);
                 return;
             }
 
             // Lookup host's name
-            Console.WriteLine();
-            Console.Write("Looking up host names, one sec...");
-            Console.CursorLeft = 0;
-            foreach (HostInformation host in activeHosts) {
+            ConsoleDisplay.Message("Looking up host names...");
+            foreach (HostInformation host in activeHosts) 
+            {
                 string hostName = Helper.RunWithCancellationToken(() => Lookup.QueryHost(host.Address), cancellationToken);
                 host.HostName = hostName;
             }
-            Console.WriteLine("                                    ");
-            Console.CursorTop--;
 
-            ConsoleDisplay.ScanResults(scanned, !cancellationToken.IsCancellationRequested, activeHosts);
+            if (OnScanFinished != null)
+            {
+                ResultsEvent results;
+                results.RanToEnd = !cancellationToken.IsCancellationRequested;
+                results.Scanned = scanned;
+                results.Hosts = activeHosts;
+
+                OnScanFinished(results);
+            }
         }
 
         /// <summary>

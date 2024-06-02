@@ -404,6 +404,11 @@ namespace PowerPing
         /// </summary>
         public static void ScanProgress(int scanned, int found, int total, int pingsPerSecond, TimeSpan curTime, string range)
         {
+            if (!Configuration.ShowOutput)
+            {
+                return;
+            }
+
             // Check if cursor position is already set
             if (_progBarPos.Left != 0)
             {
@@ -445,6 +450,11 @@ namespace PowerPing
 
         public static void ScanResults(int scanned, bool ranToEnd, List<Scan.HostInformation> hosts)
         {
+            if (!Configuration.ShowOutput)
+            {
+                return;
+            }
+
             Console.CursorVisible = true;
 
             Console.WriteLine();
