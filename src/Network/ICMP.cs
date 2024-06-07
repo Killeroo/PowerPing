@@ -38,6 +38,10 @@ namespace PowerPing
             Code = data[offset + 1];
             Checksum = BitConverter.ToUInt16(data, offset + 2);
             MessageSize = size - (offset + kIcmpHeaderSize);
+            if (MessageSize > Message.Length)
+            {
+                Message = new byte[MessageSize];
+            }
             Buffer.BlockCopy(data, (offset + kIcmpHeaderSize), Message, 0, MessageSize);
         }
 
