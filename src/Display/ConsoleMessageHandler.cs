@@ -32,32 +32,9 @@
 
         public void OnReply(PingReply response)
         {
-            // Determine what form the response address is going to be displayed in
-            // TODO: Move this when lookup refactor is done
-            string responseAddress = response.EndpointAddress;
-            if (responseAddress == string.Empty || DisplayConfig.UseInputtedAddress)
-            {
-                if (Attributes != null && Attributes.InputtedAddress != null)
-                {
-                    responseAddress = Attributes.InputtedAddress;
-                }
-            }
-            else if (DisplayConfig.UseResolvedAddress)
-            {
-                string responseIP = responseAddress;
-                if (responseAddress.Contains(':'))
-                {
-                    // Returned address normally have port at the end (eg 8.8.8.8:0) so we need to remove that before trying to query the DNS
-                    responseIP = responseAddress.Split(':')[0];
-                }
-
-                // Resolve the ip and store as the response address
-                responseAddress = Helper.RunWithCancellationToken(() => Lookup.QueryHost(responseIP), Token);
-            }
-
             ConsoleDisplay.ReplyPacket(
                 response.Packet,
-                responseAddress,
+                GetAddressToDisplay(response.EndpointAddress),
                 response.SequenceNumber,
                 response.RoundTripTime,
                 response.TimeToLive,
@@ -90,7 +67,8 @@
 
         public void OnTimeout(PingTimeout timeout)
         {
-            ConsoleDisplay.Timeout(timeout.SequenceNumber);
+            string endpointAddress = timeout.Endpoint == null ? "" : timeout.Endpoint.Address.ToString();
+            ConsoleDisplay.Timeout(timeout.SequenceNumber, GetAddressToDisplay(endpointAddress));
 
             if (Attributes.BeepMode == 1)
             {
@@ -113,6 +91,38 @@
         internal void OnScanFinished(Scan.ResultsEvent results)
         {
             ConsoleDisplay.ScanResults(results.Scanned, results.RanToEnd, results.Hosts);
+        }
+        
+        /// <summary>
+        /// Helper method to determine what address string we should display. This can be based on user inputted display options
+        /// and all other types of junk.  
+        /// </summary>
+        private string GetAddressToDisplay(string endpointAddress)
+        {
+            string addressToDisplay = endpointAddress;
+            if (addressToDisplay == string.Empty || DisplayConfig.UseInputtedAddress)
+            {
+                if (Attributes != null && Attributes.InputtedAddress != null)
+                {
+                    addressToDisplay = Attributes.InputtedAddress;
+                } 
+            }
+            else if (DisplayConfig.UseResolvedAddress)
+            {
+                // Returned address normally have port at the end (eg 8.8.8.8:0) so we need to remove that before trying to query the DNS
+                string responseIP = addressToDisplay;
+                if (addressToDisplay.Contains(':'))
+                {
+                    // Returned address normally have port at the end (eg 8.8.8.8:0) so we need to remove that before trying to query the DNS
+                    responseIP = addressToDisplay.Split(':')[0];
+                }
+
+                // Resolve the ip and store as the response address
+                addressToDisplay = Helper.RunWithCancellationToken(() => Lookup.QueryHost(responseIP),
+                    Token);
+            }
+
+            return addressToDisplay;
         }
     }
 }

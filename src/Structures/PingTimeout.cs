@@ -11,7 +11,7 @@ namespace PowerPing
 {
     public struct PingTimeout
     {
-        public IPEndPoint Endpoint;
+        public IPEndPoint? Endpoint;
         public DateTime Timestamp;
         public int SequenceNumber;
     }

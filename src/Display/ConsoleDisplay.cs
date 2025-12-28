@@ -308,7 +308,7 @@ namespace PowerPing
                 }
                 else
                 {
-                    Timeout(0);
+                    Timeout(0, address);
                 }
                 return;
             }
@@ -651,7 +651,7 @@ namespace PowerPing
         /// <summary>
         /// Display Timeout message
         /// </summary>
-        public static void Timeout(int seq)
+        public static void Timeout(int seq, string address)
         {
             if (!Configuration.ShowOutput || !Configuration.ShowTimeouts)
             {
@@ -672,7 +672,7 @@ namespace PowerPing
                 Console.BackgroundColor = ConsoleColor.DarkRed;
                 Console.ForegroundColor = ConsoleColor.Black;
             }
-            Console.Write(ProgramStrings.TIMEOUT_TXT);
+            Console.Write(ProgramStrings.TIMEOUT_TXT, string.IsNullOrEmpty(address) ? string.Empty : address + ": ");
 
             // Configuration.Short hand
             if (!Configuration.Short)
