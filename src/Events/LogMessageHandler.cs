@@ -8,7 +8,7 @@ using System;
 
 namespace PowerPing
 {
-    internal class LogMessageHandler : IDisposable
+    public class LogMessageHandler : PingEventHandlerBase, IScanEventHandler, IDisposable
     {
         private const string DATETIME_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss.fffzzzzz";
 
@@ -26,7 +26,7 @@ namespace PowerPing
             Dispose();
         }
 
-        internal void OnStart(PingAttributes attributes)
+        public void OnStart(PingAttributes attributes)
         {
             _destinationAddress = attributes.InputtedAddress;
             string message = attributes.Message.Length > 50 ? $"{attributes.Message.Substring(0, 50)}...({attributes.Message.Length - 50} lines truncated)" : attributes.Message;
@@ -57,7 +57,7 @@ namespace PowerPing
                 $"log_filename={attributes.LogFilePath}");
         }
 
-        internal void OnFinish(PingResults results)
+        public void OnFinish(PingResults results)
         {
             _logFile.Append($"[{_destinationAddress}] " +
                 $"[{results.EndTime.ToString(DATETIME_STRING_FORMAT)}] " +
@@ -82,7 +82,7 @@ namespace PowerPing
                 $"avg={results.AvgTime} ");
         }
 
-        internal void OnTimeout(PingTimeout timeout)
+        public void OnTimeout(PingTimeout timeout)
         {
             _logFile.Append($"[{_destinationAddress}] " +
                 $"[{timeout.Timestamp.ToString(DATETIME_STRING_FORMAT)}] " +
@@ -90,7 +90,7 @@ namespace PowerPing
                 $"seq={timeout.SequenceNumber}");
         }
 
-        internal void OnRequest(PingRequest request)
+        public void OnRequest(PingRequest request)
         {
             _logFile.Append($"[{_destinationAddress}] " +
                 $"[{request.Timestamp.ToString(DATETIME_STRING_FORMAT)}] " +
@@ -101,7 +101,7 @@ namespace PowerPing
                 $"code={request.Packet.Code}");
         }
 
-        internal void OnReply(PingReply reply)
+        public void OnReply(PingReply reply)
         {
             _logFile.Append($"[{_destinationAddress}] " +
                 $"[{reply.Timestamp.ToString(DATETIME_STRING_FORMAT)}] " +
@@ -115,7 +115,7 @@ namespace PowerPing
                 $"time={reply.RoundTripTime.TotalMilliseconds}ms");
         }
 
-        internal void OnError(PingError error)
+        public void OnError(PingError error)
         {
             _logFile.Append($"[{_destinationAddress}]" +
                 $"[{error.Timestamp.ToString(DATETIME_STRING_FORMAT)}] " +
@@ -124,7 +124,7 @@ namespace PowerPing
                 $"error={error.Exception.GetType().Name} ");
         }
 
-        internal void OnScanFinished(Scan.ResultsEvent results)
+        public void OnScanFinished(Scan.ResultsEvent results)
         {
             _logFile.Append($"[SCAN] " +
                 $"[{DateTime.Now.ToString(DATETIME_STRING_FORMAT)}] " +

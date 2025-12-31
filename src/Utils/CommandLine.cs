@@ -744,6 +744,23 @@ namespace PowerPing
         }
 
         /// <summary>
+        /// Finds all addresses (formatted as ip addresses or urls) in an array of arguments
+        /// </summary>
+        public static bool FindAddresses(string[] args, ref List<string> addresses)
+        {
+            addresses.Clear();
+            foreach (string arg in args)
+            {
+                if (Helper.IsIPv4Address(arg) || Helper.IsURL(arg))
+                {
+                    addresses.Add(arg);
+                }
+            }
+
+            return addresses.Count != 0;
+        }
+
+        /// <summary>
         /// Checks if a string is a valid argument
         /// </summary>
         /// <param name="arg"></param>

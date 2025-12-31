@@ -14,7 +14,7 @@ namespace PowerPing
     /// <summary>
     /// Ping Class, used for constructing and sending ICMP data over a network.
     /// </summary>
-    internal class Ping
+    public class Ping
     {
         public Action<PingRequest>? OnRequest = null;
         public Action<PingReply>? OnReply = null;

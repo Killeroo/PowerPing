@@ -1,12 +1,13 @@
-﻿namespace PowerPing
+
+namespace PowerPing
 {
-    public class ConsoleMessageHandler
+    public class ThreadedMessageHandler
     {
         public DisplayConfiguration DisplayConfig = new();
         public PingAttributes Attributes = new();
         public CancellationToken Token = new();
 
-        public ConsoleMessageHandler(DisplayConfiguration config, CancellationToken token)
+        public ThreadedMessageHandler(DisplayConfiguration config, CancellationToken token)
         {
             Attributes = new();
             DisplayConfig = config ?? new DisplayConfiguration();
@@ -24,57 +25,89 @@
                 ConsoleDisplay.Error(error.Message, error.Exception);
             }
         }
+        
+        List<Action> actions = new();
+
+        public void FlushMessages()
+        {
+            foreach (Action action in actions)
+            {
+                action();
+            }
+        }
 
         public void OnFinish(PingResults results)
         {
-            ConsoleDisplay.PingResults(Attributes, results);
+            actions.Add(() =>
+            {
+                ConsoleDisplay.PingResults(Attributes, results);
+            });
         }
 
         public void OnReply(PingReply response)
         {
-            ConsoleDisplay.ReplyPacket(
-                response.Packet,
-                GetAddressToDisplay(response.EndpointAddress),
-                response.SequenceNumber,
-                response.RoundTripTime,
-                response.TimeToLive,
-                response.BytesRead);
-            
-            if (Attributes != null && 
-                ((Attributes.BeepMode == 2 /* Beep on success */ && response.Packet.Type != 3 /* Host Unreachable packet */ ) ||
-                (Attributes.BeepMode == 1 /* Beep on error */ && response.Packet.Type == 3)))
+            actions.Add(() =>
             {
-                try { Console.Beep(); }
-                catch (Exception) { } // Silently continue if Console.Beep errors
-            }
+                ConsoleDisplay.ReplyPacket(
+                    response.Packet,
+                    GetAddressToDisplay(response.EndpointAddress),
+                    response.SequenceNumber,
+                    response.RoundTripTime,
+                    response.TimeToLive,
+                    response.BytesRead);
+            
+                if (Attributes != null && 
+                    ((Attributes.BeepMode == 2 /* Beep on success */ && response.Packet.Type != 3 /* Host Unreachable packet */ ) ||
+                     (Attributes.BeepMode == 1 /* Beep on error */ && response.Packet.Type == 3)))
+                {
+                    try { Console.Beep(); }
+                    catch (Exception) { } // Silently continue if Console.Beep errors
+                } 
+            });
         }
 
         public void OnRequest(PingRequest request)
         {
-            ConsoleDisplay.RequestPacket(
-                request.Packet,
-                (DisplayConfig.UseInputtedAddress | DisplayConfig.UseResolvedAddress ? Attributes.InputtedAddress : Attributes.ResolvedAddress),
-                request.SequenceNumber);
+            actions.Add(() =>
+            {
+                ConsoleDisplay.RequestPacket(
+                    request.Packet,
+                    (DisplayConfig.UseInputtedAddress | DisplayConfig.UseResolvedAddress
+                        ? Attributes.InputtedAddress
+                        : Attributes.ResolvedAddress),
+                    request.SequenceNumber);
+            });
         }
 
         public void OnStart(PingAttributes attributes)
         {
-            // Cache the PingAttributes at this point as Ping has modified the inputted and resolved addresses
-            Attributes = attributes;
+            actions.Add(() =>
+            {
+                // Cache the PingAttributes at this point as Ping has modified the inputted and resolved addresses
+                Attributes = attributes;
 
-            ConsoleDisplay.PingIntroMsg(attributes);
+                ConsoleDisplay.PingIntroMsg(attributes);
+            });
         }
 
         public void OnTimeout(PingTimeout timeout)
         {
-            string endpointAddress = timeout.Endpoint == null ? "" : timeout.Endpoint.Address.ToString();
-            ConsoleDisplay.Timeout(timeout.SequenceNumber, GetAddressToDisplay(endpointAddress));
-
-            if (Attributes.BeepMode == 1)
+            actions.Add(() =>
             {
-                try { Console.Beep(); }
-                catch (Exception) { }
-            }
+                string endpointAddress = timeout.Endpoint == null ? "" : timeout.Endpoint.Address.ToString();
+                ConsoleDisplay.Timeout(timeout.SequenceNumber, GetAddressToDisplay(endpointAddress));
+
+                if (Attributes.BeepMode == 1)
+                {
+                    try
+                    {
+                        Console.Beep();
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+            });
         }
 
         internal void OnScanProgress(Scan.ProgressEvent progress)

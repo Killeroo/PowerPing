@@ -43,10 +43,11 @@ namespace PowerPing
             Helper.RequireInput = _displayConfiguration.RequireInput;
 
             // Find address/host in arguments
+            List<string> parsedAddresses = new List<string>();
             if (parsedAttributes.Operation != PingOperation.Whoami &&
                 parsedAttributes.Operation != PingOperation.Listen)
             {
-                if (!CommandLine.FindAddress(args, ref parsedAttributes))
+                if (!CommandLine.FindAddresses(args, ref parsedAddresses))
                 {
                     Helper.ErrorAndExit("Could not find correctly formatted address, please check and try again");
                 }
@@ -79,7 +80,7 @@ namespace PowerPing
                 case PingOperation.Graph: RunGraphOperation(parsedAttributes.InputtedAddress, _cancellationTokenSource.Token); break;
                 case PingOperation.Flood: RunFloodOperation(parsedAttributes.InputtedAddress, _cancellationTokenSource.Token); break;
                 case PingOperation.Scan: RunScanOperation(parsedAttributes, _cancellationTokenSource.Token); break;
-                case PingOperation.Normal: RunNormalPingOperation(parsedAttributes, _cancellationTokenSource.Token); break;
+                case PingOperation.Normal: RunNormalPingOperation(parsedAttributes, parsedAddresses, _cancellationTokenSource.Token); break;
 #pragma warning restore CS8604 // Possible null reference argument.
 
                 default:
@@ -111,46 +112,74 @@ namespace PowerPing
         }
 
         private static void RunNormalPingOperation(
-            PingAttributes attributes,
+            PingAttributes baseAttributes,
+            List<string> parsedAddresses,
             CancellationToken cancellationToken)
         {
-            if (attributes == null)
+            if (baseAttributes == null)
             {
                 return;
             }
 
-            Ping p = new Ping(attributes, cancellationToken);
-
-            if (attributes.EnableFileLogging)
+            var sendPing = (PingAttributes attributes) =>
             {
-                // Setup the path we are going to save the log to
-                // (generate the name if needed)
-                attributes.LogFilePath = LogFile.SetupPath(attributes.LogFilePath, attributes.InputtedAddress);
-                _logMessageHandler = new LogMessageHandler(attributes.LogFilePath, _displayConfiguration);
+                Ping p = new Ping(attributes, cancellationToken);
+                
+                if (attributes.EnableFileLogging)
+                {
+                    // Setup the path we are going to save the log to
+                    // (generate the name if needed)
+                    attributes.LogFilePath = LogFile.SetupPath(attributes.LogFilePath, attributes.InputtedAddress);
+                    _logMessageHandler = new LogMessageHandler(attributes.LogFilePath, _displayConfiguration);
 
-                // Add callbacks for logging to a file
-                // These need to be first.. so they get run first
-                p.OnStart += _logMessageHandler.OnStart;
-                p.OnFinish += _logMessageHandler.OnFinish;
-                p.OnTimeout += _logMessageHandler.OnTimeout;
-                p.OnRequest += _logMessageHandler.OnRequest;
-                p.OnReply += _logMessageHandler.OnReply;
-                p.OnError += _logMessageHandler.OnError;
+                    // Add callbacks for logging to a file
+                    // These need to be first.. so they get run first
+                    p.OnStart += _logMessageHandler.OnStart;
+                    p.OnFinish += _logMessageHandler.OnFinish;
+                    p.OnTimeout += _logMessageHandler.OnTimeout;
+                    p.OnRequest += _logMessageHandler.OnRequest;
+                    p.OnReply += _logMessageHandler.OnReply;
+                    p.OnError += _logMessageHandler.OnError;
+                }
+
+                // Add handler to display ping events
+                _consoleMessageHandler =
+                    new ConsoleMessageHandler(_displayConfiguration, _cancellationTokenSource.Token);
+                _consoleMessageHandler.Register(p);
+
+                // Send the pings!
+                p.Send();
+            };
+            
+            
+            if (parsedAddresses.Count > 1)
+            {
+                Thread?[] threads = new Thread[parsedAddresses.Count];
+                for (int index = 0; index < threads.Length; index++)
+                {
+                    threads[index] = new (() =>
+                    {
+                        PingAttributes modifiedAttrs = new PingAttributes(baseAttributes);
+                        modifiedAttrs.InputtedAddress = parsedAddresses[index];
+                        sendPing(modifiedAttrs);
+                    });
+                    threads[index].IsBackground = true;
+                    threads[index].Start();
+                    Thread.Sleep(100);
+                }
+
+                do
+                {
+                    
+                    Thread.Sleep(1);
+
+                } while (threads.Any(x => x != null && x.IsAlive));
             }
-
-            // Add handler to display ping events
-            _consoleMessageHandler = new ConsoleMessageHandler(_displayConfiguration, _cancellationTokenSource.Token);
-
-            // Add callbacks for console display
-            p.OnStart += _consoleMessageHandler.OnStart;
-            p.OnFinish += _consoleMessageHandler.OnFinish;
-            p.OnTimeout += _consoleMessageHandler.OnTimeout;
-            p.OnRequest += _consoleMessageHandler.OnRequest;
-            p.OnReply += _consoleMessageHandler.OnReply;
-            p.OnError += _consoleMessageHandler.OnError;
-
-            // Send the pings!
-            p.Send();
+            else
+            {
+                baseAttributes.InputtedAddress = parsedAddresses.First();
+                sendPing(baseAttributes);
+            }
         }
 
         private static void RunFloodOperation(string address, CancellationToken cancellationToken)
