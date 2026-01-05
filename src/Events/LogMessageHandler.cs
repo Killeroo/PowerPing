@@ -26,7 +26,7 @@ namespace PowerPing
             Dispose();
         }
 
-        public void OnStart(PingAttributes attributes)
+        public override void OnStart(PingAttributes attributes)
         {
             _destinationAddress = attributes.InputtedAddress;
             string message = attributes.Message.Length > 50 ? $"{attributes.Message.Substring(0, 50)}...({attributes.Message.Length - 50} lines truncated)" : attributes.Message;
@@ -57,7 +57,7 @@ namespace PowerPing
                 $"log_filename={attributes.LogFilePath}");
         }
 
-        public void OnFinish(PingResults results)
+        public override void OnFinish(PingResults results)
         {
             _logFile.Append($"[{_destinationAddress}] " +
                 $"[{results.EndTime.ToString(DATETIME_STRING_FORMAT)}] " +
@@ -82,7 +82,7 @@ namespace PowerPing
                 $"avg={results.AvgTime} ");
         }
 
-        public void OnTimeout(PingTimeout timeout)
+        public override void OnTimeout(PingTimeout timeout)
         {
             _logFile.Append($"[{_destinationAddress}] " +
                 $"[{timeout.Timestamp.ToString(DATETIME_STRING_FORMAT)}] " +
@@ -90,7 +90,7 @@ namespace PowerPing
                 $"seq={timeout.SequenceNumber}");
         }
 
-        public void OnRequest(PingRequest request)
+        public override void OnRequest(PingRequest request)
         {
             _logFile.Append($"[{_destinationAddress}] " +
                 $"[{request.Timestamp.ToString(DATETIME_STRING_FORMAT)}] " +
@@ -101,7 +101,7 @@ namespace PowerPing
                 $"code={request.Packet.Code}");
         }
 
-        public void OnReply(PingReply reply)
+        public override void OnReply(PingReply reply)
         {
             _logFile.Append($"[{_destinationAddress}] " +
                 $"[{reply.Timestamp.ToString(DATETIME_STRING_FORMAT)}] " +
@@ -115,7 +115,7 @@ namespace PowerPing
                 $"time={reply.RoundTripTime.TotalMilliseconds}ms");
         }
 
-        public void OnError(PingError error)
+        public override void OnError(PingError error)
         {
             _logFile.Append($"[{_destinationAddress}]" +
                 $"[{error.Timestamp.ToString(DATETIME_STRING_FORMAT)}] " +

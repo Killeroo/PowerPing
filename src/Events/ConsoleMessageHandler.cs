@@ -13,7 +13,7 @@
             Token = token;
         }
 
-        public void OnError(PingError error)
+        public override void OnError(PingError error)
         {
             if (error.Fatal)
             {
@@ -25,12 +25,12 @@
             }
         }
 
-        public void OnFinish(PingResults results)
+        public override void OnFinish(PingResults results)
         {
             ConsoleDisplay.PingResults(Attributes, results);
         }
 
-        public void OnReply(PingReply response)
+        public override void OnReply(PingReply response)
         {
             ConsoleDisplay.ReplyPacket(
                 response.Packet,
@@ -55,7 +55,7 @@
             }
         }
 
-        public void OnRequest(PingRequest request)
+        public override void OnRequest(PingRequest request)
         {
             ConsoleDisplay.RequestPacket(
                 request.Packet,
@@ -65,7 +65,7 @@
                 request.SequenceNumber);
         }
 
-        public void OnStart(PingAttributes attributes)
+        public override void OnStart(PingAttributes attributes)
         {
             // Cache the PingAttributes at this point as Ping has modified the inputted and resolved addresses
             Attributes = attributes;
@@ -73,7 +73,7 @@
             ConsoleDisplay.PingIntroMsg(attributes);
         }
 
-        public void OnTimeout(PingTimeout timeout)
+        public override void OnTimeout(PingTimeout timeout)
         {
             string endpointAddress = timeout.Endpoint == null ? "" : timeout.Endpoint.Address.ToString();
             ConsoleDisplay.Timeout(timeout.SequenceNumber, GetAddressToDisplay(endpointAddress));

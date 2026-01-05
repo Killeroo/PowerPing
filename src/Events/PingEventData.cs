@@ -1,12 +1,13 @@
+using System.Net;
 
 namespace PowerPing
 {
-    public abstract class EventData
+    public abstract class PingEventData
     {
         
     }
     
-    public class PingError : EventData
+    public class PingError : PingEventData
     {
         public DateTime Timestamp;
         public string Message;
@@ -14,7 +15,7 @@ namespace PowerPing
         public bool Fatal;
     }
     
-    public struct PingReply : EventData
+    public class PingReply : PingEventData
     {
         public ICMP Packet;
         public string EndpointAddress;
@@ -25,7 +26,7 @@ namespace PowerPing
         public int BytesRead;
     }
     
-    public struct PingRequest : EventData
+    public class PingRequest : PingEventData
     {
         public IPEndPoint Destination;
         public ICMP Packet;
@@ -34,7 +35,7 @@ namespace PowerPing
         public int PacketSize;
     }
     
-    public struct PingTimeout
+    public class PingTimeout : PingEventData
     {
         public IPEndPoint? Endpoint;
         public DateTime Timestamp;

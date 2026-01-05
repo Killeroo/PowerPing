@@ -21,7 +21,7 @@ namespace PowerPing
     /// <summary>
     /// Stores attributes of a ping operation
     /// </summary>
-    public class PingAttributes
+    public class PingAttributes : PingEventData
     {
         // Properties
         public string InputtedAddress { get; set; }     // Address as it was inputted by user 

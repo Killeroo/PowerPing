@@ -11,7 +11,7 @@ namespace PowerPing
     /// <summary>
     /// Stores the results of a ping operation
     /// </summary>
-    public class PingResults
+    public class PingResults : PingEventData
     {
         // Properties
         public DateTime StartTime { get; private set; }                             // Time operation started at

@@ -33,10 +33,10 @@ namespace PowerPing
         private IPEndPoint? _remoteEndpoint = null;
         private readonly CancellationToken _cancellationToken;
 
-        private bool _debugIpHeader = false;
+        private bool _debugIpHeader = true;
         private bool _debugTimings = false;
 
-        private PingRequest _requestMessage = new();
+        private PingRequest _requestData = new();
         private PingReply _responseMessage = new();
         private PingTimeout _timeoutMessage = new();
         private PingError _errorMesssage = new();
@@ -346,13 +346,13 @@ namespace PowerPing
                     // Raise message on request sent
                     if (OnRequest != null)
                     {
-                        _requestMessage.Timestamp = DateTime.Now;
-                        _requestMessage.SequenceNumber = index;
-                        _requestMessage.Packet = _packet;
-                        _requestMessage.Destination = _remoteEndpoint;
-                        _requestMessage.PacketSize = _packetSize;
+                        _requestData.Timestamp = DateTime.Now;
+                        _requestData.SequenceNumber = index;
+                        _requestData.Packet = _packet;
+                        _requestData.Destination = _remoteEndpoint;
+                        _requestData.PacketSize = _packetSize;
 
-                        OnRequest.Invoke(_requestMessage);
+                        OnRequest.Invoke(_requestData);
                     }
 
                     // Just for artifically testing higher ping response times

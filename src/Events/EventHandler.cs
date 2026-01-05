@@ -13,17 +13,17 @@ namespace PowerPing
             ping.OnTimeout += OnTimeout;
         }
         
-        public void OnError(PingError error) { }
-
-        public void OnFinish(PingResults results) { }
+        public virtual void OnError(PingError error) { }
         
-        public void OnReply(PingReply response) { }
-
-        public void OnRequest(PingRequest request) { }
-
-        public void OnStart(PingAttributes attributes) { }
-
-        public void OnTimeout(PingTimeout timeout) { }
+        public virtual void OnFinish(PingResults results) { }
+        
+        public virtual void OnReply(PingReply response) { }
+        
+        public virtual void OnRequest(PingRequest request) { }
+        
+        public virtual void OnStart(PingAttributes attributes) { }
+        
+        public virtual void OnTimeout(PingTimeout timeout) { }
     }
 
     public interface IScanEventHandler

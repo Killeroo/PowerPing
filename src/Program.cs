@@ -120,40 +120,22 @@ namespace PowerPing
             {
                 return;
             }
-
-            var sendPing = (PingAttributes attributes) =>
+            
+            // Setup message handlers
+            _consoleMessageHandler = new ConsoleMessageHandler(_displayConfiguration, _cancellationTokenSource.Token);
+            if (baseAttributes.EnableFileLogging)
             {
-                Ping p = new Ping(attributes, cancellationToken);
-                
-                if (attributes.EnableFileLogging)
-                {
-                    // Setup the path we are going to save the log to
-                    // (generate the name if needed)
-                    attributes.LogFilePath = LogFile.SetupPath(attributes.LogFilePath, attributes.InputtedAddress);
-                    _logMessageHandler = new LogMessageHandler(attributes.LogFilePath, _displayConfiguration);
+                baseAttributes.LogFilePath = LogFile.SetupPath(baseAttributes.LogFilePath, baseAttributes.InputtedAddress);
+                _logMessageHandler = new LogMessageHandler(baseAttributes.LogFilePath, _displayConfiguration);
+            }
 
-                    // Add callbacks for logging to a file
-                    // These need to be first.. so they get run first
-                    p.OnStart += _logMessageHandler.OnStart;
-                    p.OnFinish += _logMessageHandler.OnFinish;
-                    p.OnTimeout += _logMessageHandler.OnTimeout;
-                    p.OnRequest += _logMessageHandler.OnRequest;
-                    p.OnReply += _logMessageHandler.OnReply;
-                    p.OnError += _logMessageHandler.OnError;
-                }
-
-                // Add handler to display ping events
-                _consoleMessageHandler =
-                    new ConsoleMessageHandler(_displayConfiguration, _cancellationTokenSource.Token);
-                _consoleMessageHandler.Register(p);
-
-                // Send the pings!
-                p.Send();
-            };
-            
-            
             if (parsedAddresses.Count > 1)
             {
+                ThreadedMessageHandler threadedMessageHandler = new();
+                threadedMessageHandler.RegisterEventHandler(_consoleMessageHandler);
+                if (_logMessageHandler != null)
+                    threadedMessageHandler.RegisterEventHandler(_logMessageHandler);
+                
                 Thread?[] threads = new Thread[parsedAddresses.Count];
                 for (int index = 0; index < threads.Length; index++)
                 {
@@ -161,7 +143,10 @@ namespace PowerPing
                     {
                         PingAttributes modifiedAttrs = new PingAttributes(baseAttributes);
                         modifiedAttrs.InputtedAddress = parsedAddresses[index];
-                        sendPing(modifiedAttrs);
+                        
+                        Ping p = new Ping(modifiedAttrs, cancellationToken);
+                        threadedMessageHandler.Register(p);
+                        p.Send();
                     });
                     threads[index].IsBackground = true;
                     threads[index].Start();
@@ -170,15 +155,24 @@ namespace PowerPing
 
                 do
                 {
-                    
+                    threadedMessageHandler.FlushMessages();
                     Thread.Sleep(1);
 
                 } while (threads.Any(x => x != null && x.IsAlive));
+                
+                
+                threadedMessageHandler.FlushMessages();
             }
             else
             {
                 baseAttributes.InputtedAddress = parsedAddresses.First();
-                sendPing(baseAttributes);
+                Ping p = new Ping(baseAttributes, cancellationToken);
+                
+                _consoleMessageHandler.Register(p);
+                if (_logMessageHandler != null)
+                    _logMessageHandler.Register(p);
+
+                p.Send();
             }
         }
 
