@@ -56,7 +56,7 @@ _Future features:_
         --timestamp     [--ts]           Display timestamps (add 'UTC' for Coordinated Universal Time)
         --fulltimestamp [--fts]          Display full timestamps with localised date and time
         --nocolor       [--nc]           No colour
-        --symbols       [--sym]          Renders replies and timeouts as ASCII symbols (add '1' for alt theme)
+        --symbols       [--sym]          Renders replies and timeouts as ASCII symbols (add '1' for alt theme, add '2' for Cisco IOS style)
         --requests      [--r]            Show request packets
         --notimeouts    [--nt]           Don't display timeout messages
         --quiet         [--q]            No output (only affects normal ping)

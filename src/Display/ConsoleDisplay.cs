@@ -117,6 +117,14 @@ namespace PowerPing
                 _replySymbols.ExtremeResponseTime = ProgramStrings.REPLY_GT_500_MS_SYMBOL_1;
                 _replySymbols.Timeout = ProgramStrings.REPLY_TIMEOUT_SYMBOL_1;
             }
+            else if (theme == 2)
+            {
+                _replySymbols.LowResponseTime = ProgramStrings.REPLY_LT_100_MS_SYMBOL_3;
+                _replySymbols.MidResponseTime = ProgramStrings.REPLY_LT_250_MS_SYMBOL_3;
+                _replySymbols.HighResponseTime = ProgramStrings.REPLY_LT_500_MS_SYMBOL_3;
+                _replySymbols.ExtremeResponseTime = ProgramStrings.REPLY_GT_500_MS_SYMBOL_3;
+                _replySymbols.Timeout = ProgramStrings.REPLY_TIMEOUT_SYMBOL_3;
+            }
             else
             {
                 _replySymbols.LowResponseTime = ProgramStrings.REPLY_LT_100_MS_SYMBOL_2;

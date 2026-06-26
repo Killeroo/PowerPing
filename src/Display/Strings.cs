@@ -84,6 +84,13 @@ Well done brave soul, I don't know your motive but I salute you =^-^=";
         public const string REPLY_GT_500_MS_SYMBOL_2 = "█";
         public const string REPLY_TIMEOUT_SYMBOL_2 = "!";
 
+        // Cisco IOS style
+        public const string REPLY_LT_100_MS_SYMBOL_3 = "!";
+        public const string REPLY_LT_250_MS_SYMBOL_3 = "!";
+        public const string REPLY_LT_500_MS_SYMBOL_3 = "!";
+        public const string REPLY_GT_500_MS_SYMBOL_3 = "!";
+        public const string REPLY_TIMEOUT_SYMBOL_3 = ".";
+
         public const string HELP_MSG =
 @"__________                         __________.__                
 \______   \______  _  __ __________\______   \__| ____    ____  
@@ -123,7 +130,7 @@ Display Arguments:
     --timestamp     [--ts]           Display timestamps (add 'UTC' for Coordinated Universal Time)
     --fulltimestamp [--fts]          Display full timestamps with localised date and time
     --nocolor       [--nc]           No colour
-    --symbols       [--sym]          Renders replies and timeouts as ASCII symbols (add '1' for alt theme)
+    --symbols       [--sym]          Renders replies and timeouts as ASCII symbols (add '1' for alt theme, add '2' for Cisco IOS style)
     --requests      [--r]            Show request packets
     --notimeouts    [--nt]           Don't display timeout messages
     --quiet         [--q]            No output (only affects normal ping)
